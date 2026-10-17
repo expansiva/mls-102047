@@ -1,0 +1,85 @@
+/// <mls fileReference="_102047_/l4/inicio/workflows.defs.ts" enhancement="_blank"/>
+
+import type { Ns5WorkflowsArtifact, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const inicioWorkflows = {
+  "schemaVersion": "2026-09-17-ns5-workflows-v3",
+  "moduleName": "inicio",
+  "processes": [
+    {
+      "processId": "liberacaoAcesso",
+      "title": "Liberação de acesso",
+      "description": "Quando a plataforma não consegue ligar sozinha o e-mail da pessoa ao cadastro, a pessoa da organização avisa o responsável, e ele libera o acesso convidando a pessoa certa pelo convite da plataforma.",
+      "trigger": {
+        "kind": "manual",
+        "actorRef": "pessoaOrganizacao"
+      },
+      "tasks": [
+        {
+          "taskId": "avisarResponsavel",
+          "kind": "human",
+          "actorRef": "pessoaOrganizacao",
+          "journeyRef": "pedirLiberacao",
+          "next": [
+            "liberarAcessoPessoa"
+          ],
+          "description": "A pessoa vê que o e-mail não foi ligado e passa ao responsável o pedido de liberação."
+        },
+        {
+          "taskId": "liberarAcessoPessoa",
+          "kind": "human",
+          "actorRef": "responsavel",
+          "journeyRef": "liberarAcesso",
+          "next": [],
+          "description": "O responsável confere quem é a pessoa certa e a convida pelo convite da plataforma, que liga o e-mail ao cadastro sem criar outra pessoa."
+        }
+      ],
+      "functions": [
+        {
+          "functionId": "abrirLiberacaoAcesso",
+          "description": "Chamada pela tela ou pelo cm quando a pessoa autenticada não teve o e-mail ligado: confere que a plataforma realmente não ligou o e-mail, pede ao cm a mensagem de origem e a Task que referencia a pessoa, passa a vez ao responsável e pede ao cm para notificá-lo; não grava pendência no módulo e, se repetida com uma ocorrência aberta para o mesmo e-mail, devolve a mesma ocorrência sem notificar de novo."
+        },
+        {
+          "functionId": "concluirLiberacaoAcesso",
+          "description": "Chamada pela tela ou pelo cm em nome do responsável depois do convite da plataforma: confere que quem chama é o responsável reconhecido pela plataforma e que o e-mail agora está ligado a um único cadastro, registra o fim da etapa, encerra a Task e pede ao cm para avisar a pessoa que já pode completar o acesso; devolve a situação da ocorrência e, se repetida, apenas devolve a ocorrência já encerrada."
+        },
+        {
+          "functionId": "resolverResponsavelEmpresa",
+          "description": "Chamada pelas outras funções do processo para decidir quem recebe a etapa de liberação: lê na plataforma quem é reconhecido como responsável pela empresa (nunca quem entrou primeiro), devolve essa pessoa ou um erro quando não há responsável, sem gravar nada; repetir devolve o mesmo resultado."
+        }
+      ]
+    }
+  ],
+  "journeyDecisions": [
+    {
+      "journeyId": "prepararEmpresa",
+      "inProcess": false
+    },
+    {
+      "journeyId": "convidarPessoas",
+      "inProcess": false
+    },
+    {
+      "journeyId": "acompanharAcessos",
+      "inProcess": false
+    },
+    {
+      "journeyId": "liberarAcesso",
+      "inProcess": true,
+      "processId": "liberacaoAcesso"
+    },
+    {
+      "journeyId": "completarMeuAcesso",
+      "inProcess": false
+    },
+    {
+      "journeyId": "pedirLiberacao",
+      "inProcess": true,
+      "processId": "liberacaoAcesso"
+    }
+  ]
+} as const satisfies Ns5Readonly<Ns5WorkflowsArtifact>;
+
+export type InicioWorkflowsType = typeof inicioWorkflows;
+
+export default inicioWorkflows;

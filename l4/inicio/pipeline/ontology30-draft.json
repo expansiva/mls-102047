@@ -1,0 +1,1014 @@
+{
+  "plan": {
+    "moduleName": "inicio",
+    "businessDomain": "Início do app da empresa: boas-vindas, preparação dos dados da empresa e conclusão do acesso de cada pessoa da organização, sobre os cadastros mestres da plataforma, sem tabelas próprias.",
+    "entities": [
+      {
+        "entityId": "Empresa",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Empresa",
+        "description": "O cadastro mestre da empresa da organização. O responsável completa só os dados obrigatórios que faltam (nome, documento, endereço, contato). O módulo calcula se a empresa está preparada a partir desses dados; não grava essa situação.",
+        "displayField": "details.identification.name",
+        "subtype": "Company",
+        "roleTag": "inicio.Empresa",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "entityId": "PessoaOrganizacao",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Pessoa da organização",
+        "description": "Toda pessoa autenticada e aceita na organização, inclusive o responsável. O cadastro é ligado ao e-mail de login pelo índice da plataforma. Ela completa nome, país, telefone opcional e o consentimento de privacidade quando a lei exige. O módulo calcula se o acesso está completo; não grava convites nem pendências.",
+        "displayField": "details.identification.name",
+        "subtype": "Person",
+        "roleTag": "inicio.PessoaOrganizacao",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "entityId": "Contato",
+        "kind": "role",
+        "family": "mdm",
+        "title": "Contato",
+        "description": "Canal de contato (telefone ou e-mail) da empresa ou da pessoa. É um registro da plataforma ligado por HasContact, nunca um campo do cadastro.",
+        "displayField": "details.identification.name",
+        "subtype": "ContactChannel",
+        "roleTag": "inicio.Contato",
+        "source": "/_102034_/l4/ontology/mdm.defs.ts"
+      }
+    ],
+    "relationships": [
+      {
+        "relationshipId": "empresaTemContato",
+        "from": "Empresa",
+        "to": "Contato",
+        "type": "oneToMany",
+        "required": false,
+        "mode": "mdmRelationship",
+        "description": "A empresa tem canais de contato, um deles exigido para que ela fique preparada.",
+        "catalogType": "HasContact"
+      },
+      {
+        "relationshipId": "pessoaTemContato",
+        "from": "PessoaOrganizacao",
+        "to": "Contato",
+        "type": "oneToMany",
+        "required": false,
+        "mode": "mdmRelationship",
+        "description": "A pessoa pode informar um telefone opcional como canal de contato.",
+        "catalogType": "HasContact"
+      },
+      {
+        "relationshipId": "pessoaMembroEmpresa",
+        "from": "PessoaOrganizacao",
+        "to": "Empresa",
+        "type": "manyToOne",
+        "required": true,
+        "mode": "mdmRelationship",
+        "description": "A pessoa faz parte da organização da empresa e aparece na lista de pessoas que o responsável acompanha.",
+        "roles": [
+          "member"
+        ],
+        "catalogType": "AssignedTo"
+      },
+      {
+        "relationshipId": "responsavelPelaEmpresa",
+        "from": "PessoaOrganizacao",
+        "to": "Empresa",
+        "type": "manyToOne",
+        "required": false,
+        "mode": "mdmRelationship",
+        "description": "A pessoa que a plataforma reconhece como responsável pela empresa, o que limita a preparação à empresa dela.",
+        "roles": [
+          "manager"
+        ],
+        "catalogType": "ManagedBy"
+      }
+    ],
+    "normalizations": [
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Empresa",
+        "detail": "roleTag inicio.Empresa; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "PessoaOrganizacao",
+        "detail": "roleTag inicio.PessoaOrganizacao; source /_102034_/l4/ontology/mdm.defs.ts"
+      },
+      {
+        "kind": "derivedFromPlatform",
+        "entityId": "Contato",
+        "detail": "roleTag inicio.Contato; source /_102034_/l4/ontology/mdm.defs.ts"
+      }
+    ]
+  },
+  "entities": [
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "inicio",
+      "entityId": "Empresa",
+      "title": "Empresa",
+      "description": "O cadastro mestre da empresa da organização. O responsável completa só os dados obrigatórios que faltam (nome, documento, endereço, contato). O módulo calcula se a empresa está preparada a partir desses dados; não grava essa situação.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "contatos": {
+          "relationshipId": "empresaTemContato",
+          "to": "Contato",
+          "via": "HasContact",
+          "cardinality": "1:N",
+          "title": "Contatos da empresa",
+          "description": "Canais de contato da empresa; um deles é exigido para a empresa ficar preparada.",
+          "required": "para a empresa ficar preparada"
+        },
+        "pessoas": {
+          "relationshipId": "pessoaMembroEmpresa",
+          "to": "PessoaOrganizacao",
+          "via": "AssignedTo",
+          "cardinality": "1:N",
+          "title": "Pessoas da organização",
+          "description": "Pessoas que fazem parte da organização e que o responsável acompanha.",
+          "roles": [
+            "member"
+          ],
+          "direction": "to",
+          "required": true
+        },
+        "responsaveis": {
+          "relationshipId": "responsavelPelaEmpresa",
+          "to": "PessoaOrganizacao",
+          "via": "ManagedBy",
+          "cardinality": "1:N",
+          "title": "Responsáveis pela empresa",
+          "description": "Pessoas que a plataforma reconhece como responsáveis pela empresa.",
+          "roles": [
+            "manager"
+          ],
+          "direction": "to"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê o cadastro da empresa pelo id já conhecido da organização, ao abrir a tela inicial do responsável.",
+        "locate.byName": "Localiza a empresa pelo nome no índice do cadastro mestre, usada pelo responsável ao abrir a própria empresa.",
+        "locate.byDocument": "Verifica pelo documento (CNPJ, EIN…) se já existe outra empresa antes de o responsável confirmar o documento que faltava.",
+        "edit.platformFields": "Grava nome, documento, endereço e razão social que faltavam, informados pelo responsável na preparação da empresa.",
+        "link.contact": "Cria um canal de contato e o liga à empresa por HasContact, quando o responsável informa o contato que faltava.",
+        "listLinks": "Lista contatos, pessoas da organização e responsáveis ligados à empresa, para o responsável ver quem ainda não completou o acesso.",
+        "link": "Registra o vínculo versionado entre a empresa e suas pessoas, mantido pela plataforma ao aceitar e convidar pessoas.",
+        "audit": "Mostra quem alterou os dados da empresa e quando, a partir do registro da plataforma.",
+        "inicio.verPendencias": "Mostra ao responsável o que a plataforma já tem e destaca só os dados obrigatórios que faltam, a partir do valor calculado de dados faltantes.",
+        "inicio.verOrientacao": "Mostra ao responsável o texto fixo de orientação com o link para criar o primeiro módulo no Studio, sem guardar módulos."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
+        "rule-company-legal-name-required",
+        "rule-company-ein-unique-for-us",
+        "empresaPreparadaComDadosObrigatorios",
+        "naoPedirDadoJaExistente",
+        "prepararSomenteResponsavel"
+      ],
+      "kind": "role",
+      "subtype": "Company",
+      "roleTag": "inicio.Empresa",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "writePrecondition": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Documento mestre da empresa da organização, como a plataforma guarda e devolve.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Company",
+                        "title": "Empresa"
+                      }
+                    ],
+                    "description": "Sempre empresa neste papel.",
+                    "title": "Subtipo"
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 200,
+                    "description": "Nome pelo qual a empresa é reconhecida; dado obrigatório para a empresa ficar preparada.",
+                    "title": "Nome da empresa"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativa"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativa"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Unificada"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueada"
+                      }
+                    ],
+                    "title": "Situação no cadastro",
+                    "description": "Situação do cadastro mestre (ativo ou inativo), mantida pela plataforma."
+                  },
+                  "docType": {
+                    "type": "enum",
+                    "indexed": true,
+                    "values": [
+                      {
+                        "value": "CNPJ",
+                        "title": "CNPJ"
+                      },
+                      {
+                        "value": "EIN",
+                        "title": "EIN"
+                      },
+                      {
+                        "value": "VAT",
+                        "title": "VAT"
+                      },
+                      {
+                        "value": "NationalId",
+                        "title": "Documento nacional"
+                      },
+                      {
+                        "value": "Other",
+                        "title": "Outro"
+                      }
+                    ],
+                    "title": "Tipo de documento",
+                    "description": "Tipo do documento nacional da empresa; o responsável informa só se a plataforma ainda não tem. Obrigatório para a empresa ficar preparada."
+                  },
+                  "docId": {
+                    "type": "string",
+                    "indexed": true,
+                    "description": "Número do documento da empresa; pedido apenas quando falta. Obrigatório para a empresa ficar preparada.",
+                    "title": "Número do documento"
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "País da empresa (ISO 3166-1 alfa-2), que define o documento e as regras legais aplicáveis.",
+                    "title": "País"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Papéis de módulos no cadastro, incluindo inicio.Empresa; escritos pela plataforma.",
+                    "title": "Papéis"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Criado em",
+                    "description": "Momento em que o cadastro foi criado."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Atualizado em",
+                    "description": "Momento da última alteração do cadastro."
+                  }
+                },
+                "description": "Dados de identificação da empresa mantidos pela plataforma."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "aliases": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "description": "Nome fantasia e outros nomes da empresa.",
+                    "title": "Outros nomes"
+                  },
+                  "addresses": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "Address",
+                    "title": "Endereços",
+                    "description": "Endereços da empresa; ao menos um é obrigatório para a empresa ficar preparada."
+                  },
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Resumo dos canais de contato ligados à empresa; ao menos um é obrigatório para a empresa ficar preparada.",
+                    "title": "Contatos"
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Chaves compactas dos vínculos da empresa, recalculadas pela plataforma.",
+                    "title": "Vínculos"
+                  }
+                },
+                "description": "Dados comuns do cadastro mestre."
+              },
+              "company": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "companyKind": {
+                    "type": "enum",
+                    "required": true,
+                    "values": [
+                      {
+                        "value": "LegalEntity",
+                        "title": "Pessoa jurídica"
+                      }
+                    ],
+                    "description": "A empresa da organização é a pessoa jurídica.",
+                    "title": "Tipo de empresa"
+                  },
+                  "legalName": {
+                    "type": "string",
+                    "required": true,
+                    "description": "Nome oficial registrado da empresa.",
+                    "title": "Razão social"
+                  },
+                  "tradeName": {
+                    "type": "string",
+                    "description": "Nome comercial da empresa, quando houver.",
+                    "title": "Nome fantasia"
+                  }
+                },
+                "description": "Dados próprios de pessoa jurídica."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Campos promovidos pela organização; o módulo apenas lê."
+              },
+              "inicio": {
+                "type": "object",
+                "owner": "module",
+                "fields": {
+                  "preparada": {
+                    "type": "boolean",
+                    "derived": true,
+                    "title": "Empresa preparada",
+                    "description": "Verdadeiro quando a empresa tem nome, documento, ao menos um endereço e ao menos um contato; calculado na leitura, nunca gravado."
+                  },
+                  "dadosFaltantes": {
+                    "type": "string",
+                    "derived": true,
+                    "title": "Dados que faltam",
+                    "description": "Lista dos dados obrigatórios ainda ausentes entre nome, documento, endereço e contato, mostrada ao responsável para pedir só o que falta."
+                  }
+                },
+                "description": "Espaço do módulo Início; vazio, pois o módulo não guarda nada próprio sobre a empresa."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "inicio",
+      "entityId": "PessoaOrganizacao",
+      "title": "Pessoa da organização",
+      "description": "Toda pessoa autenticada e aceita na organização, inclusive o responsável. O cadastro é ligado ao e-mail de login pelo índice da plataforma. Ela completa nome, país, telefone opcional e o consentimento de privacidade quando a lei exige. O módulo calcula se o acesso está completo; não grava convites nem pendências.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "contatos": {
+          "relationshipId": "pessoaTemContato",
+          "to": "Contato",
+          "via": "HasContact",
+          "cardinality": "1:N",
+          "title": "Telefone opcional",
+          "description": "Canal de contato (telefone) que a pessoa pode informar."
+        },
+        "empresa": {
+          "relationshipId": "pessoaMembroEmpresa",
+          "to": "Empresa",
+          "via": "AssignedTo",
+          "cardinality": "N:1",
+          "title": "Empresa da qual faz parte",
+          "description": "Faz a pessoa aparecer na lista de pessoas da organização acompanhada pelo responsável.",
+          "roles": [
+            "member"
+          ],
+          "required": true
+        },
+        "empresaResponsavel": {
+          "relationshipId": "responsavelPelaEmpresa",
+          "to": "Empresa",
+          "via": "ManagedBy",
+          "cardinality": "N:1",
+          "title": "Responsável pela empresa",
+          "description": "Limita a preparação da empresa e a liberação de acessos à empresa do responsável.",
+          "roles": [
+            "manager"
+          ],
+          "required": "quando a plataforma reconhece a pessoa como responsável pela empresa"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Abre o cadastro da pessoa pelo id, para a pessoa ver o próprio cadastro e para o responsável conferir a pessoa antes de liberar.",
+        "locate.byLogin": "Encontra a pessoa ligada ao e-mail da conta autenticada pelo índice de login, para saber ao entrar se já existe cadastro e o que falta.",
+        "locate.byName": "O responsável procura pelo nome a pessoa que pediu liberação entre as pessoas da organização.",
+        "locate.byTag": "Lista as pessoas com o papel inicio.PessoaOrganizacao para o responsável acompanhar quem ainda não completou o acesso.",
+        "register.createOrAttach": "Cadastra a pessoa quando não há ninguém com o e-mail, ou só anexa o papel ao cadastro existente, sem duplicar ao repetir ou interromper.",
+        "edit.platformFields": "A pessoa grava nome, país e consentimento de privacidade que faltam ao completar o próprio acesso.",
+        "link.contact": "A pessoa informa o telefone opcional como canal de contato ligado por HasContact.",
+        "link": "Liga a pessoa à empresa como membro da organização quando é cadastrada ou convidada.",
+        "listLinks": "Mostra a empresa a que a pessoa pertence e o seu telefone na tela do cadastro.",
+        "invite.login": "O responsável convida pelo e-mail com o convite da plataforma, que liga o login à pessoa certa; também é como libera o acesso de quem a plataforma não ligou sozinha.",
+        "inactivate": "Tira a pessoa de uso sem apagá-la, como a plataforma faz quando falta o consentimento exigido.",
+        "audit": "Registra quem alterou o cadastro da pessoa e quando."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
+        "rule-document-shape-validated",
+        "rule-person-privacy-consent-required-br-eu",
+        "acessoCompletoDadosMinimos",
+        "emailContaNaoEditavel",
+        "semDuplicarPessoaAoRepetir",
+        "preencherDadosNaoDaPermissao",
+        "responsavelReconhecidoPelaPlataforma"
+      ],
+      "kind": "role",
+      "subtype": "Person",
+      "roleTag": "inicio.PessoaOrganizacao",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "writePrecondition": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "Cadastro mestre da pessoa da organização, ligado ao e-mail de login pelo índice da plataforma.",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Person",
+                        "title": "Pessoa"
+                      }
+                    ],
+                    "description": "Sempre pessoa física para quem faz parte da organização.",
+                    "title": "Subtipo"
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 200,
+                    "description": "Nome da pessoa; é um dos dados mínimos pedidos em Completar meu acesso e o que o responsável vê na lista de pessoas.",
+                    "title": "Nome"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      "Active",
+                      "Inactive",
+                      "Merged",
+                      "Blocked"
+                    ],
+                    "title": "Situação no cadastro",
+                    "description": "Situação do cadastro mestre (ativo, inativo); fica inativo quando falta o consentimento exigido por lei."
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "País da pessoa (ISO 3166-1 alfa-2); decide se o consentimento de privacidade é exigido (Brasil e União Europeia).",
+                    "title": "País"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Papéis do cadastro nos módulos; inclui inicio.PessoaOrganizacao.",
+                    "title": "Papéis nos módulos"
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Cadastrada em",
+                    "description": "Quando a pessoa foi cadastrada."
+                  },
+                  "updatedAt": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "title": "Atualizada em",
+                    "description": "Última alteração do cadastro; ordena a lista do responsável."
+                  }
+                },
+                "description": "Dados de identificação que a plataforma indexa."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "contacts": {
+                    "type": "object",
+                    "required": true,
+                    "collection": true,
+                    "of": "ContactSummary",
+                    "derived": true,
+                    "description": "Resumo dos canais de contato ligados; aqui aparece o telefone opcional informado ao completar o acesso. O e-mail da conta é o login e não é editado aqui.",
+                    "title": "Contatos"
+                  },
+                  "relationshipRefs": {
+                    "type": "object",
+                    "required": true,
+                    "derived": true,
+                    "description": "Chaves compactas dos vínculos com a empresa (membro e responsável) e com os contatos.",
+                    "title": "Vínculos"
+                  }
+                },
+                "description": "Dados comuns a todo cadastro."
+              },
+              "person": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "privacyConsent": {
+                    "type": "object",
+                    "of": "PrivacyConsent",
+                    "description": "Consentimento pedido só quando a lei do país exige (Brasil — LGPD, União Europeia — GDPR).",
+                    "title": "Consentimento de privacidade"
+                  }
+                },
+                "description": "Dados de pessoa física usados pelo módulo."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Campos promovidos pela organização; o módulo apenas lê."
+              },
+              "inicio": {
+                "type": "object",
+                "owner": "module",
+                "fields": {
+                  "consentimentoExigido": {
+                    "type": "boolean",
+                    "derived": true,
+                    "title": "Consentimento exigido",
+                    "description": "Verdadeiro quando o país da pessoa é o Brasil ou um país da União Europeia."
+                  },
+                  "acessoCompleto": {
+                    "type": "boolean",
+                    "derived": true,
+                    "title": "Acesso completo",
+                    "description": "Verdadeiro quando a pessoa tem nome e país informados e, se o país exige, um consentimento de privacidade válido; o telefone é opcional e não conta."
+                  },
+                  "dadosFaltantes": {
+                    "type": "string",
+                    "derived": true,
+                    "title": "O que falta",
+                    "description": "Lista, em palavras, dos dados mínimos que ainda faltam à pessoa (nome, país, consentimento quando exigido); é o que a tela pede ao voltar, em qualquer navegador."
+                  }
+                },
+                "description": "Namespace do módulo Início; vazio, pois o módulo não guarda convites, pendências nem permissões."
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+      "moduleName": "inicio",
+      "entityId": "Contato",
+      "title": "Contato",
+      "description": "Canal de contato (telefone ou e-mail) da empresa ou da pessoa. É um registro da plataforma ligado por HasContact, nunca um campo do cadastro.",
+      "displayField": "details.identification.name",
+      "relationships": {
+        "empresa": {
+          "relationshipId": "empresaTemContato",
+          "to": "Empresa",
+          "via": "HasContact",
+          "cardinality": "N:1",
+          "title": "Empresa dona do contato",
+          "description": "Canal de contato da empresa, ligado por HasContact; um deles é exigido para a empresa ficar preparada.",
+          "direction": "to"
+        },
+        "pessoa": {
+          "relationshipId": "pessoaTemContato",
+          "to": "PessoaOrganizacao",
+          "via": "HasContact",
+          "cardinality": "N:1",
+          "title": "Pessoa dona do contato",
+          "description": "Telefone opcional informado pela pessoa ao completar o acesso, ligado por HasContact.",
+          "direction": "to"
+        }
+      },
+      "capabilities": {
+        "read.byId": "Lê os canais já ligados à empresa ou à pessoa pelo mdmId, para mostrar o que a plataforma já tem e não pedir de novo; usado pelas telas do responsável e da pessoa da organização.",
+        "locate.byContact": "Procura se o telefone ou e-mail informado já existe antes de criar outro canal, para que repetir ou interromper não duplique; usado ao salvar o contato da empresa ou o telefone da pessoa.",
+        "register.createOrAttach": "Cria o canal quando ausente e marca com o papel inicio.Contato; usado pelo responsável ao confirmar o contato da empresa e pela pessoa ao informar o telefone opcional.",
+        "edit.platformFields": "Corrige o tipo ou o valor do canal; usado pelo responsável para o contato da empresa e pela pessoa para o próprio telefone.",
+        "edit.moduleNamespace": "Mantém o namespace inicio do canal, que fica vazio; usado apenas pelo próprio módulo ao anexar o papel.",
+        "link": "Liga o canal à empresa ou à pessoa por HasContact, sem criar novo vínculo se já existir; usado ao salvar os dados.",
+        "unlink": "Encerra o vínculo HasContact de um canal que deixou de valer, mantendo o histórico; usado pelo responsável ou pela pessoa dona do telefone.",
+        "listLinks": "Mostra a qual empresa ou pessoa o canal está ligado; usado na preparação da empresa para saber se o contato exigido já existe.",
+        "inactivate": "Tira o canal de uso sem apagar, com reativação possível; usado pelo responsável ou pela pessoa dona.",
+        "audit": "Mostra quem criou ou alterou o canal e quando, pelo módulo audit da plataforma; consultado pelo responsável."
+      },
+      "rules": [
+        "rule-foreign-namespace-refused",
+        "rule-identity-never-in-namespace",
+        "rule-contact-value-unique-per-type",
+        "rule-document-shape-validated",
+        "rule-delete-blocked-by-relationships",
+        "contatoSemDuplicarAoRepetir",
+        "emailDaContaNaoEditavel"
+      ],
+      "kind": "role",
+      "subtype": "ContactChannel",
+      "roleTag": "inicio.Contato",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts",
+      "record": {
+        "fields": {
+          "id": {
+            "type": "uuid",
+            "required": true,
+            "indexed": true,
+            "derived": true,
+            "description": "mdmId; stable through promotion and merge."
+          },
+          "version": {
+            "type": "integer",
+            "required": true,
+            "derived": true,
+            "writePrecondition": true,
+            "description": "Bumped by the engine on every write; optimistic concurrency."
+          },
+          "details": {
+            "type": "object",
+            "required": true,
+            "description": "The JSONB document, as a map of groups (see groups).",
+            "fields": {
+              "identification": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "subtype": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "ContactChannel",
+                        "title": "Canal de contato"
+                      }
+                    ],
+                    "description": "Sempre ContactChannel para este papel.",
+                    "title": "Subtipo"
+                  },
+                  "name": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "maxLength": 200,
+                    "description": "Como o canal é reconhecido na tela de preparação da empresa ou de completar o acesso (ex.: telefone principal).",
+                    "title": "Nome"
+                  },
+                  "status": {
+                    "type": "enum",
+                    "required": true,
+                    "indexed": true,
+                    "derived": true,
+                    "values": [
+                      {
+                        "value": "Active",
+                        "title": "Ativo"
+                      },
+                      {
+                        "value": "Inactive",
+                        "title": "Inativo"
+                      },
+                      {
+                        "value": "Merged",
+                        "title": "Mesclado"
+                      },
+                      {
+                        "value": "Blocked",
+                        "title": "Bloqueado"
+                      }
+                    ],
+                    "title": "Situação",
+                    "description": "Situação do canal na plataforma."
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "required": true,
+                    "indexed": true,
+                    "pattern": "^[A-Z]{2}$",
+                    "maxLength": 2,
+                    "default": "US",
+                    "description": "País (ISO 3166-1 alfa-2) a que o canal pertence, usado para interpretar o telefone.",
+                    "title": "País"
+                  },
+                  "tags": {
+                    "type": "string",
+                    "required": true,
+                    "collection": true,
+                    "derived": true,
+                    "description": "Papéis dos módulos sobre o canal; inclui inicio.Contato.",
+                    "title": "Papéis"
+                  }
+                },
+                "description": "Identificação do canal de contato na plataforma."
+              },
+              "base": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {},
+                "description": "Dados comuns da plataforma; este papel não usa nenhum deles."
+              },
+              "contactChannel": {
+                "type": "object",
+                "owner": "platform",
+                "fields": {
+                  "contactType": {
+                    "type": "enum",
+                    "required": true,
+                    "values": [
+                      {
+                        "value": "Phone",
+                        "title": "Telefone"
+                      },
+                      {
+                        "value": "Email",
+                        "title": "E-mail"
+                      },
+                      {
+                        "value": "WhatsApp",
+                        "title": "WhatsApp"
+                      }
+                    ],
+                    "title": "Tipo",
+                    "description": "Tipo do canal informado no Início: telefone, WhatsApp ou e-mail da empresa; telefone da pessoa."
+                  },
+                  "value": {
+                    "type": "string",
+                    "required": true,
+                    "description": "O número ou o endereço de e-mail, sem máscara.",
+                    "title": "Valor"
+                  },
+                  "isVerified": {
+                    "type": "boolean",
+                    "required": true,
+                    "title": "Verificado",
+                    "description": "Indica se a plataforma já verificou o canal."
+                  },
+                  "verifiedAt": {
+                    "type": "timestamp",
+                    "title": "Verificado em",
+                    "description": "Quando a plataforma verificou o canal."
+                  }
+                },
+                "description": "O telefone ou e-mail da empresa ou o telefone opcional da pessoa."
+              },
+              "general": {
+                "type": "object",
+                "owner": "organization",
+                "open": true,
+                "description": "Campos promovidos pela organização; lidos, não declarados aqui."
+              },
+              "inicio": {
+                "type": "object",
+                "owner": "module",
+                "fields": {},
+                "description": "Module namespace; the prompt asked for no data of this module about the record."
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "empresaTemContato",
+      "from": "Empresa",
+      "to": "Contato",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "A empresa tem canais de contato, um deles exigido para que ela fique preparada.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "pessoaTemContato",
+      "from": "PessoaOrganizacao",
+      "to": "Contato",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "A pessoa pode informar um telefone opcional como canal de contato.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "pessoaMembroEmpresa",
+      "from": "PessoaOrganizacao",
+      "to": "Empresa",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "mdmRelationship",
+      "description": "A pessoa faz parte da organização da empresa e aparece na lista de pessoas que o responsável acompanha.",
+      "catalogType": "AssignedTo",
+      "roles": [
+        "member"
+      ]
+    },
+    {
+      "relationshipId": "responsavelPelaEmpresa",
+      "from": "PessoaOrganizacao",
+      "to": "Empresa",
+      "type": "manyToOne",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "A pessoa que a plataforma reconhece como responsável pela empresa, o que limita a preparação à empresa dela.",
+      "catalogType": "ManagedBy",
+      "roles": [
+        "manager"
+      ]
+    }
+  ],
+  "removedOrphans": [],
+  "liftedAggregateEntities": [],
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Empresa",
+      "detail": "roleTag inicio.Empresa; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PessoaOrganizacao",
+      "detail": "roleTag inicio.PessoaOrganizacao; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Contato",
+      "detail": "roleTag inicio.Contato; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Empresa",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Empresa",
+      "detail": "Empresa.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Empresa",
+      "detail": "Empresa.details.identification.docType.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Empresa",
+      "detail": "Empresa.details.company.companyKind.values"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Empresa",
+      "detail": "record.fields.details.inicio.fields.preparada.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Empresa",
+      "detail": "record.fields.details.inicio.fields.dadosFaltantes.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PessoaOrganizacao",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "PessoaOrganizacao",
+      "detail": "PessoaOrganizacao.details.identification.subtype.values"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PessoaOrganizacao",
+      "detail": "record.fields.details.inicio.fields.consentimentoExigido.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PessoaOrganizacao",
+      "detail": "record.fields.details.inicio.fields.acessoCompleto.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PessoaOrganizacao",
+      "detail": "record.fields.details.inicio.fields.dadosFaltantes.derived (derived[])"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Contato",
+      "detail": "record.fields.id, record.fields.version"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Contato",
+      "detail": "Contato.details.identification.subtype.values"
+    },
+    {
+      "kind": "tightened",
+      "entityId": "Contato",
+      "detail": "Contato.details.contactChannel.contactType.values"
+    },
+    {
+      "kind": "namespaceEmpty",
+      "entityId": "Contato",
+      "detail": "details.inicio"
+    }
+  ]
+}

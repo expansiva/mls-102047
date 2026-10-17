@@ -1,0 +1,248 @@
+/// <mls fileReference="_102047_/l4/inicio/ontology/PessoaOrganizacao.defs.ts" enhancement="_blank"/>
+
+import type { Ns5OntologyEntityV3, Ns5Readonly } from '/_102035_/l2/solution/types.js';
+
+export const inicioEntityPessoaOrganizacao = {
+  "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
+  "moduleName": "inicio",
+  "entityId": "PessoaOrganizacao",
+  "title": "Pessoa da organização",
+  "description": "Toda pessoa autenticada e aceita na organização, inclusive o responsável. O cadastro é ligado ao e-mail de login pelo índice da plataforma. Ela completa nome, país, telefone opcional e o consentimento de privacidade quando a lei exige. O módulo calcula se o acesso está completo; não grava convites nem pendências.",
+  "displayField": "details.identification.name",
+  "relationships": {
+    "contatos": {
+      "relationshipId": "pessoaTemContato",
+      "to": "Contato",
+      "via": "HasContact",
+      "cardinality": "1:N",
+      "title": "Telefone opcional",
+      "description": "Canal de contato (telefone) que a pessoa pode informar."
+    },
+    "empresa": {
+      "relationshipId": "pessoaMembroEmpresa",
+      "to": "Empresa",
+      "via": "AssignedTo",
+      "cardinality": "N:1",
+      "title": "Empresa da qual faz parte",
+      "description": "Faz a pessoa aparecer na lista de pessoas da organização acompanhada pelo responsável.",
+      "roles": [
+        "member"
+      ],
+      "required": true
+    },
+    "empresaResponsavel": {
+      "relationshipId": "responsavelPelaEmpresa",
+      "to": "Empresa",
+      "via": "ManagedBy",
+      "cardinality": "N:1",
+      "title": "Responsável pela empresa",
+      "description": "Limita a preparação da empresa e a liberação de acessos à empresa do responsável.",
+      "roles": [
+        "manager"
+      ],
+      "required": "quando a plataforma reconhece a pessoa como responsável pela empresa"
+    }
+  },
+  "capabilities": {
+    "read.byId": "Abre o cadastro da pessoa pelo id, para a pessoa ver o próprio cadastro e para o responsável conferir a pessoa antes de liberar.",
+    "locate.byLogin": "Encontra a pessoa ligada ao e-mail da conta autenticada pelo índice de login, para saber ao entrar se já existe cadastro e o que falta.",
+    "locate.byName": "O responsável procura pelo nome a pessoa que pediu liberação entre as pessoas da organização.",
+    "locate.byTag": "Lista as pessoas com o papel inicio.PessoaOrganizacao para o responsável acompanhar quem ainda não completou o acesso.",
+    "register.createOrAttach": "Cadastra a pessoa quando não há ninguém com o e-mail, ou só anexa o papel ao cadastro existente, sem duplicar ao repetir ou interromper.",
+    "edit.platformFields": "A pessoa grava nome, país e consentimento de privacidade que faltam ao completar o próprio acesso.",
+    "link.contact": "A pessoa informa o telefone opcional como canal de contato ligado por HasContact.",
+    "link": "Liga a pessoa à empresa como membro da organização quando é cadastrada ou convidada.",
+    "listLinks": "Mostra a empresa a que a pessoa pertence e o seu telefone na tela do cadastro.",
+    "invite.login": "O responsável convida pelo e-mail com o convite da plataforma, que liga o login à pessoa certa; também é como libera o acesso de quem a plataforma não ligou sozinha.",
+    "inactivate": "Tira a pessoa de uso sem apagá-la, como a plataforma faz quando falta o consentimento exigido.",
+    "audit": "Registra quem alterou o cadastro da pessoa e quando."
+  },
+  "rules": [
+    "rule-foreign-namespace-refused",
+    "rule-identity-never-in-namespace",
+    "rule-document-shape-validated",
+    "rule-person-privacy-consent-required-br-eu",
+    "acessoCompletoDadosMinimos",
+    "emailContaNaoEditavel",
+    "semDuplicarPessoaAoRepetir",
+    "preencherDadosNaoDaPermissao",
+    "responsavelReconhecidoPelaPlataforma"
+  ],
+  "kind": "role",
+  "subtype": "Person",
+  "roleTag": "inicio.PessoaOrganizacao",
+  "source": "/_102034_/l4/ontology/mdm.defs.ts",
+  "record": {
+    "fields": {
+      "id": {
+        "type": "uuid",
+        "required": true,
+        "indexed": true,
+        "derived": true,
+        "description": "mdmId; stable through promotion and merge."
+      },
+      "version": {
+        "type": "integer",
+        "required": true,
+        "derived": true,
+        "writePrecondition": true,
+        "description": "Bumped by the engine on every write; optimistic concurrency."
+      },
+      "details": {
+        "type": "object",
+        "required": true,
+        "description": "Cadastro mestre da pessoa da organização, ligado ao e-mail de login pelo índice da plataforma.",
+        "fields": {
+          "identification": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "subtype": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  {
+                    "value": "Person",
+                    "title": "Pessoa"
+                  }
+                ],
+                "description": "Sempre pessoa física para quem faz parte da organização.",
+                "title": "Subtipo"
+              },
+              "name": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "maxLength": 200,
+                "description": "Nome da pessoa; é um dos dados mínimos pedidos em Completar meu acesso e o que o responsável vê na lista de pessoas.",
+                "title": "Nome"
+              },
+              "status": {
+                "type": "enum",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "values": [
+                  "Active",
+                  "Inactive",
+                  "Merged",
+                  "Blocked"
+                ],
+                "title": "Situação no cadastro",
+                "description": "Situação do cadastro mestre (ativo, inativo); fica inativo quando falta o consentimento exigido por lei."
+              },
+              "countryCode": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "pattern": "^[A-Z]{2}$",
+                "maxLength": 2,
+                "default": "US",
+                "description": "País da pessoa (ISO 3166-1 alfa-2); decide se o consentimento de privacidade é exigido (Brasil e União Europeia).",
+                "title": "País"
+              },
+              "tags": {
+                "type": "string",
+                "required": true,
+                "collection": true,
+                "derived": true,
+                "description": "Papéis do cadastro nos módulos; inclui inicio.PessoaOrganizacao.",
+                "title": "Papéis nos módulos"
+              },
+              "createdAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Cadastrada em",
+                "description": "Quando a pessoa foi cadastrada."
+              },
+              "updatedAt": {
+                "type": "string",
+                "required": true,
+                "indexed": true,
+                "derived": true,
+                "title": "Atualizada em",
+                "description": "Última alteração do cadastro; ordena a lista do responsável."
+              }
+            },
+            "description": "Dados de identificação que a plataforma indexa."
+          },
+          "base": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "contacts": {
+                "type": "object",
+                "required": true,
+                "collection": true,
+                "of": "ContactSummary",
+                "derived": true,
+                "description": "Resumo dos canais de contato ligados; aqui aparece o telefone opcional informado ao completar o acesso. O e-mail da conta é o login e não é editado aqui.",
+                "title": "Contatos"
+              },
+              "relationshipRefs": {
+                "type": "object",
+                "required": true,
+                "derived": true,
+                "description": "Chaves compactas dos vínculos com a empresa (membro e responsável) e com os contatos.",
+                "title": "Vínculos"
+              }
+            },
+            "description": "Dados comuns a todo cadastro."
+          },
+          "person": {
+            "type": "object",
+            "owner": "platform",
+            "fields": {
+              "privacyConsent": {
+                "type": "object",
+                "of": "PrivacyConsent",
+                "description": "Consentimento pedido só quando a lei do país exige (Brasil — LGPD, União Europeia — GDPR).",
+                "title": "Consentimento de privacidade"
+              }
+            },
+            "description": "Dados de pessoa física usados pelo módulo."
+          },
+          "general": {
+            "type": "object",
+            "owner": "organization",
+            "open": true,
+            "description": "Campos promovidos pela organização; o módulo apenas lê."
+          },
+          "inicio": {
+            "type": "object",
+            "owner": "module",
+            "fields": {
+              "consentimentoExigido": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Consentimento exigido",
+                "description": "Verdadeiro quando o país da pessoa é o Brasil ou um país da União Europeia."
+              },
+              "acessoCompleto": {
+                "type": "boolean",
+                "derived": true,
+                "title": "Acesso completo",
+                "description": "Verdadeiro quando a pessoa tem nome e país informados e, se o país exige, um consentimento de privacidade válido; o telefone é opcional e não conta."
+              },
+              "dadosFaltantes": {
+                "type": "string",
+                "derived": true,
+                "title": "O que falta",
+                "description": "Lista, em palavras, dos dados mínimos que ainda faltam à pessoa (nome, país, consentimento quando exigido); é o que a tela pede ao voltar, em qualquer navegador."
+              }
+            },
+            "description": "Namespace do módulo Início; vazio, pois o módulo não guarda convites, pendências nem permissões."
+          }
+        }
+      }
+    }
+  }
+} as const satisfies Ns5Readonly<Ns5OntologyEntityV3>;
+
+export type InicioEntityPessoaOrganizacaoType = typeof inicioEntityPessoaOrganizacao;
+
+export default inicioEntityPessoaOrganizacao;

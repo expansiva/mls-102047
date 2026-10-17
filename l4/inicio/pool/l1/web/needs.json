@@ -1,0 +1,331 @@
+{
+  "schemaVersion": "2026-09-21-p2-needs-v1",
+  "moduleName": "inicio",
+  "device": "web",
+  "menuSchema": "2026-09-20-p2-menu-v2.2",
+  "pages": [
+    {
+      "pageId": "painel",
+      "actors": [
+        "responsavel"
+      ],
+      "reads": [
+        {
+          "entity": "Contato",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:responsavelContatosEmpresa",
+            "journey:acompanharAcessos/listarPessoas",
+            "journey:acompanharAcessos/verSituacao",
+            "journey:liberarAcesso/conferirCadastro",
+            "journey:liberarAcesso/convidarPessoaCerta",
+            "journey:liberarAcesso/localizarPessoa",
+            "relationship:Contato/empresaTemContato",
+            "relationship:Contato/pessoaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato"
+          ]
+        },
+        {
+          "entity": "Empresa",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.inicio.dadosFaltantes",
+            "details.inicio.preparada"
+          ],
+          "from": [
+            "grant:responsavelPreparaEmpresa",
+            "journey:acompanharAcessos/listarPessoas",
+            "journey:acompanharAcessos/verSituacao",
+            "journey:liberarAcesso/conferirCadastro",
+            "journey:liberarAcesso/convidarPessoaCerta",
+            "journey:liberarAcesso/localizarPessoa",
+            "relationship:Contato/empresaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        },
+        {
+          "entity": "PessoaOrganizacao",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.inicio.acessoCompleto",
+            "details.inicio.consentimentoExigido",
+            "details.inicio.dadosFaltantes"
+          ],
+          "from": [
+            "grant:responsavelAcompanhaPessoas",
+            "journey:acompanharAcessos/listarPessoas",
+            "journey:acompanharAcessos/verSituacao",
+            "journey:liberarAcesso/conferirCadastro",
+            "journey:liberarAcesso/convidarPessoaCerta",
+            "journey:liberarAcesso/localizarPessoa",
+            "relationship:Contato/pessoaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "PessoaOrganizacao",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:liberarAcesso/convidarPessoaCerta"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "empresa",
+      "actors": [
+        "responsavel"
+      ],
+      "reads": [
+        {
+          "entity": "Contato",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:responsavelContatosEmpresa",
+            "journey:prepararEmpresa/abrirEmpresa",
+            "journey:prepararEmpresa/completarDados",
+            "journey:prepararEmpresa/verOrientacao",
+            "journey:prepararEmpresa/verPendencias",
+            "relationship:Contato/empresaTemContato",
+            "relationship:Contato/pessoaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/responsavelPelaEmpresa"
+          ]
+        },
+        {
+          "entity": "Empresa",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.inicio.dadosFaltantes",
+            "details.inicio.preparada"
+          ],
+          "from": [
+            "grant:responsavelPreparaEmpresa",
+            "journey:prepararEmpresa/abrirEmpresa",
+            "journey:prepararEmpresa/completarDados",
+            "journey:prepararEmpresa/verOrientacao",
+            "journey:prepararEmpresa/verPendencias",
+            "relationship:Contato/empresaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        },
+        {
+          "entity": "PessoaOrganizacao",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.inicio.acessoCompleto",
+            "details.inicio.consentimentoExigido",
+            "details.inicio.dadosFaltantes"
+          ],
+          "from": [
+            "grant:responsavelAcompanhaPessoas",
+            "journey:prepararEmpresa/abrirEmpresa",
+            "journey:prepararEmpresa/completarDados",
+            "journey:prepararEmpresa/verOrientacao",
+            "journey:prepararEmpresa/verPendencias",
+            "relationship:Contato/pessoaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "Empresa",
+          "operation": "update",
+          "transitionRef": "",
+          "from": [
+            "journey:prepararEmpresa/completarDados"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "pessoas",
+      "actors": [
+        "responsavel"
+      ],
+      "reads": [
+        {
+          "entity": "Contato",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [],
+          "from": [
+            "grant:responsavelContatosEmpresa",
+            "journey:acompanharAcessos/listarPessoas",
+            "journey:acompanharAcessos/verSituacao",
+            "journey:convidarPessoas/conferirPessoa",
+            "journey:convidarPessoas/informarEmail",
+            "journey:liberarAcesso/conferirCadastro",
+            "journey:liberarAcesso/convidarPessoaCerta",
+            "journey:liberarAcesso/localizarPessoa",
+            "relationship:Contato/empresaTemContato",
+            "relationship:Contato/pessoaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato"
+          ]
+        },
+        {
+          "entity": "Empresa",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.inicio.dadosFaltantes",
+            "details.inicio.preparada"
+          ],
+          "from": [
+            "grant:responsavelPreparaEmpresa",
+            "journey:acompanharAcessos/listarPessoas",
+            "journey:acompanharAcessos/verSituacao",
+            "journey:convidarPessoas/conferirPessoa",
+            "journey:convidarPessoas/informarEmail",
+            "journey:liberarAcesso/conferirCadastro",
+            "journey:liberarAcesso/convidarPessoaCerta",
+            "journey:liberarAcesso/localizarPessoa",
+            "relationship:Contato/empresaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        },
+        {
+          "entity": "PessoaOrganizacao",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.inicio.acessoCompleto",
+            "details.inicio.consentimentoExigido",
+            "details.inicio.dadosFaltantes"
+          ],
+          "from": [
+            "grant:responsavelAcompanhaPessoas",
+            "journey:acompanharAcessos/listarPessoas",
+            "journey:acompanharAcessos/verSituacao",
+            "journey:convidarPessoas/conferirPessoa",
+            "journey:convidarPessoas/informarEmail",
+            "journey:liberarAcesso/conferirCadastro",
+            "journey:liberarAcesso/convidarPessoaCerta",
+            "journey:liberarAcesso/localizarPessoa",
+            "relationship:Contato/pessoaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "PessoaOrganizacao",
+          "operation": "create",
+          "transitionRef": "",
+          "from": [
+            "journey:convidarPessoas/informarEmail",
+            "journey:liberarAcesso/convidarPessoaCerta"
+          ]
+        }
+      ]
+    },
+    {
+      "pageId": "completar_acesso",
+      "actors": [
+        "pessoaOrganizacao"
+      ],
+      "reads": [
+        {
+          "entity": "Empresa",
+          "family": "mdm",
+          "scope": "organization",
+          "derived": [
+            "details.inicio.dadosFaltantes",
+            "details.inicio.preparada"
+          ],
+          "from": [
+            "grant:pessoaVeEmpresa",
+            "journey:completarMeuAcesso/informarDados",
+            "journey:completarMeuAcesso/seguirModulos",
+            "journey:completarMeuAcesso/verMeuCadastro",
+            "journey:pedirLiberacao/verAviso",
+            "relationship:Contato/empresaTemContato",
+            "relationship:Empresa/empresaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        },
+        {
+          "entity": "PessoaOrganizacao",
+          "family": "mdm",
+          "scope": "own",
+          "derived": [
+            "details.inicio.acessoCompleto",
+            "details.inicio.consentimentoExigido",
+            "details.inicio.dadosFaltantes"
+          ],
+          "from": [
+            "grant:pessoaCompletaMeuAcesso",
+            "journey:completarMeuAcesso/informarDados",
+            "journey:completarMeuAcesso/seguirModulos",
+            "journey:completarMeuAcesso/verMeuCadastro",
+            "journey:pedirLiberacao/verAviso",
+            "relationship:Contato/pessoaTemContato",
+            "relationship:Empresa/pessoaMembroEmpresa",
+            "relationship:Empresa/responsavelPelaEmpresa",
+            "relationship:PessoaOrganizacao/pessoaMembroEmpresa",
+            "relationship:PessoaOrganizacao/pessoaTemContato",
+            "relationship:PessoaOrganizacao/responsavelPelaEmpresa"
+          ]
+        }
+      ],
+      "writes": [
+        {
+          "entity": "PessoaOrganizacao",
+          "operation": "update",
+          "transitionRef": "",
+          "from": [
+            "journey:completarMeuAcesso/informarDados"
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "sourceMenu": "pool/l2/web/menu.json",
+    "generatedAt": "2026-10-17T06:50:06.821Z"
+  }
+}

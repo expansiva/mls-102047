@@ -845,6 +845,59 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-16T07:05:56.587Z"
+    },
+    {
+      "moduleName": "inicio",
+      "actors": [
+        {
+          "actorId": "responsavel",
+          "kind": "internal"
+        },
+        {
+          "actorId": "pessoaOrganizacao",
+          "kind": "internal"
+        }
+      ],
+      "roles": [
+        {
+          "subtype": "Company",
+          "roleTag": "inicio.Empresa",
+          "namespace": "inicio"
+        },
+        {
+          "subtype": "Person",
+          "roleTag": "inicio.PessoaOrganizacao",
+          "namespace": "inicio"
+        },
+        {
+          "subtype": "ContactChannel",
+          "roleTag": "inicio.Contato",
+          "namespace": "inicio"
+        }
+      ],
+      "generalFields": [],
+      "entities": [
+        {
+          "entityId": "Empresa",
+          "kind": "role",
+          "mdmSubtype": "Company",
+          "class": "mdm"
+        },
+        {
+          "entityId": "PessoaOrganizacao",
+          "kind": "role",
+          "mdmSubtype": "Person",
+          "class": "mdm"
+        },
+        {
+          "entityId": "Contato",
+          "kind": "role",
+          "mdmSubtype": "ContactChannel",
+          "class": "mdm"
+        }
+      ],
+      "events": [],
+      "updatedAt": "2026-10-17T06:05:24.101Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

@@ -1,0 +1,257 @@
+{
+  "journeys": [
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "prepararEmpresa",
+      "business": {
+        "actorRef": "responsavel",
+        "title": "Preparar a empresa",
+        "goal": "Completar os dados obrigatórios da empresa para que ela fique marcada como preparada.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "abrirEmpresa",
+            "kind": "locate",
+            "entity": "Empresa",
+            "title": "Abrir dados da empresa",
+            "description": "O responsável abre a tela inicial e acessa o cadastro da própria empresa."
+          },
+          {
+            "stepId": "verPendencias",
+            "kind": "inspect",
+            "entity": "Empresa",
+            "title": "Ver dados que faltam",
+            "description": "A tela mostra o que a plataforma já tem e destaca só os dados obrigatórios que faltam (nome, documento, endereço, contato)."
+          },
+          {
+            "stepId": "completarDados",
+            "kind": "act",
+            "entity": "Empresa",
+            "effect": "update",
+            "title": "Confirmar dados da empresa",
+            "description": "O responsável informa e confirma apenas os dados que faltam; com os obrigatórios completos, a empresa passa a constar como preparada."
+          },
+          {
+            "stepId": "verOrientacao",
+            "kind": "inspect",
+            "entity": "Empresa",
+            "title": "Ver orientação final",
+            "description": "A tela mostra o texto fixo de orientação com o link para criar o primeiro módulo no Studio."
+          }
+        ],
+        "outcome": {
+          "statement": "A empresa tem os dados obrigatórios completos e aparece como preparada.",
+          "evidence": [
+            "Os dados da empresa aparecem completos sem pedir de novo o que já existia",
+            "A empresa é exibida como preparada",
+            "O texto de orientação com o link para o Studio é exibido"
+          ]
+        }
+      },
+      "businessHash": "sha256:8333ee6685a9bc27344839a74fc26971a49271e3e5ecfd9e72b56aa14b83ac79"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "convidarPessoas",
+      "business": {
+        "actorRef": "responsavel",
+        "title": "Convidar pessoas",
+        "goal": "Trazer pessoas para a organização pelo e-mail usando o convite da plataforma.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "informarEmail",
+            "kind": "act",
+            "entity": "PessoaOrganizacao",
+            "effect": "create",
+            "title": "Convidar pessoa por e-mail",
+            "description": "O responsável informa o e-mail; a plataforma usa a pessoa já cadastrada ou cadastra a pessoa, dá a ela o login e envia o convite, sem que o módulo guarde convites."
+          },
+          {
+            "stepId": "conferirPessoa",
+            "kind": "inspect",
+            "entity": "PessoaOrganizacao",
+            "title": "Conferir pessoa convidada",
+            "description": "O responsável vê a pessoa na lista da organização, ainda sem acesso completo."
+          }
+        ],
+        "outcome": {
+          "statement": "A pessoa convidada faz parte da organização e recebeu o convite da plataforma.",
+          "evidence": [
+            "A pessoa aparece na lista de pessoas da organização",
+            "Nenhuma pessoa duplicada é criada para um e-mail já cadastrado"
+          ]
+        }
+      },
+      "businessHash": "sha256:580dc1a846a9716f27c28a26412883769059d85473b4b0ff85da6c13e4d22335"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "acompanharAcessos",
+      "business": {
+        "actorRef": "responsavel",
+        "title": "Acompanhar acessos",
+        "goal": "Ver as pessoas da organização e quais ainda não completaram o acesso.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "listarPessoas",
+            "kind": "locate",
+            "entity": "PessoaOrganizacao",
+            "title": "Listar pessoas da organização",
+            "description": "O responsável abre a lista de pessoas da organização."
+          },
+          {
+            "stepId": "verSituacao",
+            "kind": "inspect",
+            "entity": "PessoaOrganizacao",
+            "title": "Ver quem falta completar",
+            "description": "A lista indica quais pessoas ainda não completaram os dados mínimos de acesso."
+          }
+        ],
+        "outcome": {
+          "statement": "O responsável sabe quem já completou e quem ainda não completou o acesso.",
+          "evidence": [
+            "Cada pessoa aparece com a indicação de acesso completo ou pendente"
+          ]
+        }
+      },
+      "businessHash": "sha256:745961de5b30ceb7ae11d09b2bfefde3599e312c7da1d8a0d1d4ffa261df817d"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "liberarAcesso",
+      "business": {
+        "actorRef": "responsavel",
+        "title": "Liberar acesso de uma pessoa",
+        "goal": "Liberar o acesso de quem a plataforma não conseguiu ligar ao e-mail sozinha.",
+        "entry": {
+          "mode": "contextOrLookup"
+        },
+        "steps": [
+          {
+            "stepId": "localizarPessoa",
+            "kind": "locate",
+            "entity": "PessoaOrganizacao",
+            "title": "Localizar a pessoa certa",
+            "description": "O responsável procura a pessoa que pediu a liberação entre as pessoas da organização."
+          },
+          {
+            "stepId": "conferirCadastro",
+            "kind": "inspect",
+            "entity": "PessoaOrganizacao",
+            "title": "Conferir cadastro da pessoa",
+            "description": "O responsável confere se é a pessoa certa antes de liberar."
+          },
+          {
+            "stepId": "convidarPessoaCerta",
+            "kind": "act",
+            "entity": "PessoaOrganizacao",
+            "effect": "create",
+            "title": "Convidar a pessoa certa",
+            "description": "O responsável convida a pessoa certa pelo e-mail com o convite da plataforma, que liga o e-mail ao cadastro existente sem criar outra pessoa."
+          }
+        ],
+        "outcome": {
+          "statement": "O e-mail da pessoa fica ligado ao cadastro certo e ela consegue completar o acesso.",
+          "evidence": [
+            "A pessoa deixa de ver o aviso de liberação pendente",
+            "Não há segundo cadastro para a mesma pessoa"
+          ]
+        }
+      },
+      "businessHash": "sha256:56837c91d0d5a4a8c96ea4111bcb10659e00d4458100c96866749b95b5c895c5"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "completarMeuAcesso",
+      "business": {
+        "actorRef": "pessoaOrganizacao",
+        "title": "Completar meu acesso",
+        "goal": "Informar só os dados mínimos que faltam para seguir aos módulos que posso usar.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "verMeuCadastro",
+            "kind": "inspect",
+            "entity": "PessoaOrganizacao",
+            "title": "Ver o que falta",
+            "description": "Ao entrar, a pessoa vê seu cadastro ligado ao e-mail da conta, que não pode ser editado; se nada falta, segue direto para os módulos que pode usar."
+          },
+          {
+            "stepId": "informarDados",
+            "kind": "act",
+            "entity": "PessoaOrganizacao",
+            "effect": "update",
+            "title": "Informar dados que faltam",
+            "description": "A pessoa informa só o que falta: nome, telefone opcional, país e o consentimento de privacidade quando a lei do país exige (Brasil e União Europeia); se não havia pessoa com o e-mail, ela é cadastrada e ligada ao e-mail, sem duplicar ao repetir."
+          },
+          {
+            "stepId": "seguirModulos",
+            "kind": "inspect",
+            "entity": "PessoaOrganizacao",
+            "title": "Seguir para meus módulos",
+            "description": "Com os dados mínimos completos, a pessoa segue para os módulos que o responsável liberou, sem ganhar papéis ou permissões por preencher dados."
+          }
+        ],
+        "outcome": {
+          "statement": "A pessoa tem os dados mínimos completos e ligados ao seu e-mail, em um único cadastro.",
+          "evidence": [
+            "A tela não pede mais nenhum dado ao entrar de novo, mesmo por outro navegador",
+            "O consentimento de privacidade fica registrado quando o país exige",
+            "Os módulos exibidos são apenas os que a pessoa já podia usar"
+          ]
+        }
+      },
+      "businessHash": "sha256:136f24a29d2e1bcd818f28071d005b3230bd6e8e00128e525685847f7dcb438a"
+    },
+    {
+      "schemaVersion": "2026-09-10-ns5-journey-v1",
+      "journeyId": "pedirLiberacao",
+      "business": {
+        "actorRef": "pessoaOrganizacao",
+        "title": "Aguardar liberação do acesso",
+        "goal": "Saber que o responsável precisa liberar meu acesso quando a plataforma não liga meu e-mail sozinha.",
+        "entry": {
+          "mode": "coldStart"
+        },
+        "steps": [
+          {
+            "stepId": "verAviso",
+            "kind": "inspect",
+            "entity": "PessoaOrganizacao",
+            "title": "Ver aviso de liberação",
+            "description": "A pessoa vê que a plataforma não conseguiu ligar seu e-mail e que o responsável precisa liberar o acesso."
+          },
+          {
+            "stepId": "passarResponsavel",
+            "kind": "handoff",
+            "entity": "PessoaOrganizacao",
+            "title": "Aguardar o responsável",
+            "description": "A liberação passa ao responsável, que convida a pessoa certa pelo convite da plataforma; o módulo não guarda essa pendência.",
+            "handoffTo": "responsavel"
+          }
+        ],
+        "outcome": {
+          "statement": "A pessoa sabe que seu acesso depende da liberação do responsável.",
+          "evidence": [
+            "O aviso de que o responsável precisa liberar o acesso é exibido",
+            "Nenhuma pessoa ou vínculo novo é criado enquanto aguarda"
+          ]
+        }
+      },
+      "businessHash": "sha256:e2b008f6fbd2533fd8487b2186d3df84fd5e1751a5cbcd2150f160fd93034aad"
+    }
+  ],
+  "systemDecisions": [],
+  "droppedActors": [],
+  "removedOrphans": []
+}

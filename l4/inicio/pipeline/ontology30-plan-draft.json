@@ -1,0 +1,104 @@
+{
+  "moduleName": "inicio",
+  "businessDomain": "Início do app da empresa: boas-vindas, preparação dos dados da empresa e conclusão do acesso de cada pessoa da organização, sobre os cadastros mestres da plataforma, sem tabelas próprias.",
+  "entities": [
+    {
+      "entityId": "Empresa",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Empresa",
+      "description": "O cadastro mestre da empresa da organização. O responsável completa só os dados obrigatórios que faltam (nome, documento, endereço, contato). O módulo calcula se a empresa está preparada a partir desses dados; não grava essa situação.",
+      "displayField": "details.identification.name",
+      "subtype": "Company",
+      "roleTag": "inicio.Empresa",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "entityId": "PessoaOrganizacao",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Pessoa da organização",
+      "description": "Toda pessoa autenticada e aceita na organização, inclusive o responsável. O cadastro é ligado ao e-mail de login pelo índice da plataforma. Ela completa nome, país, telefone opcional e o consentimento de privacidade quando a lei exige. O módulo calcula se o acesso está completo; não grava convites nem pendências.",
+      "displayField": "details.identification.name",
+      "subtype": "Person",
+      "roleTag": "inicio.PessoaOrganizacao",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "entityId": "Contato",
+      "kind": "role",
+      "family": "mdm",
+      "title": "Contato",
+      "description": "Canal de contato (telefone ou e-mail) da empresa ou da pessoa. É um registro da plataforma ligado por HasContact, nunca um campo do cadastro.",
+      "displayField": "details.identification.name",
+      "subtype": "ContactChannel",
+      "roleTag": "inicio.Contato",
+      "source": "/_102034_/l4/ontology/mdm.defs.ts"
+    }
+  ],
+  "relationships": [
+    {
+      "relationshipId": "empresaTemContato",
+      "from": "Empresa",
+      "to": "Contato",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "A empresa tem canais de contato, um deles exigido para que ela fique preparada.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "pessoaTemContato",
+      "from": "PessoaOrganizacao",
+      "to": "Contato",
+      "type": "oneToMany",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "A pessoa pode informar um telefone opcional como canal de contato.",
+      "catalogType": "HasContact"
+    },
+    {
+      "relationshipId": "pessoaMembroEmpresa",
+      "from": "PessoaOrganizacao",
+      "to": "Empresa",
+      "type": "manyToOne",
+      "required": true,
+      "mode": "mdmRelationship",
+      "description": "A pessoa faz parte da organização da empresa e aparece na lista de pessoas que o responsável acompanha.",
+      "roles": [
+        "member"
+      ],
+      "catalogType": "AssignedTo"
+    },
+    {
+      "relationshipId": "responsavelPelaEmpresa",
+      "from": "PessoaOrganizacao",
+      "to": "Empresa",
+      "type": "manyToOne",
+      "required": false,
+      "mode": "mdmRelationship",
+      "description": "A pessoa que a plataforma reconhece como responsável pela empresa, o que limita a preparação à empresa dela.",
+      "roles": [
+        "manager"
+      ],
+      "catalogType": "ManagedBy"
+    }
+  ],
+  "normalizations": [
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Empresa",
+      "detail": "roleTag inicio.Empresa; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "PessoaOrganizacao",
+      "detail": "roleTag inicio.PessoaOrganizacao; source /_102034_/l4/ontology/mdm.defs.ts"
+    },
+    {
+      "kind": "derivedFromPlatform",
+      "entityId": "Contato",
+      "detail": "roleTag inicio.Contato; source /_102034_/l4/ontology/mdm.defs.ts"
+    }
+  ]
+}
