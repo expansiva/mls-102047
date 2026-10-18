@@ -43,76 +43,88 @@ tarefas?: Record<string, unknown>;
 
 type MdmPatch = Parameters<RequestContext['mdm']['entity']['update']>[0]['patch'];
 
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return value != null && typeof value === 'object' && !Array.isArray(value);
+function isObject(value: unknown): value is Record<string, unknown> {
+return value != null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function buildOutput(mdmId: string, version: number, flat: Record<string, unknown>): UpdateMembroEquipeOutput {
+const contacts = Array.isArray(flat.contacts) ? (flat.contacts as unknown[]).filter(isObject) : [];
+const tags = Array.isArray(flat.tags) ? (flat.tags as unknown[]).map((tag) => String(tag)) : [];
+const details: UpdateMembroEquipeOutput['details'] = {
+identification: {
+subtype: flat.subtype == null ? 'Person' : String(flat.subtype),
+name: flat.name == null ? '' : String(flat.name),
+status: flat.status == null ? '' : String(flat.status),
+countryCode: flat.countryCode == null ? '' : String(flat.countryCode),
+tags,
+},
+base: { contacts },
+};
+if (isObject(flat.privacyConsent)) {
+details.person = { privacyConsent: flat.privacyConsent };
+}
+if (isObject(flat.general)) {
+details.general = flat.general;
+}
+if (isObject(flat.tarefas)) {
+details.tarefas = flat.tarefas;
+}
+return { id: mdmId, version, details };
 }
 
 export async function updateMembroEquipe(input: UpdateMembroEquipeInput, ctx: RequestContext): Promise<UpdateMembroEquipeOutput> {
-  const id = String(input.id ?? '');
-  if (id === '') {
-    throw new AppError('INVALID_INPUT', 'The member id is required.', 400);
-  }
-  const expectedVersion = Number(input.version);
-  if (!Number.isInteger(expectedVersion)) {
-    throw new AppError('INVALID_INPUT', 'The member version is required.', 400);
-  }
+const id = input.id == null ? '' : String(input.id);
+if (id === '') {
+throw new AppError('INVALID_INPUT', 'The member id is required.', 400);
+}
+const version = Number(input.version);
+if (input.version == null || !Number.isInteger(version)) {
+throw new AppError('INVALID_INPUT', 'The version read by the caller is required.', 400);
+}
 
-  const identification = input.details?.identification;
-  const name = identification?.name == null ? '' : String(identification.name).trim();
-  const countryCode = identification?.countryCode == null ? '' : String(identification.countryCode).trim();
-  if (name === '' || name.length > 200) {
-    throw new AppError('INVALID_INPUT', 'The member name is required and has at most 200 characters.', 400);
-  }
-  if (!/^[A-Z]{2}$/.test(countryCode)) {
-    throw new AppError('INVALID_INPUT', 'The country code must be two uppercase letters.', 400);
-  }
+const patch: Record<string, unknown> = {};
 
-  const current = await ctx.mdm.entity.get({ mdmId: id });
-  if (current == null) {
-    throw new AppError('NOT_FOUND', 'Team member not found.', 404);
-  }
-  if (Number(current.version) !== expectedVersion) {
-    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
-  }
+const rawName = input.details?.identification?.name;
+if (rawName != null) {
+const name = String(rawName).trim();
+if (name === '' || name.length > 200) {
+throw new AppError('INVALID_INPUT', 'The member name must have between 1 and 200 characters.', 400);
+}
+patch.name = name;
+}
 
-  const patchFlat: Record<string, unknown> = { name, countryCode };
-  const privacyConsent = input.details?.person?.privacyConsent;
-  if (privacyConsent != null) {
-    patchFlat.privacyConsent = privacyConsent;
-  }
+const rawCountry = input.details?.identification?.countryCode;
+if (rawCountry != null) {
+const countryCode = String(rawCountry);
+if (!/^[A-Z]{2}$/.test(countryCode)) {
+throw new AppError('INVALID_INPUT', 'The country code must be two uppercase letters.', 400);
+}
+patch.countryCode = countryCode;
+}
 
-  const saved = await ctx.mdm.entity.update({
-    mdmId: id,
-    expectedVersion,
-    patch: patchFlat as MdmPatch,
-  });
+const privacyConsent = input.details?.person?.privacyConsent;
+if (privacyConsent != null) {
+patch.privacyConsent = privacyConsent;
+}
 
-  const d = saved.details as Record<string, unknown>;
-  const tags = Array.isArray(d.tags) ? d.tags.map((t) => String(t)) : [];
-  const contacts = Array.isArray(d.contacts) ? d.contacts.filter(isPlainObject) : [];
+if (Object.keys(patch).length === 0) {
+throw new AppError('INVALID_INPUT', 'No editable field was given.', 400);
+}
 
-  const output: UpdateMembroEquipeOutput = {
-    id: String(saved.mdmId),
-    version: Number(saved.version),
-    details: {
-      identification: {
-        subtype: d.subtype == null ? 'Person' : String(d.subtype),
-        name: String(d.name ?? ''),
-        status: String(d.status ?? ''),
-        countryCode: String(d.countryCode ?? ''),
-        tags,
-      },
-      base: { contacts },
-    },
-  };
-  if (isPlainObject(d.privacyConsent)) {
-    output.details.person = { privacyConsent: d.privacyConsent };
-  }
-  if (isPlainObject(d.general)) {
-    output.details.general = d.general;
-  }
-  if (isPlainObject(d.tarefas)) {
-    output.details.tarefas = d.tarefas;
-  }
-  return output;
+const current = await ctx.mdm.entity.get({ mdmId: id });
+if (current == null) {
+throw new AppError('NOT_FOUND', 'Team member not found.', 404);
+}
+if (Number(current.version) !== version) {
+throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
+}
+
+const updated = await ctx.mdm.entity.update({
+mdmId: id,
+expectedVersion: version,
+patch: patch as MdmPatch,
+});
+
+const flat = updated.details as Record<string, unknown>;
+return buildOutput(String(updated.mdmId), Number(updated.version), flat);
 }

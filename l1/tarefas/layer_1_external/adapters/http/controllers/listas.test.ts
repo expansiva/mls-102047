@@ -8,7 +8,7 @@ export const pageTests = {
   "actor": "gestor",
   "cases": [
     {
-      "id": "listarListas.ok",
+      "id": "tarefas.listas.listarListas.ok",
       "routine": "tarefas.listas.listarListas",
       "params": {},
       "expect": {
@@ -19,52 +19,45 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "obterLista.ok",
-      "routine": "tarefas.listas.obterLista",
+      "id": "tarefas.listas.buscarListas.vazio",
+      "routine": "tarefas.listas.buscarListas",
       "params": {
-        "listaId": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "listaId": "Lista.id"
+        "busca": ""
       },
       "expect": {
         "ok": true,
-        "shape": "object"
+        "shape": "object",
+        "itemsKey": "listas"
       },
       "mutating": false
     },
     {
-      "id": "obterLista.listaId.required",
-      "routine": "tarefas.listas.obterLista",
-      "params": {},
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": false
-    },
-    {
-      "id": "obterLista.naoEncontrada",
-      "routine": "tarefas.listas.obterLista",
+      "id": "tarefas.listas.buscarListas.porNome",
+      "routine": "tarefas.listas.buscarListas",
       "params": {
-        "listaId": "lista-inexistente-monitor"
+        "busca": "<seedValue>"
+      },
+      "paramFieldRefs": {
+        "busca": "Lista.nome"
       },
       "expect": {
-        "ok": false,
-        "errorCode": "NOT_FOUND"
+        "ok": true,
+        "minItems": 1,
+        "shape": "object",
+        "itemsKey": "listas"
       },
       "mutating": false
     },
     {
-      "id": "criarLista.ok",
+      "id": "tarefas.listas.criarLista.ok",
       "routine": "tarefas.listas.criarLista",
       "params": {
-        "nome": "Lista Monitor Nova",
-        "ativa": true,
+        "nome": "Lista monitor criada",
         "details": {
           "tipo": "project",
           "descricao": "Lista criada pelo monitor"
-        }
+        },
+        "ativa": true
       },
       "expect": {
         "ok": true
@@ -72,13 +65,13 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "criarLista.nome.required",
+      "id": "tarefas.listas.criarLista.nome.required",
       "routine": "tarefas.listas.criarLista",
       "params": {
-        "ativa": true,
         "details": {
           "tipo": "area"
-        }
+        },
+        "ativa": true
       },
       "expect": {
         "ok": false,
@@ -87,30 +80,14 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "criarLista.nomeDuplicado",
-      "routine": "tarefas.listas.criarLista",
-      "params": {
-        "nome": "Lista Monitor Nova",
-        "ativa": true,
-        "details": {
-          "tipo": "area"
-        }
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "CONFLICT"
-      },
-      "mutating": true
-    },
-    {
-      "id": "criarLista.nomeDuplicadoSeed",
+      "id": "tarefas.listas.criarLista.nomeDuplicado",
       "routine": "tarefas.listas.criarLista",
       "params": {
         "nome": "<seedValue>",
-        "ativa": true,
         "details": {
-          "tipo": "project"
-        }
+          "tipo": "area"
+        },
+        "ativa": true
       },
       "paramFieldRefs": {
         "nome": "Lista.nome"
@@ -122,17 +99,17 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarLista.ok",
+      "id": "tarefas.listas.salvarLista.ok",
       "routine": "tarefas.listas.salvarLista",
       "params": {
         "id": "<seedRef>",
         "version": "<seedRef>",
-        "nome": "Lista Monitor Renomeada",
-        "ativa": true,
+        "nome": "Lista monitor salva",
         "details": {
           "tipo": "area",
-          "descricao": "Atualizada pelo monitor"
-        }
+          "descricao": "Alterada pelo monitor"
+        },
+        "ativa": false
       },
       "paramFieldRefs": {
         "id": "Lista.id",
@@ -144,57 +121,35 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarLista.id.required",
+      "id": "tarefas.listas.salvarLista.id.required",
       "routine": "tarefas.listas.salvarLista",
       "params": {
         "version": "<seedRef>",
-        "nome": "Lista Monitor Sem Id",
-        "ativa": true,
-        "details": {
-          "tipo": "area"
-        }
-      },
-      "paramFieldRefs": {
-        "version": "Lista.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "salvarLista.nome.required",
-      "routine": "tarefas.listas.salvarLista",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "ativa": true,
-        "details": {
-          "tipo": "area"
-        }
-      },
-      "paramFieldRefs": {
-        "id": "Lista.id",
-        "version": "Lista.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "salvarLista.nomeDuplicado",
-      "routine": "tarefas.listas.salvarLista",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "nome": "Lista Monitor Nova",
-        "ativa": true,
+        "nome": "Lista sem id",
         "details": {
           "tipo": "project"
-        }
+        },
+        "ativa": true
+      },
+      "paramFieldRefs": {
+        "version": "Lista.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.listas.salvarLista.nome.required",
+      "routine": "tarefas.listas.salvarLista",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>",
+        "details": {
+          "tipo": "project"
+        },
+        "ativa": true
       },
       "paramFieldRefs": {
         "id": "Lista.id",
@@ -202,21 +157,21 @@ export const pageTests = {
       },
       "expect": {
         "ok": false,
-        "errorCode": "CONFLICT"
+        "errorCode": "VALIDATION_ERROR"
       },
       "mutating": true
     },
     {
-      "id": "salvarLista.versaoDesatualizada",
+      "id": "tarefas.listas.salvarLista.versaoDivergente",
       "routine": "tarefas.listas.salvarLista",
       "params": {
         "id": "<seedRef>",
         "version": 9999,
-        "nome": "Lista Monitor Versao Antiga",
-        "ativa": false,
+        "nome": "Lista versao antiga",
         "details": {
           "tipo": "project"
-        }
+        },
+        "ativa": true
       },
       "paramFieldRefs": {
         "id": "Lista.id"

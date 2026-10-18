@@ -34,103 +34,100 @@ export async function updateItemChecklist(input: UpdateItemChecklistInput, ctx: 
   const itemRepository = resolveRepository<ItemChecklistRepository>(ctx, 'ItemChecklistRepository');
   const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
 
-  if (input.id === undefined || input.id === null || String(input.id) === '') {
-    throw new AppError('VALIDATION_ERROR', 'id is required to update a checklist item.', 400);
+  const id = String(input.id ?? '');
+  if (!id) {
+    throw new AppError('INVALID_INPUT', 'id is required.', 400);
   }
-  const id = String(input.id);
 
   const found = await itemRepository.list({ id });
-  const current = found.find((item) => item.id === id);
-  if (!current) {
-    throw new AppError('NOT_FOUND', 'Checklist item not found: ' + id, 404);
+  const existing: ItemChecklist | undefined = found.find((item) => item.id === id);
+  if (!existing) {
+    throw new AppError('NOT_FOUND', 'Checklist item not found.', 404);
   }
 
-  if (input.version !== undefined && input.version !== null && Number(input.version) !== current.version) {
-    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
+  if (input.version !== undefined && Number(input.version) !== existing.version) {
+    throw new AppError('VERSION_CONFLICT', 'Version does not match the stored item.', 409);
   }
 
-  // The parent task: the editor must be able to see it (member: creator or assignee; manager: all).
-  const tarefa = await tarefaRepository.get(current.tarefaId);
+  if (input.tarefaId !== undefined && String(input.tarefaId) !== existing.tarefaId) {
+    throw new AppError('INVALID_INPUT', 'The task of a checklist item cannot be changed.', 400);
+  }
+
+  // editarSomenteTarefaVisivel: the actor must see the task of the item
+  // (member: created it or is responsible; manager: every task of the team).
+  const tarefa = await tarefaRepository.get(existing.tarefaId);
   if (!tarefa) {
-    throw new AppError('NOT_FOUND', 'Task of the checklist item not found: ' + current.tarefaId, 404);
+    throw new AppError('NOT_FOUND', 'Task of the checklist item not found.', 404);
   }
-
-  const session = ctx.sessionContext;
-  const actorId = session.person?.mdmId ?? session.actorId;
-  const scope = session.actorScope ?? [];
-  const isGestor = session.actorId === 'gestor' || scope.some((entry) => entry === 'gestor' || entry.endsWith(':gestor'));
+  const actorId = ctx.sessionContext.actorId ?? ctx.sessionContext.person?.mdmId;
+  const scope = ctx.sessionContext.actorScope ?? [];
+  const isGestor = scope.some((entry) => entry === 'gestor' || entry.endsWith(':gestor'));
   const canSee = isGestor || (actorId !== undefined && (tarefa.criadorId === actorId || tarefa.responsavelId === actorId));
   if (!canSee) {
-    throw new AppError('FORBIDDEN', 'The person cannot see this task, so cannot edit its checklist.', 403, { ruleId: 'editarSomenteTarefaVisivel' });
+    throw new AppError('FORBIDDEN', 'Only a person who can see the task may edit its checklist.', 403, { ruleId: 'editarSomenteTarefaVisivel' });
   }
 
-  let ordem = current.ordem;
-  if (input.ordem !== undefined && input.ordem !== null) {
+  let ordem = existing.ordem;
+  if (input.ordem !== undefined) {
     ordem = Number(input.ordem);
     if (!Number.isInteger(ordem) || ordem < 0) {
-      throw new AppError('VALIDATION_ERROR', 'ordem must be an integer greater than or equal to 0.', 400);
+      throw new AppError('INVALID_INPUT', 'ordem must be an integer greater than or equal to 0.', 400);
     }
   }
 
-  let feito = current.feito;
-  if (input.feito !== undefined && input.feito !== null) {
+  let descricao = existing.details.descricao;
+  const inputDescricao = input.details?.descricao;
+  if (inputDescricao !== undefined) {
+    descricao = String(inputDescricao).trim();
+    if (!descricao || descricao.length > 300) {
+      throw new AppError('INVALID_INPUT', 'descricao is required and must have at most 300 characters.', 400);
+    }
+  }
+
+  let feito = existing.feito;
+  if (input.feito !== undefined) {
     if (typeof input.feito !== 'boolean') {
-      throw new AppError('VALIDATION_ERROR', 'feito must be a boolean.', 400);
+      throw new AppError('INVALID_INPUT', 'feito must be a boolean.', 400);
     }
     feito = input.feito;
   }
 
-  let descricao = current.details.descricao;
-  const inputDescricao = input.details?.descricao;
-  if (inputDescricao !== undefined && inputDescricao !== null) {
-    descricao = String(inputDescricao).trim();
-  }
-  if (descricao === '') {
-    throw new AppError('VALIDATION_ERROR', 'descricao is required.', 400);
-  }
-  if (descricao.length > 300) {
-    throw new AppError('VALIDATION_ERROR', 'descricao must have at most 300 characters.', 400);
-  }
-
   const details: ItemChecklist['details'] = { descricao };
   if (feito) {
-    if (!current.feito) {
-      details.marcadoEm = ctx.clock.nowIso();
-    } else if (current.details.marcadoEm !== undefined) {
-      details.marcadoEm = current.details.marcadoEm;
+    if (existing.feito && existing.details.marcadoEm) {
+      details.marcadoEm = existing.details.marcadoEm;
     } else {
       details.marcadoEm = ctx.clock.nowIso();
     }
   }
 
-  const record: ItemChecklist = {
-    id: current.id,
-    version: current.version,
-    tarefaId: current.tarefaId,
+  // Only the checklist item is written; the task is never updated here.
+  const saved = await itemRepository.update({
+    id: existing.id,
+    version: existing.version,
+    tarefaId: existing.tarefaId,
     ordem,
     feito,
     details,
-  };
+  });
 
-  // Only the checklist item is written; the task is never updated or transitioned here.
-  const saved = await itemRepository.update(record);
-
-  // checklistNaoMudaSituacao: the task's situation must be the same after the checklist write.
-  const tarefaAfter = await tarefaRepository.get(current.tarefaId);
-  if (tarefaAfter.status !== tarefa.status) {
-    throw new AppError('CONFLICT', 'Editing a checklist item must not change the task status.', 409, { ruleId: 'checklistNaoMudaSituacao' });
+  // checklistNaoMudaSituacao: the task status must be the same after the write.
+  const tarefaAfter = await tarefaRepository.get(existing.tarefaId);
+  if (!tarefaAfter || tarefaAfter.status !== tarefa.status) {
+    throw new AppError('CONFLICT', 'Updating a checklist item must not change the status of the task.', 409, { ruleId: 'checklistNaoMudaSituacao' });
   }
 
-  const output: UpdateItemChecklistOutput = {
+  const outDetails: UpdateItemChecklistOutput['details'] = { descricao: saved.details.descricao };
+  if (saved.details.marcadoEm !== undefined) {
+    outDetails.marcadoEm = saved.details.marcadoEm;
+  }
+
+  return {
     id: saved.id,
     version: saved.version,
     tarefaId: saved.tarefaId,
     ordem: saved.ordem,
     feito: saved.feito,
-    details: { descricao: saved.details.descricao },
+    details: outDetails,
   };
-  if (saved.details.marcadoEm !== undefined) {
-    output.details.marcadoEm = saved.details.marcadoEm;
-  }
-  return output;
 }

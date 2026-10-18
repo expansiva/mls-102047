@@ -3,6 +3,7 @@ import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
 import type { TarefaRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/tarefaRepository.js';
+import type { ItemChecklistRepository } from '/_102047_/l1/tarefas/layer_2_application/ports/itemChecklistRepository.js';
 import type { Tarefa } from '/_102047_/l1/tarefas/layer_3_domain/entities/tarefa.js';
 
 export interface UpdateTarefaInput extends Record<string, unknown> {
@@ -56,103 +57,121 @@ export interface UpdateTarefaOutput extends Record<string, unknown> {
 const PRIORIDADES: ReadonlyArray<Tarefa['prioridade']> = ['low', 'medium', 'high'];
 
 function isGestor(ctx: RequestContext): boolean {
-  const scope = ctx.sessionContext.actorScope ?? ctx.sessionContext.actorSession?.scope ?? [];
-  const actorId = ctx.sessionContext.actorId ?? ctx.sessionContext.actorSession?.actorId;
-  return actorId === 'gestor' || scope.some((s) => s === 'gestor' || s.endsWith(':gestor'));
+  const session = ctx.sessionContext;
+  if (session.actorId === 'gestor') return true;
+  const scope = session.actorScope ?? session.actorSession?.scope ?? [];
+  return scope.some((entry) => entry === 'gestor' || entry.endsWith(':gestor'));
+}
+
+function currentActorId(ctx: RequestContext): string | undefined {
+  const session = ctx.sessionContext;
+  return session.person?.mdmId ?? session.actorId ?? session.actorSession?.actorId;
+}
+
+function text(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  return String(value);
 }
 
 export async function updateTarefa(input: UpdateTarefaInput, ctx: RequestContext): Promise<UpdateTarefaOutput> {
-  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
 
   const id = String(input.id ?? '');
   if (!id) {
-    throw new AppError('INVALID_INPUT', 'id is required.', 400);
+    throw new AppError('INVALID_INPUT', 'The task id is required.', 400);
   }
 
-  const current = await repository.get(id);
+  const current = await tarefaRepository.get(id);
   if (!current) {
-    throw new AppError('NOT_FOUND', `Tarefa ${id} not found.`, 404);
+    throw new AppError('NOT_FOUND', 'Task not found.', 404);
   }
 
   if (input.version !== undefined && input.version !== null && Number(input.version) !== current.version) {
-    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
+    throw new AppError('CONCURRENCY_CONFLICT', 'The task was changed by someone else; reload and try again.', 409);
   }
 
-  // edicaoNaoMudaSituacao: editing fields never changes the status; only transitions do.
+  // edicaoNaoMudaSituacao: editing fields never changes the status; only transitions do
   if (input.status !== undefined && input.status !== null && String(input.status) !== current.status) {
-    throw new AppError('STATUS_CHANGE_NOT_ALLOWED', 'Editing a task cannot change its status; use the transitions.', 409, { ruleId: 'edicaoNaoMudaSituacao' });
+    throw new AppError('STATUS_CHANGE_NOT_ALLOWED', 'Editing a task cannot change its status; use the process transitions.', 409, { ruleId: 'edicaoNaoMudaSituacao' });
   }
 
-  // editarSomenteTarefaVisivel: the member sees tasks they created or are responsible for; the gestor sees all.
   const gestor = isGestor(ctx);
-  const actorPersonId = ctx.sessionContext.person?.mdmId;
-  if (!gestor) {
-    const sees = actorPersonId !== undefined
-      && (actorPersonId === current.criadorId || actorPersonId === current.responsavelId);
-    if (!sees) {
-      throw new AppError('FORBIDDEN', 'Only the creator, the assignee or a manager can edit this task.', 403, { ruleId: 'editarSomenteTarefaVisivel' });
+  const actorId = currentActorId(ctx);
+
+  // editarSomenteTarefaVisivel
+  const visible = gestor || (actorId !== undefined && (actorId === current.criadorId || actorId === current.responsavelId));
+  if (!visible) {
+    throw new AppError('FORBIDDEN', 'Only the creator, the assignee or a manager can edit this task.', 403, { ruleId: 'editarSomenteTarefaVisivel' });
+  }
+
+  // fields
+  const titulo = input.titulo !== undefined ? String(input.titulo).trim() : current.titulo;
+  if (!titulo) {
+    throw new AppError('INVALID_INPUT', 'The task title is required.', 400);
+  }
+  if (titulo.length > 200) {
+    throw new AppError('INVALID_INPUT', 'The task title must have at most 200 characters.', 400);
+  }
+
+  let prioridade: Tarefa['prioridade'] = current.prioridade;
+  if (input.prioridade !== undefined) {
+    const candidate = String(input.prioridade) as Tarefa['prioridade'];
+    if (!PRIORIDADES.includes(candidate)) {
+      throw new AppError('INVALID_INPUT', 'The priority must be low, medium or high.', 400);
+    }
+    prioridade = candidate;
+  }
+
+  const prazo = input.prazo !== undefined ? String(input.prazo) : current.prazo;
+  if (!prazo) {
+    throw new AppError('INVALID_INPUT', 'The task due date is required.', 400);
+  }
+
+  const listaId = input.listaId !== undefined ? String(input.listaId) : current.listaId;
+  if (!listaId) {
+    throw new AppError('INVALID_INPUT', 'The task list is required.', 400);
+  }
+
+  // reatribuicaoPorCriadorOuGestor
+  const responsavelId = input.responsavelId !== undefined ? String(input.responsavelId) : current.responsavelId;
+  if (!responsavelId) {
+    throw new AppError('INVALID_INPUT', 'The task assignee is required.', 400);
+  }
+  if (responsavelId !== current.responsavelId) {
+    const isCriador = actorId !== undefined && actorId === current.criadorId;
+    if (!isCriador && !gestor) {
+      throw new AppError('FORBIDDEN', 'Only the creator or a manager can change the assignee.', 403, { ruleId: 'reatribuicaoPorCriadorOuGestor' });
     }
   }
 
   // tarefaPaiNaoPodeSerElaMesma
   let tarefaPaiId: string | undefined = current.tarefaPaiId;
-  if (input.tarefaPaiId !== undefined) {
-    const paiRaw = input.tarefaPaiId === null ? '' : String(input.tarefaPaiId);
-    tarefaPaiId = paiRaw === '' ? undefined : paiRaw;
+  if ('tarefaPaiId' in input) {
+    const raw = text(input.tarefaPaiId);
+    tarefaPaiId = raw === undefined || raw === '' ? undefined : raw;
   }
   if (tarefaPaiId !== undefined && tarefaPaiId === current.id) {
-    throw new AppError('INVALID_PARENT_TASK', 'The parent task cannot be the task itself.', 400, { ruleId: 'tarefaPaiNaoPodeSerElaMesma' });
+    throw new AppError('INVALID_INPUT', 'The parent task cannot be the task itself.', 400, { ruleId: 'tarefaPaiNaoPodeSerElaMesma' });
   }
-
-  // reatribuicaoPorCriadorOuGestor
-  let responsavelId = current.responsavelId;
-  if (input.responsavelId !== undefined && input.responsavelId !== null && String(input.responsavelId) !== '') {
-    const novo = String(input.responsavelId);
-    if (novo !== current.responsavelId) {
-      const isCriador = actorPersonId !== undefined && actorPersonId === current.criadorId;
-      if (!isCriador && !gestor) {
-        throw new AppError('FORBIDDEN', 'Only the creator or a manager can change the assignee.', 403, { ruleId: 'reatribuicaoPorCriadorOuGestor' });
-      }
-      responsavelId = novo;
+  if (tarefaPaiId !== undefined && tarefaPaiId !== current.tarefaPaiId) {
+    const pai = await tarefaRepository.get(tarefaPaiId);
+    if (!pai) {
+      throw new AppError('NOT_FOUND', 'Parent task not found.', 404);
     }
   }
 
-  let titulo = current.titulo;
-  if (input.titulo !== undefined) {
-    titulo = String(input.titulo).trim();
-    if (titulo === '' || titulo.length > 200) {
-      throw new AppError('INVALID_INPUT', 'titulo is required and must have at most 200 characters.', 400);
-    }
-  }
+  // details: only stored fields, never the derived ones
+  const inputDetails = input.details;
+  const details: Tarefa['details'] = {};
+  const descricao = inputDetails && inputDetails.descricao !== undefined ? text(inputDetails.descricao) : current.details?.descricao;
+  if (descricao !== undefined) details.descricao = descricao;
+  const prev = current.details;
+  if (prev?.motivoDevolucao !== undefined) details.motivoDevolucao = prev.motivoDevolucao;
+  if (prev?.devolvidaEm !== undefined) details.devolvidaEm = prev.devolvidaEm;
+  if (prev?.concluidaEm !== undefined) details.concluidaEm = prev.concluidaEm;
+  if (prev?.canceladaEm !== undefined) details.canceladaEm = prev.canceladaEm;
 
-  let prioridade = current.prioridade;
-  if (input.prioridade !== undefined) {
-    const p = String(input.prioridade) as Tarefa['prioridade'];
-    if (!PRIORIDADES.includes(p)) {
-      throw new AppError('INVALID_INPUT', 'prioridade must be low, medium or high.', 400);
-    }
-    prioridade = p;
-  }
-
-  let prazo = current.prazo;
-  if (input.prazo !== undefined) {
-    prazo = String(input.prazo);
-    if (prazo === '') {
-      throw new AppError('INVALID_INPUT', 'prazo is required.', 400);
-    }
-  }
-
-  let listaId = current.listaId;
-  if (input.listaId !== undefined) {
-    listaId = String(input.listaId);
-    if (listaId === '') {
-      throw new AppError('INVALID_INPUT', 'listaId is required.', 400);
-    }
-  }
-
-  const descricao = input.details?.descricao !== undefined ? String(input.details.descricao) : current.details?.descricao;
-
-  // The status, criador, chaveCriacao and criadaEm are kept as stored.
+  // status, creator, creation key and creation time stay as stored
   const next: Tarefa = {
     id: current.id,
     version: current.version,
@@ -163,21 +182,38 @@ export async function updateTarefa(input: UpdateTarefaInput, ctx: RequestContext
     listaId,
     responsavelId,
     criadorId: current.criadorId,
-    tarefaPaiId,
     chaveCriacao: current.chaveCriacao,
     criadaEm: current.criadaEm,
-    details: {
-      descricao,
-      motivoDevolucao: current.details?.motivoDevolucao,
-      devolvidaEm: current.details?.devolvidaEm,
-      concluidaEm: current.details?.concluidaEm,
-      canceladaEm: current.details?.canceladaEm,
-    },
+    details,
   };
+  if (tarefaPaiId !== undefined) next.tarefaPaiId = tarefaPaiId;
 
-  const saved = await repository.update(next);
+  const saved = await tarefaRepository.update(next);
 
-  const out: UpdateTarefaOutput = {
+  // derived values, computed every time
+  const itemRepository = resolveRepository<ItemChecklistRepository>(ctx, 'ItemChecklistRepository');
+  const subtarefas = await tarefaRepository.list({ tarefaPaiId: saved.id });
+  const itens = await itemRepository.list({ tarefaId: saved.id });
+  const feitos = itens.filter((item) => item.feito).length;
+  const aberta = saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao';
+  const hoje = ctx.clock.nowIso().slice(0, 10);
+  const prazoDia = saved.prazo.slice(0, 10);
+
+  const outDetails: UpdateTarefaOutput['details'] = {
+    aberta,
+    venceHoje: aberta && prazoDia === hoje,
+    atrasada: aberta && prazoDia < hoje,
+    quantidadeSubtarefas: subtarefas.length,
+    progressoChecklist: `${feitos}/${itens.length}`,
+  };
+  const sd = saved.details;
+  if (sd?.descricao !== undefined) outDetails.descricao = sd.descricao;
+  if (sd?.motivoDevolucao !== undefined) outDetails.motivoDevolucao = sd.motivoDevolucao;
+  if (sd?.devolvidaEm !== undefined) outDetails.devolvidaEm = sd.devolvidaEm;
+  if (sd?.concluidaEm !== undefined) outDetails.concluidaEm = sd.concluidaEm;
+  if (sd?.canceladaEm !== undefined) outDetails.canceladaEm = sd.canceladaEm;
+
+  const output: UpdateTarefaOutput = {
     id: saved.id,
     version: saved.version,
     titulo: saved.titulo,
@@ -189,17 +225,8 @@ export async function updateTarefa(input: UpdateTarefaInput, ctx: RequestContext
     criadorId: saved.criadorId,
     chaveCriacao: saved.chaveCriacao,
     criadaEm: saved.criadaEm,
-    details: {
-      descricao: saved.details?.descricao,
-      motivoDevolucao: saved.details?.motivoDevolucao,
-      devolvidaEm: saved.details?.devolvidaEm,
-      concluidaEm: saved.details?.concluidaEm,
-      canceladaEm: saved.details?.canceladaEm,
-      aberta: saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao',
-    },
+    details: outDetails,
   };
-  if (saved.tarefaPaiId !== undefined) {
-    out.tarefaPaiId = saved.tarefaPaiId;
-  }
-  return out;
+  if (saved.tarefaPaiId !== undefined) output.tarefaPaiId = saved.tarefaPaiId;
+  return output;
 }

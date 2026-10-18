@@ -8,8 +8,8 @@ export const pageTests = {
   "actor": "membroEquipe",
   "cases": [
     {
-      "id": "qryInicioMembro.ok",
-      "routine": "tarefas.inicio_membro.qryInicioMembro",
+      "id": "carregarInicio.ok",
+      "routine": "tarefas.inicio_membro.carregarInicio",
       "params": {},
       "expect": {
         "ok": true,
@@ -18,11 +18,11 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "cmdIniciarTarefa.ok",
-      "routine": "tarefas.inicio_membro.cmdIniciarTarefa",
+      "id": "iniciarTarefa.ok",
+      "routine": "tarefas.inicio_membro.iniciarTarefa",
       "params": {
-        "id": "<seedSpare>",
-        "version": "<seedValue>"
+        "id": "<seedRef>",
+        "version": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
@@ -35,41 +35,11 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "tarefas.inicio_membro.cmdIniciarTarefa.id.required",
-      "routine": "tarefas.inicio_membro.cmdIniciarTarefa",
+      "id": "enviarParaRevisao.ok",
+      "routine": "tarefas.inicio_membro.enviarParaRevisao",
       "params": {
-        "version": "<seedValue>"
-      },
-      "paramFieldRefs": {
-        "version": "Tarefa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "tarefas.inicio_membro.cmdIniciarTarefa.version.required",
-      "routine": "tarefas.inicio_membro.cmdIniciarTarefa",
-      "params": {
-        "id": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "Tarefa.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cmdEnviarParaRevisao.ok",
-      "routine": "tarefas.inicio_membro.cmdEnviarParaRevisao",
-      "params": {
-        "id": "<seedSpare>",
-        "version": "<seedValue>"
+        "id": "<seedRef>",
+        "version": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
@@ -82,41 +52,11 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "tarefas.inicio_membro.cmdEnviarParaRevisao.id.required",
-      "routine": "tarefas.inicio_membro.cmdEnviarParaRevisao",
+      "id": "aceitarEntrega.ok",
+      "routine": "tarefas.inicio_membro.aceitarEntrega",
       "params": {
-        "version": "<seedValue>"
-      },
-      "paramFieldRefs": {
-        "version": "Tarefa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "tarefas.inicio_membro.cmdEnviarParaRevisao.version.required",
-      "routine": "tarefas.inicio_membro.cmdEnviarParaRevisao",
-      "params": {
-        "id": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "Tarefa.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cmdAceitarEntrega.ok",
-      "routine": "tarefas.inicio_membro.cmdAceitarEntrega",
-      "params": {
-        "id": "<seedSpare>",
-        "version": "<seedValue>"
+        "id": "<seedRef>",
+        "version": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
@@ -129,43 +69,13 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "tarefas.inicio_membro.cmdAceitarEntrega.id.required",
-      "routine": "tarefas.inicio_membro.cmdAceitarEntrega",
+      "id": "devolverComMotivo.ok",
+      "routine": "tarefas.inicio_membro.devolverComMotivo",
       "params": {
-        "version": "<seedValue>"
-      },
-      "paramFieldRefs": {
-        "version": "Tarefa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "tarefas.inicio_membro.cmdAceitarEntrega.version.required",
-      "routine": "tarefas.inicio_membro.cmdAceitarEntrega",
-      "params": {
-        "id": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "Tarefa.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cmdDevolverComMotivo.ok",
-      "routine": "tarefas.inicio_membro.cmdDevolverComMotivo",
-      "params": {
-        "id": "<seedSpare>",
-        "version": "<seedValue>",
+        "id": "<seedRef>",
+        "version": "<seedRef>",
         "details": {
-          "motivoDevolucao": "Ajustar a checklist antes de reenviar."
+          "motivoDevolucao": "Ajustar a descrição e completar a checklist."
         }
       },
       "paramFieldRefs": {
@@ -179,11 +89,125 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "cmdDevolverComMotivo.motivoVazio",
-      "routine": "tarefas.inicio_membro.cmdDevolverComMotivo",
+      "id": "tarefas.inicio_membro.iniciarTarefa.id.required",
+      "routine": "tarefas.inicio_membro.iniciarTarefa",
       "params": {
-        "id": "<seedRef>",
-        "version": "<seedValue>",
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.inicio_membro.iniciarTarefa.version.required",
+      "routine": "tarefas.inicio_membro.iniciarTarefa",
+      "params": {
+        "id": "<seedSpare>"
+      },
+      "paramFieldRefs": {
+        "id": "Tarefa.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.inicio_membro.enviarParaRevisao.id.required",
+      "routine": "tarefas.inicio_membro.enviarParaRevisao",
+      "params": {
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.inicio_membro.enviarParaRevisao.version.required",
+      "routine": "tarefas.inicio_membro.enviarParaRevisao",
+      "params": {
+        "id": "<seedSpare>"
+      },
+      "paramFieldRefs": {
+        "id": "Tarefa.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.inicio_membro.aceitarEntrega.id.required",
+      "routine": "tarefas.inicio_membro.aceitarEntrega",
+      "params": {
+        "version": 1
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.inicio_membro.aceitarEntrega.version.required",
+      "routine": "tarefas.inicio_membro.aceitarEntrega",
+      "params": {
+        "id": "<seedSpare>"
+      },
+      "paramFieldRefs": {
+        "id": "Tarefa.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.inicio_membro.devolverComMotivo.id.required",
+      "routine": "tarefas.inicio_membro.devolverComMotivo",
+      "params": {
+        "version": 1,
+        "details": {
+          "motivoDevolucao": "Ajustar"
+        }
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "tarefas.inicio_membro.devolverComMotivo.version.required",
+      "routine": "tarefas.inicio_membro.devolverComMotivo",
+      "params": {
+        "id": "<seedSpare>",
+        "details": {
+          "motivoDevolucao": "Ajustar"
+        }
+      },
+      "paramFieldRefs": {
+        "id": "Tarefa.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "devolverComMotivo.motivoVazio",
+      "routine": "tarefas.inicio_membro.devolverComMotivo",
+      "params": {
+        "id": "<seedSpare>",
+        "version": "<seedSpare>",
         "details": {
           "motivoDevolucao": ""
         }
@@ -199,56 +223,18 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "tarefas.inicio_membro.cmdDevolverComMotivo.id.required",
-      "routine": "tarefas.inicio_membro.cmdDevolverComMotivo",
+      "id": "iniciarTarefa.versaoDivergente",
+      "routine": "tarefas.inicio_membro.iniciarTarefa",
       "params": {
-        "version": "<seedValue>",
-        "details": {
-          "motivoDevolucao": "Motivo da devolução"
-        }
-      },
-      "paramFieldRefs": {
-        "version": "Tarefa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "tarefas.inicio_membro.cmdDevolverComMotivo.version.required",
-      "routine": "tarefas.inicio_membro.cmdDevolverComMotivo",
-      "params": {
-        "id": "<seedRef>",
-        "details": {
-          "motivoDevolucao": "Motivo da devolução"
-        }
+        "id": "<seedSpare>",
+        "version": 9999
       },
       "paramFieldRefs": {
         "id": "Tarefa.id"
       },
       "expect": {
         "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cmdDevolverComMotivo.motivoAusente",
-      "routine": "tarefas.inicio_membro.cmdDevolverComMotivo",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedValue>",
-        "details": {}
-      },
-      "paramFieldRefs": {
-        "id": "Tarefa.id",
-        "version": "Tarefa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
+        "errorCode": "CONFLICT"
       },
       "mutating": true
     }

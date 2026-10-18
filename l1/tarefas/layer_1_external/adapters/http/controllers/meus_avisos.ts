@@ -6,30 +6,42 @@ import { requests } from '/_102047_/l1/tarefas/layer_2_application/requests/meus
 import type { Meus_avisosContracts } from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
 
 export const routes: ControllerRoute[] = [
-  { key: 'tarefas.meus_avisos.abrirAviso', handler: handleAbrirAviso },
-  { key: 'tarefas.meus_avisos.carregarMeusAvisos', handler: handleCarregarMeusAvisos },
+  { key: 'tarefas.meus_avisos.qryAvisoPorId', handler: handleQryAvisoPorId },
+  { key: 'tarefas.meus_avisos.qryListarMeusAvisos', handler: handleQryListarMeusAvisos },
+  { key: 'tarefas.meus_avisos.qryPaginaMeusAvisos', handler: handleQryPaginaMeusAvisos },
 ];
 
-async function handleAbrirAviso(input: IRequestEnvelope): Promise<BffResponse<Meus_avisosContracts['tarefas.meus_avisos.abrirAviso']['output']>> {
-  const held = authorize(input.request, ['membroAvisosProprios', 'gestorAvisosProprios', 'membroTarefasProprias', 'gestorTarefasEquipe']);
+async function handleQryAvisoPorId(input: IRequestEnvelope): Promise<BffResponse<Meus_avisosContracts['tarefas.meus_avisos.qryAvisoPorId']['output']>> {
+  const held = authorize(input.request, ['membroAvisosProprios', 'gestorAvisosProprios']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['avisoId']);
-  const invalid = validateInput(scoped, ['avisoId'], ['avisoId'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['id']);
+  const invalid = validateInput(scoped, ['id'], ['id'], []);
   if (invalid) throw invalid;
-  const params = scoped as Meus_avisosContracts['tarefas.meus_avisos.abrirAviso']['input'];
-  const data = await requests["tarefas.meus_avisos.abrirAviso"](params, input.ctx);
-  return { ok: true, data: data as Meus_avisosContracts['tarefas.meus_avisos.abrirAviso']['output'], error: null };
+  const params = scoped as Meus_avisosContracts['tarefas.meus_avisos.qryAvisoPorId']['input'];
+  const data = await requests["tarefas.meus_avisos.qryAvisoPorId"](params, input.ctx);
+  return { ok: true, data: data as Meus_avisosContracts['tarefas.meus_avisos.qryAvisoPorId']['output'], error: null };
 }
 
-async function handleCarregarMeusAvisos(input: IRequestEnvelope): Promise<BffResponse<Meus_avisosContracts['tarefas.meus_avisos.carregarMeusAvisos']['output']>> {
-  const held = authorize(input.request, ['membroAvisosProprios', 'gestorAvisosProprios', 'membroTarefasProprias', 'gestorTarefasEquipe']);
+async function handleQryListarMeusAvisos(input: IRequestEnvelope): Promise<BffResponse<Meus_avisosContracts['tarefas.meus_avisos.qryListarMeusAvisos']['output']>> {
+  const held = authorize(input.request, ['membroAvisosProprios', 'gestorAvisosProprios']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['responsavelId', 'page', 'pageSize']);
-  const invalid = validateInput(scoped, ['responsavelId', 'page', 'pageSize'], ['responsavelId', 'page', 'pageSize'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['dataInicio', 'dataFim', 'page', 'pageSize']);
+  const invalid = validateInput(scoped, ['page', 'pageSize'], ['dataInicio', 'dataFim', 'page', 'pageSize'], []);
   if (invalid) throw invalid;
-  const params = scoped as Meus_avisosContracts['tarefas.meus_avisos.carregarMeusAvisos']['input'];
-  const data = await requests["tarefas.meus_avisos.carregarMeusAvisos"](params, input.ctx);
-  return { ok: true, data: data as Meus_avisosContracts['tarefas.meus_avisos.carregarMeusAvisos']['output'], error: null };
+  const params = scoped as Meus_avisosContracts['tarefas.meus_avisos.qryListarMeusAvisos']['input'];
+  const data = await requests["tarefas.meus_avisos.qryListarMeusAvisos"](params, input.ctx);
+  return { ok: true, data: data as Meus_avisosContracts['tarefas.meus_avisos.qryListarMeusAvisos']['output'], error: null };
+}
+
+async function handleQryPaginaMeusAvisos(input: IRequestEnvelope): Promise<BffResponse<Meus_avisosContracts['tarefas.meus_avisos.qryPaginaMeusAvisos']['output']>> {
+  const held = authorize(input.request, ['membroAvisosProprios', 'gestorAvisosProprios']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['page', 'pageSize']);
+  const invalid = validateInput(scoped, ['page', 'pageSize'], ['page', 'pageSize'], []);
+  if (invalid) throw invalid;
+  const params = scoped as Meus_avisosContracts['tarefas.meus_avisos.qryPaginaMeusAvisos']['input'];
+  const data = await requests["tarefas.meus_avisos.qryPaginaMeusAvisos"](params, input.ctx);
+  return { ok: true, data: data as Meus_avisosContracts['tarefas.meus_avisos.qryPaginaMeusAvisos']['output'], error: null };
 }
 
 function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string } }, held: readonly string[], allowed: readonly string[]): Record<string, unknown> {

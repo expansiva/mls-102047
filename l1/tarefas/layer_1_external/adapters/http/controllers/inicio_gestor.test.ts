@@ -8,8 +8,8 @@ export const pageTests = {
   "actor": "gestor",
   "cases": [
     {
-      "id": "qryPanoramaEquipe.ok",
-      "routine": "tarefas.inicio_gestor.qryPanoramaEquipe",
+      "id": "obterPanoramaEquipe.ok",
+      "routine": "tarefas.inicio_gestor.obterPanoramaEquipe",
       "params": {},
       "expect": {
         "ok": true,
@@ -18,8 +18,8 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "qryTarefasPedemAcao.ok",
-      "routine": "tarefas.inicio_gestor.qryTarefasPedemAcao",
+      "id": "listarTarefasParaAcao.ok",
+      "routine": "tarefas.inicio_gestor.listarTarefasParaAcao",
       "params": {
         "page": 1,
         "pageSize": 10
@@ -31,8 +31,8 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "qryTarefasPedemAcao.secondPage",
-      "routine": "tarefas.inicio_gestor.qryTarefasPedemAcao",
+      "id": "listarTarefasParaAcao.page2",
+      "routine": "tarefas.inicio_gestor.listarTarefasParaAcao",
       "params": {
         "page": 2,
         "pageSize": 1

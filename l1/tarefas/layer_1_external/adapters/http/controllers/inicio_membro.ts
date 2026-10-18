@@ -6,66 +6,66 @@ import { requests } from '/_102047_/l1/tarefas/layer_2_application/requests/inic
 import type { Inicio_membroContracts } from '/_102047_/l2/tarefas/web/contracts/inicio_membro.defs.js';
 
 export const routes: ControllerRoute[] = [
-  { key: 'tarefas.inicio_membro.cmdAceitarEntrega', handler: handleCmdAceitarEntrega },
-  { key: 'tarefas.inicio_membro.cmdDevolverComMotivo', handler: handleCmdDevolverComMotivo },
-  { key: 'tarefas.inicio_membro.cmdEnviarParaRevisao', handler: handleCmdEnviarParaRevisao },
-  { key: 'tarefas.inicio_membro.cmdIniciarTarefa', handler: handleCmdIniciarTarefa },
-  { key: 'tarefas.inicio_membro.qryInicioMembro', handler: handleQryInicioMembro },
+  { key: 'tarefas.inicio_membro.aceitarEntrega', handler: handleAceitarEntrega },
+  { key: 'tarefas.inicio_membro.carregarInicio', handler: handleCarregarInicio },
+  { key: 'tarefas.inicio_membro.devolverComMotivo', handler: handleDevolverComMotivo },
+  { key: 'tarefas.inicio_membro.enviarParaRevisao', handler: handleEnviarParaRevisao },
+  { key: 'tarefas.inicio_membro.iniciarTarefa', handler: handleIniciarTarefa },
 ];
 
-async function handleCmdAceitarEntrega(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.cmdAceitarEntrega']['output']>> {
+async function handleAceitarEntrega(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.aceitarEntrega']['output']>> {
   const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
   const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
   if (invalid) throw invalid;
-  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.cmdAceitarEntrega']['input'];
-  const data = await requests["tarefas.inicio_membro.cmdAceitarEntrega"](params, input.ctx);
-  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.cmdAceitarEntrega']['output'], error: null };
+  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.aceitarEntrega']['input'];
+  const data = await requests["tarefas.inicio_membro.aceitarEntrega"](params, input.ctx);
+  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.aceitarEntrega']['output'], error: null };
 }
 
-async function handleCmdDevolverComMotivo(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.cmdDevolverComMotivo']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'details', 'details.motivoDevolucao']);
-  const invalid = validateInput(scoped, ['id', 'version', 'details', 'details.motivoDevolucao'], ['id', 'version', 'details', 'details.motivoDevolucao'], []);
-  if (invalid) throw invalid;
-  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.cmdDevolverComMotivo']['input'];
-  const data = await requests["tarefas.inicio_membro.cmdDevolverComMotivo"](params, input.ctx);
-  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.cmdDevolverComMotivo']['output'], error: null };
-}
-
-async function handleCmdEnviarParaRevisao(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.cmdEnviarParaRevisao']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
-  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
-  if (invalid) throw invalid;
-  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.cmdEnviarParaRevisao']['input'];
-  const data = await requests["tarefas.inicio_membro.cmdEnviarParaRevisao"](params, input.ctx);
-  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.cmdEnviarParaRevisao']['output'], error: null };
-}
-
-async function handleCmdIniciarTarefa(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.cmdIniciarTarefa']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
-  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
-  if (invalid) throw invalid;
-  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.cmdIniciarTarefa']['input'];
-  const data = await requests["tarefas.inicio_membro.cmdIniciarTarefa"](params, input.ctx);
-  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.cmdIniciarTarefa']['output'], error: null };
-}
-
-async function handleQryInicioMembro(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.qryInicioMembro']['output']>> {
+async function handleCarregarInicio(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.carregarInicio']['output']>> {
   const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroAvisosProprios']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, []);
   const invalid = validateInput(scoped, [], [], []);
   if (invalid) throw invalid;
-  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.qryInicioMembro']['input'];
-  const data = await requests["tarefas.inicio_membro.qryInicioMembro"](params, input.ctx);
-  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.qryInicioMembro']['output'], error: null };
+  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.carregarInicio']['input'];
+  const data = await requests["tarefas.inicio_membro.carregarInicio"](params, input.ctx);
+  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.carregarInicio']['output'], error: null };
+}
+
+async function handleDevolverComMotivo(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.devolverComMotivo']['output']>> {
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'details', 'details.motivoDevolucao']);
+  const invalid = validateInput(scoped, ['id', 'version', 'details', 'details.motivoDevolucao'], ['id', 'version', 'details', 'details.motivoDevolucao'], []);
+  if (invalid) throw invalid;
+  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.devolverComMotivo']['input'];
+  const data = await requests["tarefas.inicio_membro.devolverComMotivo"](params, input.ctx);
+  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.devolverComMotivo']['output'], error: null };
+}
+
+async function handleEnviarParaRevisao(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.enviarParaRevisao']['output']>> {
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
+  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
+  if (invalid) throw invalid;
+  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.enviarParaRevisao']['input'];
+  const data = await requests["tarefas.inicio_membro.enviarParaRevisao"](params, input.ctx);
+  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.enviarParaRevisao']['output'], error: null };
+}
+
+async function handleIniciarTarefa(input: IRequestEnvelope): Promise<BffResponse<Inicio_membroContracts['tarefas.inicio_membro.iniciarTarefa']['output']>> {
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
+  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
+  if (invalid) throw invalid;
+  const params = scoped as Inicio_membroContracts['tarefas.inicio_membro.iniciarTarefa']['input'];
+  const data = await requests["tarefas.inicio_membro.iniciarTarefa"](params, input.ctx);
+  return { ok: true, data: data as Inicio_membroContracts['tarefas.inicio_membro.iniciarTarefa']['output'], error: null };
 }
 
 function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string } }, held: readonly string[], allowed: readonly string[]): Record<string, unknown> {

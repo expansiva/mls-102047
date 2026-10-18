@@ -1,14 +1,10 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/requests/listas.ts" enhancement="_blank"/>
 import { AppError, type RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { ListasContracts, ListaResumo, ListaEdicao } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
+import type { ListasContracts, ListaCadastrada } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
 import { listLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/listLista.js';
-import { getLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/getLista.js';
 import { createLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/createLista.js';
 import { updateLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateLista.js';
 import { listTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
-
-const MAX_PAGE_SIZE = 200;
-const OPEN_STATUSES: readonly string[] = ['aFazer', 'emAndamento', 'emRevisao'];
 
 interface ListaRecord {
   id: string;
@@ -18,155 +14,126 @@ interface ListaRecord {
   details: { tipo: string; descricao?: string | null };
 }
 
-function toTipo(value: string): 'project' | 'area' {
-  if (value === 'project' || value === 'area') return value;
-  throw new AppError('INVALID_STATE', 'Lista com tipo inválido: ' + String(value), 500);
+const MAX_PAGE_SIZE = 200;
+
+function isGestor(ctx: RequestContext): boolean {
+  const scope = ctx.sessionContext.actorScope ?? [];
+  return scope.some(item => item === 'gestor' || item.endsWith(':gestor'));
 }
 
 function assertGestor(ctx: RequestContext): void {
-  const scope = ctx.sessionContext.actorScope ?? [];
-  const isGestor = scope.some((item) => item === 'gestor' || item.endsWith(':gestor'));
-  if (!isGestor) {
+  // listaMantidaPorGestor
+  if (!isGestor(ctx)) {
     throw new AppError('FORBIDDEN', 'Somente o gestor pode cadastrar e alterar listas.', 403, { ruleId: 'listaMantidaPorGestor' });
   }
 }
 
-function toResumo(record: ListaRecord, quantidadeTarefasAbertas: number): ListaResumo {
-  return {
-    id: record.id,
-    nome: record.nome,
-    ativa: record.ativa,
-    details: {
-      details: { tipo: toTipo(record.details.tipo) },
-      quantidadeTarefasAbertas,
-    },
-  };
+function normalizeText(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function toEdicao(record: ListaRecord): ListaEdicao {
-  return {
-    id: record.id,
-    version: record.version,
-    nome: record.nome,
-    ativa: record.ativa,
-    details: {
-      details: {
-        tipo: toTipo(record.details.tipo),
-        ...(record.details.descricao != null ? { descricao: record.details.descricao } : {}),
-      },
-    },
-  };
-}
-
-async function listAllListas(ctx: RequestContext, nome?: string): Promise<ListaRecord[]> {
+async function listAllListas(ctx: RequestContext): Promise<ListaRecord[]> {
   const all: ListaRecord[] = [];
-  let page = 1;
-  for (;;) {
-    const result = await listLista(nome != null ? { nome, page, pageSize: MAX_PAGE_SIZE } : { page, pageSize: MAX_PAGE_SIZE }, ctx);
-    for (const item of result.items) {
-      const record: ListaRecord = item;
-      all.push(record);
-    }
+  for (let page = 1; ; page++) {
+    const result = await listLista({ page, pageSize: MAX_PAGE_SIZE }, ctx);
+    for (const item of result.items) all.push(item);
     if (!result.hasMore) break;
-    page += 1;
   }
   return all;
 }
 
-// quantidadeTarefasAbertas: derived, counted here from the tasks with status aFazer, emAndamento or emRevisao.
-async function countOpenByLista(ctx: RequestContext, listaId?: string): Promise<Map<string, number>> {
+function sortByNome(listas: ListaRecord[]): ListaRecord[] {
+  return [...listas].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
+}
+
+// quantidadeTarefasAbertas (derived): tarefas whose status is neither concluida nor cancelada, grouped by listaId.
+async function countAbertasPorLista(ctx: RequestContext, listaId?: string): Promise<Map<string, number>> {
   const counts = new Map<string, number>();
-  for (const status of OPEN_STATUSES) {
-    let page = 1;
-    for (;;) {
-      const result = await listTarefa(
-        listaId != null ? { status, listaId, page, pageSize: MAX_PAGE_SIZE } : { status, page, pageSize: MAX_PAGE_SIZE },
-        ctx,
-      );
-      for (const tarefa of result.items) {
-        const key = String(tarefa.listaId);
-        counts.set(key, (counts.get(key) ?? 0) + 1);
-      }
-      if (!result.hasMore) break;
-      page += 1;
+  for (let page = 1; ; page++) {
+    const result = listaId === undefined
+      ? await listTarefa({ page, pageSize: MAX_PAGE_SIZE }, ctx)
+      : await listTarefa({ listaId, page, pageSize: MAX_PAGE_SIZE }, ctx);
+    for (const tarefa of result.items) {
+      if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') continue;
+      counts.set(tarefa.listaId, (counts.get(tarefa.listaId) ?? 0) + 1);
     }
+    if (!result.hasMore) break;
   }
   return counts;
 }
 
-async function assertNomeUnico(ctx: RequestContext, nome: string, ownId?: string): Promise<void> {
-  const found = await listAllListas(ctx, nome);
-  for (const other of found) {
-    if (other.nome === nome && other.id !== ownId) {
-      throw new AppError('CONFLICT', 'Já existe uma lista com o nome "' + nome + '".', 409, { ruleId: 'listaNomeUnico' });
-    }
+function toListaCadastrada(lista: ListaRecord, abertas: number): ListaCadastrada {
+  const tipo = lista.details.tipo;
+  if (tipo !== 'project' && tipo !== 'area') {
+    throw new AppError('INVALID_DATA', 'Tipo de lista desconhecido: ' + String(tipo), 500);
+  }
+  const details: ListaCadastrada['details'] = { tipo, quantidadeTarefasAbertas: abertas };
+  if (lista.details.descricao != null) details.descricao = lista.details.descricao;
+  return { id: lista.id, version: lista.version, nome: lista.nome, ativa: lista.ativa, details };
+}
+
+async function composeListas(ctx: RequestContext, listas: ListaRecord[]): Promise<ListaCadastrada[]> {
+  const abertas = await countAbertasPorLista(ctx);
+  return sortByNome(listas).map(lista => toListaCadastrada(lista, abertas.get(lista.id) ?? 0));
+}
+
+function assertNomeUnico(listas: ListaRecord[], nome: string, ignoreId?: string): void {
+  // listaNomeUnico
+  const outra = listas.find(lista => lista.nome === nome && lista.id !== ignoreId);
+  if (outra) {
+    throw new AppError('CONFLICT', 'Já existe uma lista com o nome "' + nome + '".', 409, { ruleId: 'listaNomeUnico' });
   }
 }
 
 export const requests: { [K in keyof ListasContracts]: (input: ListasContracts[K]['input'], ctx: RequestContext) => Promise<ListasContracts[K]['output']> } = {
   "tarefas.listas.listarListas": async function (input, ctx) {
-    const records = await listAllListas(ctx);
-    records.sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
-    const counts = await countOpenByLista(ctx);
-    const listas: ListaResumo[] = records.map((record) => toResumo(record, counts.get(record.id) ?? 0));
-    return { listas };
+    const listas = await listAllListas(ctx);
+    return { listas: await composeListas(ctx, listas) };
   },
-  "tarefas.listas.obterLista": async function (input, ctx) {
-    const record = await getLista({ id: input.listaId }, ctx);
-    if (record == null) {
-      throw new AppError('NOT_FOUND', 'Lista não encontrada: ' + input.listaId, 404);
-    }
-    const typed: ListaRecord = record;
-    return { lista: toEdicao(typed) };
+
+  "tarefas.listas.buscarListas": async function (input, ctx) {
+    const term = normalizeText(input.busca.trim());
+    const all = await listAllListas(ctx);
+    const found = term === '' ? all : all.filter(lista => normalizeText(lista.nome).includes(term));
+    return { listas: await composeListas(ctx, found) };
   },
+
   "tarefas.listas.criarLista": async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      // listaMantidaPorGestor
       assertGestor(bound);
-      // listaNomeUnico
-      await assertNomeUnico(bound, input.nome);
-      const created = await createLista({
-        nome: input.nome,
-        ativa: input.ativa,
-        details: {
-          tipo: input.details.tipo,
-          ...(input.details.descricao != null ? { descricao: input.details.descricao } : {}),
-        },
-      }, bound);
-      const record: ListaRecord = created;
-      // quantidadeTarefasAbertas: zero for a new lista (calculated, never stored)
-      return { lista: toResumo(record, 0), registro: toEdicao(record) };
+      const existentes = await listAllListas(bound);
+      assertNomeUnico(existentes, input.nome);
+      const details: { tipo: string; descricao?: string } = { tipo: input.details.tipo };
+      if (input.details.descricao !== undefined) details.descricao = input.details.descricao;
+      const created = await createLista({ nome: input.nome, ativa: input.ativa, details }, bound);
+      // quantidadeTarefasAbertas: derived, starts at zero for a new lista.
+      return { lista: toListaCadastrada(created, 0) };
     });
   },
+
   "tarefas.listas.salvarLista": async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      // listaMantidaPorGestor
       assertGestor(bound);
-      const current = await getLista({ id: input.id }, bound);
-      if (current == null) {
-        throw new AppError('NOT_FOUND', 'Lista não encontrada: ' + input.id, 404);
+      const existentes = await listAllListas(bound);
+      const atual = existentes.find(lista => lista.id === input.id);
+      if (!atual) throw new AppError('NOT_FOUND', 'Lista não encontrada: ' + input.id, 404);
+      if (atual.version !== Number(input.version)) {
+        throw new AppError('VERSION_CONFLICT', 'A versão da lista não confere com a gravada.', 409);
       }
-      if (Number(current.version) !== Number(input.version)) {
-        throw new AppError('CONFLICT', 'A lista foi alterada por outra pessoa; recarregue antes de salvar.', 409);
-      }
-      // listaNomeUnico: another lista with the same name
-      await assertNomeUnico(bound, input.nome, input.id);
+      assertNomeUnico(existentes, input.nome, input.id);
+      const details: { tipo: string; descricao?: string } = { tipo: input.details.tipo };
+      if (input.details.descricao !== undefined) details.descricao = input.details.descricao;
       const updated = await updateLista({
-        id: input.id,
+        id: String(input.id),
         version: Number(input.version),
         nome: input.nome,
         ativa: input.ativa,
-        details: {
-          tipo: input.details.tipo,
-          ...(input.details.descricao != null ? { descricao: input.details.descricao } : {}),
-        },
+        details,
       }, bound);
-      const record: ListaRecord = updated;
-      // quantidadeTarefasAbertas: recalculated, never stored
-      const counts = await countOpenByLista(bound, record.id);
-      return { lista: toResumo(record, counts.get(record.id) ?? 0), registro: toEdicao(record) };
+      const abertas = await countAbertasPorLista(bound, updated.id);
+      return { lista: toListaCadastrada(updated, abertas.get(updated.id) ?? 0) };
     });
   },
 };

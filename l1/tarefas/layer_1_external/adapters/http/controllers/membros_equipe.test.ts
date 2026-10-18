@@ -8,21 +8,22 @@ export const pageTests = {
   "actor": "gestor",
   "cases": [
     {
-      "id": "listarMembrosEquipe.ok",
-      "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+      "id": "qryPessoasEquipe.list",
+      "routine": "tarefas.membros_equipe.qryPessoasEquipe",
       "params": {
         "page": 1,
         "pageSize": 10
       },
       "expect": {
         "ok": true,
-        "shape": "paginated"
+        "shape": "paginated",
+        "itemsKey": "items"
       },
       "mutating": false
     },
     {
-      "id": "listarMembrosEquipe.busca.ok",
-      "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+      "id": "qryPessoasEquipe.busca",
+      "routine": "tarefas.membros_equipe.qryPessoasEquipe",
       "params": {
         "busca": "a",
         "page": 1,
@@ -30,27 +31,14 @@ export const pageTests = {
       },
       "expect": {
         "ok": true,
-        "shape": "paginated"
+        "shape": "paginated",
+        "itemsKey": "items"
       },
       "mutating": false
     },
     {
-      "id": "obterMembroEquipe.ok",
-      "routine": "tarefas.membros_equipe.obterMembroEquipe",
-      "params": {
-        "id": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "MembroEquipe.id"
-      },
-      "expect": {
-        "ok": true
-      },
-      "mutating": false
-    },
-    {
-      "id": "tarefas.membros_equipe.listarMembrosEquipe.page.required",
-      "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+      "id": "tarefas.membros_equipe.qryPessoasEquipe.page.required",
+      "routine": "tarefas.membros_equipe.qryPessoasEquipe",
       "params": {
         "pageSize": 10
       },
@@ -61,8 +49,8 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "tarefas.membros_equipe.listarMembrosEquipe.pageSize.required",
-      "routine": "tarefas.membros_equipe.listarMembrosEquipe",
+      "id": "tarefas.membros_equipe.qryPessoasEquipe.pageSize.required",
+      "routine": "tarefas.membros_equipe.qryPessoasEquipe",
       "params": {
         "page": 1
       },
@@ -73,18 +61,8 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "tarefas.membros_equipe.obterMembroEquipe.id.required",
-      "routine": "tarefas.membros_equipe.obterMembroEquipe",
-      "params": {},
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": false
-    },
-    {
-      "id": "cadastrarPessoa.ok",
-      "routine": "tarefas.membros_equipe.cadastrarPessoa",
+      "id": "cmdCadastrarPessoa.ok",
+      "routine": "tarefas.membros_equipe.cmdCadastrarPessoa",
       "params": {
         "details": {
           "identification": {
@@ -99,8 +77,8 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "tarefas.membros_equipe.cadastrarPessoa.details.required",
-      "routine": "tarefas.membros_equipe.cadastrarPessoa",
+      "id": "tarefas.membros_equipe.cmdCadastrarPessoa.details.required",
+      "routine": "tarefas.membros_equipe.cmdCadastrarPessoa",
       "params": {},
       "expect": {
         "ok": false,
@@ -109,40 +87,8 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "cadastrarPessoa.nomeAusente",
-      "routine": "tarefas.membros_equipe.cadastrarPessoa",
-      "params": {
-        "details": {
-          "identification": {
-            "countryCode": "BR"
-          }
-        }
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cadastrarPessoa.paisAusente",
-      "routine": "tarefas.membros_equipe.cadastrarPessoa",
-      "params": {
-        "details": {
-          "identification": {
-            "name": "Joao Monitor"
-          }
-        }
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "salvarAlteracoesPessoa.ok",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+      "id": "cmdSalvarAlteracoes.ok",
+      "routine": "tarefas.membros_equipe.cmdSalvarAlteracoes",
       "params": {
         "id": "<seedRef>",
         "version": "<seedRef>",
@@ -163,14 +109,14 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.versaoDesatualizada",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+      "id": "cmdSalvarAlteracoes.staleVersion",
+      "routine": "tarefas.membros_equipe.cmdSalvarAlteracoes",
       "params": {
         "id": "<seedRef>",
         "version": 999999,
         "details": {
           "identification": {
-            "name": "Nome Outro",
+            "name": "Nome Conflito",
             "countryCode": "BR"
           }
         }
@@ -185,37 +131,19 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "tarefas.membros_equipe.salvarAlteracoesPessoa.id.required",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+      "id": "tarefas.membros_equipe.cmdSalvarAlteracoes.id.required",
+      "routine": "tarefas.membros_equipe.cmdSalvarAlteracoes",
       "params": {
-        "version": 1,
+        "version": "<seedRef>",
         "details": {
           "identification": {
-            "name": "Nome",
-            "countryCode": "BR"
-          }
-        }
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "tarefas.membros_equipe.salvarAlteracoesPessoa.version.required",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
-      "params": {
-        "id": "<seedRef>",
-        "details": {
-          "identification": {
-            "name": "Nome",
+            "name": "Sem Id",
             "countryCode": "BR"
           }
         }
       },
       "paramFieldRefs": {
-        "id": "MembroEquipe.id"
+        "version": "MembroEquipe.version"
       },
       "expect": {
         "ok": false,
@@ -224,29 +152,13 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "tarefas.membros_equipe.salvarAlteracoesPessoa.details.required",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+      "id": "tarefas.membros_equipe.cmdSalvarAlteracoes.version.required",
+      "routine": "tarefas.membros_equipe.cmdSalvarAlteracoes",
       "params": {
         "id": "<seedRef>",
-        "version": 1
-      },
-      "paramFieldRefs": {
-        "id": "MembroEquipe.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "salvarAlteracoesPessoa.nomeAusente",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
-      "params": {
-        "id": "<seedRef>",
-        "version": 1,
         "details": {
           "identification": {
+            "name": "Sem Versao",
             "countryCode": "BR"
           }
         }
@@ -261,19 +173,15 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "salvarAlteracoesPessoa.paisAusente",
-      "routine": "tarefas.membros_equipe.salvarAlteracoesPessoa",
+      "id": "tarefas.membros_equipe.cmdSalvarAlteracoes.details.required",
+      "routine": "tarefas.membros_equipe.cmdSalvarAlteracoes",
       "params": {
         "id": "<seedRef>",
-        "version": 1,
-        "details": {
-          "identification": {
-            "name": "Nome"
-          }
-        }
+        "version": "<seedRef>"
       },
       "paramFieldRefs": {
-        "id": "MembroEquipe.id"
+        "id": "MembroEquipe.id",
+        "version": "MembroEquipe.version"
       },
       "expect": {
         "ok": false,

@@ -139,6 +139,14 @@ export function bind(runtime: IModuleDataRuntime): ItemChecklistRepository {
       await table.update({ where, patch: row });
       return fromRow(row) as unknown as ItemChecklist;
     },
+    async create(record: ItemChecklist): Promise<ItemChecklist> {
+      const body = withVersion(record as unknown as Row, undefined);
+      const table = await runtime.getTable<Row>(REPOSITORY);
+      rejectDuplicate(await table.findMany(), body);
+      const row = toRow(body);
+      await table.insert({ record: row });
+      return fromRow(row) as unknown as ItemChecklist;
+    },
   };
 }
 

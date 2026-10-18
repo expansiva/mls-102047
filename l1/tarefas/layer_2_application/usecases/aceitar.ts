@@ -37,90 +37,25 @@ export interface AceitarOutput extends Record<string, unknown> {
   };
 }
 
-function toOutput(t: Tarefa): AceitarOutput {
-  const details: AceitarOutput['details'] = {};
-  if (t.details.descricao !== undefined) details.descricao = t.details.descricao;
-  if (t.details.motivoDevolucao !== undefined) details.motivoDevolucao = t.details.motivoDevolucao;
-  if (t.details.devolvidaEm !== undefined) details.devolvidaEm = t.details.devolvidaEm;
-  if (t.details.concluidaEm !== undefined) details.concluidaEm = t.details.concluidaEm;
-  if (t.details.canceladaEm !== undefined) details.canceladaEm = t.details.canceladaEm;
-  // Derived: calculated from the status, never stored.
-  const aberta = t.status === 'aFazer' || t.status === 'emAndamento' || t.status === 'emRevisao';
-  details.aberta = aberta;
-  details.venceHoje = false;
-  details.atrasada = false;
-  const out: AceitarOutput = {
-    id: t.id,
-    version: t.version,
-    titulo: t.titulo,
-    status: t.status,
-    prioridade: t.prioridade,
-    prazo: t.prazo,
-    listaId: t.listaId,
-    responsavelId: t.responsavelId,
-    criadorId: t.criadorId,
-    chaveCriacao: t.chaveCriacao,
-    criadaEm: t.criadaEm,
-    details,
+function toOutput(tarefa: Tarefa): AceitarOutput {
+  // Derived flags are calculated from the status, never read from storage.
+  const aberta = tarefa.status === 'aFazer' || tarefa.status === 'emAndamento' || tarefa.status === 'emRevisao';
+  const details: AceitarOutput['details'] = {
+    aberta,
+    venceHoje: false,
+    atrasada: false,
   };
-  if (t.tarefaPaiId !== undefined) out.tarefaPaiId = t.tarefaPaiId;
-  return out;
-}
-
-export async function aceitar(input: AceitarInput, ctx: RequestContext): Promise<AceitarOutput> {
-  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-
-  const id = String(input.id ?? '');
-  if (!id) {
-    throw new AppError('INVALID_INPUT', 'id is required.', 400);
-  }
-  const version = Number(input.version);
-  if (!Number.isFinite(version)) {
-    throw new AppError('INVALID_INPUT', 'version is required.', 400);
-  }
-
-  const tarefa = await repository.get(id);
-  if (!tarefa) {
-    throw new AppError('NOT_FOUND', 'Tarefa not found.', 404);
-  }
-
-  if (tarefa.version !== version) {
-    throw new AppError('VERSION_CONFLICT', 'The task was changed by someone else; reload and try again.', 409);
-  }
-
-  if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
-    throw new AppError('TASK_CLOSED', 'A completed or cancelled task does not change status anymore.', 409, {
-      ruleId: 'tarefaEncerradaNaoTransiciona',
-    });
-  }
-  if (tarefa.status !== 'emRevisao') {
-    throw new AppError('INVALID_STATE', 'Only a task in review can be accepted.', 409);
-  }
-
-  const actorId = ctx.sessionContext.person?.mdmId;
-  if (!actorId) {
-    throw new AppError('FORBIDDEN', 'The session member could not be identified.', 403, {
-      ruleId: 'somenteCriadorRevisa',
-    });
-  }
-  if (actorId !== tarefa.criadorId) {
-    throw new AppError('FORBIDDEN', 'Only the creator of the task can accept it.', 403, {
-      ruleId: 'somenteCriadorRevisa',
-    });
-  }
-
-  const details: Tarefa['details'] = {};
   if (tarefa.details.descricao !== undefined) details.descricao = tarefa.details.descricao;
   if (tarefa.details.motivoDevolucao !== undefined) details.motivoDevolucao = tarefa.details.motivoDevolucao;
   if (tarefa.details.devolvidaEm !== undefined) details.devolvidaEm = tarefa.details.devolvidaEm;
+  if (tarefa.details.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
   if (tarefa.details.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
-  details.concluidaEm = ctx.clock.nowIso();
 
-  const next: Tarefa = {
+  const output: AceitarOutput = {
     id: tarefa.id,
     version: tarefa.version,
     titulo: tarefa.titulo,
-    status: 'concluida',
+    status: tarefa.status,
     prioridade: tarefa.prioridade,
     prazo: tarefa.prazo,
     listaId: tarefa.listaId,
@@ -130,8 +65,61 @@ export async function aceitar(input: AceitarInput, ctx: RequestContext): Promise
     criadaEm: tarefa.criadaEm,
     details,
   };
-  if (tarefa.tarefaPaiId !== undefined) next.tarefaPaiId = tarefa.tarefaPaiId;
+  if (tarefa.tarefaPaiId !== undefined) output.tarefaPaiId = tarefa.tarefaPaiId;
+  return output;
+}
 
-  const saved = await repository.transition(next, 'aceitar');
+export async function aceitar(input: AceitarInput, ctx: RequestContext): Promise<AceitarOutput> {
+  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+
+  const id = String(input.id ?? '');
+  if (!id) {
+    throw new AppError('INVALID_INPUT', 'The task id is required.', 400);
+  }
+  const version = Number(input.version);
+  if (!Number.isFinite(version)) {
+    throw new AppError('INVALID_INPUT', 'The task version is required.', 400);
+  }
+
+  const tarefa = await tarefaRepository.get(id);
+  if (!tarefa) {
+    throw new AppError('NOT_FOUND', 'Task not found.', 404);
+  }
+  if (tarefa.version !== version) {
+    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
+  }
+
+  if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
+    throw new AppError('TASK_CLOSED', 'A completed or cancelled task no longer changes status.', 409, {
+      ruleId: 'tarefaEncerradaNaoTransiciona',
+    });
+  }
+
+  if (tarefa.status !== 'emRevisao') {
+    throw new AppError('INVALID_STATE', 'Only a task under review can be accepted.', 409, {
+      ruleId: 'somenteCriadorRevisa',
+    });
+  }
+
+  const actorId = ctx.sessionContext.person?.mdmId;
+  if (!actorId || actorId !== tarefa.criadorId) {
+    throw new AppError('FORBIDDEN', 'Only the creator of the task can accept it.', 403, {
+      ruleId: 'somenteCriadorRevisa',
+    });
+  }
+
+  const next: Tarefa = {
+    ...tarefa,
+    status: 'concluida',
+    details: {
+      ...(tarefa.details.descricao !== undefined ? { descricao: tarefa.details.descricao } : {}),
+      ...(tarefa.details.motivoDevolucao !== undefined ? { motivoDevolucao: tarefa.details.motivoDevolucao } : {}),
+      ...(tarefa.details.devolvidaEm !== undefined ? { devolvidaEm: tarefa.details.devolvidaEm } : {}),
+      ...(tarefa.details.canceladaEm !== undefined ? { canceladaEm: tarefa.details.canceladaEm } : {}),
+      concluidaEm: ctx.clock.nowIso(),
+    },
+  };
+
+  const saved = await tarefaRepository.transition(next, 'aceitar');
   return toOutput(saved);
 }

@@ -6,17 +6,28 @@ import { requests } from '/_102047_/l1/tarefas/layer_2_application/requests/list
 import type { ListasContracts } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
 
 export const routes: ControllerRoute[] = [
+  { key: 'tarefas.listas.buscarListas', handler: handleBuscarListas },
   { key: 'tarefas.listas.criarLista', handler: handleCriarLista },
   { key: 'tarefas.listas.listarListas', handler: handleListarListas },
-  { key: 'tarefas.listas.obterLista', handler: handleObterLista },
   { key: 'tarefas.listas.salvarLista', handler: handleSalvarLista },
 ];
+
+async function handleBuscarListas(input: IRequestEnvelope): Promise<BffResponse<ListasContracts['tarefas.listas.buscarListas']['output']>> {
+  const held = authorize(input.request, ['gestorListas']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['busca']);
+  const invalid = validateInput(scoped, ['busca'], ['busca'], []);
+  if (invalid) throw invalid;
+  const params = scoped as ListasContracts['tarefas.listas.buscarListas']['input'];
+  const data = await requests["tarefas.listas.buscarListas"](params, input.ctx);
+  return { ok: true, data: data as ListasContracts['tarefas.listas.buscarListas']['output'], error: null };
+}
 
 async function handleCriarLista(input: IRequestEnvelope): Promise<BffResponse<ListasContracts['tarefas.listas.criarLista']['output']>> {
   const held = authorize(input.request, ['gestorListas']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['nome', 'ativa', 'details', 'details.tipo', 'details.descricao']);
-  const invalid = validateInput(scoped, ['nome', 'ativa', 'details', 'details.tipo'], ['nome', 'ativa', 'details', 'details.tipo', 'details.descricao'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['nome', 'details', 'details.tipo', 'details.descricao', 'ativa']);
+  const invalid = validateInput(scoped, ['nome', 'details', 'details.tipo', 'ativa'], ['nome', 'details', 'details.tipo', 'details.descricao', 'ativa'], []);
   if (invalid) throw invalid;
   const params = scoped as ListasContracts['tarefas.listas.criarLista']['input'];
   const data = await requests["tarefas.listas.criarLista"](params, input.ctx);
@@ -34,22 +45,11 @@ async function handleListarListas(input: IRequestEnvelope): Promise<BffResponse<
   return { ok: true, data: data as ListasContracts['tarefas.listas.listarListas']['output'], error: null };
 }
 
-async function handleObterLista(input: IRequestEnvelope): Promise<BffResponse<ListasContracts['tarefas.listas.obterLista']['output']>> {
-  const held = authorize(input.request, ['gestorListas']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['listaId']);
-  const invalid = validateInput(scoped, ['listaId'], ['listaId'], []);
-  if (invalid) throw invalid;
-  const params = scoped as ListasContracts['tarefas.listas.obterLista']['input'];
-  const data = await requests["tarefas.listas.obterLista"](params, input.ctx);
-  return { ok: true, data: data as ListasContracts['tarefas.listas.obterLista']['output'], error: null };
-}
-
 async function handleSalvarLista(input: IRequestEnvelope): Promise<BffResponse<ListasContracts['tarefas.listas.salvarLista']['output']>> {
   const held = authorize(input.request, ['gestorListas']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'nome', 'ativa', 'details', 'details.tipo', 'details.descricao']);
-  const invalid = validateInput(scoped, ['id', 'version', 'nome', 'ativa', 'details', 'details.tipo'], ['id', 'version', 'nome', 'ativa', 'details', 'details.tipo', 'details.descricao'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'nome', 'details', 'details.tipo', 'details.descricao', 'ativa']);
+  const invalid = validateInput(scoped, ['id', 'version', 'nome', 'details', 'details.tipo', 'ativa'], ['id', 'version', 'nome', 'details', 'details.tipo', 'details.descricao', 'ativa'], []);
   if (invalid) throw invalid;
   const params = scoped as ListasContracts['tarefas.listas.salvarLista']['input'];
   const data = await requests["tarefas.listas.salvarLista"](params, input.ctx);

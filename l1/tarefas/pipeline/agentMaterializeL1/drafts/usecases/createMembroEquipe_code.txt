@@ -1,7 +1,6 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/usecases/createMembroEquipe.ts" enhancement="_blank"/>
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-
 export interface CreateMembroEquipeInput extends Record<string, unknown> {
 details: {
 identification: {
@@ -16,7 +15,6 @@ general?: Record<string, unknown>;
 tarefas?: Record<string, unknown>;
 };
 }
-
 export interface CreateMembroEquipeOutput extends Record<string, unknown> {
 id: string;
 version: number;
@@ -38,52 +36,45 @@ general?: Record<string, unknown>;
 tarefas?: Record<string, unknown>;
 };
 }
-
-const isObject = (value: unknown): value is Record<string, unknown> =>
-value != null && typeof value === 'object' && !Array.isArray(value);
-
 export async function createMembroEquipe(input: CreateMembroEquipeInput, ctx: RequestContext): Promise<CreateMembroEquipeOutput> {
-const identification = input.details?.identification;
-const name = typeof identification?.name === 'string' ? identification.name.trim() : '';
-const countryCode = typeof identification?.countryCode === 'string' ? identification.countryCode.trim() : '';
-if (!name) {
-throw new AppError('INVALID_INPUT', 'The member name is required.', 400);
+const name = input.details?.identification?.name;
+const countryCode = input.details?.identification?.countryCode;
+if (typeof name !== 'string' || name.trim() === '') {
+throw new AppError('INVALID_INPUT', 'details.identification.name is required.', 400);
 }
-if (!/^[A-Z]{2}$/.test(countryCode)) {
-throw new AppError('INVALID_INPUT', 'The country code must be two uppercase letters.', 400);
+if (typeof countryCode !== 'string' || !/^[A-Z]{2}$/.test(countryCode)) {
+throw new AppError('INVALID_INPUT', 'details.identification.countryCode must be two uppercase letters.', 400);
 }
-
 const details: Record<string, unknown> = {
 subtype: 'Person',
 name,
 countryCode,
 };
 const privacyConsent = input.details?.person?.privacyConsent;
-if (privacyConsent != null) details.privacyConsent = privacyConsent;
-
+if (privacyConsent != null) details['privacyConsent'] = privacyConsent;
 const created = await ctx.mdm.entity.create({ details: details as never });
-const attached = await ctx.mdm.entity.attachRole(created.mdmId, 'tarefas.MembroEquipe');
-
-const flat: Record<string, unknown> = { ...attached.details };
-const tags = Array.isArray(flat.tags) ? flat.tags.map((tag) => String(tag)) : [];
-const contacts = Array.isArray(flat.contacts) ? flat.contacts.filter(isObject) : [];
-
+const attached = await ctx.mdm.entity.attachRole(String(created.mdmId), 'tarefas.MembroEquipe');
+const flat = (attached.details ?? {}) as Record<string, unknown>;
+const tags: string[] = Array.isArray(flat['tags']) ? (flat['tags'] as unknown[]).map((tag) => String(tag)) : [];
+const contacts: Record<string, unknown>[] = Array.isArray(flat['contacts']) ? (flat['contacts'] as Record<string, unknown>[]) : [];
 const output: CreateMembroEquipeOutput = {
 id: String(attached.mdmId),
 version: Number(attached.version),
 details: {
 identification: {
-subtype: flat.subtype != null ? String(flat.subtype) : 'Person',
-name: flat.name != null ? String(flat.name) : name,
-status: flat.status != null ? String(flat.status) : 'Active',
-countryCode: flat.countryCode != null ? String(flat.countryCode) : countryCode,
+subtype: flat['subtype'] == null ? 'Person' : String(flat['subtype']),
+name: flat['name'] == null ? name : String(flat['name']),
+status: flat['status'] == null ? '' : String(flat['status']),
+countryCode: flat['countryCode'] == null ? countryCode : String(flat['countryCode']),
 tags,
 },
 base: { contacts },
 },
 };
-if (isObject(flat.privacyConsent)) output.details.person = { privacyConsent: flat.privacyConsent };
-if (isObject(flat.general)) output.details.general = flat.general;
-if (isObject(flat.tarefas)) output.details.tarefas = flat.tarefas;
+if (flat['privacyConsent'] != null) {
+output.details.person = { privacyConsent: flat['privacyConsent'] as Record<string, unknown> };
+}
+if (flat['general'] != null) output.details.general = flat['general'] as Record<string, unknown>;
+if (flat['tarefas'] != null) output.details.tarefas = flat['tarefas'] as Record<string, unknown>;
 return output;
 }

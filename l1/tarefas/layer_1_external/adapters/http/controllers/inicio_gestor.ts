@@ -6,30 +6,30 @@ import { requests } from '/_102047_/l1/tarefas/layer_2_application/requests/inic
 import type { Inicio_gestorContracts } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
 
 export const routes: ControllerRoute[] = [
-  { key: 'tarefas.inicio_gestor.qryPanoramaEquipe', handler: handleQryPanoramaEquipe },
-  { key: 'tarefas.inicio_gestor.qryTarefasPedemAcao', handler: handleQryTarefasPedemAcao },
+  { key: 'tarefas.inicio_gestor.listarTarefasParaAcao', handler: handleListarTarefasParaAcao },
+  { key: 'tarefas.inicio_gestor.obterPanoramaEquipe', handler: handleObterPanoramaEquipe },
 ];
 
-async function handleQryPanoramaEquipe(input: IRequestEnvelope): Promise<BffResponse<Inicio_gestorContracts['tarefas.inicio_gestor.qryPanoramaEquipe']['output']>> {
-  const held = authorize(input.request, ['gestorListas']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, []);
-  const invalid = validateInput(scoped, [], [], []);
-  if (invalid) throw invalid;
-  const params = scoped as Inicio_gestorContracts['tarefas.inicio_gestor.qryPanoramaEquipe']['input'];
-  const data = await requests["tarefas.inicio_gestor.qryPanoramaEquipe"](params, input.ctx);
-  return { ok: true, data: data as Inicio_gestorContracts['tarefas.inicio_gestor.qryPanoramaEquipe']['output'], error: null };
-}
-
-async function handleQryTarefasPedemAcao(input: IRequestEnvelope): Promise<BffResponse<Inicio_gestorContracts['tarefas.inicio_gestor.qryTarefasPedemAcao']['output']>> {
+async function handleListarTarefasParaAcao(input: IRequestEnvelope): Promise<BffResponse<Inicio_gestorContracts['tarefas.inicio_gestor.listarTarefasParaAcao']['output']>> {
   const held = authorize(input.request, ['gestorTarefasEquipe', 'gestorListas']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['page', 'pageSize']);
   const invalid = validateInput(scoped, ['page', 'pageSize'], ['page', 'pageSize'], []);
   if (invalid) throw invalid;
-  const params = scoped as Inicio_gestorContracts['tarefas.inicio_gestor.qryTarefasPedemAcao']['input'];
-  const data = await requests["tarefas.inicio_gestor.qryTarefasPedemAcao"](params, input.ctx);
-  return { ok: true, data: data as Inicio_gestorContracts['tarefas.inicio_gestor.qryTarefasPedemAcao']['output'], error: null };
+  const params = scoped as Inicio_gestorContracts['tarefas.inicio_gestor.listarTarefasParaAcao']['input'];
+  const data = await requests["tarefas.inicio_gestor.listarTarefasParaAcao"](params, input.ctx);
+  return { ok: true, data: data as Inicio_gestorContracts['tarefas.inicio_gestor.listarTarefasParaAcao']['output'], error: null };
+}
+
+async function handleObterPanoramaEquipe(input: IRequestEnvelope): Promise<BffResponse<Inicio_gestorContracts['tarefas.inicio_gestor.obterPanoramaEquipe']['output']>> {
+  const held = authorize(input.request, ['gestorListas']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, []);
+  const invalid = validateInput(scoped, [], [], []);
+  if (invalid) throw invalid;
+  const params = scoped as Inicio_gestorContracts['tarefas.inicio_gestor.obterPanoramaEquipe']['input'];
+  const data = await requests["tarefas.inicio_gestor.obterPanoramaEquipe"](params, input.ctx);
+  return { ok: true, data: data as Inicio_gestorContracts['tarefas.inicio_gestor.obterPanoramaEquipe']['output'], error: null };
 }
 
 function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string } }, held: readonly string[], allowed: readonly string[]): Record<string, unknown> {

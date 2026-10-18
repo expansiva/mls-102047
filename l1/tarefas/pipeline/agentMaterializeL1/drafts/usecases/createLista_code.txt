@@ -27,62 +27,55 @@ export interface CreateListaOutput extends Record<string, unknown> {
 }
 
 function isGestor(ctx: RequestContext): boolean {
-  const scope: string[] = [
-    ...(ctx.sessionContext.actorScope ?? []),
-    ...(ctx.sessionContext.actorSession?.scope ?? []),
-  ];
-  return scope.some((entry) => {
-    const value = String(entry).trim().toLowerCase();
-    return value === 'gestor' || value.endsWith(':gestor');
-  });
+  const scope = ctx.sessionContext?.actorScope ?? ctx.sessionContext?.actorSession?.scope ?? [];
+  return scope.some((entry) => entry === 'gestor' || entry.endsWith(':gestor'));
 }
 
 export async function createLista(input: CreateListaInput, ctx: RequestContext): Promise<CreateListaOutput> {
   // listaMantidaPorGestor: only the gestor registers lists.
   if (!isGestor(ctx)) {
-    throw new AppError('FORBIDDEN', 'Only the gestor can register lists.', 403, { ruleId: 'listaMantidaPorGestor' });
+    throw new AppError('FORBIDDEN', 'Only the gestor can create lists.', 403, { ruleId: 'listaMantidaPorGestor' });
   }
 
   const nome = typeof input.nome === 'string' ? input.nome.trim() : '';
   if (nome.length === 0) {
-    throw new AppError('INVALID_NOME', 'The list name is required.', 400);
+    throw new AppError('INVALID_INPUT', 'nome is required.', 400);
   }
   if (nome.length > 120) {
-    throw new AppError('INVALID_NOME', 'The list name must have at most 120 characters.', 400);
+    throw new AppError('INVALID_INPUT', 'nome must have at most 120 characters.', 400);
   }
   if (typeof input.ativa !== 'boolean') {
-    throw new AppError('INVALID_ATIVA', 'The field ativa is required and must be a boolean.', 400);
+    throw new AppError('INVALID_INPUT', 'ativa is required and must be a boolean.', 400);
   }
-  const tipo = input.details?.tipo;
-  if (tipo !== 'project' && tipo !== 'area') {
-    throw new AppError('INVALID_TIPO', 'The list type must be project or area.', 400);
+  const tipoRaw = input.details?.tipo;
+  if (tipoRaw !== 'project' && tipoRaw !== 'area') {
+    throw new AppError('INVALID_INPUT', 'details.tipo must be "project" or "area".', 400);
   }
+  const tipo: 'project' | 'area' = tipoRaw;
   const descricaoRaw = input.details?.descricao;
-  let descricao: string | undefined;
-  if (descricaoRaw !== undefined && descricaoRaw !== null) {
-    if (typeof descricaoRaw !== 'string') {
-      throw new AppError('INVALID_DESCRICAO', 'The description must be text.', 400);
-    }
-    if (descricaoRaw.length > 2000) {
-      throw new AppError('INVALID_DESCRICAO', 'The description must have at most 2000 characters.', 400);
-    }
-    descricao = descricaoRaw;
+  if (descricaoRaw !== undefined && typeof descricaoRaw !== 'string') {
+    throw new AppError('INVALID_INPUT', 'details.descricao must be a text.', 400);
+  }
+  if (typeof descricaoRaw === 'string' && descricaoRaw.length > 2000) {
+    throw new AppError('INVALID_INPUT', 'details.descricao must have at most 2000 characters.', 400);
   }
 
-  const listaRepository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
+  const repository = resolveRepository<ListaRepository>(ctx, 'ListaRepository');
 
   // listaNomeUnico: no two lists with the same name.
-  const existing = await listaRepository.list({});
-  if (existing.some((item) => String(item.nome).trim() === nome)) {
+  const sameName = await repository.list({ nome });
+  const normalized = nome.toLocaleLowerCase();
+  const duplicate = sameName.some((l) => String(l.nome).trim().toLocaleLowerCase() === normalized);
+  if (duplicate) {
     throw new AppError('LISTA_NOME_DUPLICADO', 'A list with this name already exists.', 409, { ruleId: 'listaNomeUnico' });
   }
 
   const details: Lista['details'] = { tipo };
-  if (descricao !== undefined) {
-    details.descricao = descricao;
+  if (typeof descricaoRaw === 'string') {
+    details.descricao = descricaoRaw;
   }
 
-  const record: Lista = {
+  const lista: Lista = {
     id: ctx.idGenerator.newId(),
     version: 1,
     nome,
@@ -90,11 +83,11 @@ export async function createLista(input: CreateListaInput, ctx: RequestContext):
     details,
   };
 
-  const created = await listaRepository.create(record);
+  const created = await repository.create(lista);
 
+  // quantidadeTarefasAbertas is derived: a list that was just created has no tasks.
   const outDetails: CreateListaOutput['details'] = {
     tipo: created.details.tipo,
-    // derived: a list just created has no tasks
     quantidadeTarefasAbertas: 0,
   };
   if (created.details.descricao !== undefined) {

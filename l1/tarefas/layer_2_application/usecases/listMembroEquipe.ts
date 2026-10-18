@@ -2,111 +2,123 @@
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { MembroEquipe } from '/_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.js';
-
 export interface ListMembroEquipeInput extends Record<string, unknown> {
-  id?: string;
-  details?: {
-    identification?: {
-      subtype?: string;
-      name?: string;
-      status?: string;
-      countryCode?: string;
-      tags?: string[];
-    };
-    base?: {
-      contacts?: Record<string, unknown>[];
-    };
-    person?: {
-      privacyConsent?: Record<string, unknown>;
-    };
-    general?: Record<string, unknown>;
-    tarefas?: Record<string, unknown>;
-  };
-  page: number;
-  pageSize: number;
+id?: string;
+details?: {
+identification?: {
+subtype?: string;
+name?: string;
+status?: string;
+countryCode?: string;
+tags?: string[];
+};
+base?: {
+contacts?: Record<string, unknown>[];
+};
+person?: {
+privacyConsent?: Record<string, unknown>;
+};
+general?: Record<string, unknown>;
+tarefas?: Record<string, unknown>;
+};
+page: number;
+pageSize: number;
 }
-
 export interface ListMembroEquipeOutput extends Record<string, unknown> {
-  items: MembroEquipe[];
-  hasMore: boolean;
+items: MembroEquipe[];
+hasMore: boolean;
 }
-
-type MembroStatus = MembroEquipe['details']['identification']['status'];
-type ListByTypeInput = Parameters<RequestContext['mdm']['collection']['listByType']>[0];
-type ListStatus = NonNullable<ListByTypeInput['status']>;
-
-function isPresent(value: unknown): boolean {
-  return value !== undefined && value !== null && value !== '';
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-  return value != null && typeof value === 'object' && !Array.isArray(value);
-}
-
-function toRecord(value: object | null | undefined): Record<string, unknown> {
-  if (value == null) return {};
-  return Object.fromEntries(Object.entries(value));
-}
-
-function pack(mdmId: string, version: number, rawDetails: object | null | undefined): MembroEquipe {
-  if (rawDetails == null) {
-    throw new AppError('INVALID_RECORD', 'MembroEquipe ' + mdmId + ' has no details.', 500);
-  }
-  const flat = toRecord(rawDetails);
-  const tags: string[] = Array.isArray(flat.tags) ? flat.tags.map((tag) => String(tag)) : [];
-  const contacts: Record<string, unknown>[] = Array.isArray(flat.contacts) ? flat.contacts.filter(isObject) : [];
-  const details: MembroEquipe['details'] = {
-    identification: {
-      subtype: 'Person',
-      name: String(flat.name ?? ''),
-      status: String(flat.status ?? '') as MembroStatus,
-      countryCode: String(flat.countryCode ?? ''),
-      tags,
-    },
-    base: { contacts },
-  };
-  if (isObject(flat.privacyConsent)) {
-    details.person = { privacyConsent: flat.privacyConsent };
-  }
-  if (isObject(flat.general)) details.general = flat.general;
-  if (isObject(flat.tarefas)) details.tarefas = flat.tarefas;
-  return { id: mdmId, version, details };
-}
-
+type MdmListQuery = Parameters<RequestContext['mdm']['collection']['listByType']>[0];
 export async function listMembroEquipe(input: ListMembroEquipeInput, ctx: RequestContext): Promise<ListMembroEquipeOutput> {
-  if (isPresent(input.id)) {
-    const found = await ctx.mdm.entity.get({ mdmId: String(input.id) });
-    if (!found) {
-      throw new AppError('NOT_FOUND', 'MembroEquipe ' + String(input.id) + ' not found.', 404);
-    }
-    return { items: [pack(String(found.mdmId), Number(found.version), found.details)], hasMore: false };
-  }
+const present = (value: unknown): boolean => value !== undefined && value !== null && value !== '';
+const rawPage = Number(input.page);
+const rawSize = Number(input.pageSize);
+const page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
+const pageSize = Number.isFinite(rawSize) && rawSize >= 1 ? Math.min(200, Math.floor(rawSize)) : 20;
+const ident = input.details?.identification;
+const nameFilter = present(ident?.name) ? String(ident?.name) : undefined;
+const statusFilter = present(ident?.status) ? String(ident?.status) : undefined;
+const subtypeFilter = present(ident?.subtype) ? String(ident?.subtype) : undefined;
+const countryFilter = present(ident?.countryCode) ? String(ident?.countryCode) : undefined;
+const tagsRaw = ident?.tags;
+const tagsFilter = Array.isArray(tagsRaw) && tagsRaw.length > 0 ? tagsRaw.map((tag) => String(tag)) : undefined;
 
-  const rawPage = Number(input.page);
-  const rawSize = Number(input.pageSize);
-  const page = Number.isFinite(rawPage) && rawPage >= 1 ? Math.floor(rawPage) : 1;
-  const pageSize = Number.isFinite(rawSize) && rawSize >= 1 ? Math.min(200, Math.floor(rawSize)) : 20;
+const pack = (full: { mdmId: string; version: number; details: unknown }): MembroEquipe => {
+const d: Record<string, unknown> = full.details && typeof full.details === 'object' ? (full.details as Record<string, unknown>) : {};
+const tags = d.tags;
+const member: MembroEquipe = {
+id: String(full.mdmId),
+version: Number(full.version),
+details: {
+identification: {
+subtype: 'Person',
+name: String(d.name ?? ''),
+status: String(d.status ?? '') as MembroEquipe['details']['identification']['status'],
+countryCode: String(d.countryCode ?? ''),
+tags: Array.isArray(tags) ? tags.map((tag) => String(tag)) : [],
+},
+base: {
+contacts: Array.isArray(d.contacts) ? (d.contacts as Record<string, unknown>[]) : [],
+},
+},
+};
+if (d.privacyConsent != null) member.details.person = { privacyConsent: d.privacyConsent as Record<string, unknown> };
+if (d.general != null) member.details.general = d.general as Record<string, unknown>;
+if (d.tarefas != null) member.details.tarefas = d.tarefas as Record<string, unknown>;
+return member;
+};
 
-  const query: ListByTypeInput = { type: 'tarefas.MembroEquipe', page, pageSize };
-  const name = input.details?.identification?.name;
-  if (isPresent(name)) query.name = String(name);
-  const status = input.details?.identification?.status;
-  if (isPresent(status)) query.status = String(status) as ListStatus;
+const matches = (member: MembroEquipe): boolean => {
+const id = member.details.identification;
+if (statusFilter !== undefined && id.status !== statusFilter) return false;
+if (countryFilter !== undefined && id.countryCode !== countryFilter) return false;
+if (tagsFilter !== undefined && !tagsFilter.every((tag) => id.tags.includes(tag))) return false;
+return true;
+};
 
-  const result = await ctx.mdm.collection.listByType(query);
-  const items: MembroEquipe[] = [];
-  for (const item of result.items) {
-    const row = toRecord(item);
-    const mdmId = String(row.mdmId);
-    if (typeof row.version === 'number') {
-      items.push(pack(mdmId, row.version, item.details));
-    } else {
-      const full = await ctx.mdm.entity.get({ mdmId });
-      if (!full) {
-        throw new AppError('NOT_FOUND', 'MembroEquipe ' + mdmId + ' not found.', 404);
-      }
-      items.push(pack(String(full.mdmId), Number(full.version), full.details));
-    }
-  }
-  return { items, hasMore: result.page * result.pageSize < result.total };
+const hydrate = async (row: { mdmId: string }): Promise<MembroEquipe> => {
+const full = await ctx.mdm.entity.get({ mdmId: String(row.mdmId) });
+return pack(full);
+};
+
+if (present(input.id)) {
+const found = await ctx.mdm.entity.get({ mdmId: String(input.id) });
+const member = pack(found);
+const items: MembroEquipe[] = matches(member) ? [member] : [];
+return { items, hasMore: false };
+}
+
+const buildQuery = (pageNumber: number, size: number): MdmListQuery => {
+const query: MdmListQuery = { type: 'tarefas.MembroEquipe', page: pageNumber, pageSize: size };
+if (nameFilter !== undefined) query.name = nameFilter;
+if (statusFilter !== undefined) query.status = statusFilter as MdmListQuery['status'];
+if (subtypeFilter !== undefined) query.subtype = subtypeFilter as MdmListQuery['subtype'];
+if (tagsFilter !== undefined) query.tags = tagsFilter;
+return query;
+};
+
+if (countryFilter === undefined) {
+const result = await ctx.mdm.collection.listByType(buildQuery(page, pageSize));
+const items: MembroEquipe[] = [];
+for (const item of result.items) {
+items.push(await hydrate(item));
+}
+return { items, hasMore: page * pageSize < Number(result.total) };
+}
+
+// countryCode is not a listByType filter: list every page, keep the matching ones and paginate here.
+const kept: MembroEquipe[] = [];
+let current = 1;
+for (;;) {
+const result = await ctx.mdm.collection.listByType(buildQuery(current, 200));
+for (const item of result.items) {
+const member = await hydrate(item);
+if (matches(member)) kept.push(member);
+}
+if (result.items.length === 0 || current * 200 >= Number(result.total)) break;
+current += 1;
+}
+const start = (page - 1) * pageSize;
+const items = kept.slice(start, start + pageSize);
+return { items, hasMore: start + pageSize < kept.length };
 }

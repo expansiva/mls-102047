@@ -15,10 +15,18 @@ export interface ListTarefaInput extends Record<string, unknown> {
   criadorId?: string;
   tarefaPaiId?: string;
   chaveCriacao?: string;
+  criadaEm?: string;
   details?: {
+    descricao?: string;
+    motivoDevolucao?: string;
+    devolvidaEm?: string;
+    concluidaEm?: string;
+    canceladaEm?: string;
     aberta?: boolean;
     venceHoje?: boolean;
     atrasada?: boolean;
+    quantidadeSubtarefas?: number;
+    progressoChecklist?: string;
   };
   page: number;
   pageSize: number;
@@ -29,42 +37,62 @@ export interface ListTarefaOutput extends Record<string, unknown> {
   hasMore: boolean;
 }
 
+function filled(value: unknown): boolean {
+  return value !== undefined && value !== null && value !== '';
+}
+
+function normalizeText(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
 export async function listTarefa(input: ListTarefaInput, ctx: RequestContext): Promise<ListTarefaOutput> {
-  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-  const filled = (value: unknown): value is string => typeof value === 'string' && value !== '';
-  const normalize = (text: string): string => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
 
-  // Exact-match filters (locate.byColumn / listByForeignKey).
+  // Exact filters (stored, non-derived columns).
   const where: Record<string, unknown> = {};
-  if (filled(input.id)) where.id = input.id;
-  if (filled(input.status)) where.status = input.status;
-  if (filled(input.prioridade)) where.prioridade = input.prioridade;
-  if (filled(input.prazo)) where.prazo = input.prazo;
-  if (filled(input.listaId)) where.listaId = input.listaId;
-  if (filled(input.responsavelId)) where.responsavelId = input.responsavelId;
-  if (filled(input.criadorId)) where.criadorId = input.criadorId;
-  if (filled(input.tarefaPaiId)) where.tarefaPaiId = input.tarefaPaiId;
-  if (filled(input.chaveCriacao)) where.chaveCriacao = input.chaveCriacao;
+  if (filled(input.id)) where.id = String(input.id);
+  if (filled(input.status)) where.status = String(input.status);
+  if (filled(input.prioridade)) where.prioridade = String(input.prioridade);
+  if (filled(input.prazo)) where.prazo = String(input.prazo);
+  if (filled(input.listaId)) where.listaId = String(input.listaId);
+  if (filled(input.responsavelId)) where.responsavelId = String(input.responsavelId);
+  if (filled(input.criadorId)) where.criadorId = String(input.criadorId);
+  if (filled(input.tarefaPaiId)) where.tarefaPaiId = String(input.tarefaPaiId);
+  if (filled(input.chaveCriacao)) where.chaveCriacao = String(input.chaveCriacao);
 
-  const found = await tarefaRepository.list(where);
+  const found = await repository.list(where);
+  let kept: Tarefa[] = found;
 
-  // Derived flags are calculated from status and prazo, never read from storage.
+  // Text search on the title: contains, case and accent insensitive.
+  if (filled(input.titulo)) {
+    const term = normalizeText(String(input.titulo));
+    kept = kept.filter((tarefa) => normalizeText(String(tarefa.titulo ?? '')).includes(term));
+  }
+
+  // criadaEm is a timestamp: the filter is the day (from the start to the end of that day).
+  if (filled(input.criadaEm)) {
+    const day = String(input.criadaEm).slice(0, 10);
+    kept = kept.filter((tarefa) => String(tarefa.criadaEm ?? '').slice(0, 10) === day);
+  }
+
+  // Derived flags are computed, never read from storage.
   const today = ctx.clock.nowIso().slice(0, 10);
-  const isOpen = (t: Tarefa): boolean => t.status === 'aFazer' || t.status === 'emAndamento' || t.status === 'emRevisao';
-  const wantAberta = typeof input.details?.aberta === 'boolean' ? input.details.aberta : undefined;
-  const wantVenceHoje = typeof input.details?.venceHoje === 'boolean' ? input.details.venceHoje : undefined;
-  const wantAtrasada = typeof input.details?.atrasada === 'boolean' ? input.details.atrasada : undefined;
+  const isOpen = (tarefa: Tarefa): boolean => tarefa.status === 'aFazer' || tarefa.status === 'emAndamento' || tarefa.status === 'emRevisao';
+  const dueDay = (tarefa: Tarefa): string => String(tarefa.prazo ?? '').slice(0, 10);
 
-  // Text search (locate.byText): case-insensitive, accent-insensitive contains over the title.
-  const term = filled(input.titulo) ? normalize(input.titulo.trim()) : '';
-
-  const kept = found.filter((t: Tarefa): boolean => {
-    if (term !== '' && !normalize(String(t.titulo ?? '')).includes(term)) return false;
-    if (wantAberta !== undefined && isOpen(t) !== wantAberta) return false;
-    if (wantVenceHoje !== undefined && (isOpen(t) && String(t.prazo).slice(0, 10) === today) !== wantVenceHoje) return false;
-    if (wantAtrasada !== undefined && (isOpen(t) && String(t.prazo).slice(0, 10) < today) !== wantAtrasada) return false;
-    return true;
-  });
+  const detailsFilter = input.details;
+  if (detailsFilter && typeof detailsFilter.aberta === 'boolean') {
+    const wanted = detailsFilter.aberta;
+    kept = kept.filter((tarefa) => isOpen(tarefa) === wanted);
+  }
+  if (detailsFilter && typeof detailsFilter.venceHoje === 'boolean') {
+    const wanted = detailsFilter.venceHoje;
+    kept = kept.filter((tarefa) => (isOpen(tarefa) && dueDay(tarefa) === today) === wanted);
+  }
+  if (detailsFilter && typeof detailsFilter.atrasada === 'boolean') {
+    const wanted = detailsFilter.atrasada;
+    kept = kept.filter((tarefa) => (isOpen(tarefa) && dueDay(tarefa) !== '' && dueDay(tarefa) < today) === wanted);
+  }
 
   const page = Math.max(1, Math.trunc(Number(input.page)) || 1);
   const size = Math.min(200, Math.max(1, Math.trunc(Number(input.pageSize)) || 20));

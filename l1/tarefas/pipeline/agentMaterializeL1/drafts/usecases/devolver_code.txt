@@ -41,45 +41,50 @@ export interface DevolverOutput extends Record<string, unknown> {
 }
 
 export async function devolver(input: DevolverInput, ctx: RequestContext): Promise<DevolverOutput> {
-  const id = String(input.id ?? '').trim();
+  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+
+  const id = String(input.id ?? '');
   if (!id) {
-    throw new AppError('INVALID_INPUT', 'The task id is required.', 400);
+    throw new AppError('VALIDATION_ERROR', 'id is required.', 400);
   }
 
-  const motivoRaw = (input.details as { motivoDevolucao?: unknown } | undefined)?.motivoDevolucao;
-  const motivo = typeof motivoRaw === 'string' ? motivoRaw.trim() : '';
+  const rawMotivo = (input.details as { motivoDevolucao?: unknown } | undefined)?.motivoDevolucao;
+  const motivo = typeof rawMotivo === 'string' ? rawMotivo.trim() : '';
   if (!motivo) {
-    throw new AppError('REASON_REQUIRED', 'Returning a task for adjustment requires the reason.', 400, { ruleId: 'devolucaoExigeMotivo' });
+    throw new AppError('MOTIVO_DEVOLUCAO_REQUIRED', 'The return reason is required to send a task back for adjustment.', 400, { ruleId: 'devolucaoExigeMotivo' });
   }
   if (motivo.length > 2000) {
-    throw new AppError('INVALID_INPUT', 'The return reason must have at most 2000 characters.', 400, { ruleId: 'devolucaoExigeMotivo' });
+    throw new AppError('MOTIVO_DEVOLUCAO_TOO_LONG', 'The return reason must have at most 2000 characters.', 400, { ruleId: 'devolucaoExigeMotivo' });
   }
 
-  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-  const tarefa = await repository.get(id);
+  const tarefa = await tarefaRepository.get(id);
   if (!tarefa) {
-    throw new AppError('NOT_FOUND', 'Task not found.', 404);
+    throw new AppError('NOT_FOUND', 'Tarefa not found.', 404);
   }
 
   if (input.version !== undefined && input.version !== null && Number(input.version) !== tarefa.version) {
-    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
+    throw new AppError('VERSION_CONFLICT', 'The task was changed by someone else; reload and try again.', 409);
   }
 
   if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
-    throw new AppError('TASK_CLOSED', 'A completed or cancelled task no longer changes status.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
+    throw new AppError('TAREFA_ENCERRADA', 'A closed task (completed or cancelled) does not change status anymore.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
   }
   if (tarefa.status !== 'emRevisao') {
-    throw new AppError('INVALID_STATE', 'Only a task in review can be returned for adjustment.', 409, { ruleId: 'somenteCriadorRevisa' });
+    throw new AppError('INVALID_STATE', 'Only a task in review can be sent back for adjustment.', 409);
   }
 
-  const actorId = ctx.sessionContext.person?.mdmId;
-  if (!actorId || actorId !== tarefa.criadorId) {
-    throw new AppError('FORBIDDEN', 'Only the creator of the task can return it for adjustment.', 403, { ruleId: 'somenteCriadorRevisa' });
+  const actorPersonId = ctx.sessionContext.person?.mdmId;
+  if (!actorPersonId) {
+    throw new AppError('FORBIDDEN', 'The session person is required to review a task.', 403, { ruleId: 'somenteCriadorRevisa' });
+  }
+  if (actorPersonId !== tarefa.criadorId) {
+    throw new AppError('FORBIDDEN', 'Only the creator of the task can send it back for adjustment.', 403, { ruleId: 'somenteCriadorRevisa' });
   }
 
+  const nowIso = ctx.clock.nowIso();
   const details: Tarefa['details'] = {
     motivoDevolucao: motivo,
-    devolvidaEm: ctx.clock.nowIso(),
+    devolvidaEm: nowIso,
   };
   if (tarefa.details?.descricao !== undefined) details.descricao = tarefa.details.descricao;
   if (tarefa.details?.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
@@ -101,9 +106,24 @@ export async function devolver(input: DevolverInput, ctx: RequestContext): Promi
   };
   if (tarefa.tarefaPaiId !== undefined) next.tarefaPaiId = tarefa.tarefaPaiId;
 
-  const saved = await repository.transition(next, 'devolver');
+  const saved = await tarefaRepository.transition(next, 'devolver');
 
-  const out: DevolverOutput = {
+  const today = nowIso.slice(0, 10);
+  const prazoDay = String(saved.prazo).slice(0, 10);
+  const aberta = saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao';
+
+  const outDetails: DevolverOutput['details'] = {
+    aberta,
+    venceHoje: aberta && prazoDay === today,
+    atrasada: aberta && prazoDay < today,
+  };
+  if (saved.details?.descricao !== undefined) outDetails.descricao = saved.details.descricao;
+  if (saved.details?.motivoDevolucao !== undefined) outDetails.motivoDevolucao = saved.details.motivoDevolucao;
+  if (saved.details?.devolvidaEm !== undefined) outDetails.devolvidaEm = saved.details.devolvidaEm;
+  if (saved.details?.concluidaEm !== undefined) outDetails.concluidaEm = saved.details.concluidaEm;
+  if (saved.details?.canceladaEm !== undefined) outDetails.canceladaEm = saved.details.canceladaEm;
+
+  const output: DevolverOutput = {
     id: saved.id,
     version: saved.version,
     titulo: saved.titulo,
@@ -115,15 +135,8 @@ export async function devolver(input: DevolverInput, ctx: RequestContext): Promi
     criadorId: saved.criadorId,
     chaveCriacao: saved.chaveCriacao,
     criadaEm: saved.criadaEm,
-    details: {
-      aberta: saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao',
-    },
+    details: outDetails,
   };
-  if (saved.tarefaPaiId !== undefined) out.tarefaPaiId = saved.tarefaPaiId;
-  if (saved.details?.descricao !== undefined) out.details.descricao = saved.details.descricao;
-  if (saved.details?.motivoDevolucao !== undefined) out.details.motivoDevolucao = saved.details.motivoDevolucao;
-  if (saved.details?.devolvidaEm !== undefined) out.details.devolvidaEm = saved.details.devolvidaEm;
-  if (saved.details?.concluidaEm !== undefined) out.details.concluidaEm = saved.details.concluidaEm;
-  if (saved.details?.canceladaEm !== undefined) out.details.canceladaEm = saved.details.canceladaEm;
-  return out;
+  if (saved.tarefaPaiId !== undefined) output.tarefaPaiId = saved.tarefaPaiId;
+  return output;
 }

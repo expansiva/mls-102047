@@ -6,54 +6,42 @@ import { requests } from '/_102047_/l1/tarefas/layer_2_application/requests/memb
 import type { Membros_equipeContracts } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
 
 export const routes: ControllerRoute[] = [
-  { key: 'tarefas.membros_equipe.cadastrarPessoa', handler: handleCadastrarPessoa },
-  { key: 'tarefas.membros_equipe.listarMembrosEquipe', handler: handleListarMembrosEquipe },
-  { key: 'tarefas.membros_equipe.obterMembroEquipe', handler: handleObterMembroEquipe },
-  { key: 'tarefas.membros_equipe.salvarAlteracoesPessoa', handler: handleSalvarAlteracoesPessoa },
+  { key: 'tarefas.membros_equipe.cmdCadastrarPessoa', handler: handleCmdCadastrarPessoa },
+  { key: 'tarefas.membros_equipe.cmdSalvarAlteracoes', handler: handleCmdSalvarAlteracoes },
+  { key: 'tarefas.membros_equipe.qryPessoasEquipe', handler: handleQryPessoasEquipe },
 ];
 
-async function handleCadastrarPessoa(input: IRequestEnvelope): Promise<BffResponse<Membros_equipeContracts['tarefas.membros_equipe.cadastrarPessoa']['output']>> {
+async function handleCmdCadastrarPessoa(input: IRequestEnvelope): Promise<BffResponse<Membros_equipeContracts['tarefas.membros_equipe.cmdCadastrarPessoa']['output']>> {
   const held = authorize(input.request, ['gestorMembros']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['details', 'details.identification', 'details.identification.name', 'details.identification.countryCode']);
   const invalid = validateInput(scoped, ['details', 'details.identification', 'details.identification.name', 'details.identification.countryCode'], ['details', 'details.identification', 'details.identification.name', 'details.identification.countryCode'], []);
   if (invalid) throw invalid;
-  const params = scoped as Membros_equipeContracts['tarefas.membros_equipe.cadastrarPessoa']['input'];
-  const data = await requests["tarefas.membros_equipe.cadastrarPessoa"](params, input.ctx);
-  return { ok: true, data: data as Membros_equipeContracts['tarefas.membros_equipe.cadastrarPessoa']['output'], error: null };
+  const params = scoped as Membros_equipeContracts['tarefas.membros_equipe.cmdCadastrarPessoa']['input'];
+  const data = await requests["tarefas.membros_equipe.cmdCadastrarPessoa"](params, input.ctx);
+  return { ok: true, data: data as Membros_equipeContracts['tarefas.membros_equipe.cmdCadastrarPessoa']['output'], error: null };
 }
 
-async function handleListarMembrosEquipe(input: IRequestEnvelope): Promise<BffResponse<Membros_equipeContracts['tarefas.membros_equipe.listarMembrosEquipe']['output']>> {
-  const held = authorize(input.request, ['gestorMembros']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['busca', 'page', 'pageSize']);
-  const invalid = validateInput(scoped, ['page', 'pageSize'], ['busca', 'page', 'pageSize'], []);
-  if (invalid) throw invalid;
-  const params = scoped as Membros_equipeContracts['tarefas.membros_equipe.listarMembrosEquipe']['input'];
-  const data = await requests["tarefas.membros_equipe.listarMembrosEquipe"](params, input.ctx);
-  return { ok: true, data: data as Membros_equipeContracts['tarefas.membros_equipe.listarMembrosEquipe']['output'], error: null };
-}
-
-async function handleObterMembroEquipe(input: IRequestEnvelope): Promise<BffResponse<Membros_equipeContracts['tarefas.membros_equipe.obterMembroEquipe']['output']>> {
-  const held = authorize(input.request, ['gestorMembros']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['id']);
-  const invalid = validateInput(scoped, ['id'], ['id'], []);
-  if (invalid) throw invalid;
-  const params = scoped as Membros_equipeContracts['tarefas.membros_equipe.obterMembroEquipe']['input'];
-  const data = await requests["tarefas.membros_equipe.obterMembroEquipe"](params, input.ctx);
-  return { ok: true, data: data as Membros_equipeContracts['tarefas.membros_equipe.obterMembroEquipe']['output'], error: null };
-}
-
-async function handleSalvarAlteracoesPessoa(input: IRequestEnvelope): Promise<BffResponse<Membros_equipeContracts['tarefas.membros_equipe.salvarAlteracoesPessoa']['output']>> {
+async function handleCmdSalvarAlteracoes(input: IRequestEnvelope): Promise<BffResponse<Membros_equipeContracts['tarefas.membros_equipe.cmdSalvarAlteracoes']['output']>> {
   const held = authorize(input.request, ['gestorMembros']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'details', 'details.identification', 'details.identification.name', 'details.identification.countryCode']);
   const invalid = validateInput(scoped, ['id', 'version', 'details', 'details.identification', 'details.identification.name', 'details.identification.countryCode'], ['id', 'version', 'details', 'details.identification', 'details.identification.name', 'details.identification.countryCode'], []);
   if (invalid) throw invalid;
-  const params = scoped as Membros_equipeContracts['tarefas.membros_equipe.salvarAlteracoesPessoa']['input'];
-  const data = await requests["tarefas.membros_equipe.salvarAlteracoesPessoa"](params, input.ctx);
-  return { ok: true, data: data as Membros_equipeContracts['tarefas.membros_equipe.salvarAlteracoesPessoa']['output'], error: null };
+  const params = scoped as Membros_equipeContracts['tarefas.membros_equipe.cmdSalvarAlteracoes']['input'];
+  const data = await requests["tarefas.membros_equipe.cmdSalvarAlteracoes"](params, input.ctx);
+  return { ok: true, data: data as Membros_equipeContracts['tarefas.membros_equipe.cmdSalvarAlteracoes']['output'], error: null };
+}
+
+async function handleQryPessoasEquipe(input: IRequestEnvelope): Promise<BffResponse<Membros_equipeContracts['tarefas.membros_equipe.qryPessoasEquipe']['output']>> {
+  const held = authorize(input.request, ['gestorMembros']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['busca', 'page', 'pageSize']);
+  const invalid = validateInput(scoped, ['page', 'pageSize'], ['busca', 'page', 'pageSize'], []);
+  if (invalid) throw invalid;
+  const params = scoped as Membros_equipeContracts['tarefas.membros_equipe.qryPessoasEquipe']['input'];
+  const data = await requests["tarefas.membros_equipe.qryPessoasEquipe"](params, input.ctx);
+  return { ok: true, data: data as Membros_equipeContracts['tarefas.membros_equipe.qryPessoasEquipe']['output'], error: null };
 }
 
 function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string } }, held: readonly string[], allowed: readonly string[]): Record<string, unknown> {

@@ -22,31 +22,20 @@ export interface ListItemChecklistOutput extends Record<string, unknown> {
 export async function listItemChecklist(input: ListItemChecklistInput, ctx: RequestContext): Promise<ListItemChecklistOutput> {
   const repository = resolveRepository<ItemChecklistRepository>(ctx, 'ItemChecklistRepository');
   const where: Record<string, unknown> = {};
-
-  if (input.id !== undefined && input.id !== null && String(input.id) !== '') {
-    where.id = String(input.id);
-  }
-  if (input.tarefaId !== undefined && input.tarefaId !== null && String(input.tarefaId) !== '') {
-    where.tarefaId = String(input.tarefaId);
-  }
-  if (input.ordem !== undefined && input.ordem !== null && (input.ordem as unknown) !== '') {
-    const ordem = Number(input.ordem);
-    if (!Number.isFinite(ordem)) {
-      throw new AppError('INVALID_INPUT', 'ordem must be a number.', 400);
-    }
+  if (input.id !== undefined && input.id !== null && String(input.id) !== '') where.id = String(input.id);
+  if (input.tarefaId !== undefined && input.tarefaId !== null && String(input.tarefaId) !== '') where.tarefaId = String(input.tarefaId);
+  const ordemRaw: unknown = input.ordem;
+  if (ordemRaw !== undefined && ordemRaw !== null && ordemRaw !== '') {
+    const ordem = Number(ordemRaw);
+    if (!Number.isFinite(ordem)) throw new AppError('INVALID_INPUT', 'ordem must be a number.', 400);
     where.ordem = ordem;
   }
-  if (input.feito !== undefined && input.feito !== null && (input.feito as unknown) !== '') {
-    const raw: unknown = input.feito;
-    if (raw === true || raw === 'true') {
-      where.feito = true;
-    } else if (raw === false || raw === 'false') {
-      where.feito = false;
-    } else {
-      throw new AppError('INVALID_INPUT', 'feito must be a boolean.', 400);
-    }
+  const feitoRaw: unknown = input.feito;
+  if (feitoRaw !== undefined && feitoRaw !== null && feitoRaw !== '') {
+    if (feitoRaw === true || feitoRaw === 'true') where.feito = true;
+    else if (feitoRaw === false || feitoRaw === 'false') where.feito = false;
+    else throw new AppError('INVALID_INPUT', 'feito must be a boolean.', 400);
   }
-
   const found = await repository.list(where);
   const sorted = [...found].sort((a, b) => a.ordem - b.ordem);
   const page = Math.max(1, Math.trunc(Number(input.page)) || 1);

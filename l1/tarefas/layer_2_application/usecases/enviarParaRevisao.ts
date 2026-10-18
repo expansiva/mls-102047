@@ -37,48 +37,23 @@ export interface EnviarParaRevisaoOutput extends Record<string, unknown> {
   };
 }
 
-export async function enviarParaRevisao(input: Record<string, unknown>, ctx: RequestContext): Promise<EnviarParaRevisaoOutput> {
-  const id = String(input.id ?? '');
-  if (!id) {
-    throw new AppError('INVALID_INPUT', 'id is required.', 400);
-  }
-  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-  const tarefa: Tarefa = await repository.get(id);
-  if (!tarefa) {
-    throw new AppError('NOT_FOUND', 'Tarefa not found.', 404);
-  }
-
-  if (input.version !== undefined && input.version !== null && Number(input.version) !== tarefa.version) {
-    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
-  }
-
-  if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
-    throw new AppError('TAREFA_ENCERRADA', 'A closed task cannot change status.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
-  }
-  if (tarefa.status !== 'emAndamento') {
-    throw new AppError('INVALID_STATE', 'Only a task in progress can be sent to review.', 409);
-  }
-
-  const actorId = ctx.sessionContext.person?.mdmId;
-  if (!actorId) {
-    throw new AppError('FORBIDDEN', 'The session has no team member identified.', 403, { ruleId: 'somenteResponsavelExecuta' });
-  }
-  if (actorId !== tarefa.responsavelId) {
-    throw new AppError('FORBIDDEN', 'Only the task assignee can send it to review.', 403, { ruleId: 'somenteResponsavelExecuta' });
-  }
-
+// Only stored fields: derived ones (aberta, venceHoje, atrasada, quantidadeSubtarefas, progressoChecklist) are never written.
+function storedDetails(source: Tarefa['details']): Tarefa['details'] {
   const details: Tarefa['details'] = {};
-  if (tarefa.details.descricao !== undefined) details.descricao = tarefa.details.descricao;
-  if (tarefa.details.motivoDevolucao !== undefined) details.motivoDevolucao = tarefa.details.motivoDevolucao;
-  if (tarefa.details.devolvidaEm !== undefined) details.devolvidaEm = tarefa.details.devolvidaEm;
-  if (tarefa.details.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
-  if (tarefa.details.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
+  if (source.descricao !== undefined) details.descricao = source.descricao;
+  if (source.motivoDevolucao !== undefined) details.motivoDevolucao = source.motivoDevolucao;
+  if (source.devolvidaEm !== undefined) details.devolvidaEm = source.devolvidaEm;
+  if (source.concluidaEm !== undefined) details.concluidaEm = source.concluidaEm;
+  if (source.canceladaEm !== undefined) details.canceladaEm = source.canceladaEm;
+  return details;
+}
 
-  const toStore: Tarefa = {
+function toOutput(tarefa: Tarefa): EnviarParaRevisaoOutput {
+  const output: EnviarParaRevisaoOutput = {
     id: tarefa.id,
     version: tarefa.version,
     titulo: tarefa.titulo,
-    status: 'emRevisao',
+    status: tarefa.status,
     prioridade: tarefa.prioridade,
     prazo: tarefa.prazo,
     listaId: tarefa.listaId,
@@ -86,43 +61,52 @@ export async function enviarParaRevisao(input: Record<string, unknown>, ctx: Req
     criadorId: tarefa.criadorId,
     chaveCriacao: tarefa.chaveCriacao,
     criadaEm: tarefa.criadaEm,
-    details,
+    details: storedDetails(tarefa.details ?? {}),
   };
-  if (tarefa.tarefaPaiId !== undefined) toStore.tarefaPaiId = tarefa.tarefaPaiId;
-
-  const saved = await repository.transition(toStore, 'enviarParaRevisao');
-
-  const subtarefas = await repository.list({ tarefaPaiId: saved.id });
-  const today = ctx.clock.nowIso().slice(0, 10);
-  const prazoDay = String(saved.prazo).slice(0, 10);
-  const aberta = saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao';
-
-  const outDetails: EnviarParaRevisaoOutput['details'] = {
-    aberta,
-    venceHoje: aberta && prazoDay === today,
-    atrasada: aberta && prazoDay < today,
-    quantidadeSubtarefas: subtarefas.length,
-  };
-  if (saved.details.descricao !== undefined) outDetails.descricao = saved.details.descricao;
-  if (saved.details.motivoDevolucao !== undefined) outDetails.motivoDevolucao = saved.details.motivoDevolucao;
-  if (saved.details.devolvidaEm !== undefined) outDetails.devolvidaEm = saved.details.devolvidaEm;
-  if (saved.details.concluidaEm !== undefined) outDetails.concluidaEm = saved.details.concluidaEm;
-  if (saved.details.canceladaEm !== undefined) outDetails.canceladaEm = saved.details.canceladaEm;
-
-  const output: EnviarParaRevisaoOutput = {
-    id: saved.id,
-    version: saved.version,
-    titulo: saved.titulo,
-    status: saved.status,
-    prioridade: saved.prioridade,
-    prazo: saved.prazo,
-    listaId: saved.listaId,
-    responsavelId: saved.responsavelId,
-    criadorId: saved.criadorId,
-    chaveCriacao: saved.chaveCriacao,
-    criadaEm: saved.criadaEm,
-    details: outDetails,
-  };
-  if (saved.tarefaPaiId !== undefined) output.tarefaPaiId = saved.tarefaPaiId;
+  if (tarefa.tarefaPaiId !== undefined) output.tarefaPaiId = tarefa.tarefaPaiId;
   return output;
+}
+
+export async function enviarParaRevisao(input: EnviarParaRevisaoInput, ctx: RequestContext): Promise<EnviarParaRevisaoOutput> {
+  const id = String(input.id ?? '');
+  if (!id) {
+    throw new AppError('INVALID_INPUT', 'id is required.', 400);
+  }
+  const version = Number(input.version);
+  if (!Number.isFinite(version)) {
+    throw new AppError('INVALID_INPUT', 'version is required.', 400);
+  }
+
+  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const tarefa = await repository.get(id);
+  if (!tarefa) {
+    throw new AppError('NOT_FOUND', `Tarefa ${id} not found.`, 404);
+  }
+
+  if (tarefa.version !== version) {
+    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
+  }
+
+  if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
+    throw new AppError('TASK_CLOSED', 'A closed task (completed or cancelled) cannot change status.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
+  }
+  if (tarefa.status !== 'emAndamento') {
+    throw new AppError('INVALID_STATE', 'Only a task in progress can be sent to review.', 409);
+  }
+
+  const actorId = ctx.sessionContext.person?.mdmId;
+  if (!actorId) {
+    throw new AppError('FORBIDDEN', 'The session has no identified team member.', 403, { ruleId: 'somenteResponsavelExecuta' });
+  }
+  if (actorId !== tarefa.responsavelId) {
+    throw new AppError('FORBIDDEN', 'Only the task assignee can send it to review.', 403, { ruleId: 'somenteResponsavelExecuta' });
+  }
+
+  const next: Tarefa = {
+    ...tarefa,
+    status: 'emRevisao',
+    details: storedDetails(tarefa.details ?? {}),
+  };
+  const saved = await repository.transition(next, 'enviarParaRevisao');
+  return toOutput(saved);
 }

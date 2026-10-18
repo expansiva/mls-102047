@@ -37,9 +37,9 @@ export interface GetTarefaOutput extends Record<string, unknown> {
 }
 
 export async function getTarefa(input: GetTarefaInput, ctx: RequestContext): Promise<GetTarefaOutput> {
-  const id = input.id === undefined || input.id === null ? '' : String(input.id);
-  if (id === '') {
-    throw new AppError('INVALID_INPUT', 'The id of the tarefa is required.', 400);
+  const id = String(input.id ?? '').trim();
+  if (!id) {
+    throw new AppError('INVALID_INPUT', 'The task id is required.', 400);
   }
 
   const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
@@ -51,11 +51,11 @@ export async function getTarefa(input: GetTarefaInput, ctx: RequestContext): Pro
   }
 
   // Derived fields: calculated every time, never read from storage.
-  const aberta = found.status === 'aFazer' || found.status === 'emAndamento' || found.status === 'emRevisao';
   const today = ctx.clock.nowIso().slice(0, 10);
-  const prazoDay = String(found.prazo).slice(0, 10);
-  const venceHoje = aberta && prazoDay === today;
-  const atrasada = aberta && prazoDay < today;
+  const aberta = found.status === 'aFazer' || found.status === 'emAndamento' || found.status === 'emRevisao';
+  const prazoDay = String(found.prazo ?? '').slice(0, 10);
+  const venceHoje = aberta && prazoDay !== '' && prazoDay === today;
+  const atrasada = aberta && prazoDay !== '' && prazoDay < today;
 
   const subtarefas = await tarefaRepository.list({ tarefaPaiId: found.id });
   const itens = await itemChecklistRepository.list({ tarefaId: found.id });
@@ -68,11 +68,14 @@ export async function getTarefa(input: GetTarefaInput, ctx: RequestContext): Pro
     quantidadeSubtarefas: subtarefas.length,
     progressoChecklist: `${feitos}/${itens.length}`,
   };
-  if (found.details?.descricao !== undefined) details.descricao = found.details.descricao;
-  if (found.details?.motivoDevolucao !== undefined) details.motivoDevolucao = found.details.motivoDevolucao;
-  if (found.details?.devolvidaEm !== undefined) details.devolvidaEm = found.details.devolvidaEm;
-  if (found.details?.concluidaEm !== undefined) details.concluidaEm = found.details.concluidaEm;
-  if (found.details?.canceladaEm !== undefined) details.canceladaEm = found.details.canceladaEm;
+  const stored = found.details;
+  if (stored) {
+    if (stored.descricao !== undefined) details.descricao = stored.descricao;
+    if (stored.motivoDevolucao !== undefined) details.motivoDevolucao = stored.motivoDevolucao;
+    if (stored.devolvidaEm !== undefined) details.devolvidaEm = stored.devolvidaEm;
+    if (stored.concluidaEm !== undefined) details.concluidaEm = stored.concluidaEm;
+    if (stored.canceladaEm !== undefined) details.canceladaEm = stored.canceladaEm;
+  }
 
   const output: GetTarefaOutput = {
     id: found.id,

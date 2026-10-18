@@ -8,6 +8,7 @@ export type ItemChecklistFilter = Record<string, unknown>;
 export interface ItemChecklistRepository {
   list(itemChecklistFilter: ItemChecklistFilter): Promise<ItemChecklist[]>;
   update(itemChecklist: ItemChecklist): Promise<ItemChecklist>;
+  create(itemChecklist: ItemChecklist): Promise<ItemChecklist>;
 }
 
 let rows = createMemoryTableRepository<ItemChecklist>([]);
@@ -25,4 +26,5 @@ export async function removeMemory(id: string): Promise<boolean> {
 export const pendingItemChecklistRepository: ItemChecklistRepository = {
   async list(filter: ItemChecklistFilter): Promise<ItemChecklist[]> { return table().findMany({ where: filter as Partial<ItemChecklist> }); },
   async update(itemChecklist: ItemChecklist): Promise<ItemChecklist> {  const where = { id: itemChecklist.id } as Partial<ItemChecklist>; await table().update({ where, patch: itemChecklist }); const saved = await table().findOne({ where }); if (!saved) throw new AppError('NOT_FOUND', 'Record not found.', 404); return saved; },
+  async create(record: ItemChecklist): Promise<ItemChecklist> { await table().insert({ record }); return record; },
 };

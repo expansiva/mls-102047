@@ -22,7 +22,7 @@ export const grants: readonly StructureGrant[] = [
   {"grantId":"membroAvisosProprios","actorRef":"membroEquipe","scopeMode":"own","session":"verified","pending":"","disclosure":"fullRecord","recordField":"responsavelId","recordFields":{"AvisoVencimento":"responsavelId"},"entityRefs":["AvisoVencimento"],"selfAnchored":false},
   {"grantId":"membroConsultaListas","actorRef":"membroEquipe","scopeMode":"organization","session":"verified","pending":"","disclosure":"fieldsOnly","recordField":"","recordFields":{},"entityRefs":["Lista"],"selfAnchored":false},
   {"grantId":"membroEscolheResponsavel","actorRef":"membroEquipe","scopeMode":"organization","session":"verified","pending":"","disclosure":"fieldsOnly","recordField":"","recordFields":{},"entityRefs":["MembroEquipe"],"selfAnchored":false},
-  {"grantId":"membroTarefasProprias","actorRef":"membroEquipe","scopeMode":"own","session":"verified","pending":"","disclosure":"fullRecord","recordField":"criadorId","recordFields":{"Tarefa":"criadorId"},"entityRefs":["Tarefa","ItemChecklist"],"selfAnchored":false}
+  {"grantId":"membroTarefasProprias","actorRef":"membroEquipe","scopeMode":"own","session":"verified","pending":"ACCESS_ANCHOR","disclosure":"fullRecord","recordField":"criadorId","recordFields":{"Tarefa":"criadorId"},"entityRefs":["Tarefa","ItemChecklist"],"selfAnchored":false}
 ];
 
 export function resolveGrant(grantId: string): StructureGrant | { code: string; detail: string } {
