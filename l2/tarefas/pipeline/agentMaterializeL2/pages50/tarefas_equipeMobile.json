@@ -4,40 +4,40 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "mobile",
-  "contextHash": "sha256:f0ddb4d12100e0aca55e9484da33ae4ecc83b10f781fd5b8d81767bd948f9e61",
+  "contextHash": "sha256:19f27379a501835666ef7012bcf7211e62016197633539c34f268edb9a63421e",
   "sourcePath": "l2/tarefas/web/mobile/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:dcb65391702834fe9cf0c2d492a305dddfda3db28d90d3a048253d1554482ce7",
+  "sourceHash": "sha256:a7de4dafaad03cd2d334649b7e771a486abddc8f31d4bd809f46565b87fda01d",
   "attempt": 2,
   "design": {
-    "concept": "No celular o gestor trabalha em dois passos sem perder o lugar: a fila de tarefas da equipe (busca sempre à mão, demais filtros recolhidos) e, ao tocar numa tarefa, a tela da tarefa com detalhe, ações ao alcance do polegar e histórico por último. Voltar devolve à fila com os mesmos filtros e a tarefa marcada.",
+    "concept": "Uma coluna fluida para o gestor no celular: primeiro a lista de tarefas da equipe com filtros recolhidos e sinais de atraso, depois, ao tocar numa tarefa, uma segunda visão empilhada com o detalhe, as ações do gestor (trocar responsável, cancelar) e o histórico ao final. Uma coisa de cada vez, sem perder o lugar na lista.",
     "views": [
       {
         "id": "quadro",
-        "purpose": "Fila empilhada das tarefas da equipe: busca pelo título, filtros recolhíveis, linhas com situação, prazo e aviso de atraso; tocar numa linha abre a tarefa."
+        "purpose": "Lista compacta das tarefas da equipe (cards por tarefa), filtros recolhíveis, destaque de atrasadas e que vencem hoje, carregar mais."
       },
       {
         "id": "tarefa",
-        "purpose": "A tarefa aberta em uma coluna: cartão de detalhe com checklist, depois trocar responsável / cancelar (só quando a tarefa está aberta) e, por último, o histórico. Tem botão de voltar à fila."
+        "purpose": "Tarefa tocada: detalhe e checklist, ações do gestor com confirmação de cancelamento e, por último, o histórico. Tem botão de voltar para a lista."
       }
     ],
-    "decisions": "Usei o host de cenas em mode=\"scenary\" com duas cenas, porque no celular uma coisa de cada vez vence espremer fila e painel; selecionar chama selecionarTarefa e abre a cena 'tarefa', e o 'voltar' do host retorna à fila sem recarregar. A fila usa o ml-responsive-data-table com três colunas sempre visíveis (Tarefa, Situação, Prazo); atraso e 'vence hoje' vêm dos campos prontos do backend, em chips de alerta. A busca pelo título fica sempre visível e os outros filtros ficam num <details> recolhido. Ações só aparecem quando a tarefa está aberta. Cancelar passa por alert-modal que nomeia a tarefa. O histórico usa timeline apenas com os eventos que a tarefa realmente traz. Correção: removida a leitura de 'atrasada' no detalhe da tarefa (o campo só existe na linha do quadro)."
+    "decisions": "Duas cenas no host ml-scenary em mode=scenary (lista → tarefa) em vez de painel lateral, porque no celular o master-detail do template vira navegação empilhada com voltar; a lista mantém filtros e posição porque a cena fica no DOM. Os filtros ficam num <details> nativo (recolhível sem estado na página), com selects para lista, responsável, prioridade e situação, o intervalo de prazo e dois botões de alternância (só atrasadas, vencem hoje); busca por título foi omitida porque o shared não tem filtro de texto. Usei ml-responsive-table (alternativa) porque vira cards rotulados em tela estreita e mantém todas as colunas; o data-table esconderia a situação. A cor de alarme fica só na data das atrasadas; vence hoje é um chip de aviso. Reatribuir usa o autocomplete de membros (inativos aparecem desabilitados, sem filtrar na página) e só aparece se a tarefa está aberta; cancelar é o único botão danger e passa por um alert-modal que nomeia a tarefa, aberto/fechado direto no elemento (a página não guarda estado). O retorno de sucesso vem por toast; falhas aparecem dentro da área de ações com nova tentativa pelo próprio botão. Erros de carga mostram texto e Tentar novamente; na falta de pré-condição, texto explicando e botão de voltar à página anterior. O histórico usa timeline-view apenas com marcos que o contrato traz (criação, devolução, conclusão, cancelamento), na ordem natural."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section secaoQuadroEquipe needs an element with data-section-id=\"secaoQuadroEquipe\"."
+      "message": "Section quadroEquipe needs an element with data-section-id=\"quadroEquipe\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section secaoTarefaSelecionada needs an element with data-section-id=\"secaoTarefaSelecionada\"."
+      "message": "Section tarefaSelecionada needs an element with data-section-id=\"tarefaSelecionada\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section secaoHistoricoTarefa needs an element with data-section-id=\"secaoHistoricoTarefa\"."
+      "message": "Section historico needs an element with data-section-id=\"historico\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism quadroTarefasEquipe (filtro por período de prazo) renders neither <groupenterdateinterval--ml-date-interval-presets> nor <groupenterdateinterval--ml-date-interval-drag>."
+      "message": "Organism tarefasEquipe (Busca pelo título da tarefa) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
     }
   ]
 }

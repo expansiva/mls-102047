@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "meus_avisos",
   "device": "mobile",
-  "contextHash": "sha256:358d43f3cbbe0f4fc8e86efdeef09b461644a0e6e2887b245110a303d36593a0",
+  "contextHash": "sha256:8d22e1773014421a39785bb93e01285a62ee91e330ca4a6b15fc61fa4ea9ae27",
   "sourcePath": "l2/tarefas/web/mobile/page11/meus_avisos.ts",
-  "sourceHash": "sha256:f049b2d0bcf40db7e807a8efa886f0435054087e8286199a001e0c08a124360c",
-  "attempt": 1,
+  "sourceHash": "sha256:5a037443be7df89342e5a092153738a9080c5802dcc62f085793ef2c3d01b276",
+  "attempt": 2,
   "design": {
-    "concept": "Uma mesa de triagem de bolso: ao abrir, a pessoa vê o aviso de hoje com o total de tarefas, o total de atrasadas e cada tarefa com prazo e situação. A lista de avisos anteriores e o histórico de envio ficam a um toque, em outra cena com botão de voltar.",
+    "concept": "Uma mesa de avisos para o celular em duas telas encadeadas: a lista de avisos por data (com um atalho para o aviso aberto) e o conteúdo do aviso escolhido, com totais em destaque, tarefas em cartões e, abaixo, o registro de envio. Um toque abre o aviso; o botão Voltar do host retorna à lista sem perder o lugar.",
     "views": [
       {
-        "id": "aviso",
-        "purpose": "Cena inicial: o aviso aberto (o de hoje por padrão) com os dois totais no topo e as tarefas que vencem hoje ou estão atrasadas, em cartões curtos."
+        "id": "lista",
+        "purpose": "Escolher o aviso: atalho para o aviso aberto, filtro de período discreto e lista empilhada por data de referência, com quantidade de tarefas, atrasadas e situação do envio."
       },
       {
-        "id": "avisos",
-        "purpose": "Cena com voltar: lista empilhada dos meus avisos por data de referência (tocar abre o aviso e volta para a cena do aviso) e, no fim, a linha do tempo compacta de geração e finalização."
+        "id": "aviso",
+        "purpose": "Ler o aviso: totais de tarefas e atrasadas, tarefas com prazo e situação e, na base, o registro de geração e finalização dos avisos."
       }
     ],
-    "decisions": "Segui a intenção mobile (aviso de hoje primeiro) em vez da ordem das seções: a lista é primária em prioridade, mas o aviso aberto já vem carregado e é o que a pessoa quer ver; a lista fica a um toque. Duas cenas em ml-scenary (modo scenary) mantêm uma coisa por vez sem perder o lugar. Selecionar na lista chama abrirAviso e volta ao detalhe, fechando o ciclo selecionar-ler. Totais vêm prontos do backend e são só exibidos (metric-big-number). Tarefas usam responsive-table, que vira cartões em tela estreita. O histórico usa timeline-view com duas colunas para ficar vertical e fica no fim da cena da lista, de forma secundária. Filtro de período foi omitido: o contrato não tem entrada de filtro. Carregar mais é discreto, só quando há mais páginas. Estados de carregando, vazio e erro são desenhados; a falta de pré-condição explica em palavras e oferece voltar. Cores só por tokens; situação atrasada usa aviso (warning), não alarme."
+    "decisions": "Adaptei o inboxSplit para celular: em vez de lista e painel lado a lado, usei o host de cenas em modo scenary, com lista como primeira cena e painel como segunda e botão de voltar. A lista é a seção primária e vem primeiro. Um cartão no topo abre direto o aviso já carregado, que atende ao uso principal de abrir o aviso das 8h. O filtro de período fica recolhido num details, como controle discreto. Não há contagem de não lidos nem ação de marcar como lido, porque o contrato não os fornece. O registro de envio é secundário e fica abaixo das tarefas na cena do aviso, como linha do tempo. Totais, contagens e situações são exibidos como o backend entrega, sem cálculo na página. Cada tarefa vira cartão na tabela responsiva. Erro de abertura, vazio e carregamento têm estados próprios, e para pré-condição ausente há texto explicando e botão de voltar. Não incluí carregar mais, porque só conheço com certeza o campo items da página de avisos. Para avisos mais antigos há o filtro de período."
   },
   "advisories": [
     {
@@ -29,15 +29,11 @@
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section avisoAberto needs an element with data-section-id=\"avisoAberto\"."
+      "message": "Section conteudoAviso needs an element with data-section-id=\"conteudoAviso\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section envioDosAvisos needs an element with data-section-id=\"envioDosAvisos\"."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism listaAvisos (Filtro rápido de período) renders neither <groupenterdateinterval--ml-date-interval-presets>."
+      "message": "Section registroEnvio needs an element with data-section-id=\"registroEnvio\"."
     }
   ]
 }

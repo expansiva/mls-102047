@@ -1,14 +1,15 @@
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
-import type { ResumoMinhasTarefas, AvisoDoDia, Pendencia } from '/_102047_/l2/tarefas/web/contracts/inicio_membro.defs.js';
-export type { Inicio_membroContracts, ListaNome, TarefaResumoDetalhes, TarefaResumo, ResumoMinhasTarefas, AvisoTarefa, AvisoDetalhes, AvisoDoDia, MembroNomeIdentificacao, MembroNomeDetalhes, MembroNome, PendenciaDetalhes, Pendencia, } from '/_102047_/l2/tarefas/web/contracts/inicio_membro.defs.js';
+import type { ResumoMinhasTarefas, AvisoDoDia, EsperaPorMim } from '/_102047_/l2/tarefas/web/contracts/inicio_membro.defs.js';
+export type { Inicio_membroContracts, ResumoMinhasTarefas, AvisoDoDia, EsperaPorMim, TarefaResumoDetalhes, ListaRef, TarefaResumo, AvisoTarefa, AvisoDetalhes, MembroIdentificacao, MembroDetalhes, MembroRef, TarefaPendenciaDetalhes, TarefaPendencia } from '/_102047_/l2/tarefas/web/contracts/inicio_membro.defs.js';
 export type ErrorState = {
     code: string;
     message: string;
     details?: unknown;
 } | null;
-type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
-/** Draft of the return command: the reason typed by the person; id and version come from the chosen pending task. */
-export type CmdDevolverComMotivoDraft = {
+export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
+export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+/** Draft of the devolverComMotivo command input; every leaf is null until filled. */
+export type DevolverComMotivoDraft = {
     id: string | null;
     version: number | null;
     details: {
@@ -16,75 +17,72 @@ export type CmdDevolverComMotivoDraft = {
     };
 };
 export declare class TarefasInicio_membroShared extends StateLitElement {
-    /** state resumo — indicators already computed for the member's open tasks and the list of those tasks; source qryInicioMembro.resumo; organism resumoMinhasTarefas */
+    /** state resumo — workload of the person: totals of open, due-today and overdue tasks and the most urgent open tasks; source carregarInicio.resumo; organism resumoMinhasTarefas */
     resumo: ResumoMinhasTarefas | null;
-    /** state avisoHoje — daily due-date notice of today for the member (null when the 8h process has not generated it); source qryInicioMembro.avisoHoje; organism alertaAvisoDiario */
-    avisoHoje: AvisoDoDia | null;
-    /** state pendencias — tasks waiting for an action of the member, each with the expected action (acaoEsperada), responsible and creator names and the version for the commands; source qryInicioMembro.pendencias; organism caixaPendencias */
-    pendencias: Pendencia[];
-    /** draft — the return-with-reason form: the page fills details.motivoDevolucao through setCmdDevolverComMotivoDraft, then calls cmdDevolverComMotivo(id); source cmdDevolverComMotivo.input; organism caixaPendencias */
-    cmdDevolverComMotivoDraft: CmdDevolverComMotivoDraft;
-    /** state pageStatus — overall status of the page: idle, loading, empty (no open tasks and no pending items), success or error */
-    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
-    /** state qryInicioMembroStatus — status of the initial load request */
-    qryInicioMembroStatus: RequestStatus;
-    /** state qryInicioMembroError — error of the initial load request (also of a refused navigation); null when none */
-    qryInicioMembroError: ErrorState;
-    /** state cmdIniciarTarefaStatus — status of the start-task command */
-    cmdIniciarTarefaStatus: RequestStatus;
-    /** state cmdIniciarTarefaError — error of the start-task command; null when none */
-    cmdIniciarTarefaError: ErrorState;
-    /** state cmdEnviarParaRevisaoStatus — status of the send-to-review command */
-    cmdEnviarParaRevisaoStatus: RequestStatus;
-    /** state cmdEnviarParaRevisaoError — error of the send-to-review command; null when none */
-    cmdEnviarParaRevisaoError: ErrorState;
-    /** state cmdAceitarEntregaStatus — status of the accept-delivery command */
-    cmdAceitarEntregaStatus: RequestStatus;
-    /** state cmdAceitarEntregaError — error of the accept-delivery command; null when none */
-    cmdAceitarEntregaError: ErrorState;
-    /** state cmdDevolverComMotivoStatus — status of the return-with-reason command */
-    cmdDevolverComMotivoStatus: RequestStatus;
-    /** state cmdDevolverComMotivoError — error of the return-with-reason command; null when none */
-    cmdDevolverComMotivoError: ErrorState;
+    /** state avisoDoDia — daily due-date notice of the person for today, with delivery status and included tasks (null when not generated yet); source carregarInicio.avisoDoDia; organism avisoDoDia */
+    avisoDoDia: AvisoDoDia | null;
+    /** state esperaPorMim — tasks that depend on the person grouped by expected action: start, send to review, review, adjust after return; source carregarInicio.esperaPorMim; organism esperaPorMim */
+    esperaPorMim: EsperaPorMim | null;
+    /** state devolverComMotivoDraft — draft of the return-with-reason command (reason typed by the reviewer; id and version are filled when the command is submitted); source devolverComMotivo.input; organism esperaPorMim */
+    devolverComMotivoDraft: DevolverComMotivoDraft;
+    /** state pageStatus — overall status of the page: idle, loading, empty (every list empty), success or error; written only by the initial load */
+    pageStatus: PageStatus;
+    /** state carregarInicioStatus — status of the carregarInicio request */
+    carregarInicioStatus: RequestStatus;
+    /** state carregarInicioError — error of the carregarInicio request (also client errors of navigations), null when none */
+    carregarInicioError: ErrorState;
+    /** state iniciarTarefaStatus — status of the iniciarTarefa command */
+    iniciarTarefaStatus: RequestStatus;
+    /** state iniciarTarefaError — error of the iniciarTarefa command, null when none */
+    iniciarTarefaError: ErrorState;
+    /** state enviarParaRevisaoStatus — status of the enviarParaRevisao command */
+    enviarParaRevisaoStatus: RequestStatus;
+    /** state enviarParaRevisaoError — error of the enviarParaRevisao command, null when none */
+    enviarParaRevisaoError: ErrorState;
+    /** state aceitarEntregaStatus — status of the aceitarEntrega command */
+    aceitarEntregaStatus: RequestStatus;
+    /** state aceitarEntregaError — error of the aceitarEntrega command, null when none */
+    aceitarEntregaError: ErrorState;
+    /** state devolverComMotivoStatus — status of the devolverComMotivo command */
+    devolverComMotivoStatus: RequestStatus;
+    /** state devolverComMotivoError — error of the devolverComMotivo command, null when none */
+    devolverComMotivoError: ErrorState;
     /** state scenary — the visible scene of the page; '' until the page shows its first scene */
     scenary: string;
+    private subscribed;
     private publish;
     private assignState;
+    private setRequestStatus;
+    private setRequestError;
+    private failRequest;
+    private unexpectedError;
+    private resetCommandResults;
+    private resetVisit;
+    private hydrateData;
     connectedCallback(): void;
     disconnectedCallback(): void;
     handleIcaStateChange(key: string, value: any): void;
-    /** Fresh visit: every transient member goes back to its initial value. */
-    private resetVisit;
-    /** Clears the result (status and error) of every command, so an old success or error never sits next to new input. */
-    private resetCommandResults;
-    /** Publishes the error and then the status of one command (status last). */
-    private publishCommand;
-    private commandStatus;
-    /**
-     * Validates a command on a pending task and returns the version to send, or null when the call must not happen
-     * (command already running, id empty, or id not among the loaded pending tasks).
-     */
-    private prepareCommand;
-    /** Runs a command call, applies the returned resumo and pendencias, and publishes the status last. */
-    private submitCommand;
-    /** draft — replaces the return-with-reason draft (the page edits details.motivoDevolucao); also clears old command results */
-    setCmdDevolverComMotivoDraft(value: CmdDevolverComMotivoDraft): void;
-    /** Publishes the visible scene of the page and clears old command results. @param value scene name */
+    /** scene — publishes the visible scene of the page (any string; '' means no scene yet); clears the results of the commands */
     setScenario(value: string): void;
-    /** request qryInicioMembro — loads everything the member home shows: overview of open tasks with indicators, today's daily notice and the inbox of pending actions; redraws resumo, avisoHoje and pendencias (replace) and pageStatus; no arguments, the member comes from the session. Also the method to reload the page. */
-    qryInicioMembro(): Promise<void>;
-    /** request cmdIniciarTarefa — starts a task assigned to the member (aFazer to emAndamento); redraws resumo and pendencias (replace) with the returned values, no reload; @param id id of the pending task to start (its version is read from the loaded pendencias) */
-    cmdIniciarTarefa(id: string): Promise<void>;
-    /** request cmdEnviarParaRevisao — sends an in-progress task (also a returned one already adjusted) to the creator's review; redraws resumo and pendencias (replace) with the returned values, no reload; @param id id of the pending task to send (its version is read from the loaded pendencias) */
-    cmdEnviarParaRevisao(id: string): Promise<void>;
-    /** request cmdAceitarEntrega — accepts the delivery of a task the member created and that is in review, concluding it; redraws resumo and pendencias (replace) with the returned values, no reload; @param id id of the pending task to accept (its version is read from the loaded pendencias) */
-    cmdAceitarEntrega(id: string): Promise<void>;
-    /** request cmdDevolverComMotivo — returns for adjustment, with a required reason, a task the member created and that is in review; the reason comes from cmdDevolverComMotivoDraft.details.motivoDevolucao (empty reason gives client.requiredMissing, no call); redraws resumo and pendencias (replace) with the returned values and clears the draft; @param id id of the pending task to return (its version is read from the loaded pendencias) */
-    cmdDevolverComMotivo(id: string): Promise<void>;
-    /** navigate — opens the member's task list (minhas_tarefas) from the overview; carries nothing */
+    /** draft — replaces the draft of the return-with-reason command (the reviewer types details.motivoDevolucao); clears the results of the commands */
+    setDevolverComMotivoDraft(value: DevolverComMotivoDraft): void;
+    /** request carregarInicio — loads the whole Início of the member: workload summary, today's daily notice and the pending tasks waiting for the person; redraws resumo, avisoDoDia and esperaPorMim (replace); no arguments, the person is the session's. Also the method to reload the page. */
+    carregarInicio(): Promise<void>;
+    private applyCommandOutput;
+    private runTransition;
+    private getRequestStatus;
+    /** request iniciarTarefa — starts a task assigned to the person (aFazer → emAndamento); redraws resumo and esperaPorMim (replace with the recalculated values); arguments: id = task to start, version = version read from the row (optimistic concurrency) */
+    iniciarTarefa(id: string, version: number): Promise<void>;
+    /** request enviarParaRevisao — sends an in-progress task of the person (also a returned one) to the creator's review; redraws resumo and esperaPorMim (replace with the recalculated values); arguments: id = task to send, version = version read from the row */
+    enviarParaRevisao(id: string, version: number): Promise<void>;
+    /** request aceitarEntrega — accepts the delivery of a task created by the person, completing it; redraws resumo and esperaPorMim (replace; the task leaves the to-review list); arguments: id = task in review, version = version read from the row */
+    aceitarEntrega(id: string, version: number): Promise<void>;
+    /** request devolverComMotivo — returns a task in review created by the person for adjustment, with the reason typed in devolverComMotivoDraft.details.motivoDevolucao; redraws resumo and esperaPorMim (replace; the task leaves the to-review list) and clears the draft; arguments: id = task in review, version = version read from the row */
+    devolverComMotivo(id: string, version: number): Promise<void>;
+    /** navigate — opens the person's task list (minhas_tarefas); carries nothing */
     abrirMinhasTarefas(): void;
-    /** navigate — opens the member's daily notices (meus_avisos) from the daily notice alert; carries nothing */
+    /** navigate — opens the daily notices page (meus_avisos), carrying today's notice id as avisoVencimentoId when the notice exists */
     abrirMeusAvisos(): void;
-    /** navigate — opens a pending task in minhas_tarefas to adjust it, selecting it there (param tarefaId); @param tarefaId id of the task the person picked; null or empty is refused with client.preconditionMissing in qryInicioMembroError */
+    /** navigate — opens minhas_tarefas with the picked task selected (tarefaId); argument: tarefaId = id of the task row the person opens; null is refused with client.preconditionMissing in carregarInicioError */
     abrirTarefaParaAjustar(tarefaId: string | null): void;
 }

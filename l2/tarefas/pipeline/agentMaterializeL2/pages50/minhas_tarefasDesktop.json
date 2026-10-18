@@ -4,27 +4,27 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "desktop",
-  "contextHash": "sha256:cff863fa3006e50af37fc91a11066ebac4052f0c8ecb6304fc3d9dc5ae8f7b55",
+  "contextHash": "sha256:11a9377df4cc7d040e2ac1b239674baa1f9ecfef32ccee03773f35452d4ef4bf",
   "sourcePath": "l2/tarefas/web/desktop/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:ade5c7049e693aeb8ed8e6dda631d4c21f3a9ae9fddc0056eb65b63c7cb27f14",
-  "attempt": 1,
+  "sourceHash": "sha256:b29005e92af67602064c12b9ee0eb761ee88e237314bd6519fa8afdf3350c50f",
+  "attempt": 2,
   "design": {
-    "concept": "A master-detail work queue. The task list is always on the left, with filter pills above it. A working panel sits beside it and changes between the open task, the edit form and the create form. The person scans the list, picks a row, and reads, executes, reviews or adjusts the task without leaving the screen.",
+    "concept": "Uma mesa de trabalho em duas colunas: à esquerda a fila de tarefas por prazo com filtros rápidos (a lista nunca sai da tela); à direita um painel que muda de modo conforme o trabalho — ler a tarefa e agir sobre ela, criar uma nova ou ajustá-la. Quem executa ou revisa vê só as ações do seu papel, e o histórico conta o caminho da tarefa logo abaixo.",
     "views": [
       {
         "id": "detalhe",
-        "purpose": "Opens the selected task. It shows the summary, return reason, checklist (tickable), the actions that fit the current situation, and the history timeline."
-      },
-      {
-        "id": "editar",
-        "purpose": "Edit form for the open task (list, title, description, priority, deadline, owner, checklist). It has a back control to the task and saving never changes the situation."
+        "purpose": "Painel padrão: tarefa aberta com dados, motivo da devolução, checklist, ações de ciclo do meu papel e histórico. Vazio orienta a escolher uma tarefa."
       },
       {
         "id": "nova",
-        "purpose": "Create form opened from the single 'Nova tarefa' button. After saving it returns to the new task, which the list absorbs and marks as selected."
+        "purpose": "Criar tarefa: lista, título, descrição, prioridade, prazo, responsável (busca por nome) e checklist inicial, com voltar aos detalhes."
+      },
+      {
+        "id": "editar",
+        "purpose": "Ajustar a tarefa aberta: campos (incluindo troca de responsável) e checklist com marcar, reordenar e adicionar, cada bloco com seu próprio salvar."
       }
     ],
-    "decisions": "Followed the timelineList template: list first, detail panel beside it, one create button above. The panel is a scene host (mode scenary) that covers only the right region, so the list and the selected row stay visible while the panel changes. The three views are scenes with back to the task. Filters are navigate-pills with empty tabs, driving minhasTarefas. The request params are the single source of truth for the active pill. The list uses the advanced data table with the selected row marked by index. The overdue date takes the error colour and nothing else does. 'Due today' and 'returned' are plain labels. Checklist progress is shown as the backend string, with no percentage computed on the page. Actions follow the situation (start, send or resend for review, accept, return with a typed reason). Cancel is a quiet ghost button behind a native confirm that names the task. Results are local: a success or error feedback sits inside the actions region and form errors sit above the save button. Saving a form returns to the task view only if the command ended in success. The page cannot know the session member, so it does not hide actions by role. The backend rejects invalid ones and the page says so in plain words. Inline quick-assign was left out because the shared has no assign command. The owner is chosen in the form with a searching combobox. A search-by-title field was left out because the shared has no search parameter. The precondition-missing and generic error states have their own message with a way back or a retry."
+    "decisions": "Seguimos a experiência timelineList: a lista é a protagonista (seção primária), a seleção abre o painel ao lado (master-detail) e o botão único 'Criar tarefa' no cabeçalho abre o painel de criação, sem sair da página. O host de cenas cobre só a região direita (mode=scenary), então a lista, os filtros e a linha marcada continuam visíveis em qualquer modo. A ordem por prazo vem do backend; a tabela não oferece ordenação para não desalinhar o índice da seleção. Só a data atrasada recebe a cor de alarme; 'vence hoje' e 'devolvida' viram texto/rótulo neutro. Ações de ciclo aparecem conforme papel e situação (campos souCriador/souResponsavel e status), com um único estilo de perigo: o cancelamento fica atrás de uma confirmação inline que cita o título da tarefa. Devolver exige motivo (botão desabilitado até haver texto). Salvar fica desabilitado até os campos obrigatórios estarem preenchidos; erros e sucessos aparecem dentro do painel, acima do botão, com aria-live; sem toasts. Após criar ou salvar os campos, o painel volta ao detalhe; a checklist salva fica no modo de edição com confirmação local. Checklist: marcar, editar descrição, subir/descer e adicionar; só itens novos podem ser removidos. Busca por título e barra de progresso percentual foram omitidas porque o contrato não oferece busca nem número de progresso (só o texto pronto 'x/y', mostrado como está). Os valores dos filtros rápidos (criadasPorMim, atribuidasAMim, emRevisao, devolvidas) foram assumidos a partir do texto do organismo, pois o tipo não os revela. O rascunho de criação permanece no shared ao navegar, então fechar o painel não perde nada silenciosamente. Correção: as tags das moléculas do projeto 102040 passam a usar o sufixo do projeto (-102040), como exige o registro dos custom elements."
   },
   "advisories": [
     {
@@ -45,23 +45,71 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasLista (progresso da checklist na linha) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
+      "message": "Organism listaTarefas (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasLista (busca pelo título) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+      "message": "Organism listaTarefas (busca por título) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefaDetalhe (resumo da tarefa aberta) renders neither <groupviewcard--ml-view-card-horizontal> nor <groupviewcard--ml-vertical-card>."
+      "message": "Organism detalheTarefa (cartão da tarefa) renders neither <groupviewcard--ml-view-card-horizontal> nor <groupviewcard--ml-vertical-card>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefaDetalhe (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-segmented-progress>."
+      "message": "Organism acoesTarefa (ações principais) renders neither <grouptriggeraction--ml-button-group> nor <grouptriggeraction--ml-split-button>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefaAcoes (ações secundárias como cancelar) renders neither <grouptriggeraction--ml-kebab-action-trigger> nor <grouptriggeraction--ml-icon-button>."
+      "message": "Organism acoesTarefa (ações secundárias) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism acoesTarefa (confirmação da ação) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-alert-modal>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupnavigatesection--ml-navigate-pills-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupviewtable--ml-data-table-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupnotifyuser--ml-contextual-feedback-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupenterboolean--ml-checkbox-preference-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupentertext--ml-multiline-text-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupviewdata--ml-timeline-view-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupselectone--ml-select-one-autocomplete-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupentertext--ml-enter-text-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupselectone--ml-segmented-control-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupenterdate--ml-date-picker-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupselectone--ml-combobox-102040> is not in this page's list."
     }
   ]
 }

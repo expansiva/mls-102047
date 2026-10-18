@@ -1,6 +1,6 @@
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
-import type { ListaResumo, ListaEdicao } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
-export type { ListasContracts, ListaResumo, ListaResumoDetalhes, ListaEdicao, ListaEdicaoDetalhes } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
+import type { ListaCadastrada } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
+export type { ListasContracts, ListaCadastrada, ListaDetalhes } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
 export type ErrorState = {
     code: string;
     message: string;
@@ -9,60 +9,56 @@ export type ErrorState = {
 export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
 export type ListaTipo = 'project' | 'area';
-/** Draft of the criarLista form: every leaf may be null until the person fills it. */
+/** Details of a list draft; every leaf is null until the person fills it. */
+export type ListaDetalhesDraft = {
+    tipo: ListaTipo | null;
+    descricao: string | null;
+};
+/** Draft of the criarLista command (a new list). */
 export type CriarListaDraft = {
     nome: string | null;
+    details: ListaDetalhesDraft;
     ativa: boolean | null;
-    details: {
-        tipo: ListaTipo | null;
-        descricao: string | null;
-    };
 };
-/** Draft of the salvarLista form: the edited record (id, version) plus the editable leaves. */
+/** Draft of the salvarLista command (editing an existing list, prefilled from the selected row). */
 export type SalvarListaDraft = {
     id: string | null;
     version: number | null;
     nome: string | null;
+    details: ListaDetalhesDraft;
     ativa: boolean | null;
-    details: {
-        tipo: ListaTipo | null;
-        descricao: string | null;
-    };
 };
-export declare function emptyCriarListaDraft(): CriarListaDraft;
-export declare function emptySalvarListaDraft(): SalvarListaDraft;
 export declare class TarefasListasShared extends StateLitElement {
-    /** state listas — rows of the lists register (name, type, active flag, open task count); source listarListas.listas; organism listasCadastradas */
-    listas: ListaResumo[];
-    /** state lista — the list record loaded in the edit form (with its version); source obterLista.lista; organism formularioLista */
-    lista: ListaEdicao | null;
-    /** state selectedLista — id of the list chosen in the register, whose record is loaded in the form (null = none, new list); source entry.params.listaId; organisms formularioLista, listasCadastradas; persisted */
+    /** state listas — the lists of tasks (projects or areas) with editable data, version and open-task count; source listarListas.listas; organism formularioLista, listasCadastradas */
+    listas: ListaCadastrada[];
+    /** state selectedLista — the id of the Lista selected in listasCadastradas (the row is read through the formularioLista getter); source entry.params.listaId; organism formularioLista, listasCadastradas; persisted */
     selectedLista: string | null;
-    /** state criarListaDraft — draft of the new-list form (nome, ativa, details.tipo, details.descricao); source criarLista.input; organism formularioLista */
+    /** state busca — the name fragment last used to search the lists ('' lists all); filter held by the page for buscarListas; source buscarListas.input */
+    busca: string;
+    /** state criarListaDraft — draft of the form that creates a new list (nome, details.tipo, details.descricao, ativa); source criarLista.input; organism formularioLista */
     criarListaDraft: CriarListaDraft;
-    /** state salvarListaDraft — draft of the edit-list form, filled from the loaded record (id and version travel with it); source salvarLista.input; organism formularioLista */
+    /** state salvarListaDraft — draft of the form that edits the selected list, prefilled from it (id, version, nome, details, ativa); source salvarLista.input; organism formularioLista */
     salvarListaDraft: SalvarListaDraft;
-    /** state pageStatus — overall status of the page load: idle, loading, empty (no list), success or error */
+    /** state pageStatus — overall status of the page load: idle, loading, empty, success or error; written only by the initial load */
     pageStatus: PageStatus;
-    /** state listarListasStatus — status of the lists query */
+    /** state listarListasStatus — status of the request listarListas */
     listarListasStatus: RequestStatus;
-    /** state listarListasError — error of the lists query, null when none */
+    /** state listarListasError — error of the request listarListas (also client.selectionInvalid when the selected id matches no row); null when none */
     listarListasError: ErrorState;
-    /** state obterListaStatus — status of the query that opens one list for editing */
-    obterListaStatus: RequestStatus;
-    /** state obterListaError — error of the open-one-list query, null when none */
-    obterListaError: ErrorState;
-    /** state criarListaStatus — status of the create-list command */
+    /** state buscarListasStatus — status of the request buscarListas */
+    buscarListasStatus: RequestStatus;
+    /** state buscarListasError — error of the request buscarListas; null when none */
+    buscarListasError: ErrorState;
+    /** state criarListaStatus — status of the command criarLista; stays on success until the person changes something */
     criarListaStatus: RequestStatus;
-    /** state criarListaError — error of the create-list command, null when none */
+    /** state criarListaError — error of the command criarLista; null when none */
     criarListaError: ErrorState;
-    /** state salvarListaStatus — status of the save-list command */
+    /** state salvarListaStatus — status of the command salvarLista; stays on success until the person changes something */
     salvarListaStatus: RequestStatus;
-    /** state salvarListaError — error of the save-list command, null when none */
+    /** state salvarListaError — error of the command salvarLista; null when none */
     salvarListaError: ErrorState;
     /** state scenary — the visible scene of the page; '' until the page shows its first scene */
     scenary: string;
-    private subscribed;
     private publish;
     private assignState;
     connectedCallback(): void;
@@ -70,24 +66,26 @@ export declare class TarefasListasShared extends StateLitElement {
     handleIcaStateChange(key: string, value: any): void;
     private resetVisit;
     private resetCommandResults;
-    private readParam;
     private applyEntryParams;
     private unexpectedError;
-    /** scene — publishes the visible scene of the page (any string the page uses to switch scenes) */
-    setScenario(value: string): void;
-    /** draft — replaces the draft of the new-list form (nome, ativa, details.tipo, details.descricao); clears the previous command result */
-    setCriarListaDraft(value: CriarListaDraft): void;
-    /** draft — replaces the draft of the edit-list form (keeps id and version of the loaded record); clears the previous command result */
-    setSalvarListaDraft(value: SalvarListaDraft): void;
-    /** select — chooses a list of the register by id and loads its record into the edit form (lista, salvarListaDraft); null clears the selection and the edit draft so the form returns to creating a new list; an id that cannot be fetched is reported in obterListaError */
-    selecionarLista(listaId: string | null): void;
-    /** request listarListas — loads every list of the organization (active and inactive, ordered by name, with open task count) when the page opens; redraws listas (replace); no arguments; call it again to reload the register */
-    listarListas(): Promise<void>;
-    /** request obterLista — opens one list of the register for editing; redraws lista (replace) and fills salvarListaDraft from the record; listaId: id of the list to open (prefer selecionarLista, which also records the selection) */
-    obterLista(listaId: string): Promise<void>;
     private upsertLista;
-    /** request criarLista — registers a new project/area list from criarListaDraft (nome and details.tipo required); redraws listas (upsert of the returned row), lista and selectedLista (the new record, so the form continues in edit), salvarListaDraft (filled from the record) and resets criarListaDraft; no arguments; errors such as listaNomeUnico come in criarListaError */
+    /** The row of the loaded lists whose id is selectedLista (the selected record of formularioLista); null when nothing is selected or the row is not loaded */
+    get formularioLista(): ListaCadastrada | null;
+    /** select — selects the list (by id) that formularioLista edits, or clears the selection with null; fills salvarListaDraft from the row; an id with no loaded row publishes client.selectionInvalid in listarListasError; id: the list id or null */
+    selectFormularioLista(id: string | null): void;
+    private applySelection;
+    /** draft — replaces the draft of the new-list form (criarLista); value: the whole draft with nome, details.tipo, details.descricao and ativa */
+    setCriarListaDraft(value: CriarListaDraft): void;
+    /** draft — replaces the draft of the edit-list form (salvarLista); value: the whole draft with id, version, nome, details and ativa */
+    setSalvarListaDraft(value: SalvarListaDraft): void;
+    /** Publishes the visible scene of the page; value: the scene id ('' for none) */
+    setScenario(value: string): void;
+    /** request listarListas — loads every list of the organization (active and inactive, ordered by name, with open-task count); redraws listas (replace), then resolves the selected list and sets pageStatus; no arguments; also the method to reload the page */
+    listarListas(): Promise<void>;
+    /** request buscarListas — searches the lists whose name contains the typed fragment (case-insensitive, ordered by name); redraws listas (replace) and keeps the fragment in busca; busca: the name fragment, '' lists all */
+    buscarListas(busca: string): Promise<void>;
+    /** request criarLista — creates a new list (project or area) from criarListaDraft; redraws listas (upsert of the returned list by id) and clears criarListaDraft; no arguments, the person fills the draft with setCriarListaDraft */
     criarLista(): Promise<void>;
-    /** request salvarLista — saves the edits of the selected list from salvarListaDraft (id, version, nome, ativa and details.tipo required; version guards concurrency); redraws listas (upsert of the returned row), lista (the saved record with its new version) and salvarListaDraft (filled again from it); no arguments; errors such as listaNomeUnico or a stale version come in salvarListaError */
+    /** request salvarLista — saves the edits of the selected list from salvarListaDraft (id and version come from the draft, filled by selectFormularioLista); redraws listas (upsert of the returned list by id) and refills salvarListaDraft from the saved list with its new version; no arguments */
     salvarLista(): Promise<void>;
 }

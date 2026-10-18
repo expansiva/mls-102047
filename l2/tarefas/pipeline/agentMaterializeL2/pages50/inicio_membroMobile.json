@@ -4,68 +4,55 @@
   "module": "tarefas",
   "pageId": "inicio_membro",
   "device": "mobile",
-  "contextHash": "sha256:80f10def57d2d5f5633ed3021e32577ffc49e88ac91ac9443068ffebdaf458ab",
+  "contextHash": "sha256:3094c7796905a90b06467ae8d6d1ee39e5b6dfb50118bb47ab9f0bc1fb8909bf",
   "sourcePath": "l2/tarefas/web/mobile/page11/inicio_membro.ts",
-  "sourceHash": "sha256:5c06458b77876b2984a5c5460117ff6b05da5eac27485c6a22b4481162eb27fa",
-  "attempt": 1,
+  "sourceHash": "sha256:a3640d315b6987e9b816553299892fed52c5f2bb8861497d2823016aeb7a30b0",
+  "attempt": 2,
   "design": {
-    "concept": "A phone triage screen for the team member. It opens with one sentence that answers \"what needs me right now?\". Under it comes the stack of pending tasks, each with its main action visible. After that come the daily-notice call, a quiet strip of counts, and a collapsed list of open tasks. When nothing is pending, the screen says so calmly and the strip stays below.",
-    "views": [
-      {
-        "id": "triagem",
-        "purpose": "Main view: triage headline, pending-task lane with inline actions (start, send to review, accept, adjust), daily notice, indicator strip and the demoted list of open tasks."
-      },
-      {
-        "id": "devolver",
-        "purpose": "Step view with a back control to return a task in review. The person writes the required reason for the chosen task and confirms. On success the screen goes back to the shorter lane."
-      }
-    ],
-    "decisions": "I followed the exceptionTriage template, and its mobile section wins over the defs section order. The headline comes first. The pending lane (caixaPendencias) is next. The daily-notice call (alertaAvisoDiario) comes after the lane. The aggregates (resumoMinhasTarefas) are a small neutral strip below the lanes, with the open-task list collapsed behind a native details element and a link to minhas_tarefas. The three counts are shown exactly as the backend sends them.\n\nI computed nothing on the page. The headline has no count. The lane shows its first three rows and puts the rest behind a \"Ver as demais\" disclosure with no number. I did not filter or group by status. Each row carries a status tag and the action that fits its status.\n\nI did not use the navigate pills, the split button or the record list. The split button's secondary-item syntax is not in its contract. Pill filtering would force the page to filter. The record list's cell content is re-rendered from innerHTML, which would break the row buttons. Rows are plain list items with 44px buttons, and alternative actions sit visibly in the row. For a task in review, the primary action is \"Aceitar entrega\" and \"Devolver com motivo\" is beside it.\n\nReturning a task needs a reason field, and the page holds no state. So it is a second scene in the scene host with a back control. The shared draft holds the chosen task id and the reason text. The confirm handler goes back to the first scene only when the command ended in success.\n\nI used these molecules: the scene host, the inline notify banner for the daily notice, and contextual feedback for command errors and success. Alarm color appears only on the late flag of an open task. Loading is skeleton lanes. An error is a panel in words with a retry. A precondition error says what is missing."
+    "concept": "Início de triagem para o celular: uma coluna que responde primeiro \"o que precisa de mim agora?\". Uma frase de abertura traz atrasadas e vencendo hoje, depois o aviso das 8h e as faixas do que espera por mim (da pior para a mais leve), e só no fim uma faixa discreta com os números das minhas tarefas abertas.",
+    "views": [],
+    "decisions": "Página de uma só vista, sem scene host. Segui a seção \"On mobile\" do template acima da ordem das seções do defs: frase de triagem, aviso das 8h (banner informativo em fluxo, toque abre o aviso), faixas de pendências e por último o resumo como faixa de pares valor+rótulo, sem cartões. A frase usa só os campos prontos do resumo (atrasadas e vencem hoje); o estado de boa notícia usa pageStatus 'empty' e mantém o aviso e o resumo visíveis. As pendências viram faixas empilhadas em vez de pills, porque um separador esconderia faixas com itens atrás de uma vazia: devolvidas para ajustar, entregas para revisar, prontas para enviar e prontas para iniciar. Faixas vazias não aparecem. Cada faixa mostra três linhas e o restante fica num <details> \"Mostrar mais\" (nativo, sem estado na página). Cada item tem o título como toque de drill-down (abrirTarefaParaAjustar) e o prazo à direita. A ação principal é um botão separado, de 44px ou mais: iniciar, enviar para revisão, aceitar ou reenviar. Devolver com motivo abre um <details> com textarea ligada ao rascunho do shared e confirmação desabilitada sem motivo. Cor de alarme só no prazo das tarefas que o backend marca como atrasadas ou vencendo hoje. Deixei de fora progresso linear, kebab e métricas grandes: o progresso da checklist é texto pronto (\"2/5\") e não dá para virar percentual sem calcular, e os cartões de métrica o template proíbe. Há esqueleto no carregamento, erro com tentar de novo, e uma mensagem em palavras para client.preconditionMissing, com caminho de volta para minhas tarefas. O resultado dos comandos aparece numa região aria-live. Correção: as tags das moléculas passam a seguir o caminho completo do módulo com o sufixo do projeto (molecules--grupo--nome-102040)."
   },
   "advisories": [
     {
-      "code": "M4_PAGE_IMPORT",
-      "message": "[contract] Import lit/directives/keyed.js is not allowed. Use only lit, lit/decorators.js, /_102047_/l2/tarefas/web/shared/inicio_membro.js and the molecule paths of this page."
+      "code": "M4_PAGE_SECTION",
+      "message": "Section secaoAvisoDiario needs an element with data-section-id=\"secaoAvisoDiario\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section panoramaTarefas needs an element with data-section-id=\"panoramaTarefas\"."
+      "message": "Section secaoPendencias needs an element with data-section-id=\"secaoPendencias\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section pendenciasComigo needs an element with data-section-id=\"pendenciasComigo\"."
-    },
-    {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section avisoDoDia needs an element with data-section-id=\"avisoDoDia\"."
+      "message": "Section secaoResumo needs an element with data-section-id=\"secaoResumo\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism resumoMinhasTarefas (Indicadores compactos de abertas, vencendo hoje e atrasadas) renders neither <groupviewmetric--ml-metric-big-number> nor <groupviewmetric--ml-metric-card>."
+      "message": "Organism resumoMinhasTarefas (indicadores de abertas, vencem hoje e atrasadas) renders neither <groupviewmetric--ml-metric-big-number> nor <groupviewmetric--ml-metric-card>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism resumoMinhasTarefas (Progresso da checklist por tarefa) renders neither <groupshowprogress--ml-linear-progress>."
+      "message": "Organism resumoMinhasTarefas (progresso da checklist por tarefa) renders neither <groupshowprogress--ml-linear-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism resumoMinhasTarefas (Tarefas abertas empilhadas) renders neither <groupviewdata--ml-vertical-record-list>."
+      "message": "Organism avisoDoDia (destaque do aviso de hoje) renders neither <groupnotifyuser--ml-notify-banner>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism alertaAvisoDiario (Tarefas do aviso com prazo e situação) renders neither <groupviewdata--ml-vertical-record-list>."
+      "message": "Organism esperaPorMim (separar iniciar, revisar e ajustar) renders neither <groupnavigatesection--ml-navigate-pills>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism caixaPendencias (Filtrar entre para iniciar, para revisar e devolvidas) renders neither <groupnavigatesection--ml-navigate-pills> nor <groupnavigatesection--ml-tabs>."
+      "message": "Organism esperaPorMim (itens pendentes) renders neither <groupviewdata--ml-vertical-record-list>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism caixaPendencias (Itens pendentes empilhados) renders neither <groupviewdata--ml-vertical-record-list>."
+      "message": "Organism esperaPorMim (ação principal do item) renders neither <grouptriggeraction--ml-button-standard>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism caixaPendencias (Ação principal do item com alternativas) renders neither <grouptriggeraction--ml-split-button> nor <grouptriggeraction--ml-kebab-action-trigger>."
+      "message": "Organism esperaPorMim (ações secundárias do item) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
     }
   ]
 }

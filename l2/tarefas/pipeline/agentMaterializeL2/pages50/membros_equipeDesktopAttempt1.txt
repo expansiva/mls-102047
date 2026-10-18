@@ -1,12 +1,13 @@
-/* refused: M4_SHARED_INPUT_MISSING: input20 must run first. */
+/* refused: Cannot read properties of undefined (reading 'addEventListener') */
 
 /// <mls fileReference="_102047_/l2/tarefas/web/desktop/page11/membros_equipe.ts" enhancement="_102020_/l2/enhancementAura"/>
 
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { TarefasMembros_equipeShared } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
-import type { MembroEquipeResumo, CadastrarPessoaDraft, SalvarAlteracoesPessoaDraft } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
+import type { PessoaEquipe, SalvarAlteracoesDraft } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
 import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-toast-notification.js';
 import '/_102040_/l2/molecules/groupsearchcontent/ml-search-bar.js';
 import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
@@ -16,369 +17,374 @@ import '/_102020_/l2/molecules/ml-scenary.js';
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
   pageTitle: 'Pessoas da equipe',
-  newPerson: 'Cadastrar nova pessoa',
-  searchLabel: 'Buscar por nome',
-  searchPlaceholder: 'Digite parte do nome',
+  newPerson: 'Nova pessoa',
+  searchPlaceholder: 'Buscar pelo nome',
+  searchLabel: 'Buscar pessoa',
   colName: 'Nome',
-  colStatus: 'Situação no cadastro',
   colCountry: 'País',
+  colStatus: 'Situação',
   colContacts: 'Contatos',
-  colRoles: 'Papéis',
-  statusActive: 'Ativa',
-  statusInactive: 'Inativa',
-  statusMerged: 'Unificada',
-  statusBlocked: 'Bloqueada',
   noValue: '—',
-  emptyList: 'Nenhuma pessoa encontrada na equipe.',
-  loadMore: 'Ver mais pessoas',
-  listError: 'Não foi possível carregar as pessoas da equipe.',
-  retry: 'Tentar novamente',
-  preconditionMissing: 'Esta página foi aberta sem as informações de que precisa. Volte para a página de origem e abra a equipe novamente.',
-  goBack: 'Voltar',
-  sceneIdle: 'Cadastro',
-  sceneNew: 'Dados da nova pessoa',
-  sceneEditFallback: 'Pessoa selecionada',
-  idleHint: 'Escolha uma pessoa na tabela para ver e corrigir seus dados, ou cadastre uma nova pessoa.',
+  emptyAll: 'Ainda não há pessoas na equipe. Cadastre a primeira no painel ao lado.',
+  emptySearch: 'Nenhuma pessoa encontrada com esse nome.',
+  loadMore: 'Carregar mais pessoas',
+  statusActive: 'Ativo',
+  statusInactive: 'Inativo',
+  statusMerged: 'Mesclado',
+  statusBlocked: 'Bloqueado',
+  newSceneTitle: 'Dados de quem entra na equipe',
+  editSceneFallback: 'Dados da pessoa',
+  hostBack: 'Voltar',
   fieldName: 'Nome',
-  fieldNameHelper: 'Como a pessoa aparece nas tarefas e na escolha do responsável.',
-  fieldNameError: 'Informe o nome da pessoa.',
+  fieldNameHelper: 'É o nome que aparece como responsável e criador nas tarefas.',
   fieldCountry: 'País',
-  fieldCountryHelper: 'Código do país, como BR. Define as regras de privacidade aplicáveis.',
-  fieldCountryError: 'Informe o país da pessoa.',
+  fieldCountryHelper: 'Sigla do país, por exemplo BR. Define as regras de privacidade aplicáveis.',
+  namePlaceholder: 'Nome completo',
+  countryPlaceholder: 'BR',
   registerPerson: 'Cadastrar pessoa',
-  savePerson: 'Salvar alterações',
-  close: 'Fechar painel',
-  confirmDiscard: 'Há alterações que ainda não foram salvas. Deseja descartá-las?',
-  saveError: 'Não foi possível concluir. Confira os dados e tente de novo.',
-  registered: 'Pessoa cadastrada na equipe.',
-  saved: 'Alterações da pessoa salvas.',
-  readOnlyTitle: 'Dados do cadastro'
+  saveChanges: 'Salvar alterações',
+  closePanel: 'Fechar painel',
+  detailStatus: 'Situação no cadastro',
+  detailRoles: 'Papéis',
+  detailContacts: 'Contatos',
+  detailStatusHint: 'Pessoa ativa pode receber tarefas.',
+  noSelection: 'Escolha uma pessoa na tabela para corrigir os dados dela.',
+  discardConfirm: 'Há alterações não salvas nesta pessoa. Fechar agora descarta o que você mudou. Deseja continuar?',
+  registerError: 'Não foi possível cadastrar a pessoa. Confira os dados e tente de novo.',
+  saveError: 'Não foi possível salvar as alterações. Confira os dados e tente de novo.',
+  registerOk: 'Pessoa cadastrada na equipe.',
+  saveOk: 'Alterações salvas.',
+  loadErrorTitle: 'Não foi possível carregar a equipe.',
+  retry: 'Tentar de novo',
+  missingTitle: 'Esta tela foi aberta sem o que ela precisa para listar a equipe.',
+  missingBody: 'Volte para a tela de onde você veio e abra as pessoas da equipe novamente.',
+  back: 'Voltar',
+  loading: 'Carregando pessoas…',
 };
 type PageMessageType = typeof pageMessage_pt_br;
 const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
 /// **collab_i18n_end**
 
-type StatusKey = 'Active' | 'Inactive' | 'Merged' | 'Blocked';
+function isDirty(draft: SalvarAlteracoesDraft, pessoa: PessoaEquipe): boolean {
+  const id = draft.details.identification;
+  return (id.name ?? '') !== pessoa.details.identification.name
+    || (id.countryCode ?? '') !== pessoa.details.identification.countryCode;
+}
 
-function statusLabel(msg: PageMessageType, s: StatusKey) {
-  switch (s) {
-    case 'Active': return msg.statusActive;
-    case 'Inactive': return msg.statusInactive;
-    case 'Merged': return msg.statusMerged;
-    default: return msg.statusBlocked;
+function filled(v: string | null): boolean {
+  return (v ?? '').trim().length > 0;
+}
+
+function statusTone(status: string): string {
+  switch (status) {
+    case 'Active':
+      return 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]';
+    case 'Blocked':
+      return 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
+    default:
+      return 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
   }
-}
-
-function statusClass(s: StatusKey) {
-  switch (s) {
-    case 'Active': return 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]';
-    case 'Merged': return 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]';
-    case 'Blocked': return 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
-    default: return 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
-  }
-}
-
-function nameOf(m: MembroEquipeResumo | null) {
-  return m ? m.details.identification.details.identification.name : '';
-}
-
-function editDirty(m: MembroEquipeResumo | null, d: SalvarAlteracoesPessoaDraft) {
-  if (!m) return false;
-  const i = m.details.identification.details.identification;
-  return (d.details.identification.name ?? '') !== i.name || (d.details.identification.countryCode ?? '') !== i.countryCode;
-}
-
-function newDirty(d: CadastrarPessoaDraft) {
-  return !!(d.details.identification.name || d.details.identification.countryCode);
 }
 
 @customElement('tarefas--web--desktop--page11--membros_equipe-102047')
 export class TarefasDesktopPage11Membros_equipePage extends TarefasMembros_equipeShared {
-  private msg!: PageMessageType;
+  private msg: PageMessageType = pageMessage_pt_br;
 
-  private currentScene() {
-    return this.scenary || (this.selectedMembroEquipe ? 'editar' : 'fechado');
+  private statusLabel(status: string) {
+    switch (status) {
+      case 'Active': return this.msg['statusActive'];
+      case 'Inactive': return this.msg['statusInactive'];
+      case 'Merged': return this.msg['statusMerged'];
+      default: return this.msg['statusBlocked'];
+    }
   }
 
-  private pendingChanges() {
-    const scene = this.currentScene();
-    if (scene === 'editar') return editDirty(this.membro, this.salvarAlteracoesPessoaDraft);
-    if (scene === 'novo') return newDirty(this.cadastrarPessoaDraft);
-    return false;
-  }
-
-  private confirmLeave() {
-    return !this.pendingChanges() || window.confirm(this.msg.confirmDiscard);
+  private confirmDiscard(): boolean {
+    const p = this.cadastroPessoa;
+    if (!p) return true;
+    if (!isDirty(this.cmdSalvarAlteracoesDraft, p)) return true;
+    return window.confirm(this.msg['discardConfirm']);
   }
 
   private openNew() {
-    if (!this.confirmLeave()) return;
-    this.obterMembroEquipe(null);
+    if (!this.confirmDiscard()) return;
+    this.selectCadastroPessoa(null);
     this.setScenario('novo');
   }
 
   private closePanel() {
-    if (!this.confirmLeave()) return;
-    this.obterMembroEquipe(null);
-    this.setScenario('fechado');
+    if (!this.confirmDiscard()) return;
+    this.selectCadastroPessoa(null);
+    this.setScenario('novo');
   }
 
-  private pickRow(index: number) {
-    const item = (this.membros?.items ?? [])[index];
-    if (!item) return;
-    if (item.id === this.selectedMembroEquipe) return;
-    if (!this.confirmLeave()) return;
-    this.obterMembroEquipe(item.id);
+  private openRow(index: number) {
+    const item = this.pessoas?.items[index];
+    if (!item || item.id === this.selectedMembroEquipe) return;
+    if (!this.confirmDiscard()) return;
+    this.selectCadastroPessoa(item.id);
     this.setScenario('editar');
   }
 
-  private register() {
-    this.cadastrarPessoa().then(() => {
-      if (this.cadastrarPessoaStatus === 'success') this.setScenario('editar');
-    });
-  }
-
   private saveEdit() {
-    this.salvarAlteracoesPessoa().then(() => {
-      if (this.salvarAlteracoesPessoaStatus === 'success') {
-        this.obterMembroEquipe(null);
-        this.setScenario('fechado');
+    void this.cmdSalvarAlteracoes().then(() => {
+      if (this.cmdSalvarAlteracoesStatus === 'success') {
+        this.selectCadastroPessoa(null);
+        this.setScenario('novo');
       }
     });
   }
 
-  private renderSearch() {
-    return html`
-      <groupsearchcontent--ml-search-bar
-        data-class="w-full"
-        .value=${this.busca}
-        placeholder=${this.msg.searchPlaceholder}
-        @search=${(e: CustomEvent<{ query: string }>) => this.listarMembrosEquipe(e.detail.query)}
-        @clear=${() => this.listarMembrosEquipe('')}>
-        <Label>${this.msg.searchLabel}</Label>
-      </groupsearchcontent--ml-search-bar>
-    `;
+  private setNewField(patch: { name?: string | null; countryCode?: string | null }) {
+    const d = this.cmdCadastrarPessoaDraft;
+    this.setCmdCadastrarPessoaDraft({
+      ...d,
+      details: { identification: { ...d.details.identification, ...patch } },
+    });
   }
 
-  private renderRow(m: MembroEquipeResumo) {
-    const ident = m.details.identification.details.identification;
-    const contacts = m.details.base.details.base.contacts;
-    const muted = ident.status === 'Inactive';
-    const tone = muted ? 'text-[var(--text-muted,currentColor)]' : 'text-[var(--text-strong,currentColor)]';
+  private setEditField(patch: { name?: string | null; countryCode?: string | null }) {
+    const d = this.cmdSalvarAlteracoesDraft;
+    this.setCmdSalvarAlteracoesDraft({
+      ...d,
+      details: { identification: { ...d.details.identification, ...patch } },
+    });
+  }
+
+  private renderTable() {
+    const items = this.pessoas?.items ?? [];
+    const selIndex = items.findIndex((p) => p.id === this.selectedMembroEquipe);
+    const busy = this.pageStatus === 'loading' || this.pageStatus === 'idle';
     return html`
-      <TableRow key=${m.id}>
-        <TableCell><span class="font-medium ${tone}">${ident.name}</span></TableCell>
-        <TableCell>
-          <span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass(ident.status)}">${statusLabel(this.msg, ident.status)}</span>
-        </TableCell>
-        <TableCell><span class=${tone}>${ident.countryCode || this.msg.noValue}</span></TableCell>
-        <TableCell><span class="text-[var(--text-muted,currentColor)]">${contacts || this.msg.noValue}</span></TableCell>
-      </TableRow>
+      <groupviewtable--ml-data-table
+        .value=${selIndex >= 0 ? String(selIndex) : ''}
+        .loading=${busy}
+        @rowClick=${(e: CustomEvent<{ index: number }>) => this.openRow(e.detail.index)}
+      >
+        <TableHeader>
+          <TableRow>
+            <TableHead key="name">${this.msg['colName']}</TableHead>
+            <TableHead key="country">${this.msg['colCountry']}</TableHead>
+            <TableHead key="status">${this.msg['colStatus']}</TableHead>
+            <TableHead key="contacts">${this.msg['colContacts']}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          ${items.map((p) => {
+            const id = p.details.identification;
+            const muted = id.status !== 'Active';
+            return html`
+              <TableRow key=${p.id}>
+                <TableCell><span class=${muted ? 'text-[var(--text-muted,currentColor)]' : 'font-medium text-[var(--text-strong,currentColor)]'}>${id.name}</span></TableCell>
+                <TableCell><span class="text-[var(--text-default,currentColor)]">${id.countryCode}</span></TableCell>
+                <TableCell><span class="inline-block rounded-full px-2 py-0.5 text-xs ${statusTone(id.status)}">${this.statusLabel(id.status)}</span></TableCell>
+                <TableCell><span class="text-[var(--text-muted,currentColor)]">${p.details.base.contacts || this.msg['noValue']}</span></TableCell>
+              </TableRow>
+            `;
+          })}
+        </TableBody>
+        <Empty>${this.busca ? this.msg['emptySearch'] : this.msg['emptyAll']}</Empty>
+        <Loading>${this.msg['loading']}</Loading>
+      </groupviewtable--ml-data-table>
     `;
   }
 
   private renderList() {
-    if (this.listarMembrosEquipeStatus === 'error' || this.pageStatus === 'error') {
-      const missing = this.listarMembrosEquipeError?.code === 'client.preconditionMissing';
+    if (this.qryPessoasEquipeError?.code === 'client.preconditionMissing') {
       return html`
-        <div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6" role="alert" aria-live="polite">
-          <p class="text-[var(--text-default,currentColor)]">${missing ? this.msg.preconditionMissing : this.msg.listError}</p>
-          <div class="mt-4">
-            ${missing
-              ? html`<grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => history.back()}><Label>${this.msg.goBack}</Label></grouptriggeraction--ml-button-standard>`
-              : html`<grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => this.listarMembrosEquipe()}><Label>${this.msg.retry}</Label></grouptriggeraction--ml-button-standard>`}
-          </div>
+        <div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 flex flex-col gap-3 items-start" aria-live="polite">
+          <p class="font-medium text-[var(--text-strong,currentColor)]">${this.msg['missingTitle']}</p>
+          <p class="text-[var(--text-default,currentColor)]">${this.msg['missingBody']}</p>
+          <grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => window.history.back()}>
+            <Label>${this.msg['back']}</Label>
+          </grouptriggeraction--ml-button-standard>
         </div>
       `;
     }
-    const items = this.membros?.items ?? [];
-    const idx = this.selectedMembroEquipe ? items.findIndex(i => i.id === this.selectedMembroEquipe) : -1;
     return html`
-      <groupviewtable--ml-data-table
-        .value=${idx >= 0 ? String(idx) : ''}
-        ?loading=${this.pageStatus === 'loading'}
-        @rowClick=${(e: CustomEvent<{ index: number }>) => this.pickRow(e.detail.index)}
-        @change=${(e: Event) => e.stopPropagation()}>
-        <TableHeader>
-          <TableRow>
-            <TableHead key="name">${this.msg.colName}</TableHead>
-            <TableHead key="status">${this.msg.colStatus}</TableHead>
-            <TableHead key="country">${this.msg.colCountry}</TableHead>
-            <TableHead key="contacts">${this.msg.colContacts}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>${items.map(m => this.renderRow(m))}</TableBody>
-        <Empty>${this.msg.emptyList}</Empty>
-      </groupviewtable--ml-data-table>
-      ${this.membros?.hasMore
-        ? html`
-          <div class="mt-3 flex justify-center">
-            <grouptriggeraction--ml-button-standard
-              data-variant="secondary"
-              ?loading=${this.listarMembrosEquipeStatus === 'loading'}
-              @action=${() => this.listarMembrosEquipe(undefined, undefined, true)}>
-              <Label>${this.msg.loadMore}</Label>
-            </grouptriggeraction--ml-button-standard>
-          </div>`
-        : nothing}
-    `;
-  }
-
-  private renderError(message: string | undefined) {
-    return html`<p class="text-sm text-[var(--text-default,currentColor)]" role="alert" aria-live="polite">${message ? this.msg.saveError : ''}</p>`;
-  }
-
-  private renderCloseButton() {
-    return html`
-      <grouptriggeraction--ml-button-standard data-variant="ghost" @action=${() => this.closePanel()}>
-        <Label>${this.msg.close}</Label>
-      </grouptriggeraction--ml-button-standard>
+      <div class="flex flex-col gap-3">
+        <groupsearchcontent--ml-search-bar
+          .value=${this.busca}
+          .loading=${this.qryPessoasEquipeStatus === 'loading'}
+          placeholder=${this.msg['searchPlaceholder']}
+          @search=${(e: CustomEvent<{ query: string }>) => { void this.qryPessoasEquipe(e.detail.query); }}
+          @clear=${() => { void this.qryPessoasEquipe(''); }}
+        >
+          <Label>${this.msg['searchLabel']}</Label>
+        </groupsearchcontent--ml-search-bar>
+        ${this.pageStatus === 'error' && this.qryPessoasEquipeError
+          ? html`
+            <div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 flex items-center justify-between gap-3" aria-live="polite">
+              <p class="text-[var(--text-default,currentColor)]">${this.msg['loadErrorTitle']}</p>
+              <grouptriggeraction--ml-button-standard data-variant="secondary" size="sm" @action=${() => { void this.qryPessoasEquipe(); }}>
+                <Label>${this.msg['retry']}</Label>
+              </grouptriggeraction--ml-button-standard>
+            </div>`
+          : this.renderTable()}
+        ${this.pessoas?.hasMore
+          ? html`
+            <div class="flex justify-center">
+              <grouptriggeraction--ml-button-standard
+                data-variant="ghost"
+                size="sm"
+                .loading=${this.qryPessoasEquipeStatus === 'loading'}
+                @action=${() => { void this.qryPessoasEquipe(undefined, (this.pessoas?.page ?? 1) + 1, true); }}
+              >
+                <Label>${this.msg['loadMore']}</Label>
+              </grouptriggeraction--ml-button-standard>
+            </div>`
+          : nothing}
+      </div>
     `;
   }
 
   private renderNewScene() {
-    const d = this.cadastrarPessoaDraft;
-    const name = d.details.identification.name;
-    const country = d.details.identification.countryCode;
-    const ready = !!(name && name.trim()) && !!(country && country.trim());
-    const busy = this.cadastrarPessoaStatus === 'loading';
+    const id = this.cmdCadastrarPessoaDraft.details.identification;
+    const loading = this.cmdCadastrarPessoaStatus === 'loading';
+    const ready = filled(id.name) && filled(id.countryCode);
     return html`
-      <form class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
+      <div class="flex flex-col gap-4">
         <groupentertext--ml-enter-text
-          .value=${name ?? ''}
-          .error=${name === '' ? this.msg.fieldNameError : ''}
+          .value=${id.name ?? ''}
+          placeholder=${this.msg['namePlaceholder']}
           required
-          @input=${(e: CustomEvent<{ value: string }>) => this.setCadastrarPessoaDraft({ details: { identification: { ...d.details.identification, name: e.detail.value } } })}>
-          <Label>${this.msg.fieldName}</Label>
-          <Helper>${this.msg.fieldNameHelper}</Helper>
+          @input=${(e: CustomEvent<{ value: string }>) => this.setNewField({ name: e.detail.value })}
+        >
+          <Label>${this.msg['fieldName']}</Label>
+          <Helper>${this.msg['fieldNameHelper']}</Helper>
         </groupentertext--ml-enter-text>
         <groupentertext--ml-enter-text
-          .value=${country ?? ''}
-          .error=${country === '' ? this.msg.fieldCountryError : ''}
+          .value=${id.countryCode ?? ''}
+          placeholder=${this.msg['countryPlaceholder']}
           required
-          @input=${(e: CustomEvent<{ value: string }>) => this.setCadastrarPessoaDraft({ details: { identification: { ...d.details.identification, countryCode: e.detail.value } } })}>
-          <Label>${this.msg.fieldCountry}</Label>
-          <Helper>${this.msg.fieldCountryHelper}</Helper>
+          @input=${(e: CustomEvent<{ value: string }>) => this.setNewField({ countryCode: e.detail.value })}
+        >
+          <Label>${this.msg['fieldCountry']}</Label>
+          <Helper>${this.msg['fieldCountryHelper']}</Helper>
         </groupentertext--ml-enter-text>
-        ${this.cadastrarPessoaStatus === 'error' ? this.renderError(this.cadastrarPessoaError?.message) : nothing}
-        <div class="flex items-center justify-between gap-2">
-          ${this.renderCloseButton()}
+        <groupnotifyuser--ml-contextual-feedback type="error" .visible=${this.cmdCadastrarPessoaStatus === 'error'} .dismissible=${false}>
+          <Message>${this.msg['registerError']}</Message>
+        </groupnotifyuser--ml-contextual-feedback>
+        <div>
           <grouptriggeraction--ml-button-standard
-            data-variant="primary"
-            ?disabled=${!ready}
-            ?loading=${busy}
-            @action=${() => this.register()}>
-            <Label>${this.msg.registerPerson}</Label>
+            .disabled=${!ready}
+            .loading=${loading}
+            @action=${() => { void this.cmdCadastrarPessoa(); }}
+          >
+            <Label>${this.msg['registerPerson']}</Label>
           </grouptriggeraction--ml-button-standard>
         </div>
-      </form>
+      </div>
     `;
   }
 
   private renderEditScene() {
-    const d = this.salvarAlteracoesPessoaDraft;
-    const m = this.membro;
-    const name = d.details.identification.name;
-    const country = d.details.identification.countryCode;
-    const ready = !!(name && name.trim()) && !!(country && country.trim()) && editDirty(m, d);
-    const busy = this.salvarAlteracoesPessoaStatus === 'loading';
-    const ident = m ? m.details.identification.details.identification : null;
+    const p = this.cadastroPessoa;
+    if (!p) {
+      return html`<p class="text-[var(--text-muted,currentColor)]">${this.msg['noSelection']}</p>`;
+    }
+    const d = this.cmdSalvarAlteracoesDraft.details.identification;
+    const loading = this.cmdSalvarAlteracoesStatus === 'loading';
+    const ready = filled(d.name) && filled(d.countryCode) && isDirty(this.cmdSalvarAlteracoesDraft, p);
+    const info = p.details.identification;
     return html`
-      <form class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()} aria-busy=${this.obterMembroEquipeStatus === 'loading' ? 'true' : 'false'}>
+      <div class="flex flex-col gap-4">
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm rounded-md bg-[var(--surface-alt-bg,transparent)] p-3">
+          <dt class="text-[var(--text-muted,currentColor)]">${this.msg['detailStatus']}</dt>
+          <dd class="text-[var(--text-default,currentColor)]">
+            <span class="inline-block rounded-full px-2 py-0.5 text-xs ${statusTone(info.status)}">${this.statusLabel(info.status)}</span>
+          </dd>
+          <dt class="text-[var(--text-muted,currentColor)]">${this.msg['detailRoles']}</dt>
+          <dd class="text-[var(--text-default,currentColor)]">${info.tags || this.msg['noValue']}</dd>
+          <dt class="text-[var(--text-muted,currentColor)]">${this.msg['detailContacts']}</dt>
+          <dd class="text-[var(--text-default,currentColor)]">${p.details.base.contacts || this.msg['noValue']}</dd>
+        </dl>
+        <p class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['detailStatusHint']}</p>
         <groupentertext--ml-enter-text
-          .value=${name ?? ''}
-          .error=${name === '' ? this.msg.fieldNameError : ''}
-          ?disabled=${!m}
+          .value=${d.name ?? ''}
+          placeholder=${this.msg['namePlaceholder']}
           required
-          @input=${(e: CustomEvent<{ value: string }>) => this.setSalvarAlteracoesPessoaDraft({ ...d, details: { identification: { ...d.details.identification, name: e.detail.value } } })}>
-          <Label>${this.msg.fieldName}</Label>
-          <Helper>${this.msg.fieldNameHelper}</Helper>
+          @input=${(e: CustomEvent<{ value: string }>) => this.setEditField({ name: e.detail.value })}
+        >
+          <Label>${this.msg['fieldName']}</Label>
+          <Helper>${this.msg['fieldNameHelper']}</Helper>
         </groupentertext--ml-enter-text>
         <groupentertext--ml-enter-text
-          .value=${country ?? ''}
-          .error=${country === '' ? this.msg.fieldCountryError : ''}
-          ?disabled=${!m}
+          .value=${d.countryCode ?? ''}
+          placeholder=${this.msg['countryPlaceholder']}
           required
-          @input=${(e: CustomEvent<{ value: string }>) => this.setSalvarAlteracoesPessoaDraft({ ...d, details: { identification: { ...d.details.identification, countryCode: e.detail.value } } })}>
-          <Label>${this.msg.fieldCountry}</Label>
-          <Helper>${this.msg.fieldCountryHelper}</Helper>
+          @input=${(e: CustomEvent<{ value: string }>) => this.setEditField({ countryCode: e.detail.value })}
+        >
+          <Label>${this.msg['fieldCountry']}</Label>
+          <Helper>${this.msg['fieldCountryHelper']}</Helper>
         </groupentertext--ml-enter-text>
-        ${ident && m
-          ? html`
-            <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 border-t border-[var(--border-subtle,currentColor)] pt-4 text-sm" aria-label=${this.msg.readOnlyTitle}>
-              <dt class="text-[var(--text-muted,currentColor)]">${this.msg.colStatus}</dt>
-              <dd><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass(ident.status)}">${statusLabel(this.msg, ident.status)}</span></dd>
-              <dt class="text-[var(--text-muted,currentColor)]">${this.msg.colRoles}</dt>
-              <dd class="text-[var(--text-default,currentColor)]">${ident.tags || this.msg.noValue}</dd>
-              <dt class="text-[var(--text-muted,currentColor)]">${this.msg.colContacts}</dt>
-              <dd class="text-[var(--text-default,currentColor)]">${m.details.base.details.base.contacts || this.msg.noValue}</dd>
-            </dl>`
-          : nothing}
-        ${this.salvarAlteracoesPessoaStatus === 'error' ? this.renderError(this.salvarAlteracoesPessoaError?.message) : nothing}
-        ${this.obterMembroEquipeStatus === 'error' ? this.renderError(this.obterMembroEquipeError?.message) : nothing}
-        <div class="flex items-center justify-between gap-2">
-          ${this.renderCloseButton()}
+        <groupnotifyuser--ml-contextual-feedback type="error" .visible=${this.cmdSalvarAlteracoesStatus === 'error'} .dismissible=${false}>
+          <Message>${this.msg['saveError']}</Message>
+        </groupnotifyuser--ml-contextual-feedback>
+        <div class="flex items-center gap-3">
           <grouptriggeraction--ml-button-standard
-            data-variant="primary"
-            ?disabled=${!ready}
-            ?loading=${busy}
-            @action=${() => this.saveEdit()}>
-            <Label>${this.msg.savePerson}</Label>
+            .disabled=${!ready}
+            .loading=${loading}
+            @action=${() => this.saveEdit()}
+          >
+            <Label>${this.msg['saveChanges']}</Label>
+          </grouptriggeraction--ml-button-standard>
+          <grouptriggeraction--ml-button-standard data-variant="ghost" @action=${() => this.closePanel()}>
+            <Label>${this.msg['closePanel']}</Label>
           </grouptriggeraction--ml-button-standard>
         </div>
-      </form>
-    `;
-  }
-
-  private renderPanel() {
-    const title = nameOf(this.membro) || this.msg.sceneEditFallback;
-    return html`
-      <molecules--ml-scenary-102020
-        mode="scenary"
-        .value=${this.currentScene()}
-        @change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}>
-        <Scene value="fechado" title=${this.msg.sceneIdle}>
-          <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.idleHint}</p>
-        </Scene>
-        <Scene value="novo" title=${this.msg.sceneNew}>${this.renderNewScene()}</Scene>
-        <Scene value="editar" title=${title}>${this.renderEditScene()}</Scene>
-      </molecules--ml-scenary-102020>
+      </div>
     `;
   }
 
   render() {
     this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    const current = this.cadastroPessoa;
+    const editTitle = current ? current.details.identification.name : this.msg['editSceneFallback'];
     return html`
-      <div class="min-h-full bg-[var(--page-bg,transparent)] p-6 text-[var(--text-default,currentColor)]">
-        <header class="mb-5 flex items-center justify-between gap-4">
-          <h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
-          <grouptriggeraction--ml-button-standard data-variant="primary" @action=${() => this.openNew()}>
-            <Label>${this.msg.newPerson}</Label>
+      <div class="min-h-full bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-6 flex flex-col gap-5">
+        <header class="flex items-center justify-between gap-4">
+          <h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg['pageTitle']}</h1>
+          <grouptriggeraction--ml-button-standard @action=${() => this.openNew()}>
+            <Label>${this.msg['newPerson']}</Label>
           </grouptriggeraction--ml-button-standard>
         </header>
-        <div class="grid grid-cols-[minmax(0,1fr)_24rem] items-start gap-6">
-          <section data-organism-id="pessoasEquipe" class="flex min-w-0 flex-col gap-4">
-            <div class="max-w-md">${this.renderSearch()}</div>
-            <div>${this.renderList()}</div>
+        <div class="grid grid-cols-[minmax(0,1fr)_380px] gap-6 items-start">
+          <section data-organism-id="pessoasEquipe" class="min-w-0">
+            ${this.renderList()}
           </section>
-          <aside data-organism-id="cadastroPessoa" class="sticky top-4 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5">
-            ${this.renderPanel()}
+          <aside data-organism-id="cadastroPessoa" class="sticky top-6 rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] p-5">
+            <molecules--ml-scenary-102020
+              mode="scenary"
+              .value=${this.scenary || (current ? 'editar' : 'novo')}
+              .backLabel=${this.msg['hostBack']}
+              @change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}
+            >
+              <Scene value="novo" title=${this.msg['newSceneTitle']}>
+                ${this.renderNewScene()}
+              </Scene>
+              <Scene value="editar" title=${editTitle}>
+                ${this.renderEditScene()}
+              </Scene>
+            </molecules--ml-scenary-102020>
+            <groupnotifyuser--ml-toast-notification
+              type="success"
+              position="top-right"
+              .duration=${3500}
+              .visible=${this.cmdCadastrarPessoaStatus === 'success'}
+            >
+              <Message>${this.msg['registerOk']}</Message>
+            </groupnotifyuser--ml-toast-notification>
+            <groupnotifyuser--ml-toast-notification
+              type="success"
+              position="top-right"
+              .duration=${3500}
+              .visible=${this.cmdSalvarAlteracoesStatus === 'success'}
+            >
+              <Message>${this.msg['saveOk']}</Message>
+            </groupnotifyuser--ml-toast-notification>
           </aside>
         </div>
-        <groupnotifyuser--ml-toast-notification
-          type="success"
-          position="bottom-right"
-          duration="4000"
-          ?visible=${this.salvarAlteracoesPessoaStatus === 'success'}>
-          <Message>${this.msg.saved}</Message>
-        </groupnotifyuser--ml-toast-notification>
-        <groupnotifyuser--ml-toast-notification
-          type="success"
-          position="bottom-right"
-          duration="4000"
-          ?visible=${this.cadastrarPessoaStatus === 'success'}>
-          <Message>${this.msg.registered}</Message>
-        </groupnotifyuser--ml-toast-notification>
       </div>
     `;
   }

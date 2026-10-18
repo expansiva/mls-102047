@@ -4,33 +4,49 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "mobile",
-  "contextHash": "sha256:fa6464567cbc7aa58abfd77a48995b0ac348de4b4827dde63908739a91cc0688",
+  "contextHash": "sha256:d7adf8c73adff8268d2f8abf71f87f58d3ef43f753bb39d4d757f4861c92bcf9",
   "sourcePath": "l2/tarefas/web/mobile/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:5522465935c78e171588348c5b41d00eb7b6b1ecbb77dfb564700c1444d07ff2",
+  "sourceHash": "sha256:4166eee71b590112039c76c0dbf1130374e7ebe9648a3d2f54b2d916cb4b8264",
   "attempt": 2,
   "design": {
-    "concept": "Uma pilha de passos de um toque por vez, feita para o polegar: a lista das minhas tarefas (com filtros rápidos) leva à tarefa aberta, onde ficam o resumo, a checklist e as ações do momento. Criar e ajustar abrem em cenas próprias, com a barra de salvar fixa no rodapé. O histórico fica recolhido, para quem precisa entender o que aconteceu.",
+    "concept": "Uma pilha de telas de um polegar só: a lista de tarefas (com filtros rápidos em pílulas e o botão \"Nova tarefa\" sempre à mão) leva à tarefa aberta, onde dados, checklist e a ação de ciclo do meu papel ficam juntos e ao alcance do polegar. Criar, editar, marcar checklist, devolver e cancelar são passos próprios, cada um com voltar, para nunca competir com a lista.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Lista compacta das tarefas na ordem que o backend entrega (prazo primeiro), com filtros em pílulas, botão Criar tarefa e Carregar mais."
+        "purpose": "Ver de relance minhas tarefas, filtrar rapidamente, destacar atrasadas e as que vencem hoje, abrir uma tarefa ou iniciar uma nova."
       },
       {
-        "id": "tarefa",
-        "purpose": "A tarefa aberta em coluna única: resumo, motivo da devolução, checklist marcável, ações conforme a situação e histórico recolhido."
+        "id": "detalhe",
+        "purpose": "Tarefa aberta: dados, motivo da devolução em destaque, checklist, barra de ação do meu papel (principal em destaque + menu) e histórico recolhido."
       },
       {
         "id": "criar",
-        "purpose": "Formulário em coluna única para registrar uma tarefa nova, com checklist inicial."
+        "purpose": "Registrar nova tarefa: campos empilhados, responsável por busca de nome e checklist inicial."
       },
       {
         "id": "editar",
-        "purpose": "O mesmo formulário preenchido com a tarefa aberta, para ajustar campos, trocar o responsável e a checklist sem mudar a situação."
+        "purpose": "Editar os campos e trocar o responsável sem mudar a situação."
+      },
+      {
+        "id": "checklist",
+        "purpose": "Marcar, ajustar, reordenar e acrescentar itens da checklist, com salvamento próprio."
+      },
+      {
+        "id": "devolver",
+        "purpose": "Informar o motivo obrigatório para devolver a entrega para ajuste."
+      },
+      {
+        "id": "cancelar",
+        "purpose": "Confirmação que nomeia a tarefa antes de cancelá-la (única ação de perigo)."
       }
     ],
-    "decisions": "Usei o scene host em mode=\"scenary\" com quatro cenas; o título da cena é o único título da vista, então a lista não repete \"Minhas tarefas\". A lista usa o ml-responsive-table, que vira cartões em tela estreita, no lugar do data-table. Os filtros são pílulas exclusivas mapeadas para os filtros do shared. Só a data atrasada recebe a cor de alarme. O progresso da checklist aparece como o texto pronto do backend. A ação principal da tarefa muda com a situação. Cancelar é o único botão de perigo e pede confirmação. O feedback das ações é inline. Depois de salvar, a página volta para a tarefa. Os handlers de molécula leem apenas eventos com detail.value. O responsável é buscado por nome com buscarResponsaveis a partir do evento change do autocomplete (que não emite input): um valor que não é um responsável conhecido é tratado como texto digitado e dispara a busca; o responsável atual entra como opção na edição."
+    "decisions": "Usei o scene host em modo scenary para todas as trocas de tela; o título de cada cena é o único título da vista (a lista não repete \"Minhas tarefas\"). A lista usa a tabela responsiva (vira cartões rotulados no celular), com prazo em cor de alarme só quando atrasada e aviso textual para \"vence hoje\". Os filtros são pílulas sem conteúdo nas abas, com a lista abaixo. A ação principal do papel fica numa barra fixa na base do detalhe, com menu em folha inferior (popover nativo) para devolver e cancelar; devolver e cancelar viram cenas porque exigem motivo e confirmação com o nome da tarefa. O responsável usa o combobox porque emite digitação, com busca com debounce. Após salvar/criar/devolver/cancelar com sucesso volto ao detalhe. Histórico fica em seção recolhida com a linha do tempo. Nada é calculado: flags e progresso vêm prontos. Correção: o host de cenas segue o contrato do ml-scenary (backLabel como atributo, cenas só com value, title e nav)."
   },
   "advisories": [
+    {
+      "code": "M4_PAGE_IMPORT",
+      "message": "[contract] Import lit/directives/keyed.js is not allowed. Use only lit, lit/decorators.js, /_102047_/l2/tarefas/web/shared/minhas_tarefas.js and the molecule paths of this page."
+    },
     {
       "code": "M4_PAGE_SECTION",
       "message": "Section secTarefas needs an element with data-section-id=\"secTarefas\"."
@@ -49,19 +65,15 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasLista (progresso da checklist compacto) renders neither <groupshowprogress--ml-circular-progress> nor <groupshowprogress--ml-linear-progress>."
+      "message": "Organism listaTarefas (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasLista (busca pelo título) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
+      "message": "Organism listaTarefas (busca por título) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefaDetalhe (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefaAcoes (ações secundárias como cancelar) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
+      "message": "Organism acoesTarefa (confirmação da ação) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-alert-modal>."
     }
   ]
 }

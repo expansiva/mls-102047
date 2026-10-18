@@ -1,32 +1,40 @@
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import type { Meus_avisosContracts, AvisoDetalhe } from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
-export type { Meus_avisosContracts, AvisoResumoDetalhes, AvisoResumo, TarefaResumo, TarefaAviso, AvisoDetalheDetalhes, AvisoDetalhe } from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
-type Output<R extends keyof Meus_avisosContracts> = Meus_avisosContracts[R]['output'];
+export type { Meus_avisosContracts, AvisoResumoDetails, AvisoResumo, TarefaAvisoDetails, TarefaAviso, AvisoLinhaTarefa, AvisoDetalheDetails, AvisoDetalhe, } from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
 export type ErrorState = {
     code: string;
     message: string;
     details?: unknown;
 } | null;
-export type AvisosPage = Output<'tarefas.meus_avisos.carregarMeusAvisos'>['avisos'];
+type Output<R extends keyof Meus_avisosContracts> = Meus_avisosContracts[R]['output'];
+export type AvisosPage = Output<'tarefas.meus_avisos.qryPaginaMeusAvisos'>['avisos'];
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
 export declare class TarefasMeus_avisosShared extends StateLitElement {
-    /** state avisos — the page of daily notices (list and send history), each with totals and send dates; source carregarMeusAvisos.avisos; organisms historicoAvisos, listaAvisos */
+    /** state avisos — the list of daily due-date notices of the signed-in person, with reference date, delivery status, totals and generation/finish record; source qryPaginaMeusAvisos.avisos; organisms historicoAvisos, listaAvisos */
     avisos: AvisosPage;
-    /** state avisoAberto — the open notice with its due-today or overdue task rows; source carregarMeusAvisos.avisoAberto; organism detalheAviso */
-    avisoAberto: AvisoDetalhe | null;
-    /** state selectedAvisoVencimento — id of the notice the person selected (the record itself is avisoAberto); source entry.params.avisoVencimentoId; organisms detalheAviso, listaAvisos; persisted */
+    /** state avisoAtual — the notice shown in detail with its totals and task rows (the latest one on opening, the picked one after a selection); source qryPaginaMeusAvisos.avisoAtual; organism avisoDoDia */
+    avisoAtual: AvisoDetalhe | null;
+    /** state selectedAvisoVencimento — the id of the notice selected in listaAvisos; source entry.params.avisoVencimentoId; organisms avisoDoDia, listaAvisos; persisted */
     selectedAvisoVencimento: string | null;
-    /** state page — the page of the list the person went to with a pager (completed gap: no state held the page filter); source entry.params.page; organism listaAvisos; persisted */
-    page: number | null;
-    /** state pageStatus — overall status of the page: loading while the initial load runs, empty when there are no notices, error if it failed; source page runtime */
-    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
-    /** state carregarMeusAvisosStatus — status of the request carregarMeusAvisos; source request runtime */
-    carregarMeusAvisosStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state carregarMeusAvisosError — error of the request carregarMeusAvisos, null when none; source request runtime */
-    carregarMeusAvisosError: ErrorState;
-    /** state abrirAvisoStatus — status of the request abrirAviso; source request runtime */
-    abrirAvisoStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state abrirAvisoError — error of the request abrirAviso, null when none; source request runtime */
-    abrirAvisoError: ErrorState;
+    /** state filtroDataInicio — inclusive start of the reference-date period filter of the list (null = no limit); set by qryListarMeusAvisos; source client filter */
+    filtroDataInicio: string | null;
+    /** state filtroDataFim — inclusive end of the reference-date period filter of the list (null = no limit); set by qryListarMeusAvisos; source client filter */
+    filtroDataFim: string | null;
+    /** state pageStatus — overall status of the page opening: idle, loading, empty (no notices), success or error */
+    pageStatus: PageStatus;
+    /** state qryPaginaMeusAvisosStatus — status of the opening load request */
+    qryPaginaMeusAvisosStatus: RequestStatus;
+    /** state qryPaginaMeusAvisosError — error of the opening load request, null when none */
+    qryPaginaMeusAvisosError: ErrorState;
+    /** state qryListarMeusAvisosStatus — status of the period list request */
+    qryListarMeusAvisosStatus: RequestStatus;
+    /** state qryListarMeusAvisosError — error of the period list request, null when none */
+    qryListarMeusAvisosError: ErrorState;
+    /** state qryAvisoPorIdStatus — status of the request that opens one notice */
+    qryAvisoPorIdStatus: RequestStatus;
+    /** state qryAvisoPorIdError — error of the request that opens one notice, null when none */
+    qryAvisoPorIdError: ErrorState;
     /** state scenary — the visible scene of the page; '' until the page shows its first scene */
     scenary: string;
     private publish;
@@ -36,14 +44,18 @@ export declare class TarefasMeus_avisosShared extends StateLitElement {
     handleIcaStateChange(key: string, value: any): void;
     private hydrateData;
     private resetVisit;
-    private readParam;
+    private readUrlParam;
     private applyEntryParams;
     private startVisit;
     private unexpectedError;
-    /** scene — publishes the visible scene of the page (any string; '' for none) */
+    /** setScenario — publishes the visible scene of the page (scenary); no backend call */
     setScenario(value: string): void;
-    /** request carregarMeusAvisos — opens the page: the paged list of the session user's daily notices (also the send history) and the latest notice already open with its tasks; redraws avisos (replace, or append the next page when append is true; page/hasMore stay in the list), avisoAberto (replace, only when no notice is selected and not appending) and page (the page the person went to with a pager, only when not appending); also the method to reload and to page the list. page: page to load (omit to use the stored page, or the first); append: true adds the next page to the items (only when the list says hasMore) */
-    carregarMeusAvisos(page?: number, append?: boolean): Promise<void>;
-    /** request abrirAviso — select a notice of the list and load it with its task rows; redraws avisoAberto (replace) and selectedAvisoVencimento (the id, persisted). avisoId: id of the notice picked in the list; null clears the selection (no call) */
-    abrirAviso(avisoId: string | null): Promise<void>;
+    /** select — selects the notice shown in avisoDoDia by its id (or null to clear the selection); a non-null id opens it through qryAvisoPorId and redraws avisoAtual; null only clears selectedAvisoVencimento and keeps the notice already shown */
+    selectAvisoVencimento(id: string | null): void;
+    /** request qryPaginaMeusAvisos — opening load: first page of the signed-in person's daily notices and the most recent completed notice with its tasks; redraws avisos (replace) and avisoAtual (replace, null when the person has no notice) and pageStatus; no arguments, also the method to reload the page */
+    qryPaginaMeusAvisos(): Promise<void>;
+    /** request qryListarMeusAvisos — lists the person's daily notices in a period, page by page; redraws avisos (replace, or append the next page when append is true; append does nothing when avisos.hasMore is false); arguments: dataInicio and dataFim are the inclusive reference-date limits (string, null = no limit, undefined = keep the current filter; a new filter should be loaded with page 1), page is the page to load (default 1), append adds the page to the items (load more) */
+    qryListarMeusAvisos(dataInicio?: string | null, dataFim?: string | null, page?: number, append?: boolean): Promise<void>;
+    /** request qryAvisoPorId — opens one daily notice with its totals and task rows; selects it (selectedAvisoVencimento, persisted) and redraws avisoAtual (replace); argument id is the id of the chosen notice (a row of avisos) */
+    qryAvisoPorId(id: string): Promise<void>;
 }

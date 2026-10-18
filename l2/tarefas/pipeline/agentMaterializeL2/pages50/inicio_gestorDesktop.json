@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_gestor",
   "device": "desktop",
-  "contextHash": "sha256:7bad802d7c164f5a01658e1b185acaf28384445befa13e8b13894d09e8745c1a",
+  "contextHash": "sha256:80eda94653f78ac058d00b99b67b54640fecf0c382cb48aa8f762e04c3ac91cb",
   "sourcePath": "l2/tarefas/web/desktop/page11/inicio_gestor.ts",
-  "sourceHash": "sha256:0a9edb0909ed5e4d5150e5b5ef43ed00af4ca86a4923048ef847ee0df31c697b",
-  "attempt": 1,
+  "sourceHash": "sha256:580d7e9aa34cd7587429726b7bba0d316a1478e0ed1c00cebc87d7f4bda4cdb1",
+  "attempt": 2,
   "design": {
-    "concept": "Uma superfície de triagem para o gestor: logo abaixo do título, uma frase diz quanto problema há (atrasadas e vencendo hoje), seguida da fila de tarefas que pedem ação, em que cada linha leva a Tarefas da equipe para trocar o responsável ou cancelar. O panorama da equipe vira uma faixa discreta no rodapé, sem cartões nem gráficos.",
+    "concept": "Uma tela de triagem para o gestor: a primeira coisa que ele lê é uma frase com o que precisa dele agora (quantas tarefas estão atrasadas e quantas vencem hoje). Logo abaixo vem a fila de tarefas, da mais urgente para a menos urgente. Cada linha leva a Tarefas da equipe. O panorama de totais, checklists e listas fica embaixo, numa faixa discreta.",
     "views": [],
-    "decisions": "Segui o template exceptionTriage em vez da ordem das seções do defs: a seção primária (panoramaEquipe) fica DEPOIS da fila, como faixa de saúde discreta, porque o template proíbe KPIs e gráficos no topo e manda a pergunta 'o que precisa de mim agora' vir primeiro. A manchete usa os totais prontos do backend (atrasadas, vencem hoje) sem somar nada. A fila é uma única lane, já ordenada pelo backend (atrasadas primeiro); a página não filtra. Cada linha da lista vertical tem identidade (título, lista, responsável), situação/prioridade/checklist em texto discreto e o fato decisivo (prazo + marca atrasada/vence hoje) alinhado à direita; a linha inteira é o drill-down (agirNaTarefa), sem botão por linha. Cor de alarme só no fato decisivo. Paginação vira 'Carregar mais' (só há hasMore). O progresso da checklist é mostrado pelo texto pronto do backend, pois uma barra exigiria calcular porcentagem. Estado de boa notícia calmo no lugar da manchete. Falha de cada região mostra aviso próprio com nova tentativa; a falta de pré-condição ao agir explica em palavras e oferece abrir Tarefas da equipe. Página de uma só visão, sem scene host.\n"
+    "decisions": "Segui o template exceptionTriage em vez da ordem das seções do defs. A fila (tarefasParaAcao) vem antes e destaquesEquipe vira uma faixa discreta embaixo, sem cards nem gráficos.\n\nA página tem uma só vista, então não usei o scene host.\n\nA frase de triagem usa os totais prontos do backend (totalAtrasadas e totalVenceHoje). Não somo nem filtro nada na página.\n\nA fila é uma única lista de linhas, sem faixas separadas por tipo. O backend já a entrega ordenada. Cada linha mostra a identidade (título, lista e responsável), prioridade, situação e checklist. O fato decisivo é o prazo, alinhado à direita, em vermelho se atrasada e de aviso se vence hoje. A linha inteira leva a Tarefas da equipe.\n\nA linha não tem botão interno, para não disparar a navegação duas vezes.\n\nA fila usa o ml-vertical-record-list. O ml-button-standard serve para \"Mostrar mais tarefas\" e para tentar de novo em caso de erro. Os elementos das moléculas usam a tag completa com o prefixo molecules-- e o sufixo do projeto.\n\nO estado de boa notícia é uma frase calma, com a faixa de panorama ainda visível. Erros aparecem na própria região, cada um com sua ação de tentar de novo.\n\nO texto da checklist ('feitos/total') é exibido como o backend entrega."
   },
   "advisories": [
     {
@@ -20,11 +20,11 @@
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section tarefasParaAgir needs an element with data-section-id=\"tarefasParaAgir\"."
+      "message": "Section atencaoGestor needs an element with data-section-id=\"atencaoGestor\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism destaquesEquipe (Totais de abertas, vencendo hoje e atrasadas) renders neither <groupviewmetric--ml-metric-card> nor <groupviewmetric--ml-metric-big-number>."
+      "message": "Organism destaquesEquipe (Totais de tarefas abertas, das que vencem hoje e das atrasadas) renders neither <groupviewmetric--ml-metric-card> nor <groupviewmetric--ml-metric-big-number>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
@@ -36,7 +36,15 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasPedemAcao (Paginar as tarefas) renders neither <grouptriggeraction--ml-pagination-control>."
+      "message": "Organism tarefasParaAcao (Fila de tarefas que pedem ação) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasParaAcao (Abrir a tarefa em Tarefas da equipe) renders neither <grouptriggeraction--ml-button-standard> nor <grouptriggeraction--ml-icon-button>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasParaAcao (Navegar entre páginas da fila) renders neither <grouptriggeraction--ml-pagination-control>."
     }
   ]
 }

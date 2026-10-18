@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "listas",
   "device": "mobile",
-  "contextHash": "sha256:19189c6c30c7c8f2d99a855b01104e059463d1e1bde172769206b6899e80711e",
+  "contextHash": "sha256:066bf713f8b8b482b0711f752a8059095a83512df4774fbe84bf903b29a88fbb",
   "sourcePath": "l2/tarefas/web/mobile/page11/listas.ts",
-  "sourceHash": "sha256:36402a44b021ee929e7dac275abe49ec864e32898415a91840747f321b3f37f7",
-  "attempt": 1,
+  "sourceHash": "sha256:cc8b3cfc2892f9c63a57f41faf2917ce2a064a759701042d8d72888721663f46",
+  "attempt": 2,
   "design": {
-    "concept": "Duas cenas em coluna estreita: a lista das equipes (cada lista com nome grande, tipo/estado pequenos e a contagem de tarefas abertas) e a ficha da lista, aberta ao tocar numa linha ou em \"Nova lista\". A ficha tem um campo por linha e o botão de salvar no pé, ao alcance do polegar; ao salvar, volta à lista com a linha marcada e um aviso rápido.",
+    "concept": "Duas telas em coluna única no celular: a lista de listas (busca no topo, linhas grandes com tipo, tarefas abertas e situação, botão de cadastrar sempre ao alcance do polegar) e uma tela própria com voltar para cadastrar ou alterar uma lista, com um campo por linha e o botão de salvar no pé. Depois de salvar, volta à lista com a linha alterada marcada.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Ver as listas empilhadas, tocar numa para editar, ou cadastrar uma nova pelo botão fixo no pé. Cobre carregando, vazio, erro e pré-condição ausente."
+        "purpose": "Ver e buscar as listas; tocar numa linha abre o registro preenchido, o botão fixo no rodapé abre o registro vazio."
       },
       {
         "id": "registro",
-        "purpose": "Ficha de uma lista: nome, tipo, descrição e ativa. Serve para criar (vazia) ou salvar (preenchida); o título é o nome da lista; voltar pelo host de cenas."
+        "purpose": "Formulário de uma lista (nova ou existente), com voltar, erro de comando acima do botão e salvar no pé."
       }
     ],
-    "decisions": "Segui a variante mobile do template: lista e formulário nunca empilhados, cada um numa cena do ml-scenary em modo scenary, com back na ficha. O título da cena 'lista' é o título único da página; o da ficha é a identidade do registro (nome da lista) ou 'Dados da nova lista', sem repetir rótulo de botão. A paginação foi omitida: o shared não expõe página e o template proíbe chrome de paginação. Não há busca nem filtro porque o contrato não os declara. Listas inativas continuam na lista, com texto atenuado e selo neutro. Um mesmo formulário serve criar e salvar conforme selectedLista; o botão fica desabilitado até os obrigatórios estarem preenchidos. Erros de comando aparecem dentro da ficha, acima do botão (feedback contextual); o sucesso aparece como toast na lista, depois de voltar da cena, e o dispensar limpa o resultado reescrevendo o rascunho. Após criar ou salvar com sucesso, a página volta para a lista; a linha da lista permanece marcada porque selectedLista continua apontando para ela. Voltar com alterações não salvas usa o back do host, sem confirmação, porque o host não permite interceptá-lo."
+    "decisions": "Segui a seção On mobile do template: a lista não divide a tela com o formulário; o painel virou uma cena com voltar (ml-scenary mode=scenary). O mesmo ambiente de cena serve para criar e editar: o que muda é qual rascunho (criarListaDraft ou salvarListaDraft) e qual comando o botão chama, decidido pela linha selecionada que o shared entrega (formularioLista), nunca pela cena. O título da cena de edição é o nome da lista (identidade do registro), o da cena de criação é 'Nova lista'; o botão da lista diz 'Cadastrar nova lista', então nenhum título repete rótulo de botão. Linhas inativas ficam na lista, esmaecidas, com selo neutro (não vermelho). A linha aberta fica marcada ao voltar (selected). Após salvar com sucesso a página volta à lista e um toast curto confirma. Tipo usa select nativo e Ativa um checkbox de 44px porque nenhuma molécula cobre esses campos. Salvar fica desabilitado sem nome ou sem tipo (obrigatórios) e durante o envio. Limitação: o voltar do host não permite interceptar para confirmar descarte; ao voltar, a seleção é limpa. Estados: carregando, vazio/sem resultado, erro com tentar novamente (inclusive client.preconditionMissing em palavras)."
   },
   "advisories": [
     {
@@ -30,10 +30,6 @@
     {
       "code": "M4_PAGE_SECTION",
       "message": "Section manutencaoLista needs an element with data-section-id=\"manutencaoLista\"."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism listasCadastradas (paginação das listas) renders neither <grouptriggeraction--ml-pagination-control>."
     }
   ]
 }

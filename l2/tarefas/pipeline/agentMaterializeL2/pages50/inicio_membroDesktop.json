@@ -4,59 +4,59 @@
   "module": "tarefas",
   "pageId": "inicio_membro",
   "device": "desktop",
-  "contextHash": "sha256:5d3bff19b600d1cfefff6ea313bde2bf50e4ae648f177ad2aacd22bb4d69b315",
+  "contextHash": "sha256:e552a1b4cace822f0447e2b054dec90f0e19d404cb84dc45887d6e8e6e141617",
   "sourcePath": "l2/tarefas/web/desktop/page11/inicio_membro.ts",
-  "sourceHash": "sha256:7111d47e1473c4ba65e3bbd5b2507824e14707a26d709d10516b9bc5159b7f80",
-  "attempt": 1,
+  "sourceHash": "sha256:b8fb9e18400332c28b612fd73857fba8c95f075a6cba8000eab55d7f0a3b6674",
+  "attempt": 2,
   "design": {
-    "concept": "Uma central de triagem para o início do dia do membro: uma frase no topo diz quanto há de risco de prazo, a faixa \"Esperando por você\" lista o que depende dele com a ação certa em cada linha, e o aviso das 8h fica numa coluna lateral discreta. Os indicadores agregados e a lista completa de tarefas abertas ficam abaixo, em tom calmo, como contexto.",
+    "concept": "Início do membro como uma superfície de triagem: a pergunta é \"o que precisa de mim agora?\". As pendências aparecem em faixas de ação, da mais urgente (devolvidas para ajuste) à menos urgente (para iniciar). A carga de trabalho fica numa linha discreta logo abaixo, as tarefas em destaque ficam recolhidas, e o aviso das 8h fica numa coluna lateral.",
     "views": [],
-    "decisions": "Página de uma só visão, sem scene host, porque o modelo de triagem não tem sequência. Segui o template (manchete de triagem, faixa de exceções, faixa de indicadores, navegação demovida) e saí da ordem das seções do defs: o resumo (primary) vira a manchete e a faixa discreta, e a caixa de pendências lidera a área de trabalho. Nada é contado, somado ou filtrado na página: a manchete usa os números do backend, e a ação de cada linha vem do status e da presença do motivo de devolução. O fato decisivo de cada linha é acaoEsperada, alinhado à direita. A devolução usa o rascunho do shared: abrir o formulário grava o id da pendência no rascunho, e o campo de motivo aparece só nessa linha. A cor de alarme aparece só nos fatos \"atrasada\" e \"vence hoje\" da lista demovida. Usei o notify-banner para o aviso diário. As demais partes ficaram em HTML semântico porque as ações precisam saber qual linha disparou, e os slots dos moléculas não preservam handlers. Estados: esqueleto no carregamento, erro com nova tentativa, o texto de erro de precondição, o estado de boas notícias, e mensagens de sucesso e erro dos comandos em região aria-live. Os botões ficam desabilitados enquanto um comando roda."
+    "decisions": "A página tem uma única view e por isso não usa o scene host. As faixas aparecem empilhadas e sempre visíveis, em ordem de urgência, porque o template pede triagem e não abas. Por isso não usei as pills. O cabeçalho mostra a frase de triagem. Quando o backend informa pageStatus 'empty', ela vira a frase calma de boa notícia, com a linha de carga ainda visível. A carga (abertas, vencem hoje, atrasadas) é uma linha pequena de pares valor+rótulo, sem cartões. Só a quantidade de atrasadas tem cor de alarme. Todo número vem pronto do backend, e a página não soma nem conta nada. A linha da faixa tem identidade, prazo à direita e a ação do item. O título da tarefa leva a minhas_tarefas (abrirTarefaParaAjustar). As ações (iniciar, enviar, aceitar, devolver) são botões do item, porque as intents do defs exigem. A devolução com motivo abre um formulário dentro da própria linha. A linha aberta é a que tem o id em devolverComMotivoDraft.id, então a página não guarda estado próprio. Os botões ficam desabilitados enquanto qualquer comando roda. Erros e sucessos aparecem numa região aria-live. Erro de carga aparece dentro da região das faixas, com 'tentar novamente'. O erro client.preconditionMissing tem texto próprio e leva a Minhas tarefas. O aviso diário usa marcação própria e um botão-standard, porque o banner lê o slot como innerHTML e ficaria desatualizado com dados dinâmicos. Os títulos de faixa nunca repetem o texto dos botões. A tag do botão leva o sufixo do projeto da molécula (-102040), como as demais moléculas."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section panoramaTarefas needs an element with data-section-id=\"panoramaTarefas\"."
+      "message": "Section secaoResumo needs an element with data-section-id=\"secaoResumo\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section pendenciasComigo needs an element with data-section-id=\"pendenciasComigo\"."
+      "message": "Section secaoPendencias needs an element with data-section-id=\"secaoPendencias\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section avisoDoDia needs an element with data-section-id=\"avisoDoDia\"."
+      "message": "Section secaoAvisoDiario needs an element with data-section-id=\"secaoAvisoDiario\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism resumoMinhasTarefas (Indicadores de abertas, vencendo hoje e atrasadas) renders neither <groupviewmetric--ml-metric-card> nor <groupviewmetric--ml-metric-big-number>."
+      "message": "Organism resumoMinhasTarefas (indicadores de abertas, vencem hoje e atrasadas) renders neither <groupviewmetric--ml-metric-card> nor <groupviewmetric--ml-metric-big-number>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism resumoMinhasTarefas (Progresso da checklist de cada tarefa) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
+      "message": "Organism resumoMinhasTarefas (tarefas abertas em destaque) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism resumoMinhasTarefas (Lista das tarefas abertas com prazo e situação) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
+      "message": "Organism resumoMinhasTarefas (progresso da checklist por tarefa) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism alertaAvisoDiario (Tarefas trazidas pelo aviso com prazo e situação do prazo) renders neither <groupviewdata--ml-vertical-record-list>."
+      "message": "Organism avisoDoDia (destaque do aviso de hoje) renders neither <groupnotifyuser--ml-notify-banner> nor <groupnotifyuser--ml-contextual-feedback>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism caixaPendencias (Alternar entre para iniciar, para revisar e devolvidas) renders neither <groupnavigatesection--ml-navigate-pills> nor <groupnavigatesection--ml-tabs>."
+      "message": "Organism esperaPorMim (separar iniciar, revisar e ajustar) renders neither <groupnavigatesection--ml-navigate-pills> nor <groupnavigatesection--ml-tabs>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism caixaPendencias (Itens pendentes com título, prazo, prioridade e quem age) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
+      "message": "Organism esperaPorMim (itens pendentes) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism caixaPendencias (Ações do item: iniciar, enviar, aceitar ou devolver) renders neither <grouptriggeraction--ml-button-group> nor <grouptriggeraction--ml-split-button>."
+      "message": "Organism esperaPorMim (ações secundárias do item) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
     },
     {
-      "code": "M4_PAGE_I18N",
-      "message": "[contract] Never as const on a catalogue."
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <grouptriggeraction--ml-button-standard-102040> is not in this page's list."
     }
   ]
 }

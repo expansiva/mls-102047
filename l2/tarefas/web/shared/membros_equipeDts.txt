@@ -1,15 +1,14 @@
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
-import type { Membros_equipeContracts, MembroEquipeResumo } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
-export type { Membros_equipeContracts, MembroEquipeResumo, MembroEquipeDetalhes, MembroEquipeIdentificacao, MembroEquipeBase } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
+import type { Membros_equipeContracts, PessoaEquipe } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
+export type { Membros_equipeContracts, PessoaEquipe, PessoaEquipeDetalhes, PessoaEquipeIdentificacao, PessoaEquipeBase } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
 type Output<R extends keyof Membros_equipeContracts> = Membros_equipeContracts[R]['output'];
 export type ErrorState = {
     code: string;
     message: string;
     details?: unknown;
 } | null;
-/** One page of the team list: items plus paging data. */
-export type MembrosPage = Output<'tarefas.membros_equipe.listarMembrosEquipe'>['membros'];
-/** Draft of the cadastrarPessoa form (new person); every leaf may be null while empty. */
+type PessoasPage = Output<'tarefas.membros_equipe.qryPessoasEquipe'>['pessoas'];
+/** Draft of the new-person form: name and country typed by the person. */
 export type CadastrarPessoaDraft = {
     details: {
         identification: {
@@ -18,8 +17,8 @@ export type CadastrarPessoaDraft = {
         };
     };
 };
-/** Draft of the salvarAlteracoesPessoa form (edit of the selected person); filled from the loaded record. */
-export type SalvarAlteracoesPessoaDraft = {
+/** Draft of the edit form: the selected person (id and version read) with the new name and country. */
+export type SalvarAlteracoesDraft = {
     id: string | null;
     version: number | null;
     details: {
@@ -29,69 +28,66 @@ export type SalvarAlteracoesPessoaDraft = {
         };
     };
 };
-type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export declare function emptyCadastrarPessoaDraft(): CadastrarPessoaDraft;
+export declare function emptySalvarAlteracoesDraft(): SalvarAlteracoesDraft;
 export declare class TarefasMembros_equipeShared extends StateLitElement {
-    /** state membros — people of the team as the list shows them (page with items, page, pageSize, hasMore); source listarMembrosEquipe.membros; organism pessoasEquipe */
-    membros: MembrosPage | null;
-    /** state membro — the person loaded for the registration form (record with id and version); source obterMembroEquipe.membro; organism cadastroPessoa */
-    membro: MembroEquipeResumo | null;
-    /** state selectedMembroEquipe — id of the selected person, opened in the registration form; source entry.params.membroEquipeId; organisms cadastroPessoa, pessoasEquipe; persisted */
+    /** state pessoas — the list of team members (page { items, page, pageSize, hasMore }) with identification, registry status, roles and contact summary; source qryPessoasEquipe.pessoas; organism pessoasEquipe */
+    pessoas: PessoasPage | null;
+    /** state cmdCadastrarPessoaPessoa — the team member just registered by cmdCadastrarPessoa; source cmdCadastrarPessoa.pessoa; organism cadastroPessoa */
+    cmdCadastrarPessoaPessoa: PessoaEquipe | null;
+    /** state cmdSalvarAlteracoesPessoa — the team member just saved by cmdSalvarAlteracoes; source cmdSalvarAlteracoes.pessoa; organism cadastroPessoa */
+    cmdSalvarAlteracoesPessoa: PessoaEquipe | null;
+    /** state selectedMembroEquipe — the id of the team member selected in pessoasEquipe (the record is the getter cadastroPessoa); source entry.params.membroEquipeId; organisms cadastroPessoa, pessoasEquipe; persisted */
     selectedMembroEquipe: string | null;
-    /** state busca — optional name fragment that filters the list; source entry.params.busca; organism pessoasEquipe; persisted */
+    /** state busca — the name search text that filters pessoasEquipe (null = no filter); source entry.params.busca; organism pessoasEquipe; persisted */
     busca: string | null;
-    /** state page — the page of the list the person went to with a pager; source entry.params.page; organism pessoasEquipe; persisted */
-    page: number | null;
-    /** state cadastrarPessoaDraft — form draft of a new person (name, countryCode); source cadastrarPessoa.input; organism cadastroPessoa */
-    cadastrarPessoaDraft: CadastrarPessoaDraft;
-    /** state salvarAlteracoesPessoaDraft — form draft editing the selected person (id, version, name, countryCode), filled from the loaded record; source salvarAlteracoesPessoa.input; organism cadastroPessoa */
-    salvarAlteracoesPessoaDraft: SalvarAlteracoesPessoaDraft;
-    /** state pageStatus — overall status of the page: idle, loading, empty, success or error */
+    /** state cmdCadastrarPessoaDraft — draft of the new-person form (name, country); source cmdCadastrarPessoa.input; organism cadastroPessoa */
+    cmdCadastrarPessoaDraft: CadastrarPessoaDraft;
+    /** state cmdSalvarAlteracoesDraft — draft of the edit form (id, version, name, country), filled from the selected person; source cmdSalvarAlteracoes.input; organism cadastroPessoa */
+    cmdSalvarAlteracoesDraft: SalvarAlteracoesDraft;
+    /** state pageStatus — overall state of the page load: idle, loading, empty (no member), success or error */
     pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
-    /** state listarMembrosEquipeStatus — status of the team list request */
-    listarMembrosEquipeStatus: RequestStatus;
-    /** state listarMembrosEquipeError — error of the team list request, null when none */
-    listarMembrosEquipeError: ErrorState;
-    /** state obterMembroEquipeStatus — status of the request that loads the selected person */
-    obterMembroEquipeStatus: RequestStatus;
-    /** state obterMembroEquipeError — error of the request that loads the selected person, null when none */
-    obterMembroEquipeError: ErrorState;
-    /** state cadastrarPessoaStatus — status of the command that registers a new person */
-    cadastrarPessoaStatus: RequestStatus;
-    /** state cadastrarPessoaError — error of the command that registers a new person, null when none */
-    cadastrarPessoaError: ErrorState;
-    /** state salvarAlteracoesPessoaStatus — status of the command that saves the edited person */
-    salvarAlteracoesPessoaStatus: RequestStatus;
-    /** state salvarAlteracoesPessoaError — error of the command that saves the edited person, null when none */
-    salvarAlteracoesPessoaError: ErrorState;
+    /** state qryPessoasEquipeStatus — status of the list query: idle, loading, success or error */
+    qryPessoasEquipeStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state qryPessoasEquipeError — error of the list query (also client.selectionInvalid / client.preconditionMissing), null when none */
+    qryPessoasEquipeError: ErrorState;
+    /** state cmdCadastrarPessoaStatus — status of the register command: idle, loading, success or error */
+    cmdCadastrarPessoaStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state cmdCadastrarPessoaError — error of the register command, null when none */
+    cmdCadastrarPessoaError: ErrorState;
+    /** state cmdSalvarAlteracoesStatus — status of the save command: idle, loading, success or error */
+    cmdSalvarAlteracoesStatus: 'idle' | 'loading' | 'success' | 'error';
+    /** state cmdSalvarAlteracoesError — error of the save command, null when none */
+    cmdSalvarAlteracoesError: ErrorState;
     /** state scenary — the visible scene of the page; '' until the page shows its first scene */
     scenary: string;
     private publish;
     private assignState;
+    private persistParam;
+    private readParam;
+    private unexpectedError;
+    private resetVisit;
+    private resetCommandResults;
+    private draftFromPessoa;
+    private upsertPessoa;
     connectedCallback(): void;
     disconnectedCallback(): void;
     handleIcaStateChange(key: string, value: any): void;
-    private resetVisit;
-    private resetCommandResults;
-    private readParam;
-    private applyEntryParams;
-    private initialLoad;
-    private toError;
-    private unexpected;
-    private upsertMembro;
-    /** request listarMembrosEquipe — loads the team people (role tarefas.MembroEquipe), filtered by name, one page at a time; redraws membros (replace, or append when append is true), the busca and page states and pageStatus; arguments: busca = new name filter (empty string clears it; a new filter loads from the first page), page = page to load (defaults to the current page, or the next one when appending), append = true adds the next page to the items instead of replacing them (does nothing when there is no more) */
-    listarMembrosEquipe(busca?: string | null, page?: number, append?: boolean): Promise<void>;
-    /** select — selects the person opened in the registration form (id, or null to clear and start a new registration); publishes selectedMembroEquipe, then loads the record with obterMembroEquipe, or clears membro and the edit draft when null */
-    selectCadastroPessoa(id: string | null): Promise<void>;
-    /** request obterMembroEquipe — loads the selected person (selectedMembroEquipe) with its current version for the registration form; redraws membro (replace) and fills salvarAlteracoesPessoaDraft from it; no arguments, reads the selection (without a selection it fails with client.requiredMissing) */
-    obterMembroEquipe(): Promise<void>;
-    /** draft — replaces the form draft of a new person (name, countryCode); resets the results of the commands */
-    setCadastrarPessoaDraft(value: CadastrarPessoaDraft): void;
-    /** draft — replaces the form draft that edits the selected person (id, version, name, countryCode); resets the results of the commands */
-    setSalvarAlteracoesPessoaDraft(value: SalvarAlteracoesPessoaDraft): void;
-    /** request cadastrarPessoa — registers a new team person from cadastrarPessoaDraft (name and countryCode required); redraws membros (inserts the returned person by id), membro and selectedMembroEquipe (the new person stays in the form), salvarAlteracoesPessoaDraft (filled from the record) and clears cadastrarPessoaDraft; no arguments */
-    cadastrarPessoa(): Promise<void>;
-    /** request salvarAlteracoesPessoa — saves the new name and country of the selected person from salvarAlteracoesPessoaDraft (id, version, name, countryCode required; stale version is refused by the backend); redraws membros (updates the row by id), membro (replace) and salvarAlteracoesPessoaDraft (filled again from the returned record with the new version); no arguments */
-    salvarAlteracoesPessoa(): Promise<void>;
-    /** scene — publishes the visible scene of the page (scenary); resets the results of the commands */
+    /** select (record) — the team member selected in pessoasEquipe, picked from the loaded list by selectedMembroEquipe; null when nothing is selected or the id is not loaded */
+    get cadastroPessoa(): PessoaEquipe | null;
+    /** scene — publishes the visible scene of the page; value is the scene name ('' for none) */
     setScenario(value: string): void;
+    /** draft — replaces the draft of the new-person form (name and country typed by the person) */
+    setCmdCadastrarPessoaDraft(value: CadastrarPessoaDraft): void;
+    /** draft — replaces the draft of the edit form (new name and country of the selected person; keep id and version) */
+    setCmdSalvarAlteracoesDraft(value: SalvarAlteracoesDraft): void;
+    /** select — selects the team member to edit by id (null clears the selection); the edit draft is filled from the loaded row. An id no loaded row resolves publishes client.selectionInvalid in qryPessoasEquipeError and keeps the previous selection. id: the member id or null */
+    selectCadastroPessoa(id: string | null): void;
+    private applySelectionAfterLoad;
+    /** request qryPessoasEquipe — lists the team members (role tarefas.MembroEquipe) paged, optionally filtered by name, ordered by name; redraws pessoas (replace, or append more items when append is true); arguments: busca = name search text (omit to keep the current filter, '' or null clears it; a new value loads from the first page), page = page to load (default 1), append = true adds the page to the current items (load more) and does nothing when hasMore is false. Also the method to reload the list. */
+    qryPessoasEquipe(busca?: string | null, page?: number, append?: boolean): Promise<void>;
+    /** request cmdCadastrarPessoa — registers a new team member (role tarefas.MembroEquipe) from cmdCadastrarPessoaDraft (name and country required); redraws cmdCadastrarPessoaPessoa (replace) and pessoas (upsert by id, appended when new); the draft returns to empty; no arguments */
+    cmdCadastrarPessoa(): Promise<void>;
+    /** request cmdSalvarAlteracoes — corrects name and country of the selected team member from cmdSalvarAlteracoesDraft (id, version, name and country required; the version guards concurrent edits); redraws cmdSalvarAlteracoesPessoa (replace), pessoas (upsert by id, so the selected record cadastroPessoa updates) and refills the edit draft from the saved record; no arguments */
+    cmdSalvarAlteracoes(): Promise<void>;
 }

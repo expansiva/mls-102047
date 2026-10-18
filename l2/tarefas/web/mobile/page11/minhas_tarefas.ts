@@ -1,670 +1,737 @@
 /// <mls fileReference="_102047_/l2/tarefas/web/mobile/page11/minhas_tarefas.ts" enhancement="_102020_/l2/enhancementAura"/>
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { keyed } from 'lit/directives/keyed.js';
 import { TarefasMinhas_tarefasShared } from '/_102047_/l2/tarefas/web/shared/minhas_tarefas.js';
 import type {
-TarefaAberta,
-TarefaStatus,
-TarefaPrioridade,
-TarefasFiltroChange,
-MembroNome,
-RequestStatus,
-ErrorState,
-SalvarNovaTarefaDraft,
-SalvarEdicaoTarefaDraft,
+CmdCriarTarefaDraft,
+ItemChecklistDraft,
+TarefaFiltro,
+TarefaDetalhe,
 } from '/_102047_/l2/tarefas/web/shared/minhas_tarefas.js';
+import '/_102020_/l2/molecules/ml-scenary.js';
 import '/_102040_/l2/molecules/groupenterboolean/ml-checkbox-preference.js';
-import '/_102040_/l2/molecules/groupenterdate/ml-compact-calendar.js';
-import '/_102040_/l2/molecules/groupentertext/ml-floating-text-input.js';
+import '/_102040_/l2/molecules/groupenterdate/ml-date-picker.js';
+import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
 import '/_102040_/l2/molecules/groupentertext/ml-multiline-text.js';
 import '/_102040_/l2/molecules/groupnavigatesection/ml-navigate-pills.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-notify-banner.js';
+import '/_102040_/l2/molecules/groupselectone/ml-combobox.js';
 import '/_102040_/l2/molecules/groupselectone/ml-segmented-control.js';
 import '/_102040_/l2/molecules/groupselectone/ml-select.js';
-import '/_102040_/l2/molecules/groupselectone/ml-select-one-autocomplete.js';
 import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-kebab-action-trigger.js';
 import '/_102040_/l2/molecules/groupviewcard/ml-vertical-card.js';
 import '/_102040_/l2/molecules/groupviewdata/ml-timeline-view.js';
 import '/_102040_/l2/molecules/groupviewtable/ml-responsive-table.js';
-import '/_102020_/l2/molecules/ml-scenary.js';
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
-minhasTarefas: 'Minhas tarefas',
-filtroTodas: 'Todas',
-filtroCriadas: 'Criadas por mim',
-filtroAtribuidas: 'Atribuídas a mim',
-filtroRevisao: 'Em revisão',
-filtroDevolvidas: 'Devolvidas',
-criarTarefa: 'Criar tarefa',
+sceneLista: 'Minhas tarefas',
+sceneDetalhe: 'Tarefa',
+sceneCriar: 'Nova tarefa',
+sceneEditar: 'Editar tarefa',
+sceneChecklist: 'Checklist da tarefa',
+sceneDevolver: 'Devolução da tarefa',
+sceneCancelar: 'Confirmar cancelamento',
+voltar: 'Voltar',
+filtrosAria: 'Filtros rápidos',
+fTodas: 'Todas',
+fCriadas: 'Criadas por mim',
+fAtribuidas: 'Atribuídas a mim',
+fRevisao: 'Em revisão',
+fDevolvidas: 'Devolvidas',
+hTarefa: 'Tarefa',
+hPrazo: 'Prazo',
+hSituacao: 'Situação',
+hResponsavel: 'Responsável',
+hChecklist: 'Checklist',
+carregando: 'Carregando suas tarefas…',
+erroLista: 'Não foi possível carregar suas tarefas.',
+tentarNovamente: 'Tentar de novo',
+semContexto: 'Esta tela foi aberta sem o contexto do módulo de tarefas, então não sei de quem são as tarefas. Volte e abra de novo pelo módulo.',
+voltarInicio: 'Voltar',
+listaVazia: 'Nenhuma tarefa por aqui. Crie uma tarefa ou troque o filtro.',
 carregarMais: 'Carregar mais tarefas',
-carregando: 'Carregando…',
-listaVazia: 'Nenhuma tarefa por aqui. Ajuste o filtro ou crie uma tarefa.',
-colTarefa: 'Tarefa',
-colPrazo: 'Prazo',
-colSituacao: 'Situação',
-colChecklist: 'Checklist',
+novaTarefa: 'Nova tarefa',
 atrasada: 'Atrasada',
 venceHoje: 'Vence hoje',
-devolvida: 'Devolvida para ajuste',
-voltar: 'Voltar',
-voltarTelaAnterior: 'Voltar à tela anterior',
-tentarNovamente: 'Tentar novamente',
-erroLista: 'Não foi possível carregar suas tarefas.',
-erroPrecondicao: 'Esta tela foi aberta sem o que precisa para carregar as tarefas. Volte à tela anterior e abra de novo.',
-erroTarefa: 'Não foi possível abrir a tarefa.',
-erroGenerico: 'Não foi possível concluir. Tente novamente.',
-erroObrigatorio: 'Preencha os campos obrigatórios.',
-erroMotivo: 'Informe o motivo da devolução.',
-statusAFazer: 'A fazer',
-statusEmAndamento: 'Em andamento',
-statusEmRevisao: 'Em revisão',
-statusConcluida: 'Concluída',
-statusCancelada: 'Cancelada',
-prioridadeLow: 'Baixa',
-prioridadeMedium: 'Média',
-prioridadeHigh: 'Alta',
-tituloTarefa: 'Tarefa',
-tituloNova: 'Nova tarefa',
-tituloAjustar: 'Ajustar tarefa',
-semTarefaAberta: 'Nenhuma tarefa aberta. Volte à lista e escolha uma.',
-campoSituacao: 'Situação',
-campoPrioridade: 'Prioridade',
-campoPrazo: 'Prazo',
-campoLista: 'Lista',
-campoResponsavel: 'Responsável',
-campoCriador: 'Criada por',
-campoDescricao: 'Descrição',
-campoTitulo: 'Título',
-semDescricao: 'Sem descrição.',
-motivoDevolucao: 'Motivo da devolução',
+subtarefas: 'subtarefas',
+pBaixa: 'Baixa',
+pMedia: 'Média',
+pAlta: 'Alta',
+stAFazer: 'A fazer',
+stEmAndamento: 'Em andamento',
+stEmRevisao: 'Em revisão',
+stConcluida: 'Concluída',
+stCancelada: 'Cancelada',
+lDescricao: 'Descrição',
+lLista: 'Lista',
+lCriador: 'Criada por',
+lResponsavel: 'Responsável',
+lPrazo: 'Prazo',
+lPrioridade: 'Prioridade',
+lSituacao: 'Situação',
+lCriadaEm: 'Criada em',
+motivoTitulo: 'Motivo da devolução',
 checklist: 'Checklist',
-semChecklist: 'Esta tarefa não tem itens na checklist.',
-marcadoEm: 'Marcado em',
-iniciarTarefa: 'Iniciar tarefa',
-enviarRevisao: 'Enviar para revisão',
-reenviarRevisao: 'Reenviar para revisão',
-aceitarEntrega: 'Aceitar entrega',
-devolverComMotivo: 'Devolver com motivo',
-porQueDevolver: 'Por que está devolvendo?',
-cancelarTarefa: 'Cancelar tarefa',
-editarTarefa: 'Editar tarefa',
-confirmaCancelar: 'Cancelar a tarefa',
-confirmaAviso: 'Ela não poderá ser retomada.',
-encerrada: 'Esta tarefa está encerrada e não tem mais ações.',
+checklistVazia: 'Esta tarefa não tem itens na checklist.',
+itemFeito: 'Feito',
+itemPendente: 'Pendente',
+editarDados: 'Editar dados',
+marcarItens: 'Marcar itens',
+detalheVazio: 'Nenhuma tarefa aberta. Volte e escolha uma tarefa da lista.',
+detalheCarregando: 'Abrindo a tarefa…',
+detalheErro: 'Não foi possível abrir a tarefa.',
+aIniciar: 'Iniciar tarefa',
+aEnviar: 'Enviar para revisão',
+aReenviar: 'Reenviar para revisão',
+aAceitar: 'Aceitar entrega',
+aDevolver: 'Devolver para ajuste',
+aCancelar: 'Cancelar tarefa',
+maisAcoes: 'Mais ações',
 okIniciada: 'Tarefa iniciada.',
-okRevisao: 'Tarefa enviada para revisão.',
-okAceita: 'Entrega aceita. A tarefa foi concluída.',
-okDevolvida: 'Tarefa devolvida ao responsável.',
-okCancelada: 'Tarefa cancelada.',
+okEnviada: 'Tarefa enviada para revisão.',
+okAceita: 'Entrega aceita. Tarefa concluída.',
 historico: 'Histórico',
-colQuando: 'Quando',
-colEvento: 'Evento',
+hQuando: 'Quando',
+hEvento: 'Evento',
 evCriada: 'Tarefa criada',
 evDevolvida: 'Devolvida para ajuste',
 evConcluida: 'Entrega aceita, tarefa concluída',
 evCancelada: 'Tarefa cancelada',
-escolhaLista: 'Escolha a lista',
-semListas: 'Nenhuma lista disponível.',
-ajudaResponsavel: 'Digite o nome para buscar a pessoa.',
-buscarResponsavel: 'Buscar por nome',
-semMembros: 'Nenhuma pessoa encontrada.',
-itemChecklist: 'Item',
-adicionarItem: 'Adicionar item',
+fLista: 'Lista',
+fListaPlaceholder: 'Escolha a lista',
+fListaVazia: 'Nenhuma lista ativa disponível.',
+fTitulo: 'Título',
+fDescricao: 'Descrição',
+fPrioridade: 'Prioridade',
+fPrazo: 'Prazo',
+fPrazoPh: 'Escolha a data',
+fResponsavel: 'Responsável',
+fResponsavelPh: 'Digite o nome para buscar',
+fResponsavelAjuda: 'Busque pelo nome da pessoa da equipe.',
+fResponsavelVazio: 'Ninguém encontrado.',
+checklistInicial: 'Checklist inicial',
+addItem: 'Adicionar item',
 removerItem: 'Remover item',
-registrarTarefa: 'Registrar tarefa',
-salvarAlteracoes: 'Salvar alterações',
-descartar: 'Descartar',
+subir: 'Mover item para cima',
+descer: 'Mover item para baixo',
+itemDescricao: 'Descrição do item',
+itemMarcar: 'Marcar item como feito',
+registrar: 'Registrar tarefa',
+salvarEdicao: 'Salvar alterações',
+salvarChecklist: 'Salvar checklist',
+faltaCampos: 'Preencha lista, título, prioridade, prazo e responsável para continuar.',
+edicaoNaoMuda: 'Editar não muda a situação da tarefa.',
+checklistNaoMuda: 'Marcar ou ajustar itens não muda a situação da tarefa.',
+motivo: 'Motivo',
+motivoAjuda: 'Explique o que precisa ser ajustado. A tarefa volta para o responsável.',
+devolverTarefa: 'Devolver tarefa',
+cancelarTexto: 'A tarefa a seguir será cancelada e não poderá mais mudar de situação:',
+manter: 'Manter tarefa',
 };
-/// **collab_i18n_end**
 type PageMessageType = typeof pageMessage_pt_br;
 const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
-type Msg = PageMessageType;
-type FormDraft = SalvarNovaTarefaDraft | SalvarEdicaoTarefaDraft;
+/// **collab_i18n_end**
+type Status = TarefaDetalhe['status'];
+type Campos = Pick<CmdCriarTarefaDraft, 'listaId' | 'titulo' | 'details' | 'prioridade' | 'prazo' | 'responsavelId'>;
+type PopoverEl = HTMLElement & { togglePopover?: () => void; hidePopover?: () => void };
+const STATUS_CLS: Record<Status, string> = {
+aFazer: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]',
+emAndamento: 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]',
+emRevisao: 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]',
+concluida: 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]',
+cancelada: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]',
+};
+let buscaTimer: ReturnType<typeof setTimeout> | undefined;
+function agendar(fn: () => void, ms: number) {
+if (buscaTimer) clearTimeout(buscaTimer);
+buscaTimer = setTimeout(fn, ms);
+}
 function lang() {
 return document.documentElement.lang || undefined;
 }
-function fmtDate(v?: string | null) {
+function fmtData(v?: string) {
 if (!v) return '';
-const d = new Date(v.length === 10 ? `${v}T00:00:00` : v);
+const d = new Date(v.length === 10 ? v + 'T12:00:00' : v);
 if (Number.isNaN(d.getTime())) return v;
 return new Intl.DateTimeFormat(lang(), { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
 }
-function fmtDateTime(v?: string | null) {
+function fmtDataHora(v?: string) {
 if (!v) return '';
 const d = new Date(v);
 if (Number.isNaN(d.getTime())) return v;
-return new Intl.DateTimeFormat(lang(), { dateStyle: 'short', timeStyle: 'short' }).format(d);
+return new Intl.DateTimeFormat(lang(), { dateStyle: 'medium', timeStyle: 'short' }).format(d);
 }
-function nome(m: MembroNome) {
-return m.details.identification.details.identification.name;
+function texto(e: Event): string | null {
+const d = (e as CustomEvent).detail as unknown;
+if (d && typeof d === 'object' && 'value' in d) {
+const v = (d as { value: unknown }).value;
+return typeof v === 'string' ? v : null;
 }
-function onValue<T>(fn: (v: T) => void) {
-return (e: Event) => {
-const d = (e as CustomEvent<{ value?: T }>).detail;
-if (d && typeof d === 'object' && 'value' in d) fn(d.value as T);
-};
+return null;
 }
-function statusLabel(msg: Msg, s: TarefaStatus) {
-switch (s) {
-case 'aFazer': return msg['statusAFazer'];
-case 'emAndamento': return msg['statusEmAndamento'];
-case 'emRevisao': return msg['statusEmRevisao'];
-case 'concluida': return msg['statusConcluida'];
-default: return msg['statusCancelada'];
+function camposOk(d: Campos) {
+return !!(d.listaId && d.titulo && d.titulo.trim() && d.prioridade && d.prazo && d.responsavelId);
 }
+function renumerar(itens: ItemChecklistDraft[]): ItemChecklistDraft[] {
+return itens.map((it, i) => ({ ...it, ordem: i + 1 }));
 }
-function prioridadeLabel(msg: Msg, p: TarefaPrioridade) {
-switch (p) {
-case 'low': return msg['prioridadeLow'];
-case 'medium': return msg['prioridadeMedium'];
-default: return msg['prioridadeHigh'];
+function mover(itens: ItemChecklistDraft[], i: number, d: -1 | 1): ItemChecklistDraft[] {
+const j = i + d;
+if (j < 0 || j >= itens.length) return itens;
+const c = [...itens];
+[c[i], c[j]] = [c[j], c[i]];
+return renumerar(c);
 }
+function novoItem(n: number): ItemChecklistDraft {
+return { id: null, version: null, details: { descricao: '' }, ordem: n + 1, feito: false };
 }
-function chipClass(s: TarefaStatus) {
-switch (s) {
-case 'emAndamento': return 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]';
-case 'emRevisao': return 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
-case 'concluida': return 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]';
-default: return 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
+function abrirMenu(e: Event) {
+const host = e.currentTarget as HTMLElement;
+const menu = host.parentElement?.querySelector<PopoverEl>('[popover]');
+menu?.togglePopover?.();
 }
+function fecharMenu(e: Event) {
+const menu = (e.currentTarget as HTMLElement).closest<PopoverEl>('[popover]');
+menu?.hidePopover?.();
 }
-function chip(msg: Msg, s: TarefaStatus) {
-return html`<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${chipClass(s)}">${statusLabel(msg, s)}</span>`;
-}
-function filtroAtual(f: { c: boolean | null; a: boolean | null; s: TarefaStatus | null; d: boolean | null }) {
-if (f.c) return 'criadas';
-if (f.a) return 'atribuidas';
-if (f.s === 'emRevisao') return 'revisao';
-if (f.d) return 'devolvidas';
-return 'todas';
-}
-function filtroDe(v: string): TarefasFiltroChange {
-return {
-criadasPorMim: v === 'criadas' ? true : null,
-atribuidasAMim: v === 'atribuidas' ? true : null,
-status: v === 'revisao' ? 'emRevisao' : null,
-somenteDevolvidas: v === 'devolvidas' ? true : null,
-};
-}
-function erroTexto(msg: Msg, err: ErrorState) {
-if (!err) return '';
-return err.code === 'client.requiredMissing' ? msg['erroObrigatorio'] : msg['erroGenerico'];
-}
-function completo(d: FormDraft) {
-return !!(d.titulo && d.titulo.trim() && d.listaId && d.prioridade && d.prazo && d.responsavelId);
-}
-function botao(label: string, variant: string, loading: boolean, onAction: () => void, disabled = false) {
-return html`<grouptriggeraction--ml-button-standard
-data-variant=${variant}
-size="lg"
-data-class="w-full"
-.loading=${loading}
-.disabled=${disabled}
-@action=${onAction}
-><Label>${label}</Label></grouptriggeraction--ml-button-standard>`;
-}
-function eventos(msg: Msg, t: TarefaAberta) {
-const out: { quando: string; titulo: string; nota: string }[] = [];
-out.push({ quando: fmtDateTime(t.criadaEm), titulo: msg['evCriada'], nota: `${msg['campoCriador']} ${nome(t.criador)}` });
-const d = t.details.details;
-if (d.devolvidaEm) out.push({ quando: fmtDateTime(d.devolvidaEm), titulo: msg['evDevolvida'], nota: d.motivoDevolucao ?? '' });
-if (d.concluidaEm) out.push({ quando: fmtDateTime(d.concluidaEm), titulo: msg['evConcluida'], nota: '' });
-if (d.canceladaEm) out.push({ quando: fmtDateTime(d.canceladaEm), titulo: msg['evCancelada'], nota: '' });
-return out;
-}
-const cardBox = 'rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3';
 @customElement('tarefas--web--mobile--page11--minhas_tarefas-102047')
 export class TarefasMobilePage11Minhas_tarefasPage extends TarefasMinhas_tarefasShared {
-private msg!: PageMessageType;
+private msg: PageMessageType = pageMessage_pt_br;
+private statusLabel(s: Status) {
+const m: Record<Status, string> = {
+aFazer: this.msg['stAFazer'],
+emAndamento: this.msg['stEmAndamento'],
+emRevisao: this.msg['stEmRevisao'],
+concluida: this.msg['stConcluida'],
+cancelada: this.msg['stCancelada'],
+};
+return m[s];
+}
+private prioLabel(p: TarefaDetalhe['prioridade']) {
+const m: Record<TarefaDetalhe['prioridade'], string> = {
+low: this.msg['pBaixa'],
+medium: this.msg['pMedia'],
+high: this.msg['pAlta'],
+};
+return m[p];
+}
+private chip(s: Status) {
+return html`<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_CLS[s]}">${this.statusLabel(s)}</span>`;
+}
+private aviso(tipo: 'error' | 'success', txt: string) {
+return html`<groupnotifyuser--ml-contextual-feedback type=${tipo} .visible=${true} .dismissible=${false}>
+<Message>${txt}</Message>
+</groupnotifyuser--ml-contextual-feedback>`;
+}
+private btn(label: string, run: () => void, opts: { variant?: string; loading?: boolean; disabled?: boolean; full?: boolean; size?: string } = {}) {
+return html`<grouptriggeraction--ml-button-standard
+data-variant=${opts.variant ?? 'primary'}
+size=${opts.size ?? 'lg'}
+data-class=${opts.full ? 'w-full' : ''}
+.loading=${!!opts.loading}
+.disabled=${!!opts.disabled}
+@action=${run}
+><Label>${label}</Label></grouptriggeraction--ml-button-standard>`;
+}
 render() {
 this.msg = pageMessages[this.getMessageKey(pageMessages)];
 return html`
-<div class="w-full min-h-screen px-4 py-4 bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)]">
+<div class="mx-auto min-h-screen w-full max-w-[430px] bg-[var(--page-bg,transparent)] px-4 pb-6 pt-3 text-[var(--text-default,currentColor)]">
 <molecules--ml-scenary-102020
 mode="scenary"
 .value=${this.scenary || 'lista'}
-.backLabel=${this.msg['voltar']}
-@change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}
+backLabel=${this.msg['voltar']}
+@change=${(e: CustomEvent<{ value: string }>) => {
+if (e.target === e.currentTarget) this.setScenario(e.detail.value);
+}}
 >
-<Scene value="lista" title=${this.msg['minhasTarefas']}>${this.renderLista()}</Scene>
-<Scene value="tarefa" title=${this.msg['tituloTarefa']} nav="back" backTo="lista">${this.renderTarefaAberta()}</Scene>
-<Scene value="criar" title=${this.msg['tituloNova']} nav="back" backTo="lista">${this.renderFormCriar()}</Scene>
-<Scene value="editar" title=${this.msg['tituloAjustar']} nav="back" backTo="tarefa">${this.renderFormEditar()}</Scene>
+<Scene value="lista" title=${this.msg['sceneLista']}>${this.renderLista()}</Scene>
+<Scene value="detalhe" title=${this.msg['sceneDetalhe']} nav="back">${this.renderDetalhe()}</Scene>
+<Scene value="criar" title=${this.msg['sceneCriar']} nav="back">${this.renderCriar()}</Scene>
+<Scene value="editar" title=${this.msg['sceneEditar']} nav="back">${this.renderEditar()}</Scene>
+<Scene value="checklist" title=${this.msg['sceneChecklist']} nav="back">${this.renderChecklist()}</Scene>
+<Scene value="devolver" title=${this.msg['sceneDevolver']} nav="back">${this.renderDevolver()}</Scene>
+<Scene value="cancelar" title=${this.msg['sceneCancelar']} nav="back">${this.renderCancelar()}</Scene>
 </molecules--ml-scenary-102020>
 </div>
 `;
 }
+/* ---------------- lista ---------------- */
 private renderLista() {
-const m = this.msg;
-const items = this.tarefas?.items ?? [];
-const selIdx = items.findIndex(t => t.id === this.selectedTarefa);
-const err = this.minhasTarefasError;
-const precond = err?.code === 'client.preconditionMissing';
-const loading = this.minhasTarefasStatus === 'loading';
-const atual = filtroAtual({ c: this.criadasPorMim, a: this.atribuidasAMim, s: this.status, d: this.somenteDevolvidas });
-return html`
-<div class="flex flex-col gap-4 pb-6">
-${botao(m['criarTarefa'], 'primary', false, () => this.setScenario('criar'))}
-<div data-organism-id="tarefasLista" class="flex flex-col gap-3" aria-busy=${loading ? 'true' : 'false'}>
-<groupnavigatesection--ml-navigate-pills
-.value=${atual}
-@change=${onValue<string>(v => { this.minhasTarefas(filtroDe(v)); })}
->
-<Tab value="todas" title=${m['filtroTodas']}></Tab>
-<Tab value="criadas" title=${m['filtroCriadas']}></Tab>
-<Tab value="atribuidas" title=${m['filtroAtribuidas']}></Tab>
-<Tab value="revisao" title=${m['filtroRevisao']}></Tab>
-<Tab value="devolvidas" title=${m['filtroDevolvidas']}></Tab>
-</groupnavigatesection--ml-navigate-pills>
-${err
-? html`<div role="alert" class="${cardBox} flex flex-col gap-3 bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]">
-<p class="text-sm">${precond ? m['erroPrecondicao'] : m['erroLista']}</p>
-${precond
-? botao(m['voltarTelaAnterior'], 'secondary', false, () => history.back())
-: botao(m['tentarNovamente'], 'secondary', loading, () => { this.minhasTarefas(); })}
-</div>`
-: nothing}
-<div class=${loading && items.length ? 'opacity-60' : ''}>
-<groupviewtable--ml-responsive-table
-.value=${selIdx >= 0 ? String(selIdx) : ''}
-.loading=${loading && items.length === 0}
-@rowClick=${(e: CustomEvent<{ index: number }>) => {
-const t = items[e.detail.index];
-if (t) {
-this.selectTarefa(t.id);
-this.setScenario('tarefa');
+const t = this.tarefas;
+const items = t?.items ?? [];
+const semContexto = this.qryMinhasTarefasError?.code === 'client.preconditionMissing';
+const erro = this.qryMinhasTarefasStatus === 'error';
+const carregando = this.qryMinhasTarefasStatus === 'loading' || this.pageStatus === 'loading';
+const sel = items.findIndex((i) => i.id === this.selectedTarefa);
+if (semContexto) {
+return html`<div data-organism-id="listaTarefas" class="flex flex-col gap-4 py-6" role="alert">
+<p class="text-[var(--text-strong,currentColor)]">${this.msg['semContexto']}</p>
+${this.btn(this.msg['voltarInicio'], () => history.back(), { variant: 'secondary', full: true })}
+</div>`;
 }
+return html`
+<div data-organism-id="listaTarefas" class="flex flex-col gap-3">
+<groupnavigatesection--ml-navigate-pills
+aria-label=${this.msg['filtrosAria']}
+.value=${this.filtro ?? 'todas'}
+@change=${(e: CustomEvent<{ value: string }>) =>
+this.qryMinhasTarefas(e.detail.value === 'todas' ? null : (e.detail.value as TarefaFiltro))}
+>
+<Tab value="todas" title=${this.msg['fTodas']}></Tab>
+<Tab value="criadasPorMim" title=${this.msg['fCriadas']}></Tab>
+<Tab value="atribuidasAMim" title=${this.msg['fAtribuidas']}></Tab>
+<Tab value="emRevisao" title=${this.msg['fRevisao']}></Tab>
+<Tab value="devolvidas" title=${this.msg['fDevolvidas']}></Tab>
+</groupnavigatesection--ml-navigate-pills>
+${erro
+? html`<div role="alert" class="flex flex-col gap-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
+<p class="text-[var(--text-strong,currentColor)]">${this.msg['erroLista']}</p>
+${this.btn(this.msg['tentarNovamente'], () => { this.qryMinhasTarefas(); }, { variant: 'secondary', full: true })}
+</div>`
+: html`<div aria-busy=${carregando ? 'true' : 'false'}>
+<groupviewtable--ml-responsive-table
+.value=${sel >= 0 ? String(sel) : ''}
+.loading=${carregando}
+@rowClick=${(e: CustomEvent<{ index: number }>) => {
+const row = items[e.detail.index];
+if (!row) return;
+this.qryTarefa(row.id);
+this.setScenario('detalhe');
 }}
 >
 <TableHeader>
 <TableRow>
-<TableHead key="tarefa">${m['colTarefa']}</TableHead>
-<TableHead key="prazo">${m['colPrazo']}</TableHead>
-<TableHead key="situacao">${m['colSituacao']}</TableHead>
-<TableHead key="checklist">${m['colChecklist']}</TableHead>
+<TableHead key="titulo">${this.msg['hTarefa']}</TableHead>
+<TableHead key="prazo">${this.msg['hPrazo']}</TableHead>
+<TableHead key="situacao">${this.msg['hSituacao']}</TableHead>
+<TableHead key="responsavel">${this.msg['hResponsavel']}</TableHead>
+<TableHead key="checklist">${this.msg['hChecklist']}</TableHead>
 </TableRow>
 </TableHeader>
 <TableBody>
-${items.map(t => html`
-<TableRow key=${t.id}>
+${items.map(
+(r) => html`<TableRow key=${r.id}>
 <TableCell>
-<div class="font-medium text-[var(--text-strong,currentColor)]">${t.titulo}</div>
-<div class="text-xs text-[var(--text-muted,currentColor)]">${t.lista.nome} · ${nome(t.responsavel)} · ${prioridadeLabel(m, t.prioridade)}</div>
-${t.details.details.devolvidaEm
-? html`<div class="text-xs font-medium text-[var(--text-default,currentColor)]">${m['devolvida']}</div>`
-: nothing}
+<div class="font-semibold text-[var(--text-strong,currentColor)]">${r.titulo}</div>
+<div class="text-sm text-[var(--text-muted,currentColor)]">${r.lista.nome} · ${this.prioLabel(r.prioridade)}</div>
 </TableCell>
 <TableCell>
-<span class=${t.details.details.atrasada ? 'font-semibold text-[var(--status-error-text,currentColor)]' : ''}>${fmtDate(t.prazo)}</span>
-${t.details.details.atrasada
-? html`<div class="text-xs text-[var(--status-error-text,currentColor)]">${m['atrasada']}</div>`
-: t.details.details.venceHoje
-? html`<div class="text-xs font-semibold">${m['venceHoje']}</div>`
+<span class="${r.details.atrasada ? 'font-semibold text-[var(--status-error-text,currentColor)]' : r.details.venceHoje ? 'font-semibold text-[var(--status-warning-text,currentColor)]' : ''}">${fmtData(r.prazo)}</span>
+${r.details.atrasada
+? html`<span class="ml-1 text-xs text-[var(--status-error-text,currentColor)]">${this.msg['atrasada']}</span>`
+: r.details.venceHoje
+? html`<span class="ml-1 text-xs text-[var(--status-warning-text,currentColor)]">${this.msg['venceHoje']}</span>`
 : nothing}
 </TableCell>
-<TableCell>${chip(m, t.status)}</TableCell>
-<TableCell>${t.details.details.progressoChecklist}</TableCell>
-</TableRow>
-`)}
+<TableCell>${this.chip(r.status)}</TableCell>
+<TableCell>${r.responsavel.details.identification.name}</TableCell>
+<TableCell>${r.details.progressoChecklist} · ${r.details.quantidadeSubtarefas} ${this.msg['subtarefas']}</TableCell>
+</TableRow>`,
+)}
 </TableBody>
-<Empty><div class="py-8 text-center text-sm text-[var(--text-muted,currentColor)]">${m['listaVazia']}</div></Empty>
-<Loading><div class="py-8 text-center text-sm text-[var(--text-muted,currentColor)]">${m['carregando']}</div></Loading>
+<Empty>${this.msg['listaVazia']}</Empty>
+<Loading>${this.msg['carregando']}</Loading>
 </groupviewtable--ml-responsive-table>
-</div>
-${this.tarefas?.hasMore
-? botao(m['carregarMais'], 'secondary', loading, () => { this.minhasTarefas(undefined, (this.tarefas?.page ?? 1) + 1, true); })
+</div>`}
+${t?.hasMore
+? this.btn(
+this.msg['carregarMais'],
+() => { this.qryMinhasTarefas(undefined, t.page + 1, true); },
+{ variant: 'secondary', full: true, loading: carregando },
+)
 : nothing}
+<div class="pointer-events-none sticky bottom-4 mt-2 flex justify-end">
+<div class="pointer-events-auto shadow-lg">
+${this.btn(this.msg['novaTarefa'], () => {
+this.clearCmdCriarTarefaDraft();
+this.qryListasAtivas();
+this.setScenario('criar');
+})}
+</div>
 </div>
 </div>
 `;
 }
-private renderTarefaAberta() {
-const m = this.msg;
+/* ---------------- detalhe ---------------- */
+private renderDetalhe() {
 const t = this.tarefa;
-const loading = this.tarefaAbertaStatus === 'loading';
-const err = this.tarefaAbertaError;
-let detalhe;
-if (loading) {
-detalhe = html`<p class="py-8 text-center text-sm text-[var(--text-muted,currentColor)]" aria-live="polite">${m['carregando']}</p>`;
-} else if (err) {
-detalhe = html`<div role="alert" class="${cardBox} flex flex-col gap-3 bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]">
-<p class="text-sm">${err.code === 'client.preconditionMissing' ? m['erroPrecondicao'] : m['erroTarefa']}</p>
-${err.code === 'client.preconditionMissing'
-? botao(m['voltarTelaAnterior'], 'secondary', false, () => history.back())
-: botao(m['tentarNovamente'], 'secondary', false, () => { if (this.selectedTarefa) this.tarefaAberta(this.selectedTarefa); })}
+if (this.qryTarefaStatus === 'loading') {
+return html`<p data-organism-id="detalheTarefa" aria-busy="true" class="py-6 text-[var(--text-muted,currentColor)]">${this.msg['detalheCarregando']}</p>`;
+}
+if (this.qryTarefaStatus === 'error') {
+return html`<div data-organism-id="detalheTarefa" role="alert" class="flex flex-col gap-3 py-4">
+<p class="text-[var(--text-strong,currentColor)]">${this.msg['detalheErro']}</p>
+${this.btn(this.msg['tentarNovamente'], () => { this.qryTarefa(this.selectedTarefa); }, { variant: 'secondary', full: true })}
 </div>`;
-} else if (!t) {
-detalhe = html`<p class="py-8 text-center text-sm text-[var(--text-muted,currentColor)]">${m['semTarefaAberta']}</p>`;
-} else {
-detalhe = this.renderDetalhe(t);
 }
-const ok = !loading && !err && t;
-return html`
-<div class="flex flex-col gap-4 pb-8">
-<div data-organism-id="tarefaDetalhe">${detalhe}</div>
-<div data-organism-id="tarefaAcoes">${ok ? this.renderAcoes(t) : nothing}</div>
-<div data-organism-id="tarefaHistorico">${ok ? this.renderHistorico(t) : nothing}</div>
-</div>
-`;
+if (!t) {
+return html`<p data-organism-id="detalheTarefa" class="py-6 text-[var(--text-muted,currentColor)]">${this.msg['detalheVazio']}</p>`;
 }
-private renderDetalhe(t: TarefaAberta) {
-const m = this.msg;
-const d = t.details.details;
-const busy = this.marcarItemChecklistStatus === 'loading';
+const aberta = t.status === 'aFazer' || t.status === 'emAndamento' || t.status === 'emRevisao';
+let prim: { label: string; run: () => void; loading: boolean } | null = null;
+if (t.souResponsavel && t.status === 'aFazer') {
+prim = { label: this.msg['aIniciar'], run: () => { this.cmdIniciar(); }, loading: this.cmdIniciarStatus === 'loading' };
+} else if (t.souResponsavel && t.status === 'emAndamento') {
+prim = {
+label: t.details.devolvidaEm ? this.msg['aReenviar'] : this.msg['aEnviar'],
+run: () => { this.cmdEnviarRevisao(); },
+loading: this.cmdEnviarRevisaoStatus === 'loading',
+};
+} else if (t.souCriador && t.status === 'emRevisao') {
+prim = { label: this.msg['aAceitar'], run: () => { this.cmdAceitar(); }, loading: this.cmdAceitarStatus === 'loading' };
+}
+const podeDevolver = t.souCriador && t.status === 'emRevisao';
+const podeCancelar = t.souCriador && aberta;
+const erroAcao = this.cmdIniciarError ?? this.cmdEnviarRevisaoError ?? this.cmdAceitarError;
+const okAcao =
+this.cmdIniciarStatus === 'success'
+? this.msg['okIniciada']
+: this.cmdEnviarRevisaoStatus === 'success'
+? this.msg['okEnviada']
+: this.cmdAceitarStatus === 'success'
+? this.msg['okAceita']
+: '';
 return html`
 <div class="flex flex-col gap-4">
-<groupviewcard--ml-vertical-card>
+<div data-organism-id="detalheTarefa" class="flex flex-col gap-4">
+${keyed(
+t.id + ':' + t.version,
+html`<groupviewcard--ml-vertical-card>
 <CardHeader>
 <CardTitle>${t.titulo}</CardTitle>
 <CardDescription>${t.lista.nome}</CardDescription>
 </CardHeader>
 <CardContent>
-<div class="mb-3 flex flex-wrap items-center gap-2">
-${chip(m, t.status)}
-<span class="text-xs text-[var(--text-muted,currentColor)]">${m['campoPrioridade']}: ${prioridadeLabel(m, t.prioridade)}</span>
-</div>
-<dl class="grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-2 text-sm">
-<dt class="text-[var(--text-muted,currentColor)]">${m['campoPrazo']}</dt>
-<dd class="text-[var(--text-strong,currentColor)]">${fmtDate(t.prazo)}</dd>
-<dt class="text-[var(--text-muted,currentColor)]">${m['campoResponsavel']}</dt>
-<dd class="text-[var(--text-strong,currentColor)]">${nome(t.responsavel)}</dd>
-<dt class="text-[var(--text-muted,currentColor)]">${m['campoCriador']}</dt>
-<dd class="text-[var(--text-strong,currentColor)]">${nome(t.criador)}</dd>
-<dt class="text-[var(--text-muted,currentColor)]">${m['campoDescricao']}</dt>
-<dd>${d.descricao ?? m['semDescricao']}</dd>
+<div class="flex flex-wrap items-center gap-2 pb-3">${this.chip(t.status)}</div>
+<dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+${t.details.descricao
+? html`<dt class="text-[var(--text-muted,currentColor)]">${this.msg['lDescricao']}</dt><dd class="text-[var(--text-strong,currentColor)]">${t.details.descricao}</dd>`
+: nothing}
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg['lResponsavel']}</dt>
+<dd class="text-[var(--text-strong,currentColor)]">${t.responsavel.details.identification.name}</dd>
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg['lCriador']}</dt>
+<dd class="text-[var(--text-strong,currentColor)]">${t.criador.details.identification.name}</dd>
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg['lPrazo']}</dt>
+<dd class="text-[var(--text-strong,currentColor)]">${fmtData(t.prazo)}</dd>
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg['lPrioridade']}</dt>
+<dd class="text-[var(--text-strong,currentColor)]">${this.prioLabel(t.prioridade)}</dd>
 </dl>
 </CardContent>
-</groupviewcard--ml-vertical-card>
-${d.motivoDevolucao
-? html`<div class="${cardBox} bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]">
-<p class="text-xs font-semibold">${m['motivoDevolucao']}${d.devolvidaEm ? html` · ${fmtDateTime(d.devolvidaEm)}` : nothing}</p>
-<p class="mt-1 text-sm">${d.motivoDevolucao}</p>
-</div>`
+<CardFooter>${this.msg['lCriadaEm']} ${fmtDataHora(t.criadaEm)}</CardFooter>
+</groupviewcard--ml-vertical-card>`,
+)}
+${t.details.motivoDevolucao
+? html`<groupnotifyuser--ml-notify-banner type="warning" .visible=${true} .dismissible=${false}>
+<Title>${this.msg['motivoTitulo']}</Title>
+<Message>${t.details.motivoDevolucao}</Message>
+</groupnotifyuser--ml-notify-banner>`
 : nothing}
-<section class=${cardBox}>
-<div class="mb-1 flex items-center justify-between gap-2">
-<h3 class="text-sm font-semibold text-[var(--text-strong,currentColor)]">${m['checklist']}</h3>
-<span class="text-sm text-[var(--text-muted,currentColor)]">${d.progressoChecklist}</span>
+<section class="flex flex-col gap-2" aria-labelledby="h-check">
+<div class="flex items-center justify-between gap-2">
+<h2 id="h-check" class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg['checklist']}</h2>
+${this.btn(this.msg['marcarItens'], () => this.setScenario('checklist'), { variant: 'secondary', size: 'md' })}
 </div>
 ${t.checklist.length === 0
-? html`<p class="py-2 text-sm text-[var(--text-muted,currentColor)]">${m['semChecklist']}</p>`
-: html`<ul class="flex flex-col">
-${t.checklist.map(item => html`
-<li class="min-h-[44px] flex flex-col justify-center py-1">
-<groupenterboolean--ml-checkbox-preference
-.value=${item.feito}
-.disabled=${busy}
-@change=${onValue<boolean>(v => { this.marcarItemChecklist(item.id, v); })}
->
-<Label>${item.details.details.descricao}</Label>
-${item.feito && item.details.details.marcadoEm
-? html`<Helper>${m['marcadoEm']} ${fmtDateTime(item.details.details.marcadoEm)}</Helper>`
-: nothing}
-</groupenterboolean--ml-checkbox-preference>
-</li>
-`)}
+? html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['checklistVazia']}</p>`
+: html`<ul class="flex flex-col gap-2">
+${t.checklist.map(
+(it) => html`<li class="flex items-start gap-3 rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] p-3">
+<span aria-hidden="true" class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-[var(--border-default,currentColor)] text-xs ${it.feito ? 'bg-[var(--selected-bg,transparent)] text-[var(--selected-text,currentColor)]' : ''}">${it.feito ? '✓' : ''}</span>
+<span class="sr-only">${it.feito ? this.msg['itemFeito'] : this.msg['itemPendente']}</span>
+<span class="flex-1 text-sm ${it.feito ? 'text-[var(--text-muted,currentColor)] line-through' : 'text-[var(--text-strong,currentColor)]'}">${it.details.descricao}</span>
+</li>`,
+)}
 </ul>`}
 </section>
 </div>
-`;
-}
-private renderFeedback() {
-const m = this.msg;
-const motivoObrigatorio = this.devolverComMotivoError?.code === 'client.requiredMissing';
-const itens: [RequestStatus, ErrorState, string][] = [
-[this.iniciarTarefaStatus, this.iniciarTarefaError, m['okIniciada']],
-[this.enviarParaRevisaoStatus, this.enviarParaRevisaoError, m['okRevisao']],
-[this.aceitarEntregaStatus, this.aceitarEntregaError, m['okAceita']],
-[this.devolverComMotivoStatus, motivoObrigatorio ? null : this.devolverComMotivoError, m['okDevolvida']],
-[this.cancelarTarefaStatus, this.cancelarTarefaError, m['okCancelada']],
-[this.marcarItemChecklistStatus, this.marcarItemChecklistError, ''],
-];
-const erro = itens.find(i => i[0] === 'error' && i[1]);
-const sucesso = itens.find(i => i[0] === 'success' && i[2]);
-const tipo = erro ? 'error' : 'success';
-const texto = erro ? erroTexto(m, erro[1]) : sucesso ? sucesso[2] : '';
-return html`<div aria-live="polite">
-${texto
-? html`<groupnotifyuser--ml-contextual-feedback .type=${tipo} .visible=${true} .dismissible=${false}>
-<Message>${texto}</Message>
-</groupnotifyuser--ml-contextual-feedback>`
+<div data-organism-id="acoesTarefa" class="sticky bottom-0 z-10 -mx-4 flex flex-col gap-2 border-t border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] px-4 py-3">
+<div aria-live="polite" class="flex flex-col gap-2">
+${erroAcao ? this.aviso('error', erroAcao.message) : okAcao ? this.aviso('success', okAcao) : nothing}
+</div>
+<div class="flex items-center gap-2">
+${this.btn(this.msg['editarDados'], () => this.setScenario('editar'), { variant: 'secondary', size: 'lg' })}
+${prim
+? html`<div class="flex-1">${this.btn(prim.label, prim.run, { full: true, loading: prim.loading })}</div>`
+: html`<div class="flex-1"></div>`}
+${podeDevolver || podeCancelar
+? html`<div class="relative">
+<grouptriggeraction--ml-kebab-action-trigger size="lg" @action=${abrirMenu}>
+<Label>${this.msg['maisAcoes']}</Label>
+</grouptriggeraction--ml-kebab-action-trigger>
+<div popover class="fixed inset-x-0 bottom-0 top-auto m-0 w-full max-w-none rounded-t-2xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-0 text-[var(--text-default,currentColor)] backdrop:bg-[var(--overlay-backdrop-bg,transparent)]">
+<div class="mx-auto flex max-w-[430px] flex-col gap-2 p-4">
+${podeDevolver
+? html`<button type="button" class="min-h-12 rounded-lg px-3 text-left text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${(e: Event) => { fecharMenu(e); this.setScenario('devolver'); }}>${this.msg['aDevolver']}</button>`
 : nothing}
-</div>`;
-}
-private renderAcoes(t: TarefaAberta) {
-const m = this.msg;
-const s = t.status;
-const aberta = s === 'aFazer' || s === 'emAndamento' || s === 'emRevisao';
-const motivo = this.devolverComMotivoDraft.details.motivoDevolucao ?? '';
-const motivoErro = this.devolverComMotivoError?.code === 'client.requiredMissing' ? m['erroMotivo'] : '';
-return html`
-<div class="flex flex-col gap-3">
-${this.renderFeedback()}
-${s === 'aFazer'
-? botao(m['iniciarTarefa'], 'primary', this.iniciarTarefaStatus === 'loading', () => { this.iniciarTarefa(); })
+${podeCancelar
+? html`<button type="button" class="min-h-12 rounded-lg px-3 text-left text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${(e: Event) => { fecharMenu(e); this.setScenario('cancelar'); }}>${this.msg['aCancelar']}</button>`
 : nothing}
-${s === 'emAndamento'
-? botao(
-t.details.details.motivoDevolucao ? m['reenviarRevisao'] : m['enviarRevisao'],
-'primary',
-this.enviarParaRevisaoStatus === 'loading',
-() => { this.enviarParaRevisao(); },
-)
-: nothing}
-${s === 'emRevisao'
-? html`
-${botao(m['aceitarEntrega'], 'primary', this.aceitarEntregaStatus === 'loading', () => { this.aceitarEntrega(); })}
-<div class="${cardBox} flex flex-col gap-3">
-<groupentertext--ml-multiline-text
-.rows=${3}
-.value=${motivo}
-.error=${motivoErro}
-@change=${onValue<string>(v => this.setDevolverComMotivoDraft({ details: { motivoDevolucao: v } }))}
->
-<Label>${m['porQueDevolver']}</Label>
-</groupentertext--ml-multiline-text>
-${botao(m['devolverComMotivo'], 'secondary', this.devolverComMotivoStatus === 'loading', () => { this.devolverComMotivo(); }, !motivo.trim())}
+</div>
+</div>
 </div>`
 : nothing}
-${!aberta ? html`<p class="text-sm text-[var(--text-muted,currentColor)]">${m['encerrada']}</p>` : nothing}
-${botao(m['editarTarefa'], 'secondary', false, () => this.setScenario('editar'))}
-${aberta
-? botao(m['cancelarTarefa'], 'danger', this.cancelarTarefaStatus === 'loading', () => {
-if (window.confirm(`${m['confirmaCancelar']} “${t.titulo}”? ${m['confirmaAviso']}`)) this.cancelarTarefa();
-})
-: nothing}
 </div>
-`;
-}
-private renderHistorico(t: TarefaAberta) {
-const m = this.msg;
-const ev = eventos(m, t);
-return html`
-<details class="${cardBox} p-0">
-<summary class="flex min-h-[44px] cursor-pointer items-center px-3 text-sm font-semibold text-[var(--text-strong,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${m['historico']}</summary>
+</div>
+<details data-organism-id="historicoTarefa" class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)]">
+<summary class="flex min-h-12 cursor-pointer items-center px-3 font-semibold text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${this.msg['historico']}</summary>
 <div class="px-3 pb-3">
-<groupviewdata--ml-timeline-view>
+${keyed(
+t.id + ':' + t.version,
+html`<groupviewdata--ml-timeline-view>
 <Columns>
-<Column field="quando" header=${m['colQuando']}></Column>
-<Column field="evento" header=${m['colEvento']}></Column>
+<Column field="quando" header=${this.msg['hQuando']}></Column>
+<Column field="evento" header=${this.msg['hEvento']}></Column>
 </Columns>
 <Rows>
-${ev.map(e => html`
-<Row>
-<Cell><span class="text-xs text-[var(--text-muted,currentColor)]">${e.quando}</span></Cell>
-<Cell>
-<div class="text-sm font-medium text-[var(--text-strong,currentColor)]">${e.titulo}</div>
-${e.nota ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${e.nota}</div>` : nothing}
-</Cell>
-</Row>
-`)}
+<Row><Cell>${fmtDataHora(t.criadaEm)}</Cell><Cell>${this.msg['evCriada']}</Cell></Row>
+${t.details.devolvidaEm
+? html`<Row><Cell>${fmtDataHora(t.details.devolvidaEm)}</Cell><Cell>${this.msg['evDevolvida']}${t.details.motivoDevolucao ? html`: ${t.details.motivoDevolucao}` : nothing}</Cell></Row>`
+: nothing}
+${t.details.concluidaEm
+? html`<Row><Cell>${fmtDataHora(t.details.concluidaEm)}</Cell><Cell>${this.msg['evConcluida']}</Cell></Row>`
+: nothing}
+${t.details.canceladaEm
+? html`<Row><Cell>${fmtDataHora(t.details.canceladaEm)}</Cell><Cell>${this.msg['evCancelada']}</Cell></Row>`
+: nothing}
 </Rows>
-</groupviewdata--ml-timeline-view>
+</groupviewdata--ml-timeline-view>`,
+)}
 </div>
 </details>
-`;
-}
-private renderFormCriar() {
-const m = this.msg;
-const draft = this.salvarNovaTarefaDraft;
-const err = this.salvarNovaTarefaError;
-return html`
-<div data-organism-id="tarefaForm" class="flex flex-col gap-4">
-${this.renderCampos(draft, d => this.setSalvarNovaTarefaDraft(d), null)}
-<div class="sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] px-4 py-3">
-<div aria-live="polite">
-${err
-? html`<groupnotifyuser--ml-contextual-feedback .type=${'error'} .visible=${true} .dismissible=${false}>
-<Message>${erroTexto(m, err)}</Message>
-</groupnotifyuser--ml-contextual-feedback>`
-: nothing}
-</div>
-${botao(m['registrarTarefa'], 'primary', this.salvarNovaTarefaStatus === 'loading', () => {
-this.salvarNovaTarefa().then(() => {
-if (this.salvarNovaTarefaStatus === 'success') this.setScenario('tarefa');
-});
-}, !completo(draft))}
-${botao(m['descartar'], 'secondary', false, () => {
-this.limparSalvarNovaTarefaDraft();
-this.setScenario('lista');
-})}
-</div>
 </div>
 `;
 }
-private renderFormEditar() {
-const m = this.msg;
-const t = this.tarefa;
-const draft = this.salvarEdicaoTarefaDraft;
-const err = this.salvarEdicaoTarefaError;
-if (!t) {
-return html`<div data-organism-id="tarefaForm"><p class="py-8 text-center text-sm text-[var(--text-muted,currentColor)]">${m['semTarefaAberta']}</p></div>`;
-}
+/* ---------------- formulário ---------------- */
+private camposTarefa(d: Campos, set: (p: Partial<Campos>) => void, atual: { id: string; nome: string } | null) {
 return html`
-<div data-organism-id="tarefaForm" class="flex flex-col gap-4">
-${this.renderCampos(draft, d => this.setSalvarEdicaoTarefaDraft(d), { id: t.responsavelId, nome: nome(t.responsavel) })}
-<div class="sticky bottom-0 -mx-4 flex flex-col gap-2 border-t border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] px-4 py-3">
-<div aria-live="polite">
-${err
-? html`<groupnotifyuser--ml-contextual-feedback .type=${'error'} .visible=${true} .dismissible=${false}>
-<Message>${erroTexto(m, err)}</Message>
-</groupnotifyuser--ml-contextual-feedback>`
-: nothing}
-</div>
-${botao(m['salvarAlteracoes'], 'primary', this.salvarEdicaoTarefaStatus === 'loading', () => {
-this.salvarEdicaoTarefa().then(() => {
-if (this.salvarEdicaoTarefaStatus === 'success') this.setScenario('tarefa');
-});
-}, !completo(draft))}
-${botao(m['descartar'], 'secondary', false, () => {
-this.restaurarSalvarEdicaoTarefaDraft();
-this.setScenario('tarefa');
-})}
-</div>
-</div>
-`;
-}
-private renderCampos<D extends FormDraft>(draft: D, set: (d: D) => void, atual: { id: string; nome: string } | null) {
-const m = this.msg;
-const membroAtualFora = atual && draft.responsavelId === atual.id && !this.membros.some(x => x.responsavelId === atual.id);
-return html`
-<div class="flex flex-col gap-4">
 <groupselectone--ml-select
-.value=${draft.listaId}
-.loading=${this.opcoesFormularioStatus === 'loading'}
-@change=${onValue<string | null>(v => set({ ...draft, listaId: v }))}
+.value=${d.listaId}
+.required=${true}
+@change=${(e: CustomEvent<{ value: string | null }>) => set({ listaId: e.detail.value })}
 >
-<Label>${m['campoLista']}</Label>
-<Trigger>${m['escolhaLista']}</Trigger>
-${this.listas.map(l => html`<Item value=${l.tarefa.listaId}>${l.nome}</Item>`)}
-<Empty>${m['semListas']}</Empty>
+<Label>${this.msg['fLista']}</Label>
+<Trigger>${this.msg['fListaPlaceholder']}</Trigger>
+${this.listas.map((l) => html`<Item value=${l.id}>${l.nome}</Item>`)}
+<Empty>${this.msg['fListaVazia']}</Empty>
 </groupselectone--ml-select>
-<groupentertext--ml-floating-text-input
-.value=${draft.titulo ?? ''}
-@change=${onValue<string>(v => set({ ...draft, titulo: v }))}
+<groupentertext--ml-enter-text
+.value=${d.titulo ?? ''}
+.required=${true}
+@input=${(e: Event) => { const v = texto(e); if (v !== null) set({ titulo: v }); }}
 >
-<Label>${m['campoTitulo']}</Label>
-</groupentertext--ml-floating-text-input>
+<Label>${this.msg['fTitulo']}</Label>
+</groupentertext--ml-enter-text>
 <groupentertext--ml-multiline-text
+.value=${d.details.descricao ?? ''}
 .rows=${4}
-.value=${draft.details.descricao ?? ''}
-@change=${onValue<string>(v => set({ ...draft, details: { ...draft.details, descricao: v } }))}
+@input=${(e: Event) => { const v = texto(e); if (v !== null) set({ details: { descricao: v } }); }}
 >
-<Label>${m['campoDescricao']}</Label>
+<Label>${this.msg['fDescricao']}</Label>
 </groupentertext--ml-multiline-text>
 <groupselectone--ml-segmented-control
-.value=${draft.prioridade}
-@change=${onValue<string | null>(v => set({ ...draft, prioridade: v as TarefaPrioridade | null }))}
+.value=${d.prioridade}
+.required=${true}
+@change=${(e: CustomEvent<{ value: string | null }>) => set({ prioridade: e.detail.value as Campos['prioridade'] })}
 >
-<Label>${m['campoPrioridade']}</Label>
-<Item value="low">${m['prioridadeLow']}</Item>
-<Item value="medium">${m['prioridadeMedium']}</Item>
-<Item value="high">${m['prioridadeHigh']}</Item>
+<Label>${this.msg['fPrioridade']}</Label>
+<Item value="low">${this.msg['pBaixa']}</Item>
+<Item value="medium">${this.msg['pMedia']}</Item>
+<Item value="high">${this.msg['pAlta']}</Item>
 </groupselectone--ml-segmented-control>
-<groupenterdate--ml-compact-calendar
-.value=${draft.prazo}
-.locale=${lang() ?? ''}
-.firstDayOfWeek=${1}
-@change=${onValue<string | null>(v => set({ ...draft, prazo: v }))}
+<groupenterdate--ml-date-picker
+.value=${d.prazo}
+.required=${true}
+.locale=${lang() ?? 'pt-BR'}
+.placeholder=${this.msg['fPrazoPh']}
+@change=${(e: CustomEvent<{ value: string | null }>) => set({ prazo: e.detail.value })}
 >
-<Label>${m['campoPrazo']}</Label>
-</groupenterdate--ml-compact-calendar>
-<groupselectone--ml-select-one-autocomplete
-.value=${draft.responsavelId}
-.placeholder=${m['buscarResponsavel']}
-@change=${onValue<string | null>(v => {
-if (v === null || v === '') {
-set({ ...draft, responsavelId: null });
-return;
-}
-const conhecido = this.membros.some(x => x.responsavelId === v) || (atual !== null && atual.id === v);
-if (conhecido) {
-set({ ...draft, responsavelId: v });
-} else if (typeof v === 'string' && v.trim().length > 1) {
-this.buscarResponsaveis(v.trim());
-}
-})}
+<Label>${this.msg['fPrazo']}</Label>
+</groupenterdate--ml-date-picker>
+<groupselectone--ml-combobox
+.value=${d.responsavelId}
+.required=${true}
+.placeholder=${this.msg['fResponsavelPh']}
+@input=${(e: Event) => {
+const v = texto(e);
+if (v !== null) agendar(() => { this.qryBuscarMembros(v); }, 300);
+}}
+@change=${(e: CustomEvent<{ value: string | null }>) => set({ responsavelId: e.detail.value })}
 >
-<Label>${m['campoResponsavel']}</Label>
-<Helper>${m['ajudaResponsavel']}</Helper>
-${membroAtualFora && atual ? html`<Item value=${atual.id}>${atual.nome}</Item>` : nothing}
-${this.membros.map(x => html`<Item value=${x.responsavelId}>${nome(x)}</Item>`)}
-<Empty>${m['semMembros']}</Empty>
-</groupselectone--ml-select-one-autocomplete>
-<fieldset class="flex flex-col gap-3">
-<legend class="mb-1 text-sm font-semibold text-[var(--text-strong,currentColor)]">${m['checklist']}</legend>
-${draft.checklist.map((item, i) => html`
-<div class="flex items-start gap-2">
+<Label>${this.msg['fResponsavel']}</Label>
+<Helper>${this.msg['fResponsavelAjuda']}</Helper>
+${atual ? html`<Item value=${atual.id}>${atual.nome}</Item>` : nothing}
+${this.membros
+.filter((m) => m.id !== atual?.id)
+.map((m) => html`<Item value=${m.id}>${m.details.identification.name}</Item>`)}
+<Empty>${this.msg['fResponsavelVazio']}</Empty>
+</groupselectone--ml-combobox>
+`;
+}
+private itensChecklist(itens: ItemChecklistDraft[], set: (v: ItemChecklistDraft[]) => void, modo: 'criar' | 'editar') {
+const sep = 'flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] disabled:opacity-40';
+return html`
+<ul class="flex flex-col gap-3">
+${itens.map(
+(it, i) => html`<li class="flex items-start gap-2">
+${modo === 'editar'
+? html`<div class="pt-3">
+<groupenterboolean--ml-checkbox-preference
+.value=${!!it.feito}
+@change=${(e: CustomEvent<{ value: boolean }>) =>
+set(itens.map((x, k) => (k === i ? { ...x, feito: e.detail.value } : x)))}
+><Label><span class="sr-only">${this.msg['itemMarcar']}</span></Label></groupenterboolean--ml-checkbox-preference>
+</div>`
+: nothing}
 <div class="min-w-0 flex-1">
-<groupentertext--ml-floating-text-input
-.value=${item.details.details.descricao ?? ''}
-@change=${onValue<string>(v => set({
-...draft,
-checklist: draft.checklist.map((x, j) => (j === i ? { ...x, details: { details: { descricao: v } } } : x)),
-}))}
+<groupentertext--ml-enter-text
+.value=${it.details.descricao ?? ''}
+@input=${(e: Event) => {
+const v = texto(e);
+if (v !== null) set(itens.map((x, k) => (k === i ? { ...x, details: { descricao: v } } : x)));
+}}
+><Label><span class="sr-only">${this.msg['itemDescricao']}</span></Label></groupentertext--ml-enter-text>
+</div>
+${modo === 'editar'
+? html`<div class="flex shrink-0 gap-1">
+<button type="button" class=${sep} aria-label=${this.msg['subir']} @click=${() => set(mover(itens, i, -1))}>↑</button>
+<button type="button" class=${sep} aria-label=${this.msg['descer']} @click=${() => set(mover(itens, i, 1))}>↓</button>
+</div>`
+: html`<button type="button" class=${sep} aria-label=${this.msg['removerItem']} @click=${() => set(renumerar(itens.filter((_, k) => k !== i)))}>×</button>`}
+</li>`,
+)}
+</ul>
+${this.btn(this.msg['addItem'], () => set([...itens, novoItem(itens.length)]), { variant: 'secondary', full: true })}
+`;
+}
+private renderCriar() {
+const d = this.cmdCriarTarefaDraft;
+const ok = camposOk(d);
+const erro = this.cmdCriarTarefaError;
+return html`
+<form data-organism-id="formTarefa" class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
+${this.camposTarefa(d, (p) => this.setCmdCriarTarefaDraft({ ...this.cmdCriarTarefaDraft, ...p }), null)}
+<section class="flex flex-col gap-3" aria-labelledby="h-chk-ini">
+<h2 id="h-chk-ini" class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg['checklistInicial']}</h2>
+${this.itensChecklist(d.checklist, (v) => this.setCmdCriarTarefaDraft({ ...this.cmdCriarTarefaDraft, checklist: v }), 'criar')}
+</section>
+<div aria-live="polite" class="flex flex-col gap-2">
+${erro ? this.aviso('error', erro.message) : nothing}
+${ok ? nothing : html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['faltaCampos']}</p>`}
+</div>
+${this.btn(
+this.msg['registrar'],
+() => {
+this.cmdCriarTarefa().then(() => {
+if (this.cmdCriarTarefaStatus === 'success') this.setScenario('detalhe');
+});
+},
+{ full: true, disabled: !ok, loading: this.cmdCriarTarefaStatus === 'loading' },
+)}
+</form>
+`;
+}
+private renderEditar() {
+const d = this.cmdSalvarEdicaoDraft;
+const t = this.tarefa;
+const ok = camposOk(d);
+const erro = this.cmdSalvarEdicaoError;
+return html`
+<form data-organism-id="formTarefa" class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['edicaoNaoMuda']}</p>
+${this.camposTarefa(
+d,
+(p) => this.setCmdSalvarEdicaoDraft({ ...this.cmdSalvarEdicaoDraft, ...p }),
+t ? { id: t.responsavelId, nome: t.responsavel.details.identification.name } : null,
+)}
+<div aria-live="polite" class="flex flex-col gap-2">
+${erro ? this.aviso('error', erro.message) : nothing}
+${ok ? nothing : html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['faltaCampos']}</p>`}
+</div>
+${this.btn(
+this.msg['salvarEdicao'],
+() => {
+this.cmdSalvarEdicao().then(() => {
+if (this.cmdSalvarEdicaoStatus === 'success') this.setScenario('detalhe');
+});
+},
+{ full: true, disabled: !ok, loading: this.cmdSalvarEdicaoStatus === 'loading' },
+)}
+</form>
+`;
+}
+private renderChecklist() {
+const d = this.cmdSalvarChecklistDraft;
+const erro = this.cmdSalvarChecklistError;
+return html`
+<form data-organism-id="formTarefa" class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['checklistNaoMuda']}</p>
+${this.itensChecklist(d.itens, (v) => this.setCmdSalvarChecklistDraft({ ...this.cmdSalvarChecklistDraft, itens: v }), 'editar')}
+<div aria-live="polite">${erro ? this.aviso('error', erro.message) : nothing}</div>
+${this.btn(
+this.msg['salvarChecklist'],
+() => {
+this.cmdSalvarChecklist().then(() => {
+if (this.cmdSalvarChecklistStatus === 'success') this.setScenario('detalhe');
+});
+},
+{ full: true, loading: this.cmdSalvarChecklistStatus === 'loading' },
+)}
+</form>
+`;
+}
+/* ---------------- devolver / cancelar ---------------- */
+private renderDevolver() {
+const motivo = this.cmdDevolverDraft.details.motivoDevolucao ?? '';
+const erro = this.cmdDevolverError;
+return html`
+<div data-organism-id="acoesTarefa" class="flex flex-col gap-4">
+<p class="font-semibold text-[var(--text-strong,currentColor)]">${this.tarefa?.titulo ?? ''}</p>
+<groupentertext--ml-multiline-text
+.value=${motivo}
+.rows=${5}
+.required=${true}
+@input=${(e: Event) => {
+const v = texto(e);
+if (v !== null) this.setCmdDevolverDraft({ details: { motivoDevolucao: v } });
+}}
 >
-<Label>${m['itemChecklist']} ${i + 1}</Label>
-</groupentertext--ml-floating-text-input>
+<Label>${this.msg['motivo']}</Label>
+<Helper>${this.msg['motivoAjuda']}</Helper>
+</groupentertext--ml-multiline-text>
+<div aria-live="polite">${erro ? this.aviso('error', erro.message) : nothing}</div>
+${this.btn(
+this.msg['devolverTarefa'],
+() => {
+this.cmdDevolver().then(() => {
+if (this.cmdDevolverStatus === 'success') this.setScenario('detalhe');
+});
+},
+{ full: true, disabled: !motivo.trim(), loading: this.cmdDevolverStatus === 'loading' },
+)}
 </div>
-<button
-type="button"
-class="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] text-[var(--text-default,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
-aria-label=${m['removerItem']}
-@click=${() => set({
-...draft,
-checklist: draft.checklist.filter((_, j) => j !== i).map((x, j) => ({ ...x, ordem: j + 1 })),
-})}
-><span aria-hidden="true">×</span></button>
-</div>
-`)}
-${botao(m['adicionarItem'], 'secondary', false, () => set({
-...draft,
-checklist: [
-...draft.checklist,
-{ id: null, version: null, ordem: draft.checklist.length + 1, details: { details: { descricao: '' } } },
-],
-}))}
-</fieldset>
+`;
+}
+private renderCancelar() {
+const erro = this.cmdCancelarError;
+return html`
+<div data-organism-id="acoesTarefa" class="flex flex-col gap-4">
+<p class="text-[var(--text-default,currentColor)]">${this.msg['cancelarTexto']}</p>
+<p class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3 font-semibold text-[var(--text-strong,currentColor)]">${this.tarefa?.titulo ?? ''}</p>
+<div aria-live="polite">${erro ? this.aviso('error', erro.message) : nothing}</div>
+${this.btn(
+this.msg['aCancelar'],
+() => {
+this.cmdCancelar().then(() => {
+if (this.cmdCancelarStatus === 'success') this.setScenario('detalhe');
+});
+},
+{ variant: 'danger', full: true, loading: this.cmdCancelarStatus === 'loading' },
+)}
+${this.btn(this.msg['manter'], () => this.setScenario('detalhe'), { variant: 'secondary', full: true })}
 </div>
 `;
 }

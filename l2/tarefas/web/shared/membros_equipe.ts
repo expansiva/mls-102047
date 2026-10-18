@@ -4,179 +4,114 @@ import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { execBff } from '/_102029_/l2/bffClient.js';
 import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabState.js';
 import { runBlockingUiAction } from '/_102029_/l2/interactionRuntime.js';
-import type { Membros_equipeContracts, MembroEquipeResumo } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
-
-export type { Membros_equipeContracts, MembroEquipeResumo, MembroEquipeDetalhes, MembroEquipeIdentificacao, MembroEquipeBase } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
+import type { Membros_equipeContracts, PessoaEquipe, PessoaEquipeDetalhes, PessoaEquipeIdentificacao, PessoaEquipeBase } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
+export type { Membros_equipeContracts, PessoaEquipe, PessoaEquipeDetalhes, PessoaEquipeIdentificacao, PessoaEquipeBase } from '/_102047_/l2/tarefas/web/contracts/membros_equipe.defs.js';
 
 type Input<R extends keyof Membros_equipeContracts> = Membros_equipeContracts[R]['input'];
 type Output<R extends keyof Membros_equipeContracts> = Membros_equipeContracts[R]['output'];
 
 export type ErrorState = { code: string; message: string; details?: unknown } | null;
 
-/** One page of the team list: items plus paging data. */
-export type MembrosPage = Output<'tarefas.membros_equipe.listarMembrosEquipe'>['membros'];
+type PessoasPage = Output<'tarefas.membros_equipe.qryPessoasEquipe'>['pessoas'];
 
-/** Draft of the cadastrarPessoa form (new person); every leaf may be null while empty. */
+/** Draft of the new-person form: name and country typed by the person. */
 export type CadastrarPessoaDraft = {
-  details: {
-    identification: {
-      name: string | null;
-      countryCode: string | null;
-    };
-  };
+  details: { identification: { name: string | null; countryCode: string | null } };
 };
 
-/** Draft of the salvarAlteracoesPessoa form (edit of the selected person); filled from the loaded record. */
-export type SalvarAlteracoesPessoaDraft = {
+/** Draft of the edit form: the selected person (id and version read) with the new name and country. */
+export type SalvarAlteracoesDraft = {
   id: string | null;
   version: number | null;
-  details: {
-    identification: {
-      name: string | null;
-      countryCode: string | null;
-    };
-  };
+  details: { identification: { name: string | null; countryCode: string | null } };
 };
 
-type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
-
-type StateMember =
-  | 'membros'
-  | 'membro'
-  | 'selectedMembroEquipe'
-  | 'busca'
-  | 'page'
-  | 'cadastrarPessoaDraft'
-  | 'salvarAlteracoesPessoaDraft'
-  | 'pageStatus'
-  | 'listarMembrosEquipeStatus'
-  | 'listarMembrosEquipeError'
-  | 'obterMembroEquipeStatus'
-  | 'obterMembroEquipeError'
-  | 'cadastrarPessoaStatus'
-  | 'cadastrarPessoaError'
-  | 'salvarAlteracoesPessoaStatus'
-  | 'salvarAlteracoesPessoaError'
-  | 'scenary';
-
-const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
-  'ui.tarefas.membros_equipe.membros': 'membros',
-  'ui.tarefas.membros_equipe.membro': 'membro',
-  'ui.tarefas.membros_equipe.selectedMembroEquipe': 'selectedMembroEquipe',
-  'ui.tarefas.membros_equipe.busca': 'busca',
-  'ui.tarefas.membros_equipe.page': 'page',
-  'ui.tarefas.membros_equipe.cadastrarPessoaDraft': 'cadastrarPessoaDraft',
-  'ui.tarefas.membros_equipe.salvarAlteracoesPessoaDraft': 'salvarAlteracoesPessoaDraft',
-  'ui.tarefas.membros_equipe.pageStatus': 'pageStatus',
-  'ui.tarefas.membros_equipe.listarMembrosEquipeStatus': 'listarMembrosEquipeStatus',
-  'ui.tarefas.membros_equipe.listarMembrosEquipeError': 'listarMembrosEquipeError',
-  'ui.tarefas.membros_equipe.obterMembroEquipeStatus': 'obterMembroEquipeStatus',
-  'ui.tarefas.membros_equipe.obterMembroEquipeError': 'obterMembroEquipeError',
-  'ui.tarefas.membros_equipe.cadastrarPessoaStatus': 'cadastrarPessoaStatus',
-  'ui.tarefas.membros_equipe.cadastrarPessoaError': 'cadastrarPessoaError',
-  'ui.tarefas.membros_equipe.salvarAlteracoesPessoaStatus': 'salvarAlteracoesPessoaStatus',
-  'ui.tarefas.membros_equipe.salvarAlteracoesPessoaError': 'salvarAlteracoesPessoaError',
-  'ui.tarefas.membros_equipe.scenary': 'scenary',
-};
-const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
-
-/** State members that are persisted as entry params, with the param name used in localStorage. */
-const PERSISTED_PARAM: Partial<Record<StateMember, string>> = {
-  busca: 'busca',
-  page: 'page',
-  selectedMembroEquipe: 'membroEquipeId',
-};
-
-const PAGE_SIZE = 20;
-
-function emptyCadastrarPessoaDraft(): CadastrarPessoaDraft {
+export function emptyCadastrarPessoaDraft(): CadastrarPessoaDraft {
   return { details: { identification: { name: null, countryCode: null } } };
 }
 
-function emptySalvarAlteracoesPessoaDraft(): SalvarAlteracoesPessoaDraft {
+export function emptySalvarAlteracoesDraft(): SalvarAlteracoesDraft {
   return { id: null, version: null, details: { identification: { name: null, countryCode: null } } };
 }
 
-function draftFromMembro(membro: MembroEquipeResumo): SalvarAlteracoesPessoaDraft {
-  const identification = membro.details.identification.details.identification;
-  return {
-    id: membro.id,
-    version: membro.version,
-    details: { identification: { name: identification.name, countryCode: identification.countryCode } },
-  };
-}
+type StateMember =
+  | 'pessoas'
+  | 'cmdCadastrarPessoaPessoa'
+  | 'cmdSalvarAlteracoesPessoa'
+  | 'selectedMembroEquipe'
+  | 'busca'
+  | 'cmdCadastrarPessoaDraft'
+  | 'cmdSalvarAlteracoesDraft'
+  | 'pageStatus'
+  | 'qryPessoasEquipeStatus'
+  | 'qryPessoasEquipeError'
+  | 'cmdCadastrarPessoaStatus'
+  | 'cmdCadastrarPessoaError'
+  | 'cmdSalvarAlteracoesStatus'
+  | 'cmdSalvarAlteracoesError'
+  | 'scenary';
 
-function isBlank(value: string | null): boolean {
-  return value === null || value.trim() === '';
-}
+const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
+  'ui.tarefas.membros_equipe.pessoas': 'pessoas',
+  'ui.tarefas.membros_equipe.cmdCadastrarPessoaPessoa': 'cmdCadastrarPessoaPessoa',
+  'ui.tarefas.membros_equipe.cmdSalvarAlteracoesPessoa': 'cmdSalvarAlteracoesPessoa',
+  'ui.tarefas.membros_equipe.selectedMembroEquipe': 'selectedMembroEquipe',
+  'ui.tarefas.membros_equipe.busca': 'busca',
+  'ui.tarefas.membros_equipe.cmdCadastrarPessoaDraft': 'cmdCadastrarPessoaDraft',
+  'ui.tarefas.membros_equipe.cmdSalvarAlteracoesDraft': 'cmdSalvarAlteracoesDraft',
+  'ui.tarefas.membros_equipe.pageStatus': 'pageStatus',
+  'ui.tarefas.membros_equipe.qryPessoasEquipeStatus': 'qryPessoasEquipeStatus',
+  'ui.tarefas.membros_equipe.qryPessoasEquipeError': 'qryPessoasEquipeError',
+  'ui.tarefas.membros_equipe.cmdCadastrarPessoaStatus': 'cmdCadastrarPessoaStatus',
+  'ui.tarefas.membros_equipe.cmdCadastrarPessoaError': 'cmdCadastrarPessoaError',
+  'ui.tarefas.membros_equipe.cmdSalvarAlteracoesStatus': 'cmdSalvarAlteracoesStatus',
+  'ui.tarefas.membros_equipe.cmdSalvarAlteracoesError': 'cmdSalvarAlteracoesError',
+  'ui.tarefas.membros_equipe.scenary': 'scenary',
+};
+
+const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
+const PAGE_SIZE = 20;
 
 export class TarefasMembros_equipeShared extends StateLitElement {
-  /** state membros — people of the team as the list shows them (page with items, page, pageSize, hasMore); source listarMembrosEquipe.membros; organism pessoasEquipe */
-  @property({ attribute: false }) membros: MembrosPage | null = null;
-
-  /** state membro — the person loaded for the registration form (record with id and version); source obterMembroEquipe.membro; organism cadastroPessoa */
-  @property({ attribute: false }) membro: MembroEquipeResumo | null = null;
-
-  /** state selectedMembroEquipe — id of the selected person, opened in the registration form; source entry.params.membroEquipeId; organisms cadastroPessoa, pessoasEquipe; persisted */
+  /** state pessoas — the list of team members (page { items, page, pageSize, hasMore }) with identification, registry status, roles and contact summary; source qryPessoasEquipe.pessoas; organism pessoasEquipe */
+  @property({ attribute: false }) pessoas: PessoasPage | null = null;
+  /** state cmdCadastrarPessoaPessoa — the team member just registered by cmdCadastrarPessoa; source cmdCadastrarPessoa.pessoa; organism cadastroPessoa */
+  @property({ attribute: false }) cmdCadastrarPessoaPessoa: PessoaEquipe | null = null;
+  /** state cmdSalvarAlteracoesPessoa — the team member just saved by cmdSalvarAlteracoes; source cmdSalvarAlteracoes.pessoa; organism cadastroPessoa */
+  @property({ attribute: false }) cmdSalvarAlteracoesPessoa: PessoaEquipe | null = null;
+  /** state selectedMembroEquipe — the id of the team member selected in pessoasEquipe (the record is the getter cadastroPessoa); source entry.params.membroEquipeId; organisms cadastroPessoa, pessoasEquipe; persisted */
   @property({ attribute: false }) selectedMembroEquipe: string | null = null;
-
-  /** state busca — optional name fragment that filters the list; source entry.params.busca; organism pessoasEquipe; persisted */
+  /** state busca — the name search text that filters pessoasEquipe (null = no filter); source entry.params.busca; organism pessoasEquipe; persisted */
   @property({ attribute: false }) busca: string | null = null;
-
-  /** state page — the page of the list the person went to with a pager; source entry.params.page; organism pessoasEquipe; persisted */
-  @property({ attribute: false }) page: number | null = null;
-
-  /** state cadastrarPessoaDraft — form draft of a new person (name, countryCode); source cadastrarPessoa.input; organism cadastroPessoa */
-  @property({ attribute: false }) cadastrarPessoaDraft: CadastrarPessoaDraft = emptyCadastrarPessoaDraft();
-
-  /** state salvarAlteracoesPessoaDraft — form draft editing the selected person (id, version, name, countryCode), filled from the loaded record; source salvarAlteracoesPessoa.input; organism cadastroPessoa */
-  @property({ attribute: false }) salvarAlteracoesPessoaDraft: SalvarAlteracoesPessoaDraft = emptySalvarAlteracoesPessoaDraft();
-
-  /** state pageStatus — overall status of the page: idle, loading, empty, success or error */
+  /** state cmdCadastrarPessoaDraft — draft of the new-person form (name, country); source cmdCadastrarPessoa.input; organism cadastroPessoa */
+  @property({ attribute: false }) cmdCadastrarPessoaDraft: CadastrarPessoaDraft = emptyCadastrarPessoaDraft();
+  /** state cmdSalvarAlteracoesDraft — draft of the edit form (id, version, name, country), filled from the selected person; source cmdSalvarAlteracoes.input; organism cadastroPessoa */
+  @property({ attribute: false }) cmdSalvarAlteracoesDraft: SalvarAlteracoesDraft = emptySalvarAlteracoesDraft();
+  /** state pageStatus — overall state of the page load: idle, loading, empty (no member), success or error */
   @property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
-
-  /** state listarMembrosEquipeStatus — status of the team list request */
-  @property({ attribute: false }) listarMembrosEquipeStatus: RequestStatus = 'idle';
-
-  /** state listarMembrosEquipeError — error of the team list request, null when none */
-  @property({ attribute: false }) listarMembrosEquipeError: ErrorState = null;
-
-  /** state obterMembroEquipeStatus — status of the request that loads the selected person */
-  @property({ attribute: false }) obterMembroEquipeStatus: RequestStatus = 'idle';
-
-  /** state obterMembroEquipeError — error of the request that loads the selected person, null when none */
-  @property({ attribute: false }) obterMembroEquipeError: ErrorState = null;
-
-  /** state cadastrarPessoaStatus — status of the command that registers a new person */
-  @property({ attribute: false }) cadastrarPessoaStatus: RequestStatus = 'idle';
-
-  /** state cadastrarPessoaError — error of the command that registers a new person, null when none */
-  @property({ attribute: false }) cadastrarPessoaError: ErrorState = null;
-
-  /** state salvarAlteracoesPessoaStatus — status of the command that saves the edited person */
-  @property({ attribute: false }) salvarAlteracoesPessoaStatus: RequestStatus = 'idle';
-
-  /** state salvarAlteracoesPessoaError — error of the command that saves the edited person, null when none */
-  @property({ attribute: false }) salvarAlteracoesPessoaError: ErrorState = null;
-
+  /** state qryPessoasEquipeStatus — status of the list query: idle, loading, success or error */
+  @property({ attribute: false }) qryPessoasEquipeStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state qryPessoasEquipeError — error of the list query (also client.selectionInvalid / client.preconditionMissing), null when none */
+  @property({ attribute: false }) qryPessoasEquipeError: ErrorState = null;
+  /** state cmdCadastrarPessoaStatus — status of the register command: idle, loading, success or error */
+  @property({ attribute: false }) cmdCadastrarPessoaStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state cmdCadastrarPessoaError — error of the register command, null when none */
+  @property({ attribute: false }) cmdCadastrarPessoaError: ErrorState = null;
+  /** state cmdSalvarAlteracoesStatus — status of the save command: idle, loading, success or error */
+  @property({ attribute: false }) cmdSalvarAlteracoesStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state cmdSalvarAlteracoesError — error of the save command, null when none */
+  @property({ attribute: false }) cmdSalvarAlteracoesError: ErrorState = null;
   /** state scenary — the visible scene of the page; '' until the page shows its first scene */
   @property({ attribute: false }) scenary = '';
 
   private publish<M extends StateMember>(member: M, value: this[M]): void {
     (this as unknown as Record<string, unknown>)[member] = value;
     setState(`ui.tarefas.membros_equipe.${member}`, value);
-    const param = PERSISTED_PARAM[member];
-    if (param) {
-      try {
-        const storageKey = `tarefas.membros_equipe.${param}`;
-        if (value === null) {
-          window.localStorage.removeItem(storageKey);
-        } else {
-          window.localStorage.setItem(storageKey, String(value));
-        }
-      } catch {
-        // storage unavailable: the value stays in memory only
-      }
+    if (member === 'busca') {
+      this.persistParam('busca', typeof value === 'string' ? value : null);
+    }
+    if (member === 'selectedMembroEquipe') {
+      this.persistParam('membroEquipeId', typeof value === 'string' ? value : null);
     }
   }
 
@@ -185,16 +120,99 @@ export class TarefasMembros_equipeShared extends StateLitElement {
     if (member) (this as unknown as Record<string, unknown>)[member] = value;
   }
 
+  private persistParam(name: string, value: string | null): void {
+    try {
+      const storageKey = `tarefas.membros_equipe.${name}`;
+      if (value === null) {
+        localStorage.removeItem(storageKey);
+      } else {
+        localStorage.setItem(storageKey, value);
+      }
+    } catch {
+      // storage unavailable: the param is simply not persisted
+    }
+  }
+
+  private readParam(name: string): string | null {
+    try {
+      const search = typeof window !== 'undefined' && window.location ? window.location.search : '';
+      const fromUrl = new URLSearchParams(search).get(name);
+      if (fromUrl !== null && fromUrl !== '') return fromUrl;
+    } catch {
+      // url unavailable
+    }
+    try {
+      const stored = localStorage.getItem(`tarefas.membros_equipe.${name}`);
+      if (stored !== null && stored !== '') return stored;
+    } catch {
+      // storage unavailable
+    }
+    return null;
+  }
+
+  private unexpectedError(error: unknown): ErrorState {
+    const name = error instanceof Error ? error.name : 'unknown';
+    return { code: 'client.unexpected', message: '', details: { name } };
+  }
+
+  private resetVisit(): void {
+    this.publish('pageStatus', 'idle');
+    this.publish('qryPessoasEquipeStatus', 'idle');
+    this.publish('qryPessoasEquipeError', null);
+    this.publish('cmdCadastrarPessoaStatus', 'idle');
+    this.publish('cmdCadastrarPessoaError', null);
+    this.publish('cmdSalvarAlteracoesStatus', 'idle');
+    this.publish('cmdSalvarAlteracoesError', null);
+    this.publish('scenary', '');
+    this.publish('cmdCadastrarPessoaDraft', emptyCadastrarPessoaDraft());
+    this.publish('cmdSalvarAlteracoesDraft', emptySalvarAlteracoesDraft());
+  }
+
+  private resetCommandResults(): void {
+    this.publish('cmdCadastrarPessoaStatus', 'idle');
+    this.publish('cmdCadastrarPessoaError', null);
+    this.publish('cmdSalvarAlteracoesStatus', 'idle');
+    this.publish('cmdSalvarAlteracoesError', null);
+  }
+
+  private draftFromPessoa(pessoa: PessoaEquipe): SalvarAlteracoesDraft {
+    return {
+      id: pessoa.id,
+      version: pessoa.version,
+      details: {
+        identification: {
+          name: pessoa.details.identification.name,
+          countryCode: pessoa.details.identification.countryCode,
+        },
+      },
+    };
+  }
+
+  private upsertPessoa(pessoa: PessoaEquipe): PessoasPage {
+    const current = this.pessoas;
+    if (!current) {
+      return { items: [pessoa], page: 1, pageSize: PAGE_SIZE, hasMore: false };
+    }
+    const exists = current.items.some(row => row.id === pessoa.id);
+    const items = exists
+      ? current.items.map(row => (row.id === pessoa.id ? pessoa : row))
+      : [...current.items, pessoa];
+    return { ...current, items };
+  }
+
   public connectedCallback(): void {
     super.connectedCallback();
-    const membros = getState('ui.tarefas.membros_equipe.membros');
-    if (membros !== undefined) this.assignState('ui.tarefas.membros_equipe.membros', membros);
-    const membro = getState('ui.tarefas.membros_equipe.membro');
-    if (membro !== undefined) this.assignState('ui.tarefas.membros_equipe.membro', membro);
+    const pessoas = getState('ui.tarefas.membros_equipe.pessoas');
+    if (pessoas !== undefined) this.assignState('ui.tarefas.membros_equipe.pessoas', pessoas);
+    const cadastrada = getState('ui.tarefas.membros_equipe.cmdCadastrarPessoaPessoa');
+    if (cadastrada !== undefined) this.assignState('ui.tarefas.membros_equipe.cmdCadastrarPessoaPessoa', cadastrada);
+    const salva = getState('ui.tarefas.membros_equipe.cmdSalvarAlteracoesPessoa');
+    if (salva !== undefined) this.assignState('ui.tarefas.membros_equipe.cmdSalvarAlteracoesPessoa', salva);
     this.resetVisit();
     subscribe([...STATE_KEYS], this);
-    this.applyEntryParams();
-    void this.initialLoad();
+    this.publish('busca', this.readParam('busca'));
+    this.publish('selectedMembroEquipe', this.readParam('membroEquipeId'));
+    void this.qryPessoasEquipe();
   }
 
   public disconnectedCallback(): void {
@@ -212,270 +230,208 @@ export class TarefasMembros_equipeShared extends StateLitElement {
     this.requestUpdate();
   }
 
-  private resetVisit(): void {
-    this.publish('pageStatus', 'idle');
-    this.publish('listarMembrosEquipeStatus', 'idle');
-    this.publish('listarMembrosEquipeError', null);
-    this.publish('obterMembroEquipeStatus', 'idle');
-    this.publish('obterMembroEquipeError', null);
-    this.publish('cadastrarPessoaStatus', 'idle');
-    this.publish('cadastrarPessoaError', null);
-    this.publish('salvarAlteracoesPessoaStatus', 'idle');
-    this.publish('salvarAlteracoesPessoaError', null);
-    this.publish('cadastrarPessoaDraft', emptyCadastrarPessoaDraft());
-    this.publish('salvarAlteracoesPessoaDraft', emptySalvarAlteracoesPessoaDraft());
-    this.publish('scenary', '');
+  /** select (record) — the team member selected in pessoasEquipe, picked from the loaded list by selectedMembroEquipe; null when nothing is selected or the id is not loaded */
+  public get cadastroPessoa(): PessoaEquipe | null {
+    const id = this.selectedMembroEquipe;
+    if (id === null || !this.pessoas) return null;
+    return this.pessoas.items.find(row => row.id === id) ?? null;
   }
 
-  private resetCommandResults(): void {
-    this.publish('cadastrarPessoaStatus', 'idle');
-    this.publish('cadastrarPessoaError', null);
-    this.publish('salvarAlteracoesPessoaStatus', 'idle');
-    this.publish('salvarAlteracoesPessoaError', null);
+  /** scene — publishes the visible scene of the page; value is the scene name ('' for none) */
+  public setScenario(value: string): void {
+    this.resetCommandResults();
+    this.publish('scenary', value);
   }
 
-  private readParam(name: string): string | null {
-    const fromUrl = new URLSearchParams(window.location.search).get(name);
-    if (fromUrl !== null) return fromUrl;
-    try {
-      return window.localStorage.getItem(`tarefas.membros_equipe.${name}`);
-    } catch {
-      return null;
+  /** draft — replaces the draft of the new-person form (name and country typed by the person) */
+  public setCmdCadastrarPessoaDraft(value: CadastrarPessoaDraft): void {
+    this.resetCommandResults();
+    this.publish('cmdCadastrarPessoaDraft', value);
+  }
+
+  /** draft — replaces the draft of the edit form (new name and country of the selected person; keep id and version) */
+  public setCmdSalvarAlteracoesDraft(value: SalvarAlteracoesDraft): void {
+    this.resetCommandResults();
+    this.publish('cmdSalvarAlteracoesDraft', value);
+  }
+
+  /** select — selects the team member to edit by id (null clears the selection); the edit draft is filled from the loaded row. An id no loaded row resolves publishes client.selectionInvalid in qryPessoasEquipeError and keeps the previous selection. id: the member id or null */
+  public selectCadastroPessoa(id: string | null): void {
+    this.resetCommandResults();
+    if (id === null) {
+      this.publish('selectedMembroEquipe', null);
+      this.publish('cmdSalvarAlteracoesDraft', emptySalvarAlteracoesDraft());
+      return;
     }
-  }
-
-  private applyEntryParams(): void {
-    const rawBusca = this.readParam('busca');
-    this.publish('busca', rawBusca !== null && rawBusca !== '' ? rawBusca : null);
-    const rawPage = this.readParam('page');
-    let pageValue: number | null = null;
-    if (rawPage !== null && rawPage !== '') {
-      const parsed = Number(rawPage);
-      if (Number.isFinite(parsed)) pageValue = parsed;
+    const row = this.pessoas ? this.pessoas.items.find(item => item.id === id) ?? null : null;
+    if (!row) {
+      this.publish('qryPessoasEquipeError', { code: 'client.selectionInvalid', message: '', details: { id } });
+      return;
     }
-    this.publish('page', pageValue);
-    const rawSelected = this.readParam('membroEquipeId');
-    this.publish('selectedMembroEquipe', rawSelected !== null && rawSelected !== '' ? rawSelected : null);
-    if (this.selectedMembroEquipe === null) this.publish('membro', null);
+    this.publish('qryPessoasEquipeError', null);
+    this.publish('selectedMembroEquipe', id);
+    this.publish('cmdSalvarAlteracoesDraft', this.draftFromPessoa(row));
   }
 
-  private async initialLoad(): Promise<void> {
-    await this.listarMembrosEquipe();
-    if (this.selectedMembroEquipe !== null) await this.obterMembroEquipe();
+  private applySelectionAfterLoad(): void {
+    const id = this.selectedMembroEquipe;
+    if (id === null) return;
+    const row = this.pessoas ? this.pessoas.items.find(item => item.id === id) ?? null : null;
+    if (row) {
+      if (this.cmdSalvarAlteracoesDraft.id !== row.id) {
+        this.publish('cmdSalvarAlteracoesDraft', this.draftFromPessoa(row));
+      }
+      return;
+    }
+    if (this.cmdSalvarAlteracoesDraft.id === id) return;
+    this.publish('qryPessoasEquipeError', { code: 'client.selectionInvalid', message: '', details: { id } });
+    this.publish('qryPessoasEquipeStatus', 'error');
   }
 
-  private toError(error: { code: string; message?: string; details?: unknown } | null): ErrorState {
-    if (!error) return { code: 'client.unexpected', message: '', details: { name: 'noError' } };
-    return { code: error.code, message: error.message ?? '', details: error.details };
-  }
-
-  private unexpected(error: unknown): ErrorState {
-    const name = error instanceof Error ? error.name : 'unknown';
-    return { code: 'client.unexpected', message: '', details: { name } };
-  }
-
-  private upsertMembro(membro: MembroEquipeResumo): void {
-    if (!this.membros) return;
-    const exists = this.membros.items.some((item) => item.id === membro.id);
-    const items = exists
-      ? this.membros.items.map((item) => (item.id === membro.id ? membro : item))
-      : [...this.membros.items, membro];
-    this.publish('membros', { ...this.membros, items });
-  }
-
-  /** request listarMembrosEquipe — loads the team people (role tarefas.MembroEquipe), filtered by name, one page at a time; redraws membros (replace, or append when append is true), the busca and page states and pageStatus; arguments: busca = new name filter (empty string clears it; a new filter loads from the first page), page = page to load (defaults to the current page, or the next one when appending), append = true adds the next page to the items instead of replacing them (does nothing when there is no more) */
-  public async listarMembrosEquipe(busca?: string | null, page?: number, append = false): Promise<void> {
-    if (this.listarMembrosEquipeStatus === 'loading') return;
-    let nextPage = page ?? this.page ?? 1;
+  /** request qryPessoasEquipe — lists the team members (role tarefas.MembroEquipe) paged, optionally filtered by name, ordered by name; redraws pessoas (replace, or append more items when append is true); arguments: busca = name search text (omit to keep the current filter, '' or null clears it; a new value loads from the first page), page = page to load (default 1), append = true adds the page to the current items (load more) and does nothing when hasMore is false. Also the method to reload the list. */
+  public async qryPessoasEquipe(busca?: string | null, page = 1, append = false): Promise<void> {
+    if (this.qryPessoasEquipeStatus === 'loading') return;
     if (busca !== undefined) {
-      this.publish('busca', busca !== null && busca !== '' ? busca : null);
-      if (page === undefined) nextPage = 1;
+      const normalized = busca === null || busca === '' ? null : busca;
+      this.publish('busca', normalized);
     }
-    if (append) {
-      if (!this.membros || !this.membros.hasMore) return;
-      if (page === undefined) nextPage = this.membros.page + 1;
-    } else if (page !== undefined || busca !== undefined) {
-      this.publish('page', nextPage);
-    }
-    this.publish('listarMembrosEquipeStatus', 'loading');
-    this.publish('listarMembrosEquipeError', null);
-    if (!append) this.publish('pageStatus', 'loading');
+    if (append && this.pessoas && !this.pessoas.hasMore) return;
+    this.publish('qryPessoasEquipeStatus', 'loading');
+    this.publish('qryPessoasEquipeError', null);
+    this.publish('pageStatus', 'loading');
     const currentBusca = this.busca;
-    const input: Input<'tarefas.membros_equipe.listarMembrosEquipe'> = {
-      page: nextPage,
+    const input: Input<'tarefas.membros_equipe.qryPessoasEquipe'> = {
+      page,
       pageSize: PAGE_SIZE,
       ...(currentBusca !== null && currentBusca !== '' ? { busca: currentBusca } : {}),
     };
     try {
-      const response = await execBff<Output<'tarefas.membros_equipe.listarMembrosEquipe'>>('tarefas.membros_equipe.listarMembrosEquipe', input, { mode: 'silent' });
+      const response = await execBff<Output<'tarefas.membros_equipe.qryPessoasEquipe'>>(
+        'tarefas.membros_equipe.qryPessoasEquipe',
+        input,
+        { mode: 'silent' },
+      );
       if (!response.ok || !response.data) {
-        this.publish('listarMembrosEquipeError', this.toError(response.error));
-        this.publish('listarMembrosEquipeStatus', 'error');
-        if (!append) this.publish('pageStatus', 'error');
+        this.publish('qryPessoasEquipeError', response.error);
+        this.publish('qryPessoasEquipeStatus', 'error');
+        this.publish('pageStatus', 'error');
         return;
       }
-      const loaded = response.data.membros;
-      const previous = this.membros;
-      const merged: MembrosPage = append && previous
-        ? { ...loaded, items: [...previous.items, ...loaded.items] }
-        : loaded;
-      this.publish('membros', merged);
-      this.publish('listarMembrosEquipeStatus', 'success');
-      this.publish('pageStatus', merged.items.length === 0 ? 'empty' : 'success');
+      const incoming = response.data.pessoas;
+      const previous = this.pessoas;
+      const next: PessoasPage = append && previous
+        ? { items: [...previous.items, ...incoming.items], page: incoming.page, pageSize: incoming.pageSize, hasMore: incoming.hasMore }
+        : incoming;
+      this.publish('pessoas', next);
+      this.publish('qryPessoasEquipeStatus', 'success');
+      this.publish('pageStatus', next.items.length === 0 ? 'empty' : 'success');
+      this.applySelectionAfterLoad();
     } catch (error) {
-      this.publish('listarMembrosEquipeError', this.unexpected(error));
-      this.publish('listarMembrosEquipeStatus', 'error');
-      if (!append) this.publish('pageStatus', 'error');
+      this.publish('qryPessoasEquipeError', this.unexpectedError(error));
+      this.publish('qryPessoasEquipeStatus', 'error');
+      this.publish('pageStatus', 'error');
     }
   }
 
-  /** select — selects the person opened in the registration form (id, or null to clear and start a new registration); publishes selectedMembroEquipe, then loads the record with obterMembroEquipe, or clears membro and the edit draft when null */
-  public async selectCadastroPessoa(id: string | null): Promise<void> {
-    this.resetCommandResults();
-    this.publish('selectedMembroEquipe', id !== null && id !== '' ? id : null);
-    if (this.selectedMembroEquipe === null) {
-      this.publish('membro', null);
-      this.publish('salvarAlteracoesPessoaDraft', emptySalvarAlteracoesPessoaDraft());
-      this.publish('obterMembroEquipeStatus', 'idle');
-      this.publish('obterMembroEquipeError', null);
-      return;
-    }
-    await this.obterMembroEquipe();
-  }
-
-  /** request obterMembroEquipe — loads the selected person (selectedMembroEquipe) with its current version for the registration form; redraws membro (replace) and fills salvarAlteracoesPessoaDraft from it; no arguments, reads the selection (without a selection it fails with client.requiredMissing) */
-  public async obterMembroEquipe(): Promise<void> {
-    if (this.obterMembroEquipeStatus === 'loading') return;
-    const id = this.selectedMembroEquipe;
-    if (id === null) {
-      this.publish('obterMembroEquipeError', { code: 'client.requiredMissing', message: '', details: { stateKeys: ['ui.tarefas.membros_equipe.selectedMembroEquipe'] } });
-      this.publish('obterMembroEquipeStatus', 'error');
-      return;
-    }
-    this.publish('obterMembroEquipeStatus', 'loading');
-    this.publish('obterMembroEquipeError', null);
-    const input: Input<'tarefas.membros_equipe.obterMembroEquipe'> = { id };
-    try {
-      const response = await execBff<Output<'tarefas.membros_equipe.obterMembroEquipe'>>('tarefas.membros_equipe.obterMembroEquipe', input, { mode: 'silent' });
-      if (this.selectedMembroEquipe !== id) {
-        this.publish('obterMembroEquipeStatus', 'idle');
-        if (this.selectedMembroEquipe !== null) await this.obterMembroEquipe();
-        return;
-      }
-      if (!response.ok || !response.data) {
-        this.publish('obterMembroEquipeError', this.toError(response.error));
-        this.publish('obterMembroEquipeStatus', 'error');
-        return;
-      }
-      const loaded = response.data.membro;
-      this.publish('membro', loaded);
-      this.publish('salvarAlteracoesPessoaDraft', draftFromMembro(loaded));
-      this.publish('obterMembroEquipeStatus', 'success');
-    } catch (error) {
-      this.publish('obterMembroEquipeError', this.unexpected(error));
-      this.publish('obterMembroEquipeStatus', 'error');
-    }
-  }
-
-  /** draft — replaces the form draft of a new person (name, countryCode); resets the results of the commands */
-  public setCadastrarPessoaDraft(value: CadastrarPessoaDraft): void {
-    this.resetCommandResults();
-    this.publish('cadastrarPessoaDraft', value);
-  }
-
-  /** draft — replaces the form draft that edits the selected person (id, version, name, countryCode); resets the results of the commands */
-  public setSalvarAlteracoesPessoaDraft(value: SalvarAlteracoesPessoaDraft): void {
-    this.resetCommandResults();
-    this.publish('salvarAlteracoesPessoaDraft', value);
-  }
-
-  /** request cadastrarPessoa — registers a new team person from cadastrarPessoaDraft (name and countryCode required); redraws membros (inserts the returned person by id), membro and selectedMembroEquipe (the new person stays in the form), salvarAlteracoesPessoaDraft (filled from the record) and clears cadastrarPessoaDraft; no arguments */
-  public async cadastrarPessoa(): Promise<void> {
-    if (this.cadastrarPessoaStatus === 'loading') return;
-    const draft = this.cadastrarPessoaDraft;
+  /** request cmdCadastrarPessoa — registers a new team member (role tarefas.MembroEquipe) from cmdCadastrarPessoaDraft (name and country required); redraws cmdCadastrarPessoaPessoa (replace) and pessoas (upsert by id, appended when new); the draft returns to empty; no arguments */
+  public async cmdCadastrarPessoa(): Promise<void> {
+    if (this.cmdCadastrarPessoaStatus === 'loading') return;
+    const draft = this.cmdCadastrarPessoaDraft;
     const name = draft.details.identification.name;
     const countryCode = draft.details.identification.countryCode;
-    if (name === null || countryCode === null || isBlank(name) || isBlank(countryCode)) {
-      this.publish('cadastrarPessoaError', { code: 'client.requiredMissing', message: '', details: { stateKeys: ['ui.tarefas.membros_equipe.cadastrarPessoaDraft'] } });
-      this.publish('cadastrarPessoaStatus', 'error');
+    const missing: string[] = [];
+    if (name === null || name.trim() === '') missing.push('cmdCadastrarPessoaDraft.details.identification.name');
+    if (countryCode === null || countryCode.trim() === '') missing.push('cmdCadastrarPessoaDraft.details.identification.countryCode');
+    if (name === null || countryCode === null || missing.length > 0) {
+      this.publish('cmdCadastrarPessoaError', { code: 'client.requiredMissing', message: '', details: { stateKeys: missing } });
+      this.publish('cmdCadastrarPessoaStatus', 'error');
       return;
     }
-    this.publish('cadastrarPessoaStatus', 'loading');
-    this.publish('cadastrarPessoaError', null);
-    const input: Input<'tarefas.membros_equipe.cadastrarPessoa'> = {
+    this.publish('cmdCadastrarPessoaStatus', 'loading');
+    this.publish('cmdCadastrarPessoaError', null);
+    const input: Input<'tarefas.membros_equipe.cmdCadastrarPessoa'> = {
       details: { identification: { name: name.trim(), countryCode: countryCode.trim() } },
     };
     try {
-      const response = await runBlockingUiAction((signal) => execBff<Output<'tarefas.membros_equipe.cadastrarPessoa'>>('tarefas.membros_equipe.cadastrarPessoa', input, { mode: 'blocking', signal }));
+      const response = await runBlockingUiAction(signal =>
+        execBff<Output<'tarefas.membros_equipe.cmdCadastrarPessoa'>>(
+          'tarefas.membros_equipe.cmdCadastrarPessoa',
+          input,
+          { mode: 'blocking', signal },
+        ),
+      );
       if (response === undefined) {
-        this.publish('cadastrarPessoaError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
-        this.publish('cadastrarPessoaStatus', 'error');
+        this.publish('cmdCadastrarPessoaError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
+        this.publish('cmdCadastrarPessoaStatus', 'error');
         return;
       }
       if (!response.ok || !response.data) {
-        this.publish('cadastrarPessoaError', this.toError(response.error));
-        this.publish('cadastrarPessoaStatus', 'error');
+        this.publish('cmdCadastrarPessoaError', response.error);
+        this.publish('cmdCadastrarPessoaStatus', 'error');
         return;
       }
-      const created = response.data.membro;
-      this.upsertMembro(created);
-      this.publish('membro', created);
-      this.publish('selectedMembroEquipe', created.id);
-      this.publish('salvarAlteracoesPessoaDraft', draftFromMembro(created));
-      this.publish('cadastrarPessoaDraft', emptyCadastrarPessoaDraft());
-      this.publish('cadastrarPessoaStatus', 'success');
+      const pessoa = response.data.pessoa;
+      this.publish('cmdCadastrarPessoaPessoa', pessoa);
+      this.publish('pessoas', this.upsertPessoa(pessoa));
+      this.publish('cmdCadastrarPessoaDraft', emptyCadastrarPessoaDraft());
+      this.publish('cmdCadastrarPessoaStatus', 'success');
     } catch (error) {
-      this.publish('cadastrarPessoaError', this.unexpected(error));
-      this.publish('cadastrarPessoaStatus', 'error');
+      this.publish('cmdCadastrarPessoaError', this.unexpectedError(error));
+      this.publish('cmdCadastrarPessoaStatus', 'error');
     }
   }
 
-  /** request salvarAlteracoesPessoa — saves the new name and country of the selected person from salvarAlteracoesPessoaDraft (id, version, name, countryCode required; stale version is refused by the backend); redraws membros (updates the row by id), membro (replace) and salvarAlteracoesPessoaDraft (filled again from the returned record with the new version); no arguments */
-  public async salvarAlteracoesPessoa(): Promise<void> {
-    if (this.salvarAlteracoesPessoaStatus === 'loading') return;
-    const draft = this.salvarAlteracoesPessoaDraft;
+  /** request cmdSalvarAlteracoes — corrects name and country of the selected team member from cmdSalvarAlteracoesDraft (id, version, name and country required; the version guards concurrent edits); redraws cmdSalvarAlteracoesPessoa (replace), pessoas (upsert by id, so the selected record cadastroPessoa updates) and refills the edit draft from the saved record; no arguments */
+  public async cmdSalvarAlteracoes(): Promise<void> {
+    if (this.cmdSalvarAlteracoesStatus === 'loading') return;
+    const draft = this.cmdSalvarAlteracoesDraft;
     const id = draft.id;
     const version = draft.version;
     const name = draft.details.identification.name;
     const countryCode = draft.details.identification.countryCode;
-    if (id === null || version === null || name === null || countryCode === null || isBlank(id) || isBlank(name) || isBlank(countryCode)) {
-      this.publish('salvarAlteracoesPessoaError', { code: 'client.requiredMissing', message: '', details: { stateKeys: ['ui.tarefas.membros_equipe.salvarAlteracoesPessoaDraft'] } });
-      this.publish('salvarAlteracoesPessoaStatus', 'error');
+    const missing: string[] = [];
+    if (id === null || id === '') missing.push('cmdSalvarAlteracoesDraft.id');
+    if (version === null) missing.push('cmdSalvarAlteracoesDraft.version');
+    if (name === null || name.trim() === '') missing.push('cmdSalvarAlteracoesDraft.details.identification.name');
+    if (countryCode === null || countryCode.trim() === '') missing.push('cmdSalvarAlteracoesDraft.details.identification.countryCode');
+    if (id === null || version === null || name === null || countryCode === null || missing.length > 0) {
+      this.publish('cmdSalvarAlteracoesError', { code: 'client.requiredMissing', message: '', details: { stateKeys: missing } });
+      this.publish('cmdSalvarAlteracoesStatus', 'error');
       return;
     }
-    this.publish('salvarAlteracoesPessoaStatus', 'loading');
-    this.publish('salvarAlteracoesPessoaError', null);
-    const input: Input<'tarefas.membros_equipe.salvarAlteracoesPessoa'> = {
+    this.publish('cmdSalvarAlteracoesStatus', 'loading');
+    this.publish('cmdSalvarAlteracoesError', null);
+    const input: Input<'tarefas.membros_equipe.cmdSalvarAlteracoes'> = {
       id,
       version,
       details: { identification: { name: name.trim(), countryCode: countryCode.trim() } },
     };
     try {
-      const response = await runBlockingUiAction((signal) => execBff<Output<'tarefas.membros_equipe.salvarAlteracoesPessoa'>>('tarefas.membros_equipe.salvarAlteracoesPessoa', input, { mode: 'blocking', signal }));
+      const response = await runBlockingUiAction(signal =>
+        execBff<Output<'tarefas.membros_equipe.cmdSalvarAlteracoes'>>(
+          'tarefas.membros_equipe.cmdSalvarAlteracoes',
+          input,
+          { mode: 'blocking', signal },
+        ),
+      );
       if (response === undefined) {
-        this.publish('salvarAlteracoesPessoaError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
-        this.publish('salvarAlteracoesPessoaStatus', 'error');
+        this.publish('cmdSalvarAlteracoesError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
+        this.publish('cmdSalvarAlteracoesStatus', 'error');
         return;
       }
       if (!response.ok || !response.data) {
-        this.publish('salvarAlteracoesPessoaError', this.toError(response.error));
-        this.publish('salvarAlteracoesPessoaStatus', 'error');
+        this.publish('cmdSalvarAlteracoesError', response.error);
+        this.publish('cmdSalvarAlteracoesStatus', 'error');
         return;
       }
-      const saved = response.data.membro;
-      this.upsertMembro(saved);
-      this.publish('membro', saved);
-      this.publish('salvarAlteracoesPessoaDraft', draftFromMembro(saved));
-      this.publish('salvarAlteracoesPessoaStatus', 'success');
+      const pessoa = response.data.pessoa;
+      this.publish('cmdSalvarAlteracoesPessoa', pessoa);
+      this.publish('pessoas', this.upsertPessoa(pessoa));
+      this.publish('cmdSalvarAlteracoesDraft', this.draftFromPessoa(pessoa));
+      this.publish('cmdSalvarAlteracoesStatus', 'success');
     } catch (error) {
-      this.publish('salvarAlteracoesPessoaError', this.unexpected(error));
-      this.publish('salvarAlteracoesPessoaStatus', 'error');
+      this.publish('cmdSalvarAlteracoesError', this.unexpectedError(error));
+      this.publish('cmdSalvarAlteracoesStatus', 'error');
     }
-  }
-
-  /** scene — publishes the visible scene of the page (scenary); resets the results of the commands */
-  public setScenario(value: string): void {
-    this.resetCommandResults();
-    this.publish('scenary', value);
   }
 }

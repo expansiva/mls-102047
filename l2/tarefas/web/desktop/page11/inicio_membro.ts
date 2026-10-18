@@ -1,417 +1,298 @@
 /// <mls fileReference="_102047_/l2/tarefas/web/desktop/page11/inicio_membro.ts" enhancement="_102020_/l2/enhancementAura"/>
-
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { TarefasInicio_membroShared } from '/_102047_/l2/tarefas/web/shared/inicio_membro.js';
-import type { Pendencia, TarefaResumo, ErrorState } from '/_102047_/l2/tarefas/web/shared/inicio_membro.js';
-import '/_102040_/l2/molecules/groupnotifyuser/ml-notify-banner.js';
-
+import type { TarefaPendencia, TarefaResumo } from '/_102047_/l2/tarefas/web/shared/inicio_membro.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
-  pageTitle: 'Início',
-  headlinePrefix: 'Você tem',
-  atrasadaOne: 'tarefa atrasada',
-  atrasadaMany: 'tarefas atrasadas',
-  andHoje: 'e',
-  venceHoje: 'vencendo hoje.',
-  goodNews: 'Nada precisa de atenção agora.',
-  goodNewsHint: 'Nenhuma tarefa aberta espera por você neste momento.',
-  laneTitle: 'Esperando por você',
-  laneEmpty: 'Nenhuma tarefa espera por uma ação sua.',
-  prazo: 'Prazo',
-  prioridade: 'Prioridade',
-  checklist: 'Checklist',
-  criadaPor: 'Criada por',
-  responsavel: 'Responsável',
-  motivoLabel: 'Motivo da devolução',
-  devolvidaEm: 'devolvida em',
-  btnIniciar: 'Iniciar tarefa',
-  btnEnviar: 'Enviar para revisão',
-  btnReenviar: 'Reenviar para revisão',
-  btnAceitar: 'Aceitar entrega',
-  btnDevolver: 'Devolver com motivo',
-  btnAjustar: 'Abrir para ajustar',
-  btnConfirmarDevolucao: 'Confirmar devolução',
-  btnCancelar: 'Cancelar',
-  motivoFieldLabel: 'Motivo da devolução',
-  motivoPlaceholder: 'Explique o que precisa ser ajustado',
-  openTaskAria: 'Abrir a tarefa',
-  avisoTitle: 'Aviso diário das 8h',
-  avisoReferente: 'Referente a',
-  avisoTarefas: 'tarefas no aviso',
-  avisoAtrasadas: 'atrasadas',
-  avisoFalhou: 'O aviso de hoje não pôde ser gerado.',
-  avisoAbrir: 'Abrir aviso de hoje',
-  avisoVazio: 'O aviso diário de hoje ainda não foi gerado.',
-  avisoVerMeus: 'Ver meus avisos',
-  stripAbertas: 'abertas',
-  stripHoje: 'vencem hoje',
-  stripAtrasadas: 'atrasadas',
-  browseSummary: 'Minhas tarefas abertas',
-  browseAll: 'Ver todas as minhas tarefas',
-  browseEmpty: 'Você não tem tarefas abertas.',
-  flagAtrasada: 'Atrasada',
-  flagHoje: 'Vence hoje',
-  stAFazer: 'A fazer',
-  stEmAndamento: 'Em andamento',
-  stEmRevisao: 'Em revisão',
-  stConcluida: 'Concluída',
-  stCancelada: 'Cancelada',
-  prLow: 'Baixa',
-  prMedium: 'Média',
-  prHigh: 'Alta',
-  loading: 'Carregando seu dia…',
-  errorTitle: 'Não foi possível carregar seu início.',
-  errorPrecondition: 'Esta página foi aberta sem o que ela precisa para carregar.',
-  errorRetry: 'Tentar de novo',
-  errNavPrecondition: 'Não foi possível abrir a tarefa: faltou indicar qual tarefa.',
-  errCmd: 'Não foi possível concluir a ação. Tente novamente.',
-  errMotivo: 'Informe o motivo da devolução para devolver a tarefa.',
-  okIniciar: 'Tarefa iniciada.',
-  okEnviar: 'Tarefa enviada para revisão.',
-  okAceitar: 'Entrega aceita. A tarefa foi concluída.',
-  okDevolver: 'Tarefa devolvida para ajuste.',
-  working: 'Executando…',
-} as const;
-
-type PageMessageType = typeof pageMessage_pt_br;
-const pageMessages: Record<string, PageMessageType> = {
-  'pt-br': pageMessage_pt_br,
+pageTitle: 'Início',
+refresh: 'Atualizar',
+loading: 'Carregando seu início',
+headlineAttention: 'O que precisa de você agora',
+headlineClear: 'Nada precisa de você agora',
+clearHint: 'Nenhuma tarefa espera por uma ação sua. Veja abaixo como está sua carga de trabalho.',
+laneDevolvidas: 'Devolvidas para ajuste',
+laneDevolvidasHint: 'O criador pediu ajustes. Leia o motivo e reenvie.',
+laneRevisar: 'Entregas aguardando sua revisão',
+laneRevisarHint: 'Tarefas que você criou e que já foram entregues para conferência.',
+laneEnviar: 'Em andamento, prontas para entregar',
+laneEnviarHint: 'Quando terminar, envie para o criador revisar.',
+laneIniciar: 'Esperando para começar',
+laneIniciarHint: 'Tarefas atribuídas a você que ainda não foram iniciadas.',
+actIniciar: 'Iniciar',
+actEnviar: 'Enviar para revisão',
+actReenviar: 'Reenviar para revisão',
+actAbrir: 'Abrir tarefa',
+actAceitar: 'Aceitar entrega',
+actDevolver: 'Devolver para ajuste',
+actConfirmarDevolucao: 'Confirmar devolução',
+actCancelar: 'Cancelar',
+motivoLabel: 'Motivo da devolução',
+motivoPlaceholder: 'Explique o que precisa ser ajustado',
+motivoHint: 'O responsável lê este motivo ao retomar a tarefa.',
+motivoInformado: 'Motivo informado',
+prazo: 'Prazo',
+responsavel: 'Responsável',
+criadaPor: 'Criada por',
+checklist: 'Checklist',
+prioridade: 'Prioridade',
+devolvidaEm: 'Devolvida em',
+prioLow: 'baixa',
+prioMedium: 'média',
+prioHigh: 'alta',
+stAFazer: 'A fazer',
+stEmAndamento: 'Em andamento',
+stEmRevisao: 'Em revisão',
+stConcluida: 'Concluída',
+stCancelada: 'Cancelada',
+stripAria: 'Carga de trabalho',
+stripAbertas: 'Abertas',
+stripHoje: 'Vencem hoje',
+stripAtrasadas: 'Atrasadas',
+destaquesTitle: 'Minhas tarefas em destaque',
+destaquesVazio: 'Nenhuma tarefa aberta no momento.',
+verTodas: 'Ver todas as minhas tarefas',
+listaLabel: 'Lista',
+avisoTitle: 'Aviso das 8h',
+avisoVazio: 'O aviso de hoje ainda não foi gerado.',
+avisoTarefas: 'Tarefas no aviso',
+avisoAtrasadas: 'Atrasadas',
+avisoReferente: 'Referente a',
+avisoAbrir: 'Ver tarefas do aviso',
+avisoPending: 'Aguardando envio',
+avisoCompleted: 'Enviado',
+avisoFailed: 'Falha no envio',
+loadErrorTitle: 'Não foi possível carregar seu início',
+retry: 'Tentar novamente',
+preconditionTitle: 'Falta indicar qual tarefa abrir',
+preconditionBody: 'A tarefa escolhida não foi identificada. Abra a lista de tarefas e escolha uma por lá.',
+goToTasks: 'Ir para minhas tarefas',
+okIniciar: 'Tarefa iniciada.',
+okEnviar: 'Tarefa enviada para revisão.',
+okAceitar: 'Entrega aceita. A tarefa foi concluída.',
+okDevolver: 'Tarefa devolvida com o motivo informado.'
 };
+type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
 /// **collab_i18n_end**
-
-type Msg = PageMessageType;
-
-const BTN_BASE =
-  'inline-flex min-h-9 items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,currentColor)] disabled:opacity-50 disabled:cursor-not-allowed';
-const BTN_PRIMARY = `${BTN_BASE} bg-[var(--button-primary-bg,transparent)] text-[var(--button-primary-text,currentColor)]`;
-const BTN_SECONDARY = `${BTN_BASE} bg-[var(--button-secondary-bg,transparent)] text-[var(--button-secondary-text,currentColor)] border border-[var(--button-secondary-border,currentColor)]`;
-const TITLE_LINK =
-  'text-left font-medium text-[var(--link-text,currentColor)] hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,currentColor)]';
-
-function lang(): string | undefined {
-  return document.documentElement.lang || undefined;
+const statusKey = {
+aFazer: 'stAFazer',
+emAndamento: 'stEmAndamento',
+emRevisao: 'stEmRevisao',
+concluida: 'stConcluida',
+cancelada: 'stCancelada'
+} as const;
+const prioKey = { low: 'prioLow', medium: 'prioMedium', high: 'prioHigh' } as const;
+const avisoKey = { pending: 'avisoPending', completed: 'avisoCompleted', failed: 'avisoFailed' } as const;
+function fmtDate(v: string | undefined | null): string {
+if (!v) return '';
+const d = new Date(v.length === 10 ? v + 'T00:00:00' : v);
+if (Number.isNaN(d.getTime())) return v;
+return new Intl.DateTimeFormat(document.documentElement.lang || undefined, { day: '2-digit', month: 'short' }).format(d);
 }
-
-function fmtDate(v: string | null | undefined): string {
-  if (!v) return '';
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return v;
-  const dateOnly = v.length <= 10;
-  return new Intl.DateTimeFormat(lang(), dateOnly ? { dateStyle: 'medium', timeZone: 'UTC' } : { dateStyle: 'medium' }).format(d);
-}
-
 function fmtNumber(n: number): string {
-  return new Intl.NumberFormat(lang()).format(n);
+return new Intl.NumberFormat(document.documentElement.lang || undefined).format(n);
 }
-
-function statusLabel(m: Msg, s: Pendencia['status']): string {
-  switch (s) {
-    case 'aFazer': return m.stAFazer;
-    case 'emAndamento': return m.stEmAndamento;
-    case 'emRevisao': return m.stEmRevisao;
-    case 'concluida': return m.stConcluida;
-    case 'cancelada': return m.stCancelada;
-  }
-}
-
-function prioLabel(m: Msg, p: Pendencia['prioridade']): string {
-  switch (p) {
-    case 'low': return m.prLow;
-    case 'medium': return m.prMedium;
-    case 'high': return m.prHigh;
-  }
-}
-
-function errorText(m: Msg, e: ErrorState): string {
-  if (e && e.code === 'client.requiredMissing') return m.errMotivo;
-  return m.errCmd;
-}
-
+const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]';
 @customElement('tarefas--web--desktop--page11--inicio_membro-102047')
 export class TarefasDesktopPage11Inicio_membroPage extends TarefasInicio_membroShared {
-  private msg: PageMessageType = pageMessage_pt_br;
-
-  render() {
-    this.msg = pageMessages[this.getMessageKey(pageMessages)];
-    const loading = this.pageStatus === 'idle' || this.pageStatus === 'loading';
-    return html`
-      <div class="min-h-full bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] px-8 py-6">
-        <div class="mx-auto flex max-w-5xl flex-col gap-6">
-          <h1 class="text-sm font-medium text-[var(--text-muted,currentColor)]">${this.msg['pageTitle']}</h1>
-          ${this.renderNavError()}
-          ${loading
-            ? this.renderSkeleton()
-            : this.pageStatus === 'error'
-              ? this.renderLoadError()
-              : this.renderContent()}
-        </div>
-      </div>
-    `;
-  }
-
-  private renderNavError() {
-    const e = this.qryInicioMembroError;
-    if (!e || this.pageStatus === 'error') return nothing;
-    return html`
-      <div role="alert" aria-live="polite" class="rounded-md bg-[var(--status-warning-bg,transparent)] px-4 py-3 text-sm text-[var(--status-warning-text,currentColor)]">
-        ${e.code === 'client.preconditionMissing' ? this.msg['errNavPrecondition'] : this.msg['errorTitle']}
-      </div>
-    `;
-  }
-
-  private renderSkeleton() {
-    return html`
-      <div aria-busy="true" aria-live="polite" class="flex flex-col gap-6">
-        <span class="sr-only">${this.msg['loading']}</span>
-        <div class="h-9 w-2/3 animate-pulse rounded bg-[var(--surface-alt-bg,transparent)]"></div>
-        <div class="grid grid-cols-[1fr_20rem] gap-6">
-          <div class="flex flex-col gap-3">
-            ${[0, 1, 2].map(() => html`<div class="h-24 animate-pulse rounded-lg bg-[var(--surface-alt-bg,transparent)]"></div>`)}
-          </div>
-          <div class="h-32 animate-pulse rounded-lg bg-[var(--surface-alt-bg,transparent)]"></div>
-        </div>
-        <div class="h-5 w-1/2 animate-pulse rounded bg-[var(--surface-alt-bg,transparent)]"></div>
-      </div>
-    `;
-  }
-
-  private renderLoadError() {
-    const e = this.qryInicioMembroError;
-    return html`
-      <div role="alert" aria-live="polite" class="flex flex-col items-start gap-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--status-error-bg,transparent)] p-5 text-[var(--status-error-text,currentColor)]">
-        <p class="font-medium">${this.msg['errorTitle']}</p>
-        ${e && e.code === 'client.preconditionMissing' ? html`<p class="text-sm">${this.msg['errorPrecondition']}</p>` : nothing}
-        <button type="button" class="${BTN_SECONDARY}" @click=${() => { void this.qryInicioMembro(); }}>${this.msg['errorRetry']}</button>
-      </div>
-    `;
-  }
-
-  private renderContent() {
-    const busy = this.cmdIniciarTarefaStatus === 'loading'
-      || this.cmdEnviarParaRevisaoStatus === 'loading'
-      || this.cmdAceitarEntregaStatus === 'loading'
-      || this.cmdDevolverComMotivoStatus === 'loading';
-    return html`
-      ${this.renderHeadline()}
-      ${this.renderFeedback()}
-      <div class="grid grid-cols-[minmax(0,1fr)_20rem] items-start gap-6">
-        ${this.renderPendencias(busy)}
-        ${this.renderAviso()}
-      </div>
-      ${this.renderStrip()}
-      ${this.renderBrowse()}
-    `;
-  }
-
-  private renderHeadline() {
-    const m = this.msg;
-    if (this.pageStatus === 'empty' || !this.resumo) {
-      return html`
-        <header>
-          <p class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${m['goodNews']}</p>
-          <p class="mt-1 text-sm text-[var(--text-muted,currentColor)]">${m['goodNewsHint']}</p>
-        </header>
-      `;
-    }
-    const r = this.resumo;
-    return html`
-      <header>
-        <p class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">
-          ${m['headlinePrefix']} ${fmtNumber(r.quantidadeAtrasadas)} ${r.quantidadeAtrasadas === 1 ? m['atrasadaOne'] : m['atrasadaMany']}
-          ${m['andHoje']} ${fmtNumber(r.quantidadeVencemHoje)} ${m['venceHoje']}
-        </p>
-      </header>
-    `;
-  }
-
-  private renderFeedback() {
-    const m = this.msg;
-    const items: { ok: boolean; text: string }[] = [];
-    const add = (status: string, err: ErrorState, okText: string) => {
-      if (status === 'success') items.push({ ok: true, text: okText });
-      if (status === 'error') items.push({ ok: false, text: errorText(m, err) });
-    };
-    add(this.cmdIniciarTarefaStatus, this.cmdIniciarTarefaError, m['okIniciar']);
-    add(this.cmdEnviarParaRevisaoStatus, this.cmdEnviarParaRevisaoError, m['okEnviar']);
-    add(this.cmdAceitarEntregaStatus, this.cmdAceitarEntregaError, m['okAceitar']);
-    add(this.cmdDevolverComMotivoStatus, this.cmdDevolverComMotivoError, m['okDevolver']);
-    return html`
-      <div aria-live="polite" class="flex flex-col gap-2">
-        ${items.map(i => html`
-          <div role=${i.ok ? 'status' : 'alert'} class="rounded-md px-4 py-2 text-sm ${i.ok
-            ? 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]'
-            : 'bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]'}">${i.text}</div>
-        `)}
-      </div>
-    `;
-  }
-
-  private renderPendencias(busy: boolean) {
-    const m = this.msg;
-    return html`
-      <section data-organism-id="caixaPendencias" class="flex flex-col gap-3" aria-busy=${busy ? 'true' : 'false'}>
-        <h2 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${m['laneTitle']}</h2>
-        ${this.pendencias.length === 0
-          ? html`<p class="rounded-lg border border-dashed border-[var(--border-subtle,currentColor)] px-4 py-6 text-sm text-[var(--text-muted,currentColor)]">${m['laneEmpty']}</p>`
-          : html`<ul class="flex flex-col gap-3">${this.pendencias.map(p => this.renderPendencia(p, busy))}</ul>`}
-      </section>
-    `;
-  }
-
-  private renderPendencia(p: Pendencia, busy: boolean) {
-    const m = this.msg;
-    const motivo = p.details.details.motivoDevolucao;
-    const devolvidaEm = p.details.details.devolvidaEm;
-    const returning = this.cmdDevolverComMotivoDraft.id === p.id;
-    const criador = p.criador.details.identification.details.identification.name;
-    const responsavel = p.responsavel.details.identification.details.identification.name;
-    const draft = this.cmdDevolverComMotivoDraft;
-
-    let actions;
-    if (p.status === 'aFazer') {
-      actions = html`<button type="button" class="${BTN_PRIMARY}" ?disabled=${busy} @click=${() => { void this.cmdIniciarTarefa(p.id); }}>${m['btnIniciar']}</button>`;
-    } else if (p.status === 'emAndamento') {
-      actions = motivo
-        ? html`
-            <button type="button" class="${BTN_SECONDARY}" ?disabled=${busy} @click=${() => this.abrirTarefaParaAjustar(p.id)}>${m['btnAjustar']}</button>
-            <button type="button" class="${BTN_PRIMARY}" ?disabled=${busy} @click=${() => { void this.cmdEnviarParaRevisao(p.id); }}>${m['btnReenviar']}</button>`
-        : html`<button type="button" class="${BTN_PRIMARY}" ?disabled=${busy} @click=${() => { void this.cmdEnviarParaRevisao(p.id); }}>${m['btnEnviar']}</button>`;
-    } else if (p.status === 'emRevisao') {
-      actions = html`
-        <button type="button" class="${BTN_SECONDARY}" ?disabled=${busy} aria-expanded=${returning ? 'true' : 'false'}
-          @click=${() => this.setCmdDevolverComMotivoDraft({ id: p.id, version: p.version, details: { motivoDevolucao: '' } })}>${m['btnDevolver']}</button>
-        <button type="button" class="${BTN_PRIMARY}" ?disabled=${busy} @click=${() => { void this.cmdAceitarEntrega(p.id); }}>${m['btnAceitar']}</button>`;
-    } else {
-      actions = nothing;
-    }
-
-    return html`
-      <li class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
-        <div class="flex items-start justify-between gap-4">
-          <div class="min-w-0 flex-1">
-            <button type="button" class="${TITLE_LINK}" aria-label="${m['openTaskAria']} ${p.titulo}" @click=${() => this.abrirTarefaParaAjustar(p.id)}>${p.titulo}</button>
-            <p class="mt-1 text-sm text-[var(--text-muted,currentColor)]">
-              ${m['prazo']} ${fmtDate(p.prazo)} · ${m['prioridade']} ${prioLabel(m, p.prioridade)} · ${statusLabel(m, p.status)}
-              ${p.details.details.progressoChecklist ? html` · ${m['checklist']} ${p.details.details.progressoChecklist}` : nothing}
-            </p>
-            <p class="text-sm text-[var(--text-muted,currentColor)]">
-              ${m['responsavel']}: ${responsavel} · ${m['criadaPor']}: ${criador}
-            </p>
-          </div>
-          <p class="shrink-0 text-right text-sm font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${p.acaoEsperada}</p>
-        </div>
-        ${motivo
-          ? html`
-              <div class="mt-3 rounded-md bg-[var(--status-warning-bg,transparent)] px-3 py-2 text-sm text-[var(--status-warning-text,currentColor)]">
-                <p class="font-medium">${m['motivoLabel']}${devolvidaEm ? html` · ${m['devolvidaEm']} ${fmtDate(devolvidaEm)}` : nothing}</p>
-                <p class="mt-0.5">${motivo}</p>
-              </div>`
-          : nothing}
-        ${returning
-          ? html`
-              <div class="mt-3 flex flex-col gap-2">
-                <label class="flex flex-col gap-1 text-sm font-medium text-[var(--text-strong,currentColor)]">
-                  ${m['motivoFieldLabel']}
-                  <textarea rows="3" placeholder="${m['motivoPlaceholder']}"
-                    class="rounded-md border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] px-3 py-2 text-sm font-normal text-[var(--text-default,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,currentColor)]"
-                    .value=${draft.details.motivoDevolucao ?? ''}
-                    @input=${(e: Event) => this.setCmdDevolverComMotivoDraft({ ...draft, details: { motivoDevolucao: (e.target as HTMLTextAreaElement).value } })}></textarea>
-                </label>
-                <div class="flex justify-end gap-2">
-                  <button type="button" class="${BTN_SECONDARY}" ?disabled=${busy}
-                    @click=${() => this.setCmdDevolverComMotivoDraft({ id: null, version: null, details: { motivoDevolucao: null } })}>${m['btnCancelar']}</button>
-                  <button type="button" class="${BTN_PRIMARY}" ?disabled=${busy} aria-busy=${this.cmdDevolverComMotivoStatus === 'loading' ? 'true' : 'false'}
-                    @click=${() => { void this.cmdDevolverComMotivo(p.id); }}>${this.cmdDevolverComMotivoStatus === 'loading' ? m['working'] : m['btnConfirmarDevolucao']}</button>
-                </div>
-              </div>`
-          : html`<div class="mt-3 flex flex-wrap justify-end gap-2">${actions}</div>`}
-      </li>
-    `;
-  }
-
-  private renderAviso() {
-    const m = this.msg;
-    const a = this.avisoHoje;
-    return html`
-      <aside data-organism-id="alertaAvisoDiario" class="flex flex-col gap-3">
-        ${a
-          ? html`
-              <groupnotifyuser--ml-notify-banner
-                .type=${a.status === 'failed' ? 'warning' : 'info'}
-                .visible=${true}
-                .dismissible=${false}
-                @action=${() => this.abrirMeusAvisos()}>
-                <Title>${m['avisoTitle']}</Title>
-                <Message>${a.status === 'failed'
-                  ? m['avisoFalhou']
-                  : `${m['avisoReferente']} ${fmtDate(a.dataReferencia)}: ${fmtNumber(a.details.details.quantidadeTarefas)} ${m['avisoTarefas']}, ${fmtNumber(a.details.details.quantidadeAtrasadas)} ${m['avisoAtrasadas']}.`}</Message>
-                <Action><button type="button">${m['avisoAbrir']}</button></Action>
-              </groupnotifyuser--ml-notify-banner>`
-          : html`
-              <div class="rounded-lg border border-[var(--border-subtle,currentColor)] p-4 text-sm">
-                <p class="text-[var(--text-muted,currentColor)]">${m['avisoVazio']}</p>
-                <button type="button" class="mt-3 ${BTN_SECONDARY}" @click=${() => this.abrirMeusAvisos()}>${m['avisoVerMeus']}</button>
-              </div>`}
-      </aside>
-    `;
-  }
-
-  private renderStrip() {
-    const m = this.msg;
-    const r = this.resumo;
-    if (!r) return nothing;
-    const pair = (n: number, label: string) => html`
-      <div class="flex flex-row-reverse items-baseline justify-end gap-1.5">
-        <dt class="text-[var(--text-muted,currentColor)]">${label}</dt>
-        <dd class="font-medium tabular-nums text-[var(--text-default,currentColor)]">${fmtNumber(n)}</dd>
-      </div>`;
-    return html`
-      <div data-organism-id="resumoMinhasTarefas" class="flex flex-col gap-3 border-t border-[var(--border-subtle,currentColor)] pt-4">
-        <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          ${pair(r.quantidadeAbertas, m['stripAbertas'])}
-          ${pair(r.quantidadeVencemHoje, m['stripHoje'])}
-          ${pair(r.quantidadeAtrasadas, m['stripAtrasadas'])}
-        </dl>
-        ${this.renderBrowseList(r.tarefas)}
-      </div>
-    `;
-  }
-
-  private renderBrowse() {
-    return nothing;
-  }
-
-  private renderBrowseList(tarefas: TarefaResumo[]) {
-    const m = this.msg;
-    return html`
-      <details class="group text-sm">
-        <summary class="cursor-pointer rounded py-1 font-medium text-[var(--text-default,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--focus-ring,currentColor)]">${m['browseSummary']}</summary>
-        <div class="mt-2 flex flex-col gap-2">
-          ${tarefas.length === 0
-            ? html`<p class="text-[var(--text-muted,currentColor)]">${m['browseEmpty']}</p>`
-            : html`<ul class="divide-y divide-[var(--border-subtle,currentColor)]">
-                ${tarefas.map(t => html`
-                  <li class="flex items-center justify-between gap-4 py-2">
-                    <div class="min-w-0">
-                      <button type="button" class="${TITLE_LINK}" @click=${() => this.abrirTarefaParaAjustar(t.id)}>${t.titulo}</button>
-                      <p class="text-[var(--text-muted,currentColor)]">
-                        ${t.lista.nome} · ${m['prazo']} ${fmtDate(t.prazo)} · ${statusLabel(m, t.status)}
-                        ${t.details.details.progressoChecklist ? html` · ${m['checklist']} ${t.details.details.progressoChecklist}` : nothing}
-                      </p>
-                    </div>
-                    ${t.details.details.atrasada
-                      ? html`<span class="shrink-0 font-semibold text-[var(--status-error-text,currentColor)]">${m['flagAtrasada']}</span>`
-                      : t.details.details.venceHoje
-                        ? html`<span class="shrink-0 font-semibold text-[var(--status-warning-text,currentColor)]">${m['flagHoje']}</span>`
-                        : nothing}
-                  </li>`)}
-              </ul>`}
-          <div>
-            <button type="button" class="${BTN_SECONDARY}" @click=${() => this.abrirMinhasTarefas()}>${m['browseAll']}</button>
-          </div>
-        </div>
-      </details>
-    `;
-  }
+private msg!: PageMessageType;
+private busy() {
+return this.iniciarTarefaStatus === 'loading'
+|| this.enviarParaRevisaoStatus === 'loading'
+|| this.aceitarEntregaStatus === 'loading'
+|| this.devolverComMotivoStatus === 'loading';
+}
+private act(label: string, variant: string, handler: () => void, disabled = false) {
+return html`<grouptriggeraction--ml-button-standard-102040 size="sm" data-variant=${variant}
+?disabled=${disabled || this.busy()} @action=${handler}><Label>${label}</Label></grouptriggeraction--ml-button-standard-102040>`;
+}
+private renderFeedback() {
+const errors: Array<{ message: string } | null> = [
+this.iniciarTarefaError, this.enviarParaRevisaoError, this.aceitarEntregaError, this.devolverComMotivoError
+];
+const oks: string[] = [];
+if (this.iniciarTarefaStatus === 'success') oks.push(this.msg.okIniciar);
+if (this.enviarParaRevisaoStatus === 'success') oks.push(this.msg.okEnviar);
+if (this.aceitarEntregaStatus === 'success') oks.push(this.msg.okAceitar);
+if (this.devolverComMotivoStatus === 'success') oks.push(this.msg.okDevolver);
+const loadErr = this.pageStatus === 'error' ? null : this.carregarInicioError;
+return html`<div aria-live="polite" class="flex flex-col gap-2 empty:hidden">
+${errors.map(e => e ? html`<p role="alert" class="rounded-md px-3 py-2 text-sm bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]">${e.message}</p>` : nothing)}
+${oks.map(o => html`<p class="rounded-md px-3 py-2 text-sm bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]">${o}</p>`)}
+${loadErr ? this.renderLoadError() : nothing}
+</div>`;
+}
+private renderLoadError() {
+const err = this.carregarInicioError;
+if (!err) return nothing;
+const precondition = err.code === 'client.preconditionMissing';
+return html`<div role="alert" class="rounded-md border border-[var(--border-default,currentColor)] bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)] p-4 flex flex-col gap-2">
+<p class="font-semibold">${precondition ? this.msg.preconditionTitle : this.msg.loadErrorTitle}</p>
+<p class="text-sm">${precondition ? this.msg.preconditionBody : err.message}</p>
+<div>
+${precondition
+? this.act(this.msg.goToTasks, 'secondary', () => this.abrirMinhasTarefas())
+: this.act(this.msg.retry, 'secondary', () => { void this.carregarInicio(); })}
+</div>
+</div>`;
+}
+private renderSkeleton() {
+return html`<div class="flex flex-col gap-3" aria-busy="true" aria-label=${this.msg.loading}>
+${[0, 1, 2].map(() => html`<div class="h-16 rounded-md animate-pulse bg-[var(--surface-alt-bg,transparent)]"></div>`)}
+</div>`;
+}
+private renderRow(t: TarefaPendencia, who: 'responsavel' | 'criador', actions: unknown, extra: unknown = nothing) {
+const person = who === 'responsavel'
+? `${this.msg.responsavel}: ${t.responsavel?.details?.identification?.name ?? ''}`
+: `${this.msg.criadaPor}: ${t.criador?.details?.identification?.name ?? ''}`;
+return html`<li class="grid grid-cols-[minmax(0,1fr)_7rem_auto] items-center gap-x-6 gap-y-2 px-4 py-3 border-b border-[var(--border-subtle,currentColor)] last:border-b-0">
+<div class="min-w-0">
+<button type="button" @click=${() => this.abrirTarefaParaAjustar(t.id)}
+class="text-left font-medium text-[var(--link-text,currentColor)] hover:underline rounded ${focusRing}">${t.titulo}</button>
+<p class="mt-0.5 text-xs text-[var(--text-muted,currentColor)]">
+${person} · ${this.msg.prioridade}: ${this.msg[prioKey[t.prioridade]]} · ${this.msg.checklist}: ${t.details?.progressoChecklist ?? ''}
+</p>
+</div>
+<div class="text-right tabular-nums">
+<span class="block text-xs text-[var(--text-muted,currentColor)]">${this.msg.prazo}</span>
+<span class="font-semibold text-[var(--text-strong,currentColor)]">${fmtDate(t.prazo)}</span>
+</div>
+<div class="flex flex-wrap justify-end gap-2">${actions}</div>
+${extra}
+</li>`;
+}
+private renderLane(title: string, hint: string, items: TarefaPendencia[] | undefined, row: (t: TarefaPendencia) => unknown) {
+if (!items || items.length === 0) return nothing;
+return html`<section class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
+<header class="px-4 pt-3 pb-2">
+<h3 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${title}</h3>
+<p class="text-xs text-[var(--text-muted,currentColor)]">${hint}</p>
+</header>
+<ul class="border-t border-[var(--border-subtle,currentColor)]">${items.map(row)}</ul>
+</section>`;
+}
+private renderDevolverForm(t: TarefaPendencia) {
+const d = this.devolverComMotivoDraft;
+const motivo = d.details.motivoDevolucao ?? '';
+return html`<div class="col-span-3 flex flex-col gap-2 rounded-md bg-[var(--surface-alt-bg,transparent)] p-3">
+<label class="text-sm font-medium text-[var(--text-strong,currentColor)]" for=${'motivo-' + t.id}>${this.msg.motivoLabel}</label>
+<textarea id=${'motivo-' + t.id} rows="3" .value=${motivo} placeholder=${this.msg.motivoPlaceholder}
+@input=${(e: Event) => this.setDevolverComMotivoDraft({
+id: t.id, version: t.version,
+details: { motivoDevolucao: (e.target as HTMLTextAreaElement).value }
+})}
+class="w-full rounded-md border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] p-2 text-sm text-[var(--text-default,currentColor)] ${focusRing}"></textarea>
+<p class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.motivoHint}</p>
+<div class="flex gap-2 justify-end">
+${this.act(this.msg.actCancelar, 'ghost', () => this.setDevolverComMotivoDraft({ id: null, version: null, details: { motivoDevolucao: null } }))}
+${this.act(this.msg.actConfirmarDevolucao, 'primary', () => { void this.devolverComMotivo(t.id, t.version); }, motivo.trim() === '')}
+</div>
+</div>`;
+}
+private renderLanes() {
+const e = this.esperaPorMim;
+return html`
+${this.renderLane(this.msg.laneDevolvidas, this.msg.laneDevolvidasHint, e?.devolvidas, t => this.renderRow(t, 'criador',
+html`${this.act(this.msg.actAbrir, 'secondary', () => this.abrirTarefaParaAjustar(t.id))}
+${this.act(this.msg.actReenviar, 'primary', () => { void this.enviarParaRevisao(t.id, t.version); })}`,
+t.details?.motivoDevolucao
+? html`<p class="col-span-3 text-sm text-[var(--text-default,currentColor)]">
+<span class="text-[var(--text-muted,currentColor)]">${this.msg.motivoInformado}${t.details.devolvidaEm ? ` (${this.msg.devolvidaEm} ${fmtDate(t.details.devolvidaEm)})` : ''}:</span>
+${t.details.motivoDevolucao}</p>`
+: nothing))}
+${this.renderLane(this.msg.laneRevisar, this.msg.laneRevisarHint, e?.paraRevisar, t => {
+const open = this.devolverComMotivoDraft.id === t.id;
+return this.renderRow(t, 'responsavel',
+open ? nothing : html`${this.act(this.msg.actDevolver, 'secondary', () => this.setDevolverComMotivoDraft({ id: t.id, version: t.version, details: { motivoDevolucao: '' } }))}
+${this.act(this.msg.actAceitar, 'primary', () => { void this.aceitarEntrega(t.id, t.version); })}`,
+open ? this.renderDevolverForm(t) : nothing);
+})}
+${this.renderLane(this.msg.laneEnviar, this.msg.laneEnviarHint, e?.paraEnviarRevisao, t => this.renderRow(t, 'criador',
+this.act(this.msg.actEnviar, 'primary', () => { void this.enviarParaRevisao(t.id, t.version); })))}
+${this.renderLane(this.msg.laneIniciar, this.msg.laneIniciarHint, e?.paraIniciar, t => this.renderRow(t, 'criador',
+this.act(this.msg.actIniciar, 'primary', () => { void this.iniciarTarefa(t.id, t.version); })))}
+`;
+}
+private renderTriage() {
+if (this.pageStatus === 'idle' || this.pageStatus === 'loading') return this.renderSkeleton();
+if (this.pageStatus === 'error') return this.carregarInicioError ? this.renderLoadError() : nothing;
+if (this.pageStatus === 'empty') {
+return html`<p class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)] px-4 py-5">${this.msg.clearHint}</p>`;
+}
+return this.renderLanes();
+}
+private renderResumoTarefa(t: TarefaResumo) {
+return html`<li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 px-4 py-2 border-b border-[var(--border-subtle,currentColor)] last:border-b-0">
+<div class="min-w-0">
+<button type="button" @click=${() => this.abrirTarefaParaAjustar(t.id)}
+class="text-left font-medium text-[var(--link-text,currentColor)] hover:underline rounded ${focusRing}">${t.titulo}</button>
+<p class="text-xs text-[var(--text-muted,currentColor)]">
+${this.msg.listaLabel}: ${t.lista?.nome ?? ''} · ${this.msg[statusKey[t.status]]} · ${this.msg.checklist}: ${t.details?.progressoChecklist ?? ''}
+</p>
+</div>
+<span class="tabular-nums text-sm font-semibold ${t.details?.atrasada ? 'text-[var(--status-error-text,currentColor)]' : 'text-[var(--text-strong,currentColor)]'}">${fmtDate(t.prazo)}</span>
+</li>`;
+}
+private renderResumo() {
+const r = this.resumo;
+if (!r) return this.pageStatus === 'loading' ? html`<div class="h-8 rounded animate-pulse bg-[var(--surface-alt-bg,transparent)]"></div>` : nothing;
+return html`
+<dl aria-label=${this.msg.stripAria} class="flex flex-wrap items-baseline gap-x-8 gap-y-2 border-t border-[var(--border-subtle,currentColor)] pt-4">
+<div class="flex items-baseline gap-2"><dd class="order-1 text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${fmtNumber(r.quantidadeAbertas)}</dd><dt class="order-2 text-sm text-[var(--text-muted,currentColor)]">${this.msg.stripAbertas}</dt></div>
+<div class="flex items-baseline gap-2"><dd class="order-1 text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${fmtNumber(r.quantidadeVencemHoje)}</dd><dt class="order-2 text-sm text-[var(--text-muted,currentColor)]">${this.msg.stripHoje}</dt></div>
+<div class="flex items-baseline gap-2"><dd class="order-1 text-lg font-semibold tabular-nums text-[var(--status-error-text,currentColor)]">${fmtNumber(r.quantidadeAtrasadas)}</dd><dt class="order-2 text-sm text-[var(--text-muted,currentColor)]">${this.msg.stripAtrasadas}</dt></div>
+</dl>
+<details class="rounded-lg border border-[var(--border-subtle,currentColor)]">
+<summary class="cursor-pointer px-4 py-3 text-sm font-medium text-[var(--text-default,currentColor)] ${focusRing}">${this.msg.destaquesTitle}</summary>
+${r.tarefas && r.tarefas.length > 0
+? html`<ul class="border-t border-[var(--border-subtle,currentColor)]">${r.tarefas.map(t => this.renderResumoTarefa(t))}</ul>`
+: html`<p class="px-4 py-3 text-sm text-[var(--text-muted,currentColor)]">${this.msg.destaquesVazio}</p>`}
+<div class="px-4 py-3 border-t border-[var(--border-subtle,currentColor)]">
+<grouptriggeraction--ml-button-standard-102040 size="sm" data-variant="link" @action=${() => this.abrirMinhasTarefas()}><Label>${this.msg.verTodas}</Label></grouptriggeraction--ml-button-standard-102040>
+</div>
+</details>`;
+}
+private renderAviso() {
+const a = this.avisoDoDia;
+return html`<aside class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 flex flex-col gap-3">
+<h2 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.avisoTitle}</h2>
+${a ? html`
+<span class="self-start rounded-full px-2 py-0.5 text-xs bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]">${this.msg[avisoKey[a.status]]}</span>
+<p class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.avisoReferente} ${fmtDate(a.dataReferencia)}</p>
+<dl class="flex gap-6">
+<div><dd class="text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${fmtNumber(a.details.quantidadeTarefas)}</dd><dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.avisoTarefas}</dt></div>
+<div><dd class="text-lg font-semibold tabular-nums text-[var(--status-error-text,currentColor)]">${fmtNumber(a.details.quantidadeAtrasadas)}</dd><dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.avisoAtrasadas}</dt></div>
+</dl>
+<div>${this.act(this.msg.avisoAbrir, 'secondary', () => this.abrirMeusAvisos())}</div>`
+: html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.avisoVazio}</p>`}
+</aside>`;
+}
+render() {
+this.msg = pageMessages[this.getMessageKey(pageMessages)];
+const loading = this.carregarInicioStatus === 'loading';
+return html`<div class="min-h-full p-8 bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)]">
+<div class="mx-auto max-w-6xl flex flex-col gap-6">
+<header class="flex items-center justify-between gap-4">
+<h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+<grouptriggeraction--ml-button-standard-102040 size="sm" data-variant="ghost" ?loading=${loading} ?disabled=${loading}
+@action=${() => { void this.carregarInicio(); }}><Label>${this.msg.refresh}</Label></grouptriggeraction--ml-button-standard-102040>
+</header>
+${this.renderFeedback()}
+<div class="grid grid-cols-[minmax(0,1fr)_20rem] gap-8 items-start">
+<div class="flex flex-col gap-4" aria-busy=${loading ? 'true' : 'false'}>
+<div data-organism-id="esperaPorMim" class="flex flex-col gap-4">
+<h2 class="text-xl font-semibold text-[var(--text-strong,currentColor)]">${this.pageStatus === 'empty' ? this.msg.headlineClear : this.msg.headlineAttention}</h2>
+${this.renderTriage()}
+</div>
+<div data-organism-id="resumoMinhasTarefas" class="flex flex-col gap-4 mt-2">
+${this.renderResumo()}
+</div>
+</div>
+<div data-organism-id="avisoDoDia">${this.renderAviso()}</div>
+</div>
+</div>
+</div>`;
+}
 }

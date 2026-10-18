@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "meus_avisos",
   "device": "desktop",
-  "contextHash": "sha256:46574f57c821adfbb27c5e2748ebc775dceaee94f93f3015d07617aadaf14757",
+  "contextHash": "sha256:c1794aa9a3196f91344bb863d2246de3bc3067753c0883cb571357d08aadb6ae",
   "sourcePath": "l2/tarefas/web/desktop/page11/meus_avisos.ts",
-  "sourceHash": "sha256:42da2a3b0df5b179fa5a255dae2c2f57a68af4705977f4fb606de703c8c5da2f",
-  "attempt": 1,
+  "sourceHash": "sha256:e87f3a741ba6c1beb231ba5e34e25d647691ed6226f1cd743d291dc7eba43a93",
+  "attempt": 2,
   "design": {
-    "concept": "Uma mesa de triagem dos avisos diários: à esquerda a lista dos avisos por data de referência (com o histórico do envio das 8h em uma aba quieta), à direita o aviso aberto com seus totais e as tarefas que vencem hoje ou estão atrasadas. Escolher um aviso preenche o painel sem sair da página.",
+    "concept": "Uma mesa de triagem em duas colunas: à esquerda os avisos diários por data de referência (com filtro de período discreto), à direita o aviso escolhido com totais em destaque e a relação de tarefas. O registro de geração e finalização dos avisos fica numa segunda aba do painel direito, como assunto secundário.",
     "views": [
       {
-        "id": "avisos",
-        "purpose": "Aba da coluna esquerda: lista dos avisos recebidos, com datas, totais e situação; escolher uma linha abre o aviso no painel."
+        "id": "aviso",
+        "purpose": "Conteúdo do aviso escolhido: cabeçalho com a data, totais de tarefas e atrasadas e tabela das tarefas com prazo e situação."
       },
       {
         "id": "envio",
-        "purpose": "Aba da coluna esquerda: linha do tempo de quando o processo das 8h gerou e finalizou cada aviso e o motivo das falhas."
+        "purpose": "Registro de envio: linha do tempo de quando cada aviso foi gerado e finalizado, com sucesso ou falha."
       }
     ],
-    "decisions": "Segui o inboxSplit: lista como região primária e painel de contexto ao lado, sempre visíveis. O histórico (prioridade secundária) vira uma aba do host de cenas (mode=tabs) na coluna da lista, para não competir com o trabalho principal e sem empilhar tudo. A lista usa ml-vertical-record-list com a linha marcada por ?selected (o aviso aberto), pois a seleção pertence à página. O painel mostra dois cartões de métrica (totais vindos prontos do backend) e a tabela de tarefas com prazo e situação do prazo; nada é somado ou filtrado na página. Não há conceito de lido/não lido, marcar tudo ou ação contextual no contrato, então nada disso foi inventado. O filtro de período não tem estado nem intent no shared e foi omitido. Estados: carregando na lista, vazio com texto próprio, erro com tentar novamente, precondição ausente com explicação e voltar, e carregar mais discreto só quando a lista informa que há mais avisos. Cores só por tokens; destaque sem cor de alarme na seleção."
+    "decisions": "Segui o inboxSplit: lista à esquerda sempre visível, painel à direita que preenche ao selecionar uma linha; a seleção é marcada na linha (selected) e a primeira abertura já mostra o aviso mais recente. O histórico de envio (secundário) vai numa aba do host de cenas em mode=tabs dentro do painel, para não competir com o conteúdo e sem perder a lista. Linhas da lista mostram só identidade (data, totais, situação do envio); o detalhe fica no painel. Filtro de período é uma linha quieta acima da lista (calendário duplo), paginação é só um botão discreto 'avisos mais antigos'. Nenhum valor é calculado na página: totais e situações vêm do contrato. Estados de carregamento, vazio, erro com nova tentativa e pré-condição ausente (com botão Voltar) são desenhados. Sem alarme de cor: atrasada usa o token de status discreto apenas no rótulo da tarefa."
   },
   "advisories": [
     {
@@ -29,15 +29,11 @@
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section avisoAberto needs an element with data-section-id=\"avisoAberto\"."
+      "message": "Section conteudoAviso needs an element with data-section-id=\"conteudoAviso\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section envioDosAvisos needs an element with data-section-id=\"envioDosAvisos\"."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism listaAvisos (Filtro do período das datas de referência) renders neither <groupenterdateinterval--ml-date-interval-presets> nor <groupenterdateinterval--ml-date-range-dual-calendar>."
+      "message": "Section registroEnvio needs an element with data-section-id=\"registroEnvio\"."
     }
   ]
 }

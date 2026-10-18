@@ -3,30 +3,30 @@
   "project": 102047,
   "module": "tarefas",
   "pageId": "membros_equipe",
-  "unitInputHash": "sha256:705d3b864f7fdff29ff39e4b8eadc4f81548bbfbe4acaeb2afaf90f1eff2241b",
+  "unitInputHash": "sha256:598b00cb821c634a01a7efce79ff7ed292d317454a82b669a45aff74d57c361c",
   "promptHash": "sha256:285f13d9e093816ed7270af464b539a73e096344c3a45829abeaaec8c5ebc18c",
-  "rulesHash": "sha256:4bbdeabfeb1166e62230b57576f1506040db16df85660a9d66627b22a00788ed",
+  "rulesHash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
   "sourcePath": "l2/tarefas/web/shared/membros_equipe.ts",
-  "sourceHash": "sha256:c340b8835477005b5b980cc2d6bf75419745218a9f0ef6975c64cf98a0ba2daf",
+  "sourceHash": "sha256:80f7bc64a5a6b6e36b63a58337cfd7223a4426683f273726a064e122f38965e2",
   "declarationPath": "l2/tarefas/web/shared/membros_equipeDts.txt",
-  "declarationHash": "sha256:3659f546f65bf3112745ce54d53e81d9a62d882e70a1d710066618383c7d2688",
-  "attempt": 1,
+  "declarationHash": "sha256:18e82010e7fd9e85f3c28f56f8a569d7dbb191290336c93ebc9b0c98d0f21439",
+  "attempt": 2,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "Params busca and page have effect filter:pessoasEquipe and are persisted, but no state holds them. Added public states busca (string | null) and page (number | null), both persisted, and they take part in the input of listarMembrosEquipe."
+      "message": "Param busca has effect filter:pessoasEquipe but no state holds it. Added public state 'busca' (string | null, persisted, loaded from URL/localStorage); qryPessoasEquipe(busca?, page, append) publishes it and sends it in the query input."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "selectedMembroEquipe (select:cadastroPessoa) had no member that writes it. Added selectCadastroPessoa(id | null), which publishes the id and calls obterMembroEquipe (which has the id as input); null clears membro and the edit draft."
+      "message": "State selectedMembroEquipe (select:cadastroPessoa) has no setter and no request fetching the record. Added public selectCadastroPessoa(id|null), which also fills the edit draft, and a getter cadastroPessoa returning the row of the loaded list."
     },
     {
-      "code": "DRAFT_STATE_MISSING",
-      "message": "Commands cadastrarPessoa and salvarAlteracoesPessoa are submitted from the form cadastroPessoa but no state has their input as source. Added cadastrarPessoaDraft and salvarAlteracoesPessoaDraft with setters setCadastrarPessoaDraft and setSalvarAlteracoesPessoaDraft; the edit draft is filled from membro (loaded or returned by the commands)."
+      "code": "FILTER_STATE_MISSING",
+      "message": "The commands have no '<command>.input' state. Added drafts cmdCadastrarPessoaDraft and cmdSalvarAlteracoesDraft (the latter prefilled from the selected row and refilled from the saved record) with setters setCmdCadastrarPessoaDraft and setCmdSalvarAlteracoesDraft."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "The route returns membro for cadastrarPessoa and salvarAlteracoesPessoa with no state as source; applied it to the list membros (upsert by id; a new person is appended since the order by name cannot be computed in the browser), to membro, selectedMembroEquipe and the edit draft. The server order of the list may differ until it is reloaded."
+      "message": "cmdCadastrarPessoa returns a person that is upserted into pessoas.items (appended at the end when new), but the list is ordered by name and filtered by busca on the backend, so the new row may be out of order or not match the current search; pageStatus stays 'empty' if the list was empty before the first registration. Reload with qryPessoasEquipe() to realign."
     },
     {
       "code": "MEMBER_ADDED",
@@ -34,15 +34,15 @@
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public cadastrarPessoaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public cadastroPessoa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public page is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public cmdCadastrarPessoaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public salvarAlteracoesPessoaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public cmdSalvarAlteracoesDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
@@ -50,11 +50,11 @@
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public setCadastrarPessoaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public setCmdCadastrarPessoaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public setSalvarAlteracoesPessoaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public setCmdSalvarAlteracoesDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     }
   ]
 }

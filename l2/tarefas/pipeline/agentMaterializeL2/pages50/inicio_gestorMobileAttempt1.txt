@@ -1,56 +1,63 @@
-/* refused: M4_SHARED_INPUT_MISSING: input20 must run first. */
+/* refused: Cannot read properties of undefined (reading 'addEventListener') */
 
 /// <mls fileReference="_102047_/l2/tarefas/web/mobile/page11/inicio_gestor.ts" enhancement="_102020_/l2/enhancementAura"/>
 
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { TarefasInicio_gestorShared } from '/_102047_/l2/tarefas/web/shared/inicio_gestor.js';
+import type { TarefaAcao } from '/_102047_/l2/tarefas/web/shared/inicio_gestor.js';
 import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
+import '/_102040_/l2/molecules/groupviewchart/ml-bar-chart.js';
 import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
 
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
   pageTitle: 'Início do gestor',
-  attentionLead: 'Precisam da sua atenção',
-  overdueLabel: 'Atrasadas',
-  dueTodayLabel: 'Vencendo hoje',
-  goodNews: 'Nada precisa de atenção agora.',
-  laneTitle: 'Atrasadas e vencendo hoje',
-  colTask: 'Tarefa',
-  colDue: 'Prazo',
-  emptyLane: 'Nenhuma tarefa nesta lista.',
-  loadingLane: 'Carregando tarefas…',
-  loadMore: 'Mostrar mais tarefas',
-  overdueFact: 'Atrasada',
-  dueTodayFact: 'Vence hoje',
-  checklistPrefix: 'Checklist',
-  noAssignee: 'Sem responsável',
-  status_aFazer: 'A fazer',
-  status_emAndamento: 'Em andamento',
-  status_emRevisao: 'Em revisão',
-  status_concluida: 'Concluída',
-  status_cancelada: 'Cancelada',
-  stripTitle: 'Resumo da equipe',
-  openLabel: 'Abertas',
-  checklistLabel: 'Checklists',
-  checklistItemsOf: 'itens feitos de',
-  byListTitle: 'Tarefas abertas por lista',
-  openCountSuffix: 'abertas',
-  linkTeamTasks: 'Abrir tarefas da equipe',
-  linkLists: 'Abrir listas',
-  errorGeneric: 'Não foi possível carregar esta parte da tela.',
-  errorPrecondition: 'Esta tela foi aberta sem as informações de que precisa. Volte ao início do módulo e abra-a novamente.',
+  headlinePrefix: 'Precisam de você:',
+  headlineLate: 'atrasadas',
+  headlineToday: 'vencem hoje',
+  headlineAnd: 'e',
+  goodNews: 'Nada precisa de atenção agora',
+  goodNewsHint: 'Nenhuma tarefa da equipe está atrasada ou vence hoje.',
+  laneTitle: 'Para decidir: trocar responsável ou cancelar',
+  laneEmpty: 'Nenhuma tarefa para decidir.',
+  laneColTask: 'Tarefa',
+  laneColDue: 'Prazo',
+  factLate: 'Atrasada',
+  factToday: 'Vence hoje',
+  statusAFazer: 'A fazer',
+  statusEmAndamento: 'Em andamento',
+  statusEmRevisao: 'Em revisão',
+  statusConcluida: 'Concluída',
+  statusCancelada: 'Cancelada',
+  checklist: 'checklist',
+  loadMore: 'Carregar mais tarefas',
   retry: 'Tentar de novo',
-  loadingHeadline: 'Verificando o que precisa de você…'
-};
+  laneError: 'Não foi possível carregar as tarefas que pedem sua decisão.',
+  stripError: 'Não foi possível carregar o panorama da equipe.',
+  preconditionMissing: 'Escolha uma tarefa da fila para abrir em Tarefas da equipe.',
+  loading: 'Carregando…',
+  stripTitle: 'Panorama da equipe',
+  stripOpen: 'Abertas',
+  stripToday: 'Vencem hoje',
+  stripLate: 'Atrasadas',
+  stripChecklist: 'Checklists feitas',
+  byList: 'Tarefas abertas por lista',
+  byListSeries: 'Tarefas abertas',
+  byListEmpty: 'Nenhuma lista com tarefas abertas.',
+} as const;
+
 type PageMessageType = typeof pageMessage_pt_br;
-const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+
+const pageMessages: Record<string, PageMessageType> = {
+  'pt-br': pageMessage_pt_br,
+};
 /// **collab_i18n_end**
 
-function formatPrazo(prazo: string): string {
-  if (!prazo) return '';
-  const d = new Date(prazo.length === 10 ? `${prazo}T00:00:00` : prazo);
-  if (Number.isNaN(d.getTime())) return prazo;
+function formatDate(value: string): string {
+  const parts = (value || '').slice(0, 10).split('-').map(Number);
+  if (parts.length < 3 || parts.some(n => Number.isNaN(n))) return value || '';
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
   return new Intl.DateTimeFormat(document.documentElement.lang || undefined, { day: '2-digit', month: 'short' }).format(d);
 }
 
@@ -62,205 +69,186 @@ function formatNumber(n: number): string {
 export class TarefasMobilePage11Inicio_gestorPage extends TarefasInicio_gestorShared {
   private msg: PageMessageType = pageMessage_pt_br;
 
-  private errorText(e: { code: string } | null) {
-    return e && e.code === 'client.preconditionMissing' ? this.msg.errorPrecondition : this.msg.errorGeneric;
-  }
-
-  private statusLabel(s: string) {
-    const key = `status_${s}` as keyof PageMessageType;
-    return this.msg[key] ?? s;
-  }
-
-  private renderSkeleton(lines: number) {
-    return html`<div class="space-y-3" aria-hidden="true">
-      ${Array.from({ length: lines }).map(
-        () => html`<div class="h-14 animate-pulse rounded-lg bg-[var(--surface-alt-bg,transparent)]"></div>`
-      )}
-    </div>`;
-  }
-
-  private renderError(message: string, retry: () => void) {
-    return html`<div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--status-error-bg,transparent)] p-4" role="alert">
-      <p class="text-sm text-[var(--status-error-text,currentColor)]">${message}</p>
-      <div class="mt-3">
-        <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${retry}>
-          <Label>${this.msg.retry}</Label>
-        </grouptriggeraction--ml-button-standard>
-      </div>
-    </div>`;
-  }
-
-  private renderHeadline() {
-    const loading = this.pageStatus === 'loading' || this.pageStatus === 'idle';
-    if (loading) {
-      return html`<p class="text-base text-[var(--text-muted,currentColor)]" aria-busy="true">${this.msg.loadingHeadline}</p>`;
-    }
-    if (this.pageStatus === 'empty') {
-      return html`<p class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${this.msg.goodNews}</p>`;
-    }
-    const t = this.totais;
-    if (!t) return nothing;
-    return html`<div>
-      <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.attentionLead}</p>
-      <p class="mt-1 text-lg font-semibold text-[var(--text-strong,currentColor)]">
-        <span class="tabular-nums">${this.msg.overdueLabel}: ${formatNumber(t.atrasadas)}</span>
-        <span class="mx-1 text-[var(--text-muted,currentColor)]">·</span>
-        <span class="tabular-nums">${this.msg.dueTodayLabel}: ${formatNumber(t.vencemHoje)}</span>
-      </p>
-    </div>`;
-  }
-
-  private renderLane() {
-    const loading = this.pageStatus === 'loading' || this.pageStatus === 'idle';
-    if (loading) return this.renderSkeleton(3);
-    if (this.qryTarefasPedemAcaoStatus === 'error') {
-      return this.renderError(this.errorText(this.qryTarefasPedemAcaoError), () => { void this.qryTarefasPedemAcao(1); });
-    }
-    if (this.pageStatus === 'empty') return nothing;
-    const page = this.tarefas;
-    const items = page ? page.items : [];
-    return html`
-      <h2 class="mb-2 text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.laneTitle}</h2>
-      <div class="overflow-hidden rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
-        <groupviewdata--ml-vertical-record-list
-          .hoverable=${true}
-          .loading=${this.qryTarefasPedemAcaoStatus === 'loading' && items.length === 0}
-          @row-click=${(e: CustomEvent<{ index: number }>) => {
-            const item = items[e.detail.index];
-            if (item) this.agirNaTarefa(item.id);
-          }}
-        >
-          <Columns>
-            <Column field="titulo" header=${this.msg.colTask} />
-            <Column field="prazo" header=${this.msg.colDue} align="right" width="112px" />
-          </Columns>
-          <Rows>
-            ${items.map((item) => {
-              const flags = item.details.details;
-              const factClass = flags.atrasada
-                ? 'text-[var(--status-error-text,currentColor)]'
-                : flags.venceHoje
-                  ? 'text-[var(--status-warning-text,currentColor)]'
-                  : 'text-[var(--text-default,currentColor)]';
-              const fact = flags.atrasada ? this.msg.overdueFact : flags.venceHoje ? this.msg.dueTodayFact : '';
-              const who = item.membroEquipe.details.identification.details.identification.name || this.msg.noAssignee;
-              return html`
-                <Row>
-                  <Cell>
-                    <div class="min-h-[44px] min-w-0 py-1">
-                      <div class="break-words font-medium text-[var(--text-strong,currentColor)]">${item.titulo}</div>
-                      <div class="text-xs text-[var(--text-muted,currentColor)]">${item.lista.nome} · ${who}</div>
-                      <div class="text-xs text-[var(--text-muted,currentColor)]">
-                        ${this.statusLabel(item.status)}${flags.progressoChecklist ? html` · ${this.msg.checklistPrefix} ${flags.progressoChecklist}` : nothing}
-                      </div>
-                    </div>
-                  </Cell>
-                  <Cell>
-                    <div class="whitespace-nowrap py-1 text-right">
-                      <div class="text-sm font-semibold tabular-nums ${factClass}">${formatPrazo(item.prazo)}</div>
-                      ${fact ? html`<div class="text-xs ${factClass}">${fact}</div>` : nothing}
-                    </div>
-                  </Cell>
-                </Row>`;
-            })}
-          </Rows>
-          <Empty><div class="py-6 text-center text-sm text-[var(--text-muted,currentColor)]">${this.msg.emptyLane}</div></Empty>
-          <Loading><div class="py-6 text-center text-sm text-[var(--text-muted,currentColor)]">${this.msg.loadingLane}</div></Loading>
-        </groupviewdata--ml-vertical-record-list>
-      </div>
-      ${page && page.hasMore
-        ? html`<div class="mt-3">
-            <grouptriggeraction--ml-button-standard
-              data-variant="secondary"
-              size="lg"
-              data-class="w-full"
-              ?loading=${this.qryTarefasPedemAcaoStatus === 'loading'}
-              @action=${() => { void this.qryTarefasPedemAcao(page.page + 1, true); }}
-            >
-              <Label>${this.msg.loadMore}</Label>
-            </grouptriggeraction--ml-button-standard>
-          </div>`
-        : nothing}
-    `;
-  }
-
-  private renderStrip() {
-    const loading = this.pageStatus === 'loading' || this.pageStatus === 'idle';
-    if (loading) return this.renderSkeleton(2);
-    if (this.qryPanoramaEquipeStatus === 'error') {
-      return this.renderError(this.errorText(this.qryPanoramaEquipeError), () => { void this.qryPanoramaEquipe(); });
-    }
-    const t = this.totais;
-    return html`
-      <h2 class="mb-2 text-sm font-semibold text-[var(--text-muted,currentColor)]">${this.msg.stripTitle}</h2>
-      ${t
-        ? html`<dl class="grid grid-cols-2 gap-x-4 gap-y-3 rounded-lg border border-[var(--border-subtle,currentColor)] p-3">
-            <div>
-              <dd class="text-lg font-semibold tabular-nums text-[var(--text-default,currentColor)]">${formatNumber(t.abertas)}</dd>
-              <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.openLabel}</dt>
-            </div>
-            <div>
-              <dd class="text-lg font-semibold tabular-nums text-[var(--text-default,currentColor)]">${formatNumber(t.vencemHoje)}</dd>
-              <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.dueTodayLabel}</dt>
-            </div>
-            <div>
-              <dd class="text-lg font-semibold tabular-nums text-[var(--text-default,currentColor)]">${formatNumber(t.atrasadas)}</dd>
-              <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.overdueLabel}</dt>
-            </div>
-            <div>
-              <dd class="text-lg font-semibold tabular-nums text-[var(--text-default,currentColor)]">${t.progressoChecklist}</dd>
-              <dt class="text-xs text-[var(--text-muted,currentColor)]">
-                ${this.msg.checklistLabel}: ${formatNumber(t.itensChecklistFeitos)} ${this.msg.checklistItemsOf} ${formatNumber(t.itensChecklistTotal)}
-              </dt>
-            </div>
-          </dl>`
-        : nothing}
-      ${this.listas.length
-        ? html`<h3 class="mb-1 mt-4 text-sm font-semibold text-[var(--text-muted,currentColor)]">${this.msg.byListTitle}</h3>
-          <ul class="divide-y divide-[var(--border-subtle,currentColor)] rounded-lg border border-[var(--border-subtle,currentColor)]">
-            ${this.listas.map(
-              (l) => html`<li>
-                <button
-                  type="button"
-                  class="flex min-h-[44px] w-full items-center justify-between gap-3 px-3 py-2 text-left text-[var(--text-default,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
-                  @click=${() => this.abrirTarefasEquipe(l.id)}
-                >
-                  <span class="min-w-0 break-words text-sm">${l.nome}</span>
-                  <span class="whitespace-nowrap text-sm tabular-nums text-[var(--text-muted,currentColor)]">${formatNumber(l.details.details.quantidadeTarefasAbertas)} ${this.msg.openCountSuffix}</span>
-                </button>
-              </li>`
-            )}
-          </ul>`
-        : nothing}
-    `;
-  }
-
   render() {
     this.msg = pageMessages[this.getMessageKey(pageMessages)];
     return html`
-      <main class="mx-auto w-full max-w-[430px] space-y-6 bg-[var(--page-bg,transparent)] px-4 pb-10 pt-4 text-[var(--text-default,currentColor)]">
-        <header class="space-y-3">
-          <h1 class="text-xs font-medium uppercase tracking-wide text-[var(--text-muted,currentColor)]">${this.msg.pageTitle}</h1>
-          <div aria-live="polite">${this.renderHeadline()}</div>
+      <main class="min-h-screen w-full max-w-[430px] mx-auto bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] px-4 pb-10 pt-4 flex flex-col gap-6">
+        <header>
+          <h1 class="text-sm font-medium text-[var(--text-muted,currentColor)]">${this.msg['pageTitle']}</h1>
         </header>
-
-        <section data-organism-id="tarefasPedemAcao" aria-busy=${this.qryTarefasPedemAcaoStatus === 'loading' ? 'true' : 'false'}>
-          ${this.renderLane()}
-        </section>
-
-        <section data-organism-id="destaquesEquipe" aria-busy=${this.qryPanoramaEquipeStatus === 'loading' ? 'true' : 'false'}>
-          ${this.renderStrip()}
-          <div class="mt-4 flex flex-col gap-2">
-            <grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => this.abrirTarefasEquipe(null)}>
-              <Label>${this.msg.linkTeamTasks}</Label>
-            </grouptriggeraction--ml-button-standard>
-            <grouptriggeraction--ml-button-standard data-variant="ghost" size="lg" data-class="w-full" @action=${() => this.abrirListas(null)}>
-              <Label>${this.msg.linkLists}</Label>
-            </grouptriggeraction--ml-button-standard>
-          </div>
-        </section>
+        ${this.renderHeadline()}
+        ${this.renderLane()}
+        ${this.renderStrip()}
       </main>
     `;
+  }
+
+  private statusLabel(status: TarefaAcao['status']) {
+    switch (status) {
+      case 'aFazer': return this.msg['statusAFazer'];
+      case 'emAndamento': return this.msg['statusEmAndamento'];
+      case 'emRevisao': return this.msg['statusEmRevisao'];
+      case 'concluida': return this.msg['statusConcluida'];
+      default: return this.msg['statusCancelada'];
+    }
+  }
+
+  private renderHeadline() {
+    if (this.pageStatus === 'empty') {
+      return html`
+        <section aria-live="polite" class="flex flex-col gap-1">
+          <p class="text-xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg['goodNews']}</p>
+          <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['goodNewsHint']}</p>
+        </section>`;
+    }
+    if (this.obterPanoramaEquipeStatus !== 'success') {
+      return html`
+        <section aria-live="polite" aria-busy=${this.obterPanoramaEquipeStatus === 'loading' ? 'true' : 'false'}>
+          <div class="h-7 w-3/4 rounded bg-[var(--surface-alt-bg,transparent)] animate-pulse"></div>
+        </section>`;
+    }
+    return html`
+      <section aria-live="polite">
+        <p class="text-xl font-semibold leading-snug text-[var(--text-strong,currentColor)]">
+          ${this.msg['headlinePrefix']}
+          ${formatNumber(this.totalAtrasadas)} ${this.msg['headlineLate']}
+          ${this.msg['headlineAnd']}
+          ${formatNumber(this.totalVenceHoje)} ${this.msg['headlineToday']}
+        </p>
+      </section>`;
+  }
+
+  private renderLane() {
+    if (this.pageStatus === 'empty') return nothing;
+    const err = this.listarTarefasParaAcaoError;
+    const items = this.tarefas?.items ?? [];
+    const loadingFirst = this.listarTarefasParaAcaoStatus === 'loading' && !this.tarefas;
+
+    return html`
+      <section data-organism-id="tarefasParaAcao" class="flex flex-col gap-3">
+        <h2 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg['laneTitle']}</h2>
+        ${err && err.code === 'client.preconditionMissing' ? html`
+          <p role="status" aria-live="polite" class="rounded-lg px-3 py-3 text-sm bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]">${this.msg['preconditionMissing']}</p>` : nothing}
+        ${err && err.code !== 'client.preconditionMissing' && this.listarTarefasParaAcaoStatus === 'error' ? html`
+          <div role="alert" class="rounded-lg px-3 py-3 flex flex-col gap-2 bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]">
+            <p class="text-sm">${this.msg['laneError']}</p>
+            <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => { void this.listarTarefasParaAcao(); }}>
+              <Label>${this.msg['retry']}</Label>
+            </grouptriggeraction--ml-button-standard>
+          </div>` : html`
+          <div class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] overflow-hidden">
+            <groupviewdata--ml-vertical-record-list
+              .loading=${loadingFirst}
+              .hoverable=${true}
+              @row-click=${(e: CustomEvent<{ index: number }>) => {
+                const row = items[e.detail.index];
+                if (row) this.abrirTarefasEquipe(row.id);
+              }}>
+              <Columns>
+                <Column field="titulo" header=${this.msg['laneColTask']} />
+                <Column field="prazo" header=${this.msg['laneColDue']} width="112px" align="right" />
+              </Columns>
+              <Rows>
+                ${items.map(t => this.renderRow(t))}
+              </Rows>
+              <Empty>
+                <div class="py-6 text-center text-sm text-[var(--text-muted,currentColor)]">${this.msg['laneEmpty']}</div>
+              </Empty>
+              <Loading>
+                <div class="flex flex-col gap-3 p-4" aria-live="polite">
+                  <div class="h-11 rounded bg-[var(--surface-alt-bg,transparent)] animate-pulse"></div>
+                  <div class="h-11 rounded bg-[var(--surface-alt-bg,transparent)] animate-pulse"></div>
+                  <div class="h-11 rounded bg-[var(--surface-alt-bg,transparent)] animate-pulse"></div>
+                </div>
+              </Loading>
+            </groupviewdata--ml-vertical-record-list>
+          </div>
+          ${this.tarefas?.hasMore ? html`
+            <grouptriggeraction--ml-button-standard
+              data-variant="secondary" size="lg" data-class="w-full"
+              ?loading=${this.listarTarefasParaAcaoStatus === 'loading'}
+              @action=${() => { void this.listarTarefasParaAcao((this.tarefas?.page ?? 1) + 1, true); }}>
+              <Label>${this.msg['loadMore']}</Label>
+            </grouptriggeraction--ml-button-standard>` : nothing}
+        `}
+      </section>`;
+  }
+
+  private renderRow(t: TarefaAcao) {
+    const factClass = t.details.atrasada
+      ? 'bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]'
+      : 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
+    const fact = t.details.atrasada ? this.msg['factLate'] : t.details.venceHoje ? this.msg['factToday'] : '';
+    return html`
+      <Row ?selected=${t.id === this.selectedTarefa}>
+        <Cell>
+          <div class="min-h-[44px] flex flex-col justify-center gap-0.5 py-1">
+            <span class="font-medium text-[var(--text-strong,currentColor)] break-words">${t.titulo}</span>
+            <span class="text-xs text-[var(--text-muted,currentColor)] break-words">
+              ${t.membroEquipe.details.identification.name} · ${t.lista.nome}
+            </span>
+            <span class="text-xs text-[var(--text-muted,currentColor)]">
+              ${this.statusLabel(t.status)} · ${this.msg['checklist']} ${t.details.progressoChecklist}
+            </span>
+          </div>
+        </Cell>
+        <Cell>
+          <div class="min-h-[44px] flex flex-col items-end justify-center gap-1 py-1 tabular-nums">
+            ${fact ? html`<span class="rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${factClass}">${fact}</span>` : nothing}
+            <span class="text-sm font-medium whitespace-nowrap text-[var(--text-strong,currentColor)]">${formatDate(t.prazo)}</span>
+          </div>
+        </Cell>
+      </Row>`;
+  }
+
+  private renderStrip() {
+    const err = this.obterPanoramaEquipeError;
+    return html`
+      <section data-organism-id="destaquesEquipe" class="flex flex-col gap-3 border-t border-[var(--border-subtle,currentColor)] pt-5">
+        <h2 class="text-sm font-semibold text-[var(--text-muted,currentColor)]">${this.msg['stripTitle']}</h2>
+        ${this.obterPanoramaEquipeStatus === 'error' && err ? html`
+          <div role="alert" class="rounded-lg px-3 py-3 flex flex-col gap-2 bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)]">
+            <p class="text-sm">${this.msg['stripError']}</p>
+            <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => { void this.obterPanoramaEquipe(); }}>
+              <Label>${this.msg['retry']}</Label>
+            </grouptriggeraction--ml-button-standard>
+          </div>` : this.obterPanoramaEquipeStatus === 'success' ? html`
+          <dl class="flex flex-wrap gap-x-6 gap-y-3 m-0">
+            <div class="flex flex-col">
+              <dd class="m-0 text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${formatNumber(this.totalAbertas)}</dd>
+              <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['stripOpen']}</dt>
+            </div>
+            <div class="flex flex-col">
+              <dd class="m-0 text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${formatNumber(this.totalVenceHoje)}</dd>
+              <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['stripToday']}</dt>
+            </div>
+            <div class="flex flex-col">
+              <dd class="m-0 text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${formatNumber(this.totalAtrasadas)}</dd>
+              <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['stripLate']}</dt>
+            </div>
+            <div class="flex flex-col">
+              <dd class="m-0 text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${this.progressoChecklist}</dd>
+              <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['stripChecklist']}</dt>
+            </div>
+          </dl>
+          <details class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)]">
+            <summary class="min-h-[44px] flex items-center px-3 cursor-pointer text-sm font-medium text-[var(--text-default,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] rounded-lg">${this.msg['byList']}</summary>
+            <div class="px-3 pb-3">
+              <groupviewchart--ml-bar-chart .showValues=${true} .showLegend=${false}>
+                <Series name=${this.msg['byListSeries']}>
+                  ${this.listas.map(l => html`<Point label=${l.nome} value=${String(l.details.quantidadeTarefasAbertas)} />`)}
+                </Series>
+                <Empty>${this.msg['byListEmpty']}</Empty>
+              </groupviewchart--ml-bar-chart>
+            </div>
+          </details>` : html`
+          <div class="flex flex-wrap gap-4" aria-busy="true" aria-live="polite">
+            <div class="h-10 w-16 rounded bg-[var(--surface-alt-bg,transparent)] animate-pulse"></div>
+            <div class="h-10 w-16 rounded bg-[var(--surface-alt-bg,transparent)] animate-pulse"></div>
+            <div class="h-10 w-16 rounded bg-[var(--surface-alt-bg,transparent)] animate-pulse"></div>
+            <span class="sr-only">${this.msg['loading']}</span>
+          </div>`}
+      </section>`;
   }
 }
 

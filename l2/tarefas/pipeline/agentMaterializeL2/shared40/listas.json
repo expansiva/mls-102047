@@ -3,26 +3,34 @@
   "project": 102047,
   "module": "tarefas",
   "pageId": "listas",
-  "unitInputHash": "sha256:76c29a8f65083250c84f7926b8db21636ea0c7c6f7ccde5a0fa443fa48efe551",
+  "unitInputHash": "sha256:ba52b4b4d8c993f61e193279dc14f84058660523069c76070c0e65696008478d",
   "promptHash": "sha256:285f13d9e093816ed7270af464b539a73e096344c3a45829abeaaec8c5ebc18c",
-  "rulesHash": "sha256:0e771b62db62c30409e81ae77f7b6e47eaa933b8f39212342dea64f39f7bf186",
+  "rulesHash": "sha256:50215eff3d301abb00897a55630d65432a65d7c8f1e89f171dde84cc6ba8fbc2",
   "sourcePath": "l2/tarefas/web/shared/listas.ts",
-  "sourceHash": "sha256:ce4844734c29d293df14d22c561bf72c08477c56d1b733b2d4c1af059e68f796",
+  "sourceHash": "sha256:e37a70bd96910b13cb313032f35fdc50581b802b93e72605a38084131c15e6aa",
   "declarationPath": "l2/tarefas/web/shared/listasDts.txt",
-  "declarationHash": "sha256:b2828c2e68d8363b598a8ad9bff6948e908d0ded20eebf920c3421917bf6794a",
-  "attempt": 1,
+  "declarationHash": "sha256:fafaaf8389d30cfaceaf76820f4e7a3feacd762f44e95d7b7ed717b82913f8a1",
+  "attempt": 2,
   "findings": [
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "The defs declare entry param listaId (select:formularioLista) but no member that selects. Added public selecionarLista(listaId | null): publishes selectedLista (the id, persisted), calls obterLista to load the record into lista and fill salvarListaDraft; null clears selection, record and edit draft."
+      "message": "The param listaId selects formularioLista but no request fetches the record; added the public selectFormularioLista(id | null) and the getter formularioLista (row of the loaded listas by id). Selecting also fills salvarListaDraft; an unresolved id publishes client.selectionInvalid in listarListasError."
+    },
+    {
+      "code": "FILTER_STATE_MISSING",
+      "message": "buscarListas takes a name fragment but no state holds it; added the state busca (published by buscarListas) so the search field can show the current filter."
     },
     {
       "code": "DRAFT_STATE_MISSING",
-      "message": "Commands criarLista and salvarLista are submitted from the form formularioLista but no state has source <command>.input. Added criarListaDraft and salvarListaDraft with setCriarListaDraft and setSalvarListaDraft; salvarListaDraft is prefilled from the loaded record (id and version included) and refilled from the returned registro. criarListaDraft starts with ativa = true."
+      "message": "criarLista and salvarLista have no <command>.input state; added criarListaDraft and salvarListaDraft with setCriarListaDraft and setSalvarListaDraft. The edit draft is prefilled from the selected row and refilled from the returned lista after salvarLista."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "criarLista and salvarLista return lista and registro, which no state has as its source. Applied by the route comments: lista (row) is upserted by id into listas, registro redraws lista, selectedLista and salvarListaDraft. A newly created row is appended at the end of listas, not in name order, because the browser does not sort; a reload (listarListas) restores the backend order."
+      "message": "The list is ordered by nome by the backend, but criarLista output is appended to listas (no sorting in the browser), so a new list may be out of order; it may also not match an active busca filter. A reload (listarListas/buscarListas) restores the order."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public busca is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
@@ -30,11 +38,15 @@
     },
     {
       "code": "MEMBER_ADDED",
+      "message": "public formularioLista is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
       "message": "public salvarListaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public selecionarLista is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public selectFormularioLista is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",

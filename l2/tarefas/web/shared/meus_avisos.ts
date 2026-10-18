@@ -3,80 +3,97 @@ import { property } from 'lit/decorators.js';
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { execBff } from '/_102029_/l2/bffClient.js';
 import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabState.js';
-import type { Meus_avisosContracts, AvisoResumoDetalhes, AvisoResumo, TarefaResumo, TarefaAviso, AvisoDetalheDetalhes, AvisoDetalhe } from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
-export type { Meus_avisosContracts, AvisoResumoDetalhes, AvisoResumo, TarefaResumo, TarefaAviso, AvisoDetalheDetalhes, AvisoDetalhe } from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
+import type { Meus_avisosContracts, AvisoDetalhe } from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
+export type {
+Meus_avisosContracts,
+AvisoResumoDetails,
+AvisoResumo,
+TarefaAvisoDetails,
+TarefaAviso,
+AvisoLinhaTarefa,
+AvisoDetalheDetails,
+AvisoDetalhe,
+} from '/_102047_/l2/tarefas/web/contracts/meus_avisos.defs.js';
+export type ErrorState = { code: string; message: string; details?: unknown } | null;
 type Input<R extends keyof Meus_avisosContracts> = Meus_avisosContracts[R]['input'];
 type Output<R extends keyof Meus_avisosContracts> = Meus_avisosContracts[R]['output'];
-export type ErrorState = { code: string; message: string; details?: unknown } | null;
-export type AvisosPage = Output<'tarefas.meus_avisos.carregarMeusAvisos'>['avisos'];
+export type AvisosPage = Output<'tarefas.meus_avisos.qryPaginaMeusAvisos'>['avisos'];
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
 type StateMember =
 | 'avisos'
-| 'avisoAberto'
+| 'avisoAtual'
 | 'selectedAvisoVencimento'
-| 'page'
+| 'filtroDataInicio'
+| 'filtroDataFim'
 | 'pageStatus'
-| 'carregarMeusAvisosStatus'
-| 'carregarMeusAvisosError'
-| 'abrirAvisoStatus'
-| 'abrirAvisoError'
+| 'qryPaginaMeusAvisosStatus'
+| 'qryPaginaMeusAvisosError'
+| 'qryListarMeusAvisosStatus'
+| 'qryListarMeusAvisosError'
+| 'qryAvisoPorIdStatus'
+| 'qryAvisoPorIdError'
 | 'scenary';
 const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
 'ui.tarefas.meus_avisos.avisos': 'avisos',
-'ui.tarefas.meus_avisos.avisoAberto': 'avisoAberto',
+'ui.tarefas.meus_avisos.avisoAtual': 'avisoAtual',
 'ui.tarefas.meus_avisos.selectedAvisoVencimento': 'selectedAvisoVencimento',
-'ui.tarefas.meus_avisos.page': 'page',
+'ui.tarefas.meus_avisos.filtroDataInicio': 'filtroDataInicio',
+'ui.tarefas.meus_avisos.filtroDataFim': 'filtroDataFim',
 'ui.tarefas.meus_avisos.pageStatus': 'pageStatus',
-'ui.tarefas.meus_avisos.carregarMeusAvisosStatus': 'carregarMeusAvisosStatus',
-'ui.tarefas.meus_avisos.carregarMeusAvisosError': 'carregarMeusAvisosError',
-'ui.tarefas.meus_avisos.abrirAvisoStatus': 'abrirAvisoStatus',
-'ui.tarefas.meus_avisos.abrirAvisoError': 'abrirAvisoError',
+'ui.tarefas.meus_avisos.qryPaginaMeusAvisosStatus': 'qryPaginaMeusAvisosStatus',
+'ui.tarefas.meus_avisos.qryPaginaMeusAvisosError': 'qryPaginaMeusAvisosError',
+'ui.tarefas.meus_avisos.qryListarMeusAvisosStatus': 'qryListarMeusAvisosStatus',
+'ui.tarefas.meus_avisos.qryListarMeusAvisosError': 'qryListarMeusAvisosError',
+'ui.tarefas.meus_avisos.qryAvisoPorIdStatus': 'qryAvisoPorIdStatus',
+'ui.tarefas.meus_avisos.qryAvisoPorIdError': 'qryAvisoPorIdError',
 'ui.tarefas.meus_avisos.scenary': 'scenary',
 };
 const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
-/** persisted members and the entry param name each one is stored under */
-const PERSISTED_PARAM_BY_MEMBER: Partial<Record<StateMember, string>> = {
-page: 'page',
-selectedAvisoVencimento: 'avisoVencimentoId',
-};
 const PAGE_SIZE = 20;
+const PARAM_STORAGE_KEY = 'tarefas.meus_avisos.avisoVencimentoId';
 function emptyAvisosPage(): AvisosPage {
 return { items: [], page: 1, pageSize: PAGE_SIZE, hasMore: false };
 }
 export class TarefasMeus_avisosShared extends StateLitElement {
-/** state avisos — the page of daily notices (list and send history), each with totals and send dates; source carregarMeusAvisos.avisos; organisms historicoAvisos, listaAvisos */
+/** state avisos — the list of daily due-date notices of the signed-in person, with reference date, delivery status, totals and generation/finish record; source qryPaginaMeusAvisos.avisos; organisms historicoAvisos, listaAvisos */
 @property({ attribute: false }) avisos: AvisosPage = emptyAvisosPage();
-/** state avisoAberto — the open notice with its due-today or overdue task rows; source carregarMeusAvisos.avisoAberto; organism detalheAviso */
-@property({ attribute: false }) avisoAberto: AvisoDetalhe | null = null;
-/** state selectedAvisoVencimento — id of the notice the person selected (the record itself is avisoAberto); source entry.params.avisoVencimentoId; organisms detalheAviso, listaAvisos; persisted */
+/** state avisoAtual — the notice shown in detail with its totals and task rows (the latest one on opening, the picked one after a selection); source qryPaginaMeusAvisos.avisoAtual; organism avisoDoDia */
+@property({ attribute: false }) avisoAtual: AvisoDetalhe | null = null;
+/** state selectedAvisoVencimento — the id of the notice selected in listaAvisos; source entry.params.avisoVencimentoId; organisms avisoDoDia, listaAvisos; persisted */
 @property({ attribute: false }) selectedAvisoVencimento: string | null = null;
-/** state page — the page of the list the person went to with a pager (completed gap: no state held the page filter); source entry.params.page; organism listaAvisos; persisted */
-@property({ attribute: false }) page: number | null = null;
-/** state pageStatus — overall status of the page: loading while the initial load runs, empty when there are no notices, error if it failed; source page runtime */
-@property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
-/** state carregarMeusAvisosStatus — status of the request carregarMeusAvisos; source request runtime */
-@property({ attribute: false }) carregarMeusAvisosStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
-/** state carregarMeusAvisosError — error of the request carregarMeusAvisos, null when none; source request runtime */
-@property({ attribute: false }) carregarMeusAvisosError: ErrorState = null;
-/** state abrirAvisoStatus — status of the request abrirAviso; source request runtime */
-@property({ attribute: false }) abrirAvisoStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
-/** state abrirAvisoError — error of the request abrirAviso, null when none; source request runtime */
-@property({ attribute: false }) abrirAvisoError: ErrorState = null;
+/** state filtroDataInicio — inclusive start of the reference-date period filter of the list (null = no limit); set by qryListarMeusAvisos; source client filter */
+@property({ attribute: false }) filtroDataInicio: string | null = null;
+/** state filtroDataFim — inclusive end of the reference-date period filter of the list (null = no limit); set by qryListarMeusAvisos; source client filter */
+@property({ attribute: false }) filtroDataFim: string | null = null;
+/** state pageStatus — overall status of the page opening: idle, loading, empty (no notices), success or error */
+@property({ attribute: false }) pageStatus: PageStatus = 'idle';
+/** state qryPaginaMeusAvisosStatus — status of the opening load request */
+@property({ attribute: false }) qryPaginaMeusAvisosStatus: RequestStatus = 'idle';
+/** state qryPaginaMeusAvisosError — error of the opening load request, null when none */
+@property({ attribute: false }) qryPaginaMeusAvisosError: ErrorState = null;
+/** state qryListarMeusAvisosStatus — status of the period list request */
+@property({ attribute: false }) qryListarMeusAvisosStatus: RequestStatus = 'idle';
+/** state qryListarMeusAvisosError — error of the period list request, null when none */
+@property({ attribute: false }) qryListarMeusAvisosError: ErrorState = null;
+/** state qryAvisoPorIdStatus — status of the request that opens one notice */
+@property({ attribute: false }) qryAvisoPorIdStatus: RequestStatus = 'idle';
+/** state qryAvisoPorIdError — error of the request that opens one notice, null when none */
+@property({ attribute: false }) qryAvisoPorIdError: ErrorState = null;
 /** state scenary — the visible scene of the page; '' until the page shows its first scene */
 @property({ attribute: false }) scenary = '';
 private publish<M extends StateMember>(member: M, value: this[M]): void {
 (this as unknown as Record<string, unknown>)[member] = value;
 setState(`ui.tarefas.meus_avisos.${member}`, value);
-const param = PERSISTED_PARAM_BY_MEMBER[member];
-if (param) {
+if (member === 'selectedAvisoVencimento') {
 try {
-const storageKey = `tarefas.meus_avisos.${param}`;
 if (value === null || value === undefined) {
-localStorage.removeItem(storageKey);
+localStorage.removeItem(PARAM_STORAGE_KEY);
 } else {
-localStorage.setItem(storageKey, String(value));
+localStorage.setItem(PARAM_STORAGE_KEY, String(value));
 }
 } catch {
-// storage unavailable: ignore
+// storage unavailable: the selection simply is not persisted
 }
 }
 }
@@ -97,7 +114,7 @@ unsubscribe([...STATE_KEYS], this);
 super.disconnectedCallback();
 }
 public handleIcaStateChange(key: string, value: any): void {
-if (!STATE_MEMBER_BY_KEY[key]) {
+if (!(key in STATE_MEMBER_BY_KEY)) {
 super.handleIcaStateChange(key, value);
 return;
 }
@@ -108,132 +125,172 @@ this.requestUpdate();
 private hydrateData(): void {
 const avisos = getState('ui.tarefas.meus_avisos.avisos');
 if (avisos !== undefined) this.assignState('ui.tarefas.meus_avisos.avisos', avisos);
-const aberto = getState('ui.tarefas.meus_avisos.avisoAberto');
-if (aberto !== undefined) this.assignState('ui.tarefas.meus_avisos.avisoAberto', aberto);
+const atual = getState('ui.tarefas.meus_avisos.avisoAtual');
+if (atual !== undefined) this.assignState('ui.tarefas.meus_avisos.avisoAtual', atual);
 }
 private resetVisit(): void {
 this.publish('pageStatus', 'idle');
-this.publish('carregarMeusAvisosStatus', 'idle');
-this.publish('carregarMeusAvisosError', null);
-this.publish('abrirAvisoStatus', 'idle');
-this.publish('abrirAvisoError', null);
+this.publish('qryPaginaMeusAvisosStatus', 'idle');
+this.publish('qryPaginaMeusAvisosError', null);
+this.publish('qryListarMeusAvisosStatus', 'idle');
+this.publish('qryListarMeusAvisosError', null);
+this.publish('qryAvisoPorIdStatus', 'idle');
+this.publish('qryAvisoPorIdError', null);
+this.publish('filtroDataInicio', null);
+this.publish('filtroDataFim', null);
 this.publish('scenary', '');
 }
-private readParam(name: string): string | null {
-const fromUrl = new URLSearchParams(window.location.search).get(name);
-if (fromUrl !== null && fromUrl !== '') return fromUrl;
+private readUrlParam(name: string): string | null {
 try {
-const stored = localStorage.getItem(`tarefas.meus_avisos.${name}`);
-if (stored !== null && stored !== '') return stored;
+const search = typeof window !== 'undefined' && window.location ? window.location.search : '';
+if (!search) return null;
+return new URLSearchParams(search).get(name);
 } catch {
-// storage unavailable: ignore
-}
 return null;
 }
-private applyEntryParams(): void {
-const rawPage = this.readParam('page');
-let pageValue: number | null = null;
-if (rawPage !== null) {
-const parsed = Number(rawPage);
-if (Number.isFinite(parsed) && parsed >= 1) pageValue = parsed;
 }
-this.publish('page', pageValue);
-const selected = this.readParam('avisoVencimentoId') ?? this.readParam('avisoId');
-this.publish('selectedAvisoVencimento', selected);
+private applyEntryParams(): void {
+let value: string | null = this.readUrlParam('avisoVencimentoId');
+if (value === null || value === '') {
+value = null;
+try {
+const stored = localStorage.getItem(PARAM_STORAGE_KEY);
+if (stored !== null && stored !== '') value = stored;
+} catch {
+value = null;
+}
+}
+this.publish('selectedAvisoVencimento', value);
 }
 private async startVisit(): Promise<void> {
-await this.carregarMeusAvisos();
-const selected = this.selectedAvisoVencimento;
-if (selected !== null && selected !== '' && this.avisoAberto?.id !== selected) {
-await this.abrirAviso(selected);
-}
+await this.qryPaginaMeusAvisos();
+if (this.qryPaginaMeusAvisosStatus !== 'success') return;
+const id = this.selectedAvisoVencimento;
+if (id !== null) await this.qryAvisoPorId(id);
 }
 private unexpectedError(error: unknown): ErrorState {
-return { code: 'client.unexpected', message: '', details: { name: error instanceof Error ? error.name : 'unknown' } };
+const name = error instanceof Error ? error.name : 'unknown';
+return { code: 'client.unexpected', message: '', details: { name } };
 }
-/** scene — publishes the visible scene of the page (any string; '' for none) */
+/** setScenario — publishes the visible scene of the page (scenary); no backend call */
 public setScenario(value: string): void {
 this.publish('scenary', value);
 }
-/** request carregarMeusAvisos — opens the page: the paged list of the session user's daily notices (also the send history) and the latest notice already open with its tasks; redraws avisos (replace, or append the next page when append is true; page/hasMore stay in the list), avisoAberto (replace, only when no notice is selected and not appending) and page (the page the person went to with a pager, only when not appending); also the method to reload and to page the list. page: page to load (omit to use the stored page, or the first); append: true adds the next page to the items (only when the list says hasMore) */
-public async carregarMeusAvisos(page?: number, append = false): Promise<void> {
-if (this.carregarMeusAvisosStatus === 'loading') return;
-let target = page ?? this.page ?? 1;
-if (append) {
-if (!this.avisos.hasMore) return;
-target = this.avisos.page + 1;
+/** select — selects the notice shown in avisoDoDia by its id (or null to clear the selection); a non-null id opens it through qryAvisoPorId and redraws avisoAtual; null only clears selectedAvisoVencimento and keeps the notice already shown */
+public selectAvisoVencimento(id: string | null): void {
+if (id === null || id === '') {
+this.publish('selectedAvisoVencimento', null);
+return;
 }
-this.publish('carregarMeusAvisosStatus', 'loading');
-this.publish('carregarMeusAvisosError', null);
+void this.qryAvisoPorId(id);
+}
+/** request qryPaginaMeusAvisos — opening load: first page of the signed-in person's daily notices and the most recent completed notice with its tasks; redraws avisos (replace) and avisoAtual (replace, null when the person has no notice) and pageStatus; no arguments, also the method to reload the page */
+public async qryPaginaMeusAvisos(): Promise<void> {
+if (this.qryPaginaMeusAvisosStatus === 'loading') return;
+this.publish('qryPaginaMeusAvisosStatus', 'loading');
+this.publish('qryPaginaMeusAvisosError', null);
 this.publish('pageStatus', 'loading');
-// responsavelId: entry param read by name (url or storage); the backend fills it from the session when absent
-const responsavelId = this.readParam('responsavelId') ?? '';
-const input: Input<'tarefas.meus_avisos.carregarMeusAvisos'> = {
-responsavelId,
-page: target,
-pageSize: PAGE_SIZE,
-};
 try {
-const response = await execBff<Output<'tarefas.meus_avisos.carregarMeusAvisos'>>('tarefas.meus_avisos.carregarMeusAvisos', input, { mode: 'silent' });
+const input: Input<'tarefas.meus_avisos.qryPaginaMeusAvisos'> = { page: 1, pageSize: PAGE_SIZE };
+const response = await execBff<Output<'tarefas.meus_avisos.qryPaginaMeusAvisos'>>(
+'tarefas.meus_avisos.qryPaginaMeusAvisos',
+input,
+{ mode: 'silent' },
+);
 if (!response.ok || !response.data) {
-this.publish('carregarMeusAvisosError', response.error ?? this.unexpectedError(null));
-this.publish('carregarMeusAvisosStatus', 'error');
+this.publish('qryPaginaMeusAvisosError', response.error);
+this.publish('qryPaginaMeusAvisosStatus', 'error');
 this.publish('pageStatus', 'error');
 return;
 }
 const output = response.data;
-if (append) {
-this.publish('avisos', {
-items: [...this.avisos.items, ...output.avisos.items],
-page: output.avisos.page,
-pageSize: output.avisos.pageSize,
-hasMore: output.avisos.hasMore,
-});
-} else {
 this.publish('avisos', output.avisos);
-if (page !== undefined) this.publish('page', page);
-if (this.selectedAvisoVencimento === null) {
-this.publish('avisoAberto', output.avisoAberto ?? null);
-}
-}
-this.publish('carregarMeusAvisosStatus', 'success');
-this.publish('pageStatus', this.avisos.items.length === 0 ? 'empty' : 'success');
+this.publish('avisoAtual', output.avisoAtual ?? null);
+this.publish('qryPaginaMeusAvisosStatus', 'success');
+this.publish('pageStatus', output.avisos.items.length === 0 ? 'empty' : 'success');
 } catch (error) {
-this.publish('carregarMeusAvisosError', this.unexpectedError(error));
-this.publish('carregarMeusAvisosStatus', 'error');
+this.publish('qryPaginaMeusAvisosError', this.unexpectedError(error));
+this.publish('qryPaginaMeusAvisosStatus', 'error');
 this.publish('pageStatus', 'error');
 }
 }
-/** request abrirAviso — select a notice of the list and load it with its task rows; redraws avisoAberto (replace) and selectedAvisoVencimento (the id, persisted). avisoId: id of the notice picked in the list; null clears the selection (no call) */
-public async abrirAviso(avisoId: string | null): Promise<void> {
-if (avisoId === null) {
-this.publish('selectedAvisoVencimento', null);
-this.publish('abrirAvisoStatus', 'idle');
-this.publish('abrirAvisoError', null);
-return;
-}
-if (this.abrirAvisoStatus === 'loading') return;
-if (avisoId === '') {
-this.publish('abrirAvisoError', { code: 'client.requiredMissing', message: '', details: { stateKeys: ['ui.tarefas.meus_avisos.selectedAvisoVencimento'] } });
-this.publish('abrirAvisoStatus', 'error');
-return;
-}
-this.publish('abrirAvisoStatus', 'loading');
-this.publish('abrirAvisoError', null);
-const input: Input<'tarefas.meus_avisos.abrirAviso'> = { avisoId };
+/** request qryListarMeusAvisos — lists the person's daily notices in a period, page by page; redraws avisos (replace, or append the next page when append is true; append does nothing when avisos.hasMore is false); arguments: dataInicio and dataFim are the inclusive reference-date limits (string, null = no limit, undefined = keep the current filter; a new filter should be loaded with page 1), page is the page to load (default 1), append adds the page to the items (load more) */
+public async qryListarMeusAvisos(
+dataInicio?: string | null,
+dataFim?: string | null,
+page = 1,
+append = false,
+): Promise<void> {
+if (this.qryListarMeusAvisosStatus === 'loading') return;
+if (append && !this.avisos.hasMore) return;
+if (dataInicio !== undefined) this.publish('filtroDataInicio', dataInicio === '' ? null : dataInicio);
+if (dataFim !== undefined) this.publish('filtroDataFim', dataFim === '' ? null : dataFim);
+this.publish('qryListarMeusAvisosStatus', 'loading');
+this.publish('qryListarMeusAvisosError', null);
 try {
-const response = await execBff<Output<'tarefas.meus_avisos.abrirAviso'>>('tarefas.meus_avisos.abrirAviso', input, { mode: 'silent' });
+const inicio = this.filtroDataInicio;
+const fim = this.filtroDataFim;
+const input: Input<'tarefas.meus_avisos.qryListarMeusAvisos'> = {
+...(inicio !== null && inicio !== '' ? { dataInicio: inicio } : {}),
+...(fim !== null && fim !== '' ? { dataFim: fim } : {}),
+page,
+pageSize: PAGE_SIZE,
+};
+const response = await execBff<Output<'tarefas.meus_avisos.qryListarMeusAvisos'>>(
+'tarefas.meus_avisos.qryListarMeusAvisos',
+input,
+{ mode: 'silent' },
+);
 if (!response.ok || !response.data) {
-this.publish('abrirAvisoError', response.error ?? this.unexpectedError(null));
-this.publish('abrirAvisoStatus', 'error');
+this.publish('qryListarMeusAvisosError', response.error);
+this.publish('qryListarMeusAvisosStatus', 'error');
 return;
 }
-this.publish('avisoAberto', response.data.aviso);
-this.publish('selectedAvisoVencimento', avisoId);
-this.publish('abrirAvisoStatus', 'success');
+const loaded = response.data.avisos;
+if (append) {
+this.publish('avisos', {
+items: [...this.avisos.items, ...loaded.items],
+page: loaded.page,
+pageSize: loaded.pageSize,
+hasMore: loaded.hasMore,
+});
+} else {
+this.publish('avisos', loaded);
+}
+this.publish('qryListarMeusAvisosStatus', 'success');
 } catch (error) {
-this.publish('abrirAvisoError', this.unexpectedError(error));
-this.publish('abrirAvisoStatus', 'error');
+this.publish('qryListarMeusAvisosError', this.unexpectedError(error));
+this.publish('qryListarMeusAvisosStatus', 'error');
+}
+}
+/** request qryAvisoPorId — opens one daily notice with its totals and task rows; selects it (selectedAvisoVencimento, persisted) and redraws avisoAtual (replace); argument id is the id of the chosen notice (a row of avisos) */
+public async qryAvisoPorId(id: string): Promise<void> {
+if (this.qryAvisoPorIdStatus === 'loading') return;
+if (id === '') {
+this.publish('qryAvisoPorIdError', { code: 'client.requiredMissing', message: '', details: { params: ['id'] } });
+this.publish('qryAvisoPorIdStatus', 'error');
+return;
+}
+this.publish('qryAvisoPorIdStatus', 'loading');
+this.publish('qryAvisoPorIdError', null);
+try {
+const input: Input<'tarefas.meus_avisos.qryAvisoPorId'> = { id };
+const response = await execBff<Output<'tarefas.meus_avisos.qryAvisoPorId'>>(
+'tarefas.meus_avisos.qryAvisoPorId',
+input,
+{ mode: 'silent' },
+);
+if (!response.ok || !response.data) {
+this.publish('qryAvisoPorIdError', response.error);
+this.publish('qryAvisoPorIdStatus', 'error');
+return;
+}
+this.publish('selectedAvisoVencimento', id);
+this.publish('avisoAtual', response.data.aviso);
+this.publish('qryAvisoPorIdStatus', 'success');
+} catch (error) {
+this.publish('qryAvisoPorIdError', this.unexpectedError(error));
+this.publish('qryAvisoPorIdStatus', 'error');
 }
 }
 }

@@ -4,32 +4,32 @@
   "module": "tarefas",
   "pageId": "membros_equipe",
   "device": "desktop",
-  "contextHash": "sha256:e5c6be049e2296b9e16c284b4d66208e3cc60098692f6959f015d70dd9953e59",
+  "contextHash": "sha256:8174cbd093f5d29df14a9b69c1a82fc9219a58cf7c8994b881d0fe8ccf10bcbe",
   "sourcePath": "l2/tarefas/web/desktop/page11/membros_equipe.ts",
-  "sourceHash": "sha256:50cf7fa73e35f145ddaf175427909ce60f927454b88e1c1a2abeed64a373b096",
-  "attempt": 1,
+  "sourceHash": "sha256:e44bbdb5b56f0ab0d076ff237a2cee884986cd77ad81bfbf46b6e52e5a1948ff",
+  "attempt": 2,
   "design": {
-    "concept": "Uma superfície de consulta calma: a tabela da equipe à esquerda é o foco, com busca discreta e o botão \"Nova pessoa\" acima. Ao escolher uma linha (ou criar), o cadastro abre ao lado, sem cobrir a tabela, e a linha escolhida permanece marcada.",
+    "concept": "Uma superfície de referência calma: a tabela de pessoas da equipe domina a esquerda e um painel lateral fixo ao lado edita ou cadastra, sem nunca cobrir a tabela. Clicar numa linha abre o painel preenchido com a pessoa; \"Nova pessoa\" abre o mesmo painel vazio. A tabela nunca é editável.",
     "views": [
       {
-        "id": "vazio",
-        "purpose": "Estado quieto do painel: orienta a escolher uma pessoa ou iniciar um cadastro novo."
+        "id": "novo",
+        "purpose": "Painel lateral em modo cadastro: nome e país da nova pessoa, com o botão que nomeia o resultado."
       },
       {
-        "id": "cadastro",
-        "purpose": "Painel de cadastro: formulário vazio para pessoa nova ou formulário preenchido da pessoa selecionada, com Situação, Papéis e Contatos apenas para leitura."
+        "id": "editar",
+        "purpose": "Painel lateral em modo edição da pessoa selecionada: o título é o nome dela, mostra situação, papéis e contatos só para leitura e deixa corrigir nome e país."
       }
     ],
-    "decisions": "Segui o template compactCrudTable: tabela primeiro, busca, botão de criar e painel lateral. O painel é uma região controlada pelo host de cenas (modo scenary) ao lado da tabela, que fica fora do host e sempre visível. Mantive uma única cena de cadastro: o formulário de criação ou de edição depende da pessoa selecionada, assim o aviso de sucesso do cadastro não é apagado ao trocar de cena (setScenario zera os resultados dos comandos). A paginação usa botões Anterior/Próxima com hasMore, pois o backend não entrega o total de páginas que o controle de paginação exigiria. A busca usa o evento search com debounce e o clear. As colunas não são ordenáveis, porque a ordenação interna reordenaria os índices de seleção. Salvar fica desabilitado até os campos obrigatórios estarem preenchidos. O erro de comando aparece dentro do painel, acima do botão. O sucesso é local, no painel. Não implementei a confirmação ao fechar com alterações não salvas, porque ela exigiria a página comparar o rascunho com o registro, e o brief proíbe cálculos na página. Situação e Papéis são somente leitura, exibidos como o backend entrega."
+    "decisions": "O host de cenas cobre só a região do painel (mode=scenary) enquanto a tabela fica sempre visível e marca a linha selecionada por índice. Botão \"Fechar painel\" próprio para pedir confirmação quando há alterações não salvas. Busca com ml-search-bar; \"Carregar mais\" quando há mais páginas. Salvar fica desabilitado até nome e país preenchidos e algo mudar. Erro de comando aparece no painel; sucesso em toast breve. Situação vira selo discreto. Se a página abre sem o que precisa, mostra explicação e botão Voltar. Correção: o rótulo de voltar do host de cenas passa como atributo backLabel, como o contrato da molécula."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section equipeCadastrada needs an element with data-section-id=\"equipeCadastrada\"."
+      "message": "Section equipe needs an element with data-section-id=\"equipe\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section manutencaoPessoa needs an element with data-section-id=\"manutencaoPessoa\"."
+      "message": "Section cadastro needs an element with data-section-id=\"cadastro\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",

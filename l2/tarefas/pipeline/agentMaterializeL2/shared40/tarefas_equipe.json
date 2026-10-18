@@ -3,118 +3,70 @@
   "project": 102047,
   "module": "tarefas",
   "pageId": "tarefas_equipe",
-  "unitInputHash": "sha256:473cd537b0eb265f796c1b01d3bea262c11caa7ac0b926bd774ba2742f284a9a",
+  "unitInputHash": "sha256:b5ece9356bf49c0b1d8727801742d5b29d1a8d6ef8206e11570ef1e756c00a14",
   "promptHash": "sha256:285f13d9e093816ed7270af464b539a73e096344c3a45829abeaaec8c5ebc18c",
-  "rulesHash": "sha256:6814f44523adc8d2f6c15874181c4015d7c2c2b5d4c5c3fc20684ea9e9570e7c",
+  "rulesHash": "sha256:949fb2b49678e5b865db22fb4ca08daaece960d5ff9e5471b6581caaff240fe9",
   "sourcePath": "l2/tarefas/web/shared/tarefas_equipe.ts",
-  "sourceHash": "sha256:143a721dc431f6c147bbd19ca21c1d964925b82493119d13aefbaca700e62100",
+  "sourceHash": "sha256:cfb8735ad6d1c9192bc1f869525d95eb3942dc1945b49245c07936787244a0d5",
   "declarationPath": "l2/tarefas/web/shared/tarefas_equipeDts.txt",
-  "declarationHash": "sha256:dcd336b09798336ff9b7bea6f3b51fdfa110e73f98359576ef589afcc8aa99c3",
-  "attempt": 1,
+  "declarationHash": "sha256:6d795b759381387529441e817b6e2db13002f612b8873dec80b96fd5d47a406d",
+  "attempt": 2,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "Entry params listaId, responsavelId, prioridade, prazo, status, titulo, page, name and somenteAtivos had no state. Added persisted states filtroListaId, filtroResponsavelId, filtroPrioridade, filtroPrazo, filtroStatus (array parsed from a comma-separated param), filtroTitulo, filtroPagina, filtroNomeMembro and filtroSomenteAtivos, with filter methods (selecionarLista, filtrarPorResponsavel, filtrarPorPrioridade, filtrarPorPrazo, filtrarPorStatus, buscarPorTitulo, limparFiltros). The contract input names the title filter 'titulo' and the due date 'prazo' (single date, not a range)."
+      "message": "The entry params listaId, responsavelId, prioridade, status, prazoDe, prazoAte, venceHoje and atrasada have effect filter:tarefasEquipe but no state holds them. Added one persisted public state per param (same id as the param), applied from URL/localStorage on entry and changed through the filters argument of listarTarefasEquipe."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "No public selection member existed for selectedTarefa (id) nor for the Lista selection. Added selecionarTarefa(id|null), which loads the record through qryDetalheTarefa, and selecionarLista(id|null) plus the getter lista (row of listas), since no query fetches a Lista by id."
+      "message": "The selectedTarefa state (entry.params.tarefaId) had no method to select. The request method obterTarefa(tarefaId | null) selects the task, persists the id and loads the record into tarefa; null clears it."
     },
     {
-      "code": "DRAFT_STATE_MISSING",
-      "message": "cmdReatribuirTarefa has no <command>.input state. Added cmdReatribuirTarefaDraft (ReatribuirTarefaDraft, responsavelId) with setCmdReatribuirTarefaDraft; id and version come from the loaded tarefa."
+      "code": "DRAFT_STATE_ADDED",
+      "message": "The command reatribuirTarefa has a typed input (responsavelId) but no <command>.input state. Added the public reatribuirTarefaDraft state with setReatribuirTarefaDraft, prefilled from the selected task and refilled from the record the command returns."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "cmdReatribuirTarefa and cmdCancelarTarefa return itemQuadro, which no state has as source. It is applied to tarefas by id (only when the row is loaded); it is removed when it no longer matches the situation or responsible filters. Board ordering, the page's hasMore and other filters (list, priority, due date, title) cannot be recomputed in the browser and may stay stale until the board is reloaded. The membros state is also not refreshed by the reassignment."
+      "message": "reatribuirTarefa and cancelarTarefa return a TarefaDetalhe, but the board rows are TarefaEquipeItem. The row is updated by id (status, owner, title, priority, due date, checklist progress) or removed when it no longer matches the active filters, but the row's venceHoje/atrasada indicators and the list name cannot be recomputed from the detail and stay as loaded (a cancelled task may keep its overdue mark until the list is reloaded)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public buscarPorTitulo is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public atrasada is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public cancelarTarefa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public listaId is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public cmdReatribuirTarefaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public prazoAte is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtrarPorPrazo is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public prazoDe is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtrarPorPrioridade is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public prioridade is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtrarPorResponsavel is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public reatribuirTarefaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtrarPorStatus is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public responsavelId is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtroListaId is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public setReatribuirTarefaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtroNomeMembro is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public status is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public filtroPagina is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public filtroPrazo is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public filtroPrioridade is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public filtroResponsavelId is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public filtroSomenteAtivos is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public filtroStatus is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public filtroTitulo is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public limparFiltros is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public lista is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public reatribuirTarefa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public selecionarLista is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public selecionarTarefa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
-    },
-    {
-      "code": "MEMBER_ADDED",
-      "message": "public setCmdReatribuirTarefaDraft is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public venceHoje is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     }
   ]
 }

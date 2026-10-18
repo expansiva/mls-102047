@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_gestor",
   "device": "mobile",
-  "contextHash": "sha256:96e2755bb2888f166a3a2112976128d32ff5ed44b05f226b5be4d9a9a328efba",
+  "contextHash": "sha256:a611c7fb548d3f47ba8b9139a806c4990811c8777c37ccbeda7ae535aaa1f6c2",
   "sourcePath": "l2/tarefas/web/mobile/page11/inicio_gestor.ts",
-  "sourceHash": "sha256:dae5a4315c2ce2f8e6befead9fd32edd50748e800b2cee87f82cc8b0cf286f96",
-  "attempt": 1,
+  "sourceHash": "sha256:39046ff5055512553fbc06423f68051b6a010c2bc4e6ef13d4dc3fdc3c5294d8",
+  "attempt": 2,
   "design": {
-    "concept": "Uma tela de triagem para o gestor no celular: abre com uma frase que diz quanto está atrasado e vencendo hoje, logo abaixo a lista de tarefas que pedem ação (cada linha é um toque para agir), e só depois, em tom discreto, os números da equipe e as tarefas abertas por lista. Se nada precisa de atenção, a tela diz isso com calma e mantém os números visíveis.",
+    "concept": "Uma tela de triagem para o celular: a primeira frase diz quanto precisa do gestor agora (atrasadas e que vencem hoje), logo abaixo vem a fila de tarefas a decidir, e só depois uma faixa discreta com os totais da equipe, as tarefas por lista e o progresso das checklists. Cada tarefa é uma linha inteira tocável que abre Tarefas da equipe.",
     "views": [],
-    "decisions": "A página tem uma única visão, então não usa o scene host. Segui a seção 'On mobile' do template, que vence o defs: a frase de triagem vem primeiro e os totais (destaquesEquipe) ficam abaixo da lista como uma faixa discreta, sem cartões nem gráficos — por isso não usei metric-big-number, bar-chart nem linear-progress (o progresso vem pronto como texto e calcular um percentual seria derivar dado). A frase de triagem junta os totais que o servidor já entrega, sem somar nada. A fila mantém a ordem do servidor (atrasadas primeiro); cada linha traz identidade (título, responsável, lista, situação), o fato decisivo à direita (prazo e marca Atrasada/Vence hoje, vindas das flags do servidor) e é um botão inteiro de 56px que chama agirNaTarefa. A cor de alarme só aparece no prazo/marca de tarefa atrasada; vence-hoje usa aviso. A paginação é um 'Ver mais tarefas' (ml-button-standard) usando hasMore, já que não há total de páginas para o pagination-control. Estado de boa notícia usa pageStatus 'empty'. Cada região (fila e panorama) trata erro próprio com 'Tentar de novo', e o erro de pré-condição ausente explica em palavras e oferece abrir as tarefas da equipe. As listas abertas levam às tarefas da equipe já filtradas pela lista; links finais abrem tarefas da equipe e listas."
+    "decisions": "Segui a seção 'On mobile' do template, que vence as seções do defs: o organismo tarefasParaAcao (prioridade 'main') vem ANTES de destaquesEquipe (prioridade 'primary'), porque agregados acima das filas são proibidos no celular. A manchete usa só os totais prontos do backend (totalAtrasadas, totalVenceHoje), sem somar nada. Há uma única fila na ordem em que o backend entrega (atrasadas primeiro); o fato decisivo de cada linha (Atrasada / Vence hoje + prazo) vem dos flags readonly da linha e é o único lugar com cor de alarme. Como a página não guarda estado, não há 'ver todas' expansível: a fila mostra o que foi carregado e um botão 'Carregar mais' chama a próxima página. A faixa de saúde é uma lista de pares valor+rótulo sem cartões; o progresso das checklists aparece como texto 'feitos/total' porque a barra exigiria calcular um percentual. As tarefas por lista ficam num bloco recolhido (details) com o gráfico de barras, rebaixado ao fim. Sem cena: é uma só vista. Estados: esqueleto na fila, erro por região com 'Tentar de novo', estado de boas notícias calmo quando pageStatus é 'empty', e aviso em palavras quando falta escolher uma tarefa (client.preconditionMissing). Linhas e botões com no mínimo 44px. Correção: as tags das moléculas levam o sufixo do projeto (-102040) e os elementos filhos (Column, Point) são fechados explicitamente."
   },
   "advisories": [
     {
@@ -20,27 +20,31 @@
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section tarefasParaAgir needs an element with data-section-id=\"tarefasParaAgir\"."
+      "message": "Section atencaoGestor needs an element with data-section-id=\"atencaoGestor\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism destaquesEquipe (Totais de abertas, vencendo hoje e atrasadas) renders neither <groupviewmetric--ml-metric-big-number> nor <groupviewmetric--ml-metric-card>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism destaquesEquipe (Tarefas abertas por lista) renders neither <groupviewchart--ml-bar-chart>."
+      "message": "Organism destaquesEquipe (Totais de tarefas abertas, das que vencem hoje e das atrasadas) renders neither <groupviewmetric--ml-metric-big-number> nor <groupviewmetric--ml-metric-card>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism destaquesEquipe (Progresso das checklists) renders neither <groupshowprogress--ml-linear-progress>."
     },
     {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasPedemAcao (Tarefas que pedem ação) renders neither <groupviewdata--ml-vertical-record-list>."
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <grouptriggeraction--ml-button-standard-102040> is not in this page's list."
     },
     {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasPedemAcao (Paginar as tarefas) renders neither <grouptriggeraction--ml-pagination-control>."
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupviewdata--ml-vertical-record-list-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE",
+      "message": "[contract] Molecule <groupviewchart--ml-bar-chart-102040> is not in this page's list."
+    },
+    {
+      "code": "M4_PAGE_I18N",
+      "message": "[contract] Never as const on a catalogue."
     }
   ]
 }

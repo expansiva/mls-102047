@@ -4,36 +4,40 @@
   "module": "tarefas",
   "pageId": "membros_equipe",
   "device": "mobile",
-  "contextHash": "sha256:6b1600eb799bc5e28c9a96b37acdd0136e66e8d2688e04d62c837e9da43f62ab",
+  "contextHash": "sha256:eaca5532fe276b6aa2aa08963a1361887bed43b19d89fccfc325012bdef6c6a6",
   "sourcePath": "l2/tarefas/web/mobile/page11/membros_equipe.ts",
-  "sourceHash": "sha256:ae6247937ed519d428ab766341df83cc3260af560557a31455dfb9f455c2c7d1",
-  "attempt": 1,
+  "sourceHash": "sha256:88a84fec100fa06f7dd89885cdabc0302d2fd0260f4c462a7708e0b108229fd6",
+  "attempt": 2,
   "design": {
-    "concept": "A calm two-step mobile surface. The first view is a compact list of team people, with a quiet name search on top, cards that show the name large with status and country behind it, and a create button that is always within thumb reach. Tapping a person, or the create button, opens the record view. It is a single column with name and country and a Save button pinned at the bottom. After a successful save it returns to the list with the person still marked.",
+    "concept": "Um fluxo de duas telas numa coluna só, pensado para o polegar. A lista compacta das pessoas da equipe, com busca no topo e o botão de nova pessoa sempre no rodapé, abre o cadastro como uma tela própria, com voltar. O cadastro serve tanto para cadastrar quanto para corrigir nome e país, e o botão de salvar fica fixo na base.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Scan and search the team, spot the selected or just-saved person, load more people, and start a new registration."
+        "purpose": "Consultar as pessoas da equipe: busca pelo nome, cartões com nome grande e situação e país pequenos, carregar mais e o botão fixo de nova pessoa. Tocar numa pessoa abre o cadastro dela."
       },
       {
-        "id": "registro",
-        "purpose": "One-field-per-line form to register a new person or correct the name and country of the selected one, with the save action pinned at the bottom and a way back."
+        "id": "cadastro",
+        "purpose": "Um campo por linha: nome e país. Cadastra uma pessoa nova quando nada está selecionado e corrige a pessoa escolhida quando há seleção. O título é a identidade da pessoa. Salvar fica fixo no rodapé e o erro do comando aparece logo acima dele."
       }
     ],
-    "decisions": "I followed the mobile section of the compactCrudTable template. The side panel becomes a scene of its own, switched only by the scenary host in mode=scenary with back. The list and the form never share a screen.\n\nI chose the alternative groupviewtable--ml-responsive-table over the data table. The data table keeps three columns and scrolls sideways on narrow screens, which is forbidden on mobile. The responsive table turns each row into a labelled card.\n\nThe selected row is marked by the table's `value`, using the index of the selected person. After a save the person stays marked, and that is the success feedback. A success toast would be wiped by setScenario, which resets command results, so I dropped it.\n\nThe list has no total count, so I used a 'Ver mais pessoas' button that appends the next page instead of the pagination control. Paging stays wiring and is never a field.\n\nSave is disabled while name or country is empty or while a request runs. Command errors show inline above the Save button, with contextual feedback, in the page body style. The scene title carries the person's identity when editing, and there is no extra page header.\n\nThe record view also shows the read-only status and contacts as a quiet definition list. The country is a text field because the contract offers no country list.\n\nI did not add the unsaved-changes confirm on back. The host owns the back control, so the page cannot intercept it, and the drafts live in the shared state.\n\nThe empty, loading and error states are designed. A missing-precondition error says in words what is missing and offers a way back."
+    "decisions": "Segui a experiência compactCrudTable na versão mobile: a lista e o formulário nunca ficam empilhados e nenhuma gaveta cobre a lista. As duas telas trocam só pelo host de cenas em mode=scenary, e o voltar do próprio host leva à lista. Usei ml-responsive-table, a alternativa preferida para telas estreitas, porque ela vira cartões e a responsive-data-table esconderia colunas ou criaria rolagem horizontal. Paginação por páginas numeradas não cabe, pois o contrato não traz o total de páginas, só hasMore; por isso uso um botão Carregar mais. Depois de salvar ou cadastrar com sucesso, volta-se à lista, a linha continua marcada pela seleção e um toast curto confirma. Erros de comando ficam dentro do formulário, com contextual-feedback. O botão de salvar só habilita com os campos obrigatórios preenchidos e, na edição, com alguma mudança. A falta de pré-condição vira uma explicação em palavras com botão de voltar. Situação e papéis (somente leitura) aparecem como legenda discreta na edição. Pessoas inativas ficam esmaecidas, nunca em vermelho. A confirmação ao voltar com alterações não salvas não foi implementada, porque o voltar pertence ao host de cenas e a página não guarda estado."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section equipeCadastrada needs an element with data-section-id=\"equipeCadastrada\"."
+      "message": "Section equipe needs an element with data-section-id=\"equipe\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section manutencaoPessoa needs an element with data-section-id=\"manutencaoPessoa\"."
+      "message": "Section cadastro needs an element with data-section-id=\"cadastro\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism pessoasEquipe (paginação da lista) renders neither <grouptriggeraction--ml-pagination-control>."
+    },
+    {
+      "code": "M4_PAGE_I18N",
+      "message": "[contract] The first statement of render() must be this.msg = pageMessages[this.getMessageKey(pageMessages)];"
     }
   ]
 }

@@ -1,33 +1,39 @@
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
-import type { Inicio_gestorContracts, TotaisEquipe, ListaAbertas } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
-export type { Inicio_gestorContracts, TotaisEquipe, ListaAbertasDetails, ListaAbertas, TarefaAcaoDetails, ListaRef, MembroRefIdentification, MembroRefDetails, MembroRef, TarefaAcao, } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
+import type { Inicio_gestorContracts, ListaResumo, TarefaAcao } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
+export type { Inicio_gestorContracts, ListaResumoDetalhes, ListaResumo, ListaNome, MembroNomeIdentificacao, MembroNomeDetalhes, MembroNome, TarefaAcaoDetalhes, TarefaAcao } from '/_102047_/l2/tarefas/web/contracts/inicio_gestor.defs.js';
 export type ErrorState = {
     code: string;
     message: string;
     details?: unknown;
 } | null;
 type Output<R extends keyof Inicio_gestorContracts> = Inicio_gestorContracts[R]['output'];
-type TarefasPage = Output<'tarefas.inicio_gestor.qryTarefasPedemAcao'>['tarefas'];
+export type TarefasPage = Output<'tarefas.inicio_gestor.listarTarefasParaAcao'>['tarefas'];
 type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 export declare class TarefasInicio_gestorShared extends StateLitElement {
-    /** state totais — team indicators already computed on the server (open, due today, overdue, checklist progress); source qryPanoramaEquipe.totais; organism destaquesEquipe */
-    totais: TotaisEquipe | null;
-    /** state listas — active lists with their count of open tasks; source qryPanoramaEquipe.listas; organism destaquesEquipe */
-    listas: ListaAbertas[];
-    /** state tarefas — page { items, page, pageSize, hasMore } of open tasks that are overdue or due today, with list and assignee; source qryTarefasPedemAcao.tarefas; organism tarefasPedemAcao */
+    /** state listas — the list of Lista (projeto ou área) with the count of open tasks each one has; source obterPanoramaEquipe.listas; organism destaquesEquipe */
+    listas: ListaResumo[];
+    /** state totalAbertas — total open tasks of the team; source obterPanoramaEquipe.totalAbertas; organism destaquesEquipe */
+    totalAbertas: number;
+    /** state totalVenceHoje — total open tasks of the team due today; source obterPanoramaEquipe.totalVenceHoje; organism destaquesEquipe */
+    totalVenceHoje: number;
+    /** state totalAtrasadas — total open tasks of the team that are overdue; source obterPanoramaEquipe.totalAtrasadas; organism destaquesEquipe */
+    totalAtrasadas: number;
+    /** state progressoChecklist — overall checklist progress of the open tasks as 'done/total' text; source obterPanoramaEquipe.progressoChecklist; organism destaquesEquipe */
+    progressoChecklist: string;
+    /** state tarefas — the page { items, page, pageSize, hasMore } of team tasks that may ask for a manager decision (overdue and due today), with list name and assignee name; source listarTarefasParaAcao.tarefas; organism tarefasParaAcao */
     tarefas: TarefasPage | null;
-    /** state page — the page of the inbox the person went to with a pager (a "load more" never writes it); source entry.params.page; organism tarefasPedemAcao; persisted */
-    page: number | null;
-    /** state pageStatus — overall status of the page: loading while a request runs, error if one failed, empty when every list is empty, success otherwise; source page */
+    /** state selectedTarefa — the id of the Tarefa selected in destaquesEquipe and tarefasParaAcao; the selected row is the getter tarefasParaAcao; source entry.params.tarefaId; organism destaquesEquipe, tarefasParaAcao; persisted */
+    selectedTarefa: string | null;
+    /** state pageStatus — overall status of the page: idle, loading, empty (every loaded list empty), success or error; written only by the initial/reload loads */
     pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
-    /** state qryPanoramaEquipeStatus — status of the team overview request; source qryPanoramaEquipe */
-    qryPanoramaEquipeStatus: RequestStatus;
-    /** state qryPanoramaEquipeError — error of the team overview request, null when none; source qryPanoramaEquipe */
-    qryPanoramaEquipeError: ErrorState;
-    /** state qryTarefasPedemAcaoStatus — status of the inbox request (also used by navigation errors); source qryTarefasPedemAcao */
-    qryTarefasPedemAcaoStatus: RequestStatus;
-    /** state qryTarefasPedemAcaoError — error of the inbox request, null when none; source qryTarefasPedemAcao */
-    qryTarefasPedemAcaoError: ErrorState;
+    /** state obterPanoramaEquipeStatus — status of the obterPanoramaEquipe request */
+    obterPanoramaEquipeStatus: RequestStatus;
+    /** state obterPanoramaEquipeError — error of the obterPanoramaEquipe request, null when none */
+    obterPanoramaEquipeError: ErrorState;
+    /** state listarTarefasParaAcaoStatus — status of the listarTarefasParaAcao request */
+    listarTarefasParaAcaoStatus: RequestStatus;
+    /** state listarTarefasParaAcaoError — error of the listarTarefasParaAcao request (also client.selectionInvalid and client.preconditionMissing of selection and navigation), null when none */
+    listarTarefasParaAcaoError: ErrorState;
     /** state scenary — the visible scene of the page; '' until the page shows its first scene */
     scenary: string;
     private publish;
@@ -38,19 +44,17 @@ export declare class TarefasInicio_gestorShared extends StateLitElement {
     private hydrateData;
     private resetVisit;
     private applyEntryParams;
-    private loadInitial;
-    private updatePageStatus;
-    private unexpectedError;
-    /** setScenario — publishes the visible scene of the page (scenary); not persisted, not in the URL; scene: the scene name */
+    /** setScenario — publishes the visible scene of the page (scenary) */
     setScenario(value: string): void;
-    /** request qryPanoramaEquipe — loads the team overview (totals of open, due today and overdue tasks, checklist progress, open tasks per list); redraws totais (replace) and listas (replace); no arguments; also the method to reload the overview */
-    qryPanoramaEquipe(): Promise<void>;
-    /** request qryTarefasPedemAcao — loads the inbox of open tasks that are overdue or due today (overdue first); redraws tarefas (replace the page, or append the next page to items when append is true; append keeps page/hasMore inside tarefas and never writes the page state; a pager call with append false publishes the page state); page: page to load (default: the page state, else 1; with append, the next page); append: add the next page to the loaded items, ignored unless tarefas.hasMore */
-    qryTarefasPedemAcao(page?: number, append?: boolean): Promise<void>;
-    /** navigate abrirTarefasEquipe — opens the team tasks page (board/list); listaId: optional list the person picked, carried as the listaId param of tarefas_equipe (omit to open it unfiltered) */
-    abrirTarefasEquipe(listaId?: string | null): void;
-    /** navigate abrirListas — opens the lists page; listaId: optional list the person picked, carried as the listaId param of listas (omit to just open it) */
-    abrirListas(listaId?: string | null): void;
-    /** navigate agirNaTarefa — opens the team tasks page on the chosen inbox task to reassign or cancel it; tarefaId: id of the task the person picked (null refuses with client.preconditionMissing in qryTarefasPedemAcaoError) */
-    agirNaTarefa(tarefaId: string | null): void;
+    /** select — selects the task with this id (null clears the selection); the selected row is read from the getter tarefasParaAcao; an id that no loaded row resolves publishes client.selectionInvalid in listarTarefasParaAcaoError and keeps the previous selection */
+    selectTarefa(id: string | null): void;
+    /** getter — the selected task: the loaded row of tarefas whose id is selectedTarefa, or null when nothing is selected or the row is not loaded */
+    get tarefasParaAcao(): TarefaAcao | null;
+    private refreshPageStatus;
+    /** request obterPanoramaEquipe — loads the team overview (open, due today and overdue totals, overall checklist progress and open tasks per list); redraws totalAbertas, totalVenceHoje, totalAtrasadas, progressoChecklist and listas (replace); no arguments, also the method to reload */
+    obterPanoramaEquipe(): Promise<void>;
+    /** request listarTarefasParaAcao — loads one page of team tasks that may ask for a manager decision (overdue first, then due today); redraws tarefas (replace by default; with append true the items of the page are added to the loaded ones and page/hasMore follow the response, doing nothing when tarefas.hasMore is false); arguments: page = page number starting at 1 (default 1), append = true for a "load more" */
+    listarTarefasParaAcao(page?: number, append?: boolean): Promise<void>;
+    /** navigate abrirTarefasEquipe — opens the team tasks page (tarefas_equipe) on the task the person picked; argument tarefaId = id of the picked task (defaults to the selected one); refuses with client.preconditionMissing in listarTarefasParaAcaoError when there is none */
+    abrirTarefasEquipe(tarefaId?: string | null): void;
 }
