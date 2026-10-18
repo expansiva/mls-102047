@@ -2,266 +2,296 @@
 
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import { taskOccurrence } from '/_102047_/l1/inicio/layer_1_external/adapters/workflow/taskOccurrence.js';
-import type { OccurrenceRef, TaskOccurrence } from '/_102047_/l1/inicio/layer_1_external/adapters/workflow/taskOccurrence.js';
+import type { OccurrenceKey, OccurrenceSnapshot, WorkflowTable } from '/_102034_/l1/workflow/contracts.js';
+import type { WorkflowEngine } from '/_102034_/l1/workflow/engine.js';
+import { engines, workflowTables } from '/_102047_/l1/inicio/layer_1_external/adapters/workflow/engine.js';
 
-const PROJECT = 102047;
-const MODULE = 'inicio';
-const ENTITY = 'PessoaOrganizacao';
 const PROCESS_ID = 'liberacaoAcessoPessoa';
-const WORKFLOW_VERSION = '1';
-const PESSOA_ROLE_TAG = 'inicio.PessoaOrganizacao';
-const EMPRESA_ROLE_TAG = 'inicio.Empresa';
+const MODULE_ID = 'inicio';
+const ENTITY = 'PessoaOrganizacao';
+const ROLE_TAG = 'inicio.PessoaOrganizacao';
+const EMPRESA_TYPE = 'inicio.Empresa';
 
-const STEP_PESSOA_VE_AVISO = 'pessoaVeAvisoLiberacao';
-const STEP_RESPONSAVEL_LIBERA = 'responsavelLiberaAcesso';
-const STEP_AGUARDAR_LIGACAO = 'aguardarLigacaoPlataforma';
-const STEP_PESSOA_COMPLETA = 'pessoaCompletaAcesso';
-const STEP_CONCLUIDA = 'concluida';
+const STEP_AVISO = 'pessoaVeAvisoLiberacao';
+const STEP_RESPONSAVEL = 'responsavelLiberaAcesso';
+const STEP_AGUARDA = 'aguardarLigacaoPlataforma';
+const STEP_COMPLETA = 'pessoaCompletaAcesso';
 
-const ACTOR_PLATAFORMA = 'plataforma';
-const ACTOR_NENHUM = 'nenhum';
-
-/** Countries that require a privacy consent (Brazil and the European Union), rule acessoCompletoDadosMinimos. */
-const CONSENT_COUNTRIES: readonly string[] = [
+// Countries where the privacy consent is required (Brazil and the European Union).
+const CONSENT_COUNTRIES: ReadonlySet<string> = new Set([
   'BR',
   'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE',
   'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
-];
+]);
 
-type OccurrenceKey = Omit<OccurrenceRef, 'workflowVersion'>;
-
-function occurrenceKey(recordId: string): OccurrenceKey {
-  return { project: PROJECT, module: MODULE, entity: ENTITY, recordId, processId: PROCESS_ID };
+export interface LiberacaoAcessoState {
+  pessoaId: string;
+  step: string;
+  actorNow: string | null;
+  done: boolean;
+  occurrence: OccurrenceSnapshot;
 }
 
-function resolvePessoaId(pessoaId: string | undefined, ctx: RequestContext): string {
-  const id = pessoaId ?? ctx.sessionContext.person?.mdmId;
-  if (id == null || id.trim() === '') {
-    throw new AppError('PESSOA_ID_REQUIRED', 'The person of the occurrence was not informed and the session has none.', 400, {
-      ruleId: 'repetirNaoDuplicaPessoa',
-    });
-  }
-  return id;
+export interface AbrirPedidoLiberacaoAcessoInput {
+  pessoaId: string;
+  /** The platform told that the account e-mail could not be linked: another record has the same contact e-mail. */
+  conflitoEmailContato: boolean;
 }
-
-async function findOccurrenceOrFail(ctx: RequestContext, pessoaId: string): Promise<TaskOccurrence> {
-  const occurrence = await taskOccurrence.find(ctx, occurrenceKey(pessoaId));
-  if (occurrence == null) {
-    throw new AppError('OCCURRENCE_NOT_FOUND', 'No access release occurrence was opened for this person.', 404, {
-      ruleId: 'ligacaoLoginPelaPlataforma',
-    });
-  }
-  return occurrence;
+export interface AbrirPedidoLiberacaoAcessoOutput extends LiberacaoAcessoState {
+  created: boolean;
+  responsavelId: string | null;
 }
-
-// ---------------------------------------------------------------------------------------------
-// resolverResponsavelLiberacao
-// ---------------------------------------------------------------------------------------------
 
 export interface ResolverResponsavelLiberacaoInput {
-  /** The company whose responsible is wanted; when absent, the company of the app is used. */
   empresaId?: string;
 }
-
 export interface ResolverResponsavelLiberacaoOutput {
   empresaId: string;
   responsavelId: string;
 }
 
-/** Read only: asks the platform who it recognizes as responsible for the company (being first to enter does not count). */
+export interface RegistrarLiberacaoConcluidaInput {
+  pessoaId: string;
+  /** The platform told that the login of the person is now linked to a record. */
+  loginLigado: boolean;
+}
+export type RegistrarLiberacaoConcluidaOutput = LiberacaoAcessoState;
+
+export interface ConcluirLiberacaoAcessoInput {
+  pessoaId: string;
+}
+export type ConcluirLiberacaoAcessoOutput = LiberacaoAcessoState;
+
+function getEngine(): WorkflowEngine {
+  const engine: WorkflowEngine | undefined = engines[PROCESS_ID];
+  if (!engine) {
+    throw new AppError('WORKFLOW_ENGINE_NOT_FOUND', 'Workflow engine of process ' + PROCESS_ID + ' is not configured', 500);
+  }
+  return engine;
+}
+
+function getTable(): WorkflowTable {
+  const table: WorkflowTable | undefined = workflowTables[PROCESS_ID];
+  if (!table) {
+    throw new AppError('WORKFLOW_TABLE_NOT_FOUND', 'Workflow table of process ' + PROCESS_ID + ' is not configured', 500);
+  }
+  return table;
+}
+
+function keyOf(ctx: RequestContext, pessoaId: string): OccurrenceKey {
+  const project = ctx.sessionContext.project.projectId;
+  if (project == null || project === '') {
+    throw new AppError('PROJECT_REQUIRED', 'The request has no project in its session context', 400);
+  }
+  return { project, module: MODULE_ID, processId: PROCESS_ID, entity: ENTITY, recordId: pessoaId };
+}
+
+function requirePessoaId(pessoaId: string): void {
+  if (typeof pessoaId !== 'string' || pessoaId.trim() === '') {
+    throw new AppError('PESSOA_ID_REQUIRED', 'pessoaId is required', 400, { ruleId: 'repetirNaoDuplicaPessoa' });
+  }
+}
+
+function stateOf(pessoaId: string, occurrence: OccurrenceSnapshot): LiberacaoAcessoState {
+  return { pessoaId, step: occurrence.step, actorNow: occurrence.actorNow, done: occurrence.done, occurrence };
+}
+
+async function loadPessoa(ctx: RequestContext, pessoaId: string) {
+  const pessoa = await ctx.mdm.entity.get({ mdmId: pessoaId });
+  if (!pessoa) {
+    throw new AppError('PESSOA_NOT_FOUND', 'Person ' + pessoaId + ' was not found', 404);
+  }
+  return pessoa;
+}
+
+async function requirePessoaDaOrganizacao(ctx: RequestContext, pessoaId: string) {
+  const pessoa = await loadPessoa(ctx, pessoaId);
+  const tags = pessoa.details.tags;
+  if (!Array.isArray(tags) || !tags.includes(ROLE_TAG)) {
+    throw new AppError('PESSOA_NOT_IN_ORGANIZATION', 'The person is not a member of the organization', 403, {
+      ruleId: 'ligacaoLoginPelaPlataforma',
+    });
+  }
+  return pessoa;
+}
+
+function firstResponsavel(refs: unknown): string | null {
+  if (refs == null || typeof refs !== 'object') return null;
+  const value: unknown = Reflect.get(refs, 'responsavel');
+  if (typeof value === 'string' && value !== '') return value;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      if (typeof item === 'string' && item !== '') return item;
+    }
+  }
+  return null;
+}
+
 export async function resolverResponsavelLiberacao(
   input: ResolverResponsavelLiberacaoInput,
   ctx: RequestContext,
 ): Promise<ResolverResponsavelLiberacaoOutput> {
   let empresaId = input.empresaId;
-  if (empresaId == null) {
-    const list = await ctx.mdm.collection.listByType({ type: EMPRESA_ROLE_TAG, page: 1, pageSize: 1 });
+  if (empresaId == null || empresaId === '') {
+    const list = await ctx.mdm.collection.listByType({ type: EMPRESA_TYPE, page: 1, pageSize: 1 });
     const first = list.items[0];
-    if (first == null) {
-      throw new AppError('EMPRESA_NOT_FOUND', 'The company of the app was not found on the platform.', 404, {
+    if (!first) {
+      throw new AppError('EMPRESA_NOT_FOUND', 'No company of the app was found on the platform', 404, {
         ruleId: 'somenteResponsavelEditaEmpresa',
       });
     }
     empresaId = first.mdmId;
   }
   const empresa = await ctx.mdm.entity.get({ mdmId: empresaId });
-  const related = (empresa.related as (key: string) => string[]).call(empresa, 'responsavel');
-  const responsavelId = related[0];
+  if (!empresa) {
+    throw new AppError('EMPRESA_NOT_FOUND', 'Company ' + empresaId + ' was not found', 404);
+  }
+  // Only who the platform recognizes as responsible counts; being the first to enter does not.
+  const refs: unknown = Reflect.get(empresa.details, 'relationshipRefs');
+  const responsavelId = firstResponsavel(refs);
   if (responsavelId == null) {
-    throw new AppError('RESPONSAVEL_NOT_RECOGNIZED', 'The platform recognizes no responsible for the company.', 409, {
+    throw new AppError('RESPONSAVEL_NOT_FOUND', 'The platform recognizes no responsible for the company', 404, {
       ruleId: 'somenteResponsavelEditaEmpresa',
     });
   }
-  return { empresaId: empresa.mdmId, responsavelId };
+  return { empresaId, responsavelId };
 }
 
-// ---------------------------------------------------------------------------------------------
-// abrirPedidoLiberacaoAcesso
-// ---------------------------------------------------------------------------------------------
-
-export interface AbrirPedidoLiberacaoAcessoInput {
-  /** The authenticated person; when absent, the person of the session. */
-  pessoaId?: string;
-  /** Whether the platform told that the e-mail could not be linked because of another record with the same contact e-mail. */
-  conflitoEmailContato: boolean;
-}
-
-export interface AbrirPedidoLiberacaoAcessoOutput {
-  pessoaId: string;
-  step: string;
-  actorNow: string;
-  occurrence: TaskOccurrence;
-}
-
-/**
- * Opens (or returns) the occurrence of the person and hands it to the responsible.
- * The Task keeps only the reference and the progress; the notification of the responsible
- * follows from the Task now being theirs (actorNow), which the cm reads.
- */
 export async function abrirPedidoLiberacaoAcesso(
   input: AbrirPedidoLiberacaoAcessoInput,
   ctx: RequestContext,
 ): Promise<AbrirPedidoLiberacaoAcessoOutput> {
-  const pessoaId = resolvePessoaId(input.pessoaId, ctx);
+  requirePessoaId(input.pessoaId);
+  const engine = getEngine();
+  const table = getTable();
+  const key = keyOf(ctx, input.pessoaId);
 
+  const existing = await engine.find(ctx, key);
+  if (existing && existing.step !== STEP_AVISO) {
+    return { ...stateOf(input.pessoaId, existing), created: false, responsavelId: null };
+  }
+
+  await requirePessoaDaOrganizacao(ctx, input.pessoaId);
   if (input.conflitoEmailContato !== true) {
-    throw new AppError('EMAIL_CONFLICT_NOT_INDICATED', 'The platform did not indicate a contact e-mail conflict.', 400, {
+    throw new AppError('EMAIL_CONFLICT_NOT_REPORTED', 'The platform did not report a contact e-mail conflict', 409, {
       ruleId: 'ligacaoLoginPelaPlataforma',
     });
   }
 
-  const pessoa = await ctx.mdm.entity.get({ mdmId: pessoaId });
-  const tags = pessoa.details.tags;
-  if (!Array.isArray(tags) || !tags.includes(PESSOA_ROLE_TAG)) {
-    throw new AppError('NOT_ORGANIZATION_MEMBER', 'The person is not a member of the organization.', 403, {
-      ruleId: 'ligacaoLoginPelaPlataforma',
-    });
+  const opened = await engine.open(ctx, table, key, STEP_AVISO, input.pessoaId);
+  if (opened.occurrence.step !== STEP_AVISO) {
+    return { ...stateOf(input.pessoaId, opened.occurrence), created: false, responsavelId: null };
   }
 
-  let occurrence = await taskOccurrence.find(ctx, occurrenceKey(pessoaId));
-
-  if (occurrence == null) {
-    const requestId = ctx.requestMeta?.requestId;
-    if (requestId == null || requestId.trim() === '') {
-      throw new AppError('REQUEST_ID_REQUIRED', 'The request id is required to open the occurrence.', 400, {
-        ruleId: 'repetirNaoDuplicaPessoa',
-      });
-    }
-    const ref: OccurrenceRef = { ...occurrenceKey(pessoaId), workflowVersion: WORKFLOW_VERSION };
-    occurrence = await taskOccurrence.open(ctx, ref, STEP_PESSOA_VE_AVISO, pessoaId, requestId);
-  }
-
-  if (occurrence.step === STEP_PESSOA_VE_AVISO) {
-    const { responsavelId } = await resolverResponsavelLiberacao({}, ctx);
-    occurrence = await taskOccurrence.advance(ctx, occurrenceKey(pessoaId), STEP_RESPONSAVEL_LIBERA, responsavelId);
-  }
-
-  return { pessoaId, step: occurrence.step, actorNow: occurrence.actorNow, occurrence };
+  const { responsavelId } = await resolverResponsavelLiberacao({}, ctx);
+  const advanced = await engine.advance(ctx, table, key, {
+    from: STEP_AVISO,
+    to: STEP_RESPONSAVEL,
+    actorNow: responsavelId,
+  });
+  return {
+    ...stateOf(input.pessoaId, advanced.occurrence),
+    created: opened.outcome === 'created',
+    responsavelId,
+  };
 }
 
-// ---------------------------------------------------------------------------------------------
-// registrarLiberacaoConcluida
-// ---------------------------------------------------------------------------------------------
-
-export interface RegistrarLiberacaoConcluidaInput {
-  /** The person of the occurrence; when absent, the person of the session. */
-  pessoaId?: string;
-}
-
-export interface RegistrarLiberacaoConcluidaOutput {
-  pessoaId: string;
-  step: string;
-  actorNow: string;
-}
-
-/**
- * Registers that the platform release finished and hands the occurrence back to the person.
- * When the occurrence is still with the responsible, the release they made is what puts it to wait
- * for the platform, so that step is registered first and no step is skipped.
- */
 export async function registrarLiberacaoConcluida(
   input: RegistrarLiberacaoConcluidaInput,
   ctx: RequestContext,
 ): Promise<RegistrarLiberacaoConcluidaOutput> {
-  const pessoaId = resolvePessoaId(input.pessoaId, ctx);
-  let occurrence = await findOccurrenceOrFail(ctx, pessoaId);
+  requirePessoaId(input.pessoaId);
+  const engine = getEngine();
+  const table = getTable();
+  const key = keyOf(ctx, input.pessoaId);
 
-  if (occurrence.step === STEP_PESSOA_COMPLETA || occurrence.step === STEP_CONCLUIDA) {
-    return { pessoaId, step: occurrence.step, actorNow: occurrence.actorNow };
+  const current = await engine.find(ctx, key);
+  if (!current) {
+    throw new AppError('OCCURRENCE_NOT_FOUND', 'No access release occurrence for person ' + input.pessoaId, 404);
   }
-
-  if (occurrence.step !== STEP_AGUARDAR_LIGACAO && occurrence.step !== STEP_RESPONSAVEL_LIBERA) {
-    throw new AppError('OCCURRENCE_NOT_WAITING', `The occurrence is in step ${occurrence.step}, not waiting for the platform.`, 409, {
+  // Already advanced: nothing to do, same state.
+  if (current.done || current.step === STEP_COMPLETA) {
+    return stateOf(input.pessoaId, current);
+  }
+  if (current.step !== STEP_AGUARDA && current.step !== STEP_RESPONSAVEL) {
+    throw new AppError('OCCURRENCE_NOT_WAITING', 'The occurrence is not waiting for the platform release', 409, {
       ruleId: 'ligacaoLoginPelaPlataforma',
     });
   }
 
-  if (ctx.sessionContext.person == null) {
-    throw new AppError('LOGIN_NOT_LINKED', 'The login of the person is not linked to a record yet.', 409, {
+  await requirePessoaDaOrganizacao(ctx, input.pessoaId);
+  if (input.loginLigado !== true) {
+    throw new AppError('LOGIN_NOT_LINKED', 'The login of the person is not linked to a record yet', 409, {
       ruleId: 'ligacaoLoginPelaPlataforma',
     });
   }
 
-  if (occurrence.step === STEP_RESPONSAVEL_LIBERA) {
-    occurrence = await taskOccurrence.advance(ctx, occurrenceKey(pessoaId), STEP_AGUARDAR_LIGACAO, ACTOR_PLATAFORMA);
+  let snapshot: OccurrenceSnapshot = current;
+  if (snapshot.step === STEP_RESPONSAVEL) {
+    // The platform release started by the responsible has ended: the occurrence passes through the wait step.
+    const toWait = await engine.advance(ctx, table, key, {
+      from: STEP_RESPONSAVEL,
+      to: STEP_AGUARDA,
+      actorNow: null,
+    });
+    if (toWait.outcome === 'conflict') {
+      return stateOf(input.pessoaId, toWait.occurrence);
+    }
+    snapshot = toWait.occurrence;
   }
-  occurrence = await taskOccurrence.advance(ctx, occurrenceKey(pessoaId), STEP_PESSOA_COMPLETA, pessoaId);
-
-  return { pessoaId, step: occurrence.step, actorNow: occurrence.actorNow };
+  if (snapshot.step !== STEP_AGUARDA) {
+    return stateOf(input.pessoaId, snapshot);
+  }
+  const advanced = await engine.advance(ctx, table, key, {
+    from: STEP_AGUARDA,
+    to: STEP_COMPLETA,
+    actorNow: input.pessoaId,
+  });
+  return stateOf(input.pessoaId, advanced.occurrence);
 }
 
-// ---------------------------------------------------------------------------------------------
-// concluirLiberacaoAcesso
-// ---------------------------------------------------------------------------------------------
-
-export interface ConcluirLiberacaoAcessoInput {
-  /** The person of the occurrence; when absent, the person of the session. */
-  pessoaId?: string;
-}
-
-export interface ConcluirLiberacaoAcessoOutput {
-  pessoaId: string;
-  step: string;
-  actorNow: string;
-  occurrence: TaskOccurrence;
-}
-
-/** Closes the occurrence when the minimum data of the person are complete; repeated, returns the closed one. */
 export async function concluirLiberacaoAcesso(
   input: ConcluirLiberacaoAcessoInput,
   ctx: RequestContext,
 ): Promise<ConcluirLiberacaoAcessoOutput> {
-  const pessoaId = resolvePessoaId(input.pessoaId, ctx);
-  let occurrence = await findOccurrenceOrFail(ctx, pessoaId);
+  requirePessoaId(input.pessoaId);
+  const engine = getEngine();
+  const table = getTable();
+  const key = keyOf(ctx, input.pessoaId);
 
-  if (occurrence.step === STEP_CONCLUIDA) {
-    return { pessoaId, step: occurrence.step, actorNow: occurrence.actorNow, occurrence };
+  const current = await engine.find(ctx, key);
+  if (!current) {
+    throw new AppError('OCCURRENCE_NOT_FOUND', 'No access release occurrence for person ' + input.pessoaId, 404);
   }
-  if (occurrence.step !== STEP_PESSOA_COMPLETA) {
-    throw new AppError('OCCURRENCE_NOT_COMPLETING', `The occurrence is in step ${occurrence.step}, not in the person's completion.`, 409, {
-      ruleId: 'ligacaoLoginPelaPlataforma',
-    });
+  if (current.done) {
+    return stateOf(input.pessoaId, current);
   }
-
-  const pessoa = await ctx.mdm.entity.get({ mdmId: pessoaId });
-  const name = pessoa.details.name;
-  const countryCode = pessoa.details.countryCode;
-  const missing: string[] = [];
-  if (typeof name !== 'string' || name.trim() === '') {
-    missing.push('name');
-  }
-  if (typeof countryCode !== 'string' || countryCode.trim() === '') {
-    missing.push('countryCode');
-  } else if (CONSENT_COUNTRIES.includes(countryCode) && pessoa.details.privacyConsent == null) {
-    missing.push('privacyConsent');
-  }
-  if (missing.length > 0) {
-    throw new AppError('MINIMUM_DATA_INCOMPLETE', `The minimum data are incomplete: ${missing.join(', ')}.`, 400, {
+  if (current.step !== STEP_COMPLETA) {
+    throw new AppError('OCCURRENCE_NOT_COMPLETING', 'The person is not completing the access in this occurrence', 409, {
       ruleId: 'acessoCompletoDadosMinimos',
     });
   }
 
-  occurrence = await taskOccurrence.advance(ctx, occurrenceKey(pessoaId), STEP_CONCLUIDA, ACTOR_NENHUM);
-  return { pessoaId, step: occurrence.step, actorNow: occurrence.actorNow, occurrence };
+  const pessoa = await requirePessoaDaOrganizacao(ctx, input.pessoaId);
+  const name = pessoa.details.name;
+  const countryCode = pessoa.details.countryCode;
+  const hasName = typeof name === 'string' && name.trim() !== '';
+  const hasCountry = typeof countryCode === 'string' && countryCode.trim() !== '';
+  if (!hasName || !hasCountry) {
+    throw new AppError('MINIMUM_DATA_INCOMPLETE', 'The name and country of the person are required', 400, {
+      ruleId: 'acessoCompletoDadosMinimos',
+    });
+  }
+  if (CONSENT_COUNTRIES.has(countryCode) && pessoa.details.privacyConsent == null) {
+    throw new AppError('PRIVACY_CONSENT_REQUIRED', 'A valid privacy consent is required for the country of the person', 400, {
+      ruleId: 'acessoCompletoDadosMinimos',
+    });
+  }
+
+  const advanced = await engine.advance(ctx, table, key, {
+    from: STEP_COMPLETA,
+    to: 'end',
+    actorNow: null,
+  });
+  return stateOf(input.pessoaId, advanced.occurrence);
 }
