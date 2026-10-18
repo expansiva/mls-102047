@@ -418,12 +418,24 @@ O `inicio` (onboarding da empresa e da pessoa; L4 em `7293668`) não tem tabela 
   O módulo só lê a solicitação e aciona a capability pelo id dela, nunca com e-mail solto ou `mdmId` arbitrário. O processo
   `liberacaoAcessoPessoa` usa o id da solicitação como chave da ocorrência, e o `wait` termina quando a plataforma liga o login. "É este cadastro"
   ou "é outra pessoa" quem decide é o responsável; quem executa é a plataforma.
+- **A entrada do app e o autocadastro (runtime, rt80–rt83 e rt88; adotar só depois dos recibos do aceite, não pelo texto das specs):**
+  - `POST /session/register` usa só a sessão e devolve `ready`/`incomplete`/`pending`, com `person` quando ligada, `requestId` quando pendente,
+    e `company`. Não mandar e-mail nem `mdmId`;
+  - `GET /session/info` traz `person`/`company` e o `onboarding` opcional; o erro é distinto da ausência;
+  - a `inicio_pessoa` (o destino da entrada, `l5` `onboarding.entryPath`) **precisa tratar o `pending` sem `person`**: mostrar o aviso de liberação e
+    reler pela `GET /session/registration/request`. Enquanto ela exigir pessoa, o runtime não liga o redirect (rt83 s4);
+  - **o L1 só lê; a tela resolve** (rt88, 18/10):
+    - o processo `liberacaoAcessoPessoa` relê a solicitação por `readAccessRequestState(ctx, { requestId })` (`/_102034_/l1/mdm/registration.js`) e só
+      segue com o `person.mdmId` de `resolved`;
+    - o acompanhamento usa `listPendingAccessRequests(ctx)`, ou a `GET /session/registration/requests`;
+    - a resolução é `POST /session/registration/resolve`, pela tela;
+    - o materializador do L1 passa a mostrar essa API ao módulo de onboarding (`l1_d1_88`).
 - **País desconhecido continua incompleto:** o autocadastro não usa o US como padrão. A tela pede o país e o consentimento.
 - **"Esta pessoa sou eu" não é do módulo.** Quem não tem pessoa passa pela rotina de autocadastro da plataforma antes de chegar ao Início
   (`todo/runtime/tasks/backlog/fromHow_inicio_pecas_de_plataforma.md`). O módulo só faz o `update` de quem já existe.
 - **Os eventos de entrada** (`loginGranted`, `mdmUpdated`; o `inviteAccepted` sai com o convite) estão no catálogo, mas nada os publica hoje. A tela lê o estado ao
   abrir, e não espera evento. O `MECHANISM_UNBOUND` deles no relatório é esperado.
-- **O processo `liberacaoAcesso`** (a pessoa pede, o responsável liga o login ao cadastro certo) sai como o do `tarefas`, com a ocorrência em memória até o
-  motor do runtime (§13).
+- **O processo `liberacaoAcessoPessoa`** (a pessoa pede, o responsável resolve pela tela, a plataforma liga o login) sai sobre o motor do runtime
+  (§13), relendo a solicitação pela rt88.
 - **Autorização:** o papel vem do collab-auth (`verifiedAuthorities`); preencher cadastro não dá papel. O "responsável" é quem a plataforma diz,
   nunca quem entrou primeiro.
