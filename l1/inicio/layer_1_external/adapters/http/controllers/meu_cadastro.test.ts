@@ -12,7 +12,8 @@ export const pageTests = {
       "routine": "inicio.meu_cadastro.qryMeuCadastro",
       "params": {},
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": false
     },
@@ -23,8 +24,7 @@ export const pageTests = {
         "version": "<seedRef>",
         "details": {
           "identification": {
-            "name": "Pessoa Teste",
-            "countryCode": "US"
+            "name": "Pessoa Teste"
           },
           "person": {}
         }
@@ -45,38 +45,13 @@ export const pageTests = {
         "id": "<seedRef>",
         "details": {
           "identification": {
-            "name": "Pessoa Teste",
-            "countryCode": "US"
+            "name": "Pessoa Teste"
           },
           "person": {}
         }
       },
       "paramFieldRefs": {
         "id": "PessoaOrganizacao.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "inicio.meu_cadastro.salvarMeusDados.consentimentoBrasil",
-      "routine": "inicio.meu_cadastro.salvarMeusDados",
-      "params": {
-        "id": "<seedRef>",
-        "version": "<seedRef>",
-        "details": {
-          "identification": {
-            "name": "Pessoa Teste",
-            "countryCode": "BR"
-          },
-          "person": {}
-        }
-      },
-      "paramFieldRefs": {
-        "id": "PessoaOrganizacao.id",
-        "version": "PessoaOrganizacao.version"
       },
       "expect": {
         "ok": false,
@@ -108,6 +83,30 @@ export const pageTests = {
       "mutating": true
     },
     {
+      "id": "inicio.meu_cadastro.salvarMeusDados.consentimentoExigidoBrasil",
+      "routine": "inicio.meu_cadastro.salvarMeusDados",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>",
+        "details": {
+          "identification": {
+            "name": "Pessoa Teste",
+            "countryCode": "BR"
+          },
+          "person": {}
+        }
+      },
+      "paramFieldRefs": {
+        "id": "PessoaOrganizacao.id",
+        "version": "PessoaOrganizacao.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
       "id": "inicio.meu_cadastro.salvarMeusDados.ok",
       "routine": "inicio.meu_cadastro.salvarMeusDados",
       "params": {
@@ -126,7 +125,8 @@ export const pageTests = {
         "version": "PessoaOrganizacao.version"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": true
     }

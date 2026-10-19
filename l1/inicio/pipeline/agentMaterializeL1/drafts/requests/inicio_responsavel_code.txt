@@ -1,111 +1,103 @@
 /// <mls fileReference="_102047_/l1/inicio/layer_2_application/requests/inicio_responsavel.ts" enhancement="_blank"/>
 
 import type { Inicio_responsavelContracts } from '/_102047_/l2/inicio/web/contracts/inicio_responsavel.defs.js';
-import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { getEmpresa } from '/_102047_/l1/inicio/layer_2_application/usecases/getEmpresa.js';
 import { listPessoaOrganizacao } from '/_102047_/l1/inicio/layer_2_application/usecases/listPessoaOrganizacao.js';
-import type { ListPessoaOrganizacaoInput, ListPessoaOrganizacaoOutput } from '/_102047_/l1/inicio/layer_2_application/usecases/listPessoaOrganizacao.js';
-import { listContatoEmpresa } from '/_102047_/l1/inicio/layer_2_application/usecases/listContatoEmpresa.js';
+import type { ListPessoaOrganizacaoOutput } from '/_102047_/l1/inicio/layer_2_application/usecases/listPessoaOrganizacao.js';
 
-type PessoaItem = ListPessoaOrganizacaoOutput['items'][number];
-type PessoaStatus = 'Active' | 'Inactive' | 'Merged' | 'Blocked';
+type PessoaRecord = ListPessoaOrganizacaoOutput['items'][number];
 
 const MAX_PAGE_SIZE = 200;
 const DEFAULT_PAGE_SIZE = 20;
 
-// Brasil e países da União Europeia: exigem consentimento de privacidade.
-const COUNTRIES_WITH_CONSENT = new Set<string>([
+// Países em que o consentimento de privacidade é exigido: Brasil (LGPD) e União Europeia (GDPR).
+const PAISES_COM_CONSENTIMENTO = new Set<string>([
   'BR',
   'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE',
   'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
 ]);
 
 function isBlank(value: string | null | undefined): boolean {
-  return value == null || value.trim() === '';
+  return value == null || String(value).trim() === '';
 }
 
-function toStatus(value: string): PessoaStatus {
-  switch (value) {
-    case 'Active':
-    case 'Inactive':
-    case 'Merged':
-    case 'Blocked':
-      return value;
-    default:
-      throw new AppError('INVALID_STATUS', 'unsupported person status: ' + value, 500);
-  }
-}
-
-/** acessoCompletoDadosMinimos: nome, país e consentimento (Brasil/UE); telefone não conta. */
-function calcAcesso(p: PessoaItem): { dadosFaltantes: string[]; consentimentoExigido: boolean; consentimentoPendente: boolean } {
-  const dadosFaltantes: string[] = [];
-  const countryCode = p.details.identification.countryCode;
-  if (isBlank(p.details.identification.name)) dadosFaltantes.push('nome');
-  const semPais = isBlank(countryCode);
-  if (semPais) dadosFaltantes.push('país');
-  const consentimentoExigido = !semPais && COUNTRIES_WITH_CONSENT.has(countryCode.trim().toUpperCase());
-  const consent = p.details.person?.privacyConsent;
-  const temConsentimento = consent != null && Object.keys(consent).length > 0;
-  const consentimentoPendente = consentimentoExigido && !temConsentimento;
-  if (consentimentoPendente) dadosFaltantes.push('consentimento de privacidade');
-  return { dadosFaltantes, consentimentoExigido, consentimentoPendente };
-}
-
-async function listAllPessoas(ctx: RequestContext, status?: string): Promise<PessoaItem[]> {
-  const all: PessoaItem[] = [];
+/** Todas as pessoas com o papel inicio.PessoaOrganizacao, lidas página a página pelo usecase. */
+async function listarTodasPessoas(ctx: RequestContext): Promise<PessoaRecord[]> {
+  const todas: PessoaRecord[] = [];
   let page = 1;
-  for (;;) {
-    const listInput: ListPessoaOrganizacaoInput = status === undefined
-      ? { page, pageSize: MAX_PAGE_SIZE }
-      : { details: { identification: { status } }, page, pageSize: MAX_PAGE_SIZE };
-    const res = await listPessoaOrganizacao(listInput, ctx);
-    all.push(...res.items);
-    if (!res.hasMore) break;
+  let hasMore = true;
+  while (hasMore) {
+    const result = await listPessoaOrganizacao({ page, pageSize: MAX_PAGE_SIZE }, ctx);
+    for (const item of result.items) todas.push(item);
+    hasMore = result.hasMore === true && result.items.length > 0;
     page += 1;
   }
-  return all;
+  return todas;
 }
 
-function contactsText(contacts: Record<string, unknown>[]): string {
-  const parts: string[] = [];
-  for (const c of contacts) {
-    const candidate = c['value'] ?? c['contact'] ?? c['label'];
-    if (typeof candidate === 'string' && candidate.trim() !== '') parts.push(candidate);
-  }
-  return parts.join(', ');
+/** acessoCompletoDadosMinimos: nome, país e, para Brasil/UE, consentimento de privacidade; telefone não conta. */
+function calcularAcessoPessoa(pessoa: PessoaRecord): {
+  acessoCompleto: boolean;
+  dadosFaltantes: string[];
+  consentimentoExigido: boolean;
+  consentimentoPendente: boolean;
+} {
+  const faltantes: string[] = [];
+  const nome = pessoa.details?.identification?.name;
+  const pais = pessoa.details?.identification?.countryCode;
+  if (isBlank(nome)) faltantes.push('nome');
+  if (isBlank(pais)) faltantes.push('país');
+  const consentimentoExigido = !isBlank(pais) && PAISES_COM_CONSENTIMENTO.has(String(pais).toUpperCase());
+  const consent = pessoa.details?.person?.privacyConsent;
+  const consentimentoValido = consent != null && Object.keys(consent).length > 0;
+  const consentimentoPendente = consentimentoExigido && !consentimentoValido;
+  if (consentimentoPendente) faltantes.push('consentimento de privacidade');
+  return {
+    acessoCompleto: faltantes.length === 0,
+    dadosFaltantes: faltantes,
+    consentimentoExigido,
+    consentimentoPendente,
+  };
+}
+
+function resumirContatos(contacts: Record<string, unknown>[] | undefined): string {
+  if (contacts == null) return '';
+  return contacts
+    .map((c) => (c.value == null ? '' : String(c.value)))
+    .filter((v) => v !== '')
+    .join(', ');
 }
 
 export const requests: { [K in keyof Inicio_responsavelContracts]: (input: Inicio_responsavelContracts[K]['input'], ctx: RequestContext) => Promise<Inicio_responsavelContracts[K]['output']> } = {
-  "inicio.inicio_responsavel.qryPainelResponsavel": async function (_input, ctx) {
+  "inicio.inicio_responsavel.qryPainelResponsavel": async function (input, ctx) {
     const empresaId = ctx.sessionContext.activeCompanyId ?? ctx.sessionContext.businessContext.activeCompanyId;
     if (empresaId == null || empresaId === '') {
-      throw new AppError('NOT_FOUND', 'empresa da organização não encontrada na sessão', 404);
+      throw new AppError('NOT_FOUND', 'Empresa da organização da sessão não encontrada', 404);
     }
-    const empresa = await getEmpresa({ id: empresaId }, ctx);
+    const empresa = await getEmpresa({ id: String(empresaId) }, ctx);
 
-    // empresaPreparadaDadosObrigatorios + naoPedirDadoJaExistente: só lista o que a plataforma ainda não tem.
+    // empresaPreparadaDadosObrigatorios / naoPedirDadoJaExistente: lista só o que a plataforma ainda não tem.
     const dadosFaltantesEmpresa: string[] = [];
     if (isBlank(empresa.details.identification.name)) dadosFaltantesEmpresa.push('nome');
-    if (isBlank(empresa.details.identification.docId)) dadosFaltantesEmpresa.push('documento');
-    if (empresa.details.base.addresses.length === 0) dadosFaltantesEmpresa.push('endereço');
-    let temContato = empresa.details.base.contacts.length > 0;
-    if (!temContato) {
-      const contatos = await listContatoEmpresa({ details: { identification: { status: 'Active' } }, page: 1, pageSize: 1 }, ctx);
-      temContato = contatos.items.length > 0;
+    if (isBlank(empresa.details.identification.docType) || isBlank(empresa.details.identification.docId)) {
+      dadosFaltantesEmpresa.push('documento');
     }
-    if (!temContato) dadosFaltantesEmpresa.push('contato');
-    const preparada = dadosFaltantesEmpresa.length === 0;
+    const enderecos = empresa.details.base.addresses ?? [];
+    if (enderecos.length === 0) dadosFaltantesEmpresa.push('endereço');
+    const contatos = empresa.details.base.contacts ?? [];
+    if (contatos.length === 0) dadosFaltantesEmpresa.push('contato');
 
-    // acessoCompletoDadosMinimos: contagens calculadas, nunca gravadas.
-    const pessoas = await listAllPessoas(ctx);
+    // acessoCompletoDadosMinimos: contagem sobre as pessoas da organização.
+    const pessoas = await listarTodasPessoas(ctx);
     let totalAcessoCompleto = 0;
     let totalComDadosFaltando = 0;
     let totalConsentimentoPendente = 0;
-    for (const p of pessoas) {
-      const acesso = calcAcesso(p);
-      if (acesso.dadosFaltantes.length === 0) totalAcessoCompleto += 1;
-      else totalComDadosFaltando += 1;
+    for (const pessoa of pessoas) {
+      const acesso = calcularAcessoPessoa(pessoa);
+      if (acesso.acessoCompleto) totalAcessoCompleto += 1;
+      if (acesso.dadosFaltantes.length > 0) totalComDadosFaltando += 1;
       if (acesso.consentimentoPendente) totalConsentimentoPendente += 1;
     }
 
@@ -114,37 +106,62 @@ export const requests: { [K in keyof Inicio_responsavelContracts]: (input: Inici
         id: empresa.id,
         details: {
           identification: { name: empresa.details.identification.name },
-          inicio: { preparada, dadosFaltantes: dadosFaltantesEmpresa },
+          inicio: {
+            preparada: dadosFaltantesEmpresa.length === 0,
+            dadosFaltantes: dadosFaltantesEmpresa,
+          },
         },
       },
-      indicadores: { totalAcessoCompleto, totalComDadosFaltando, totalConsentimentoPendente },
+      indicadores: {
+        totalAcessoCompleto,
+        totalComDadosFaltando,
+        totalConsentimentoPendente,
+      },
     };
   },
 
   "inicio.inicio_responsavel.qryPessoasAguardandoLiberacao": async function (input, ctx) {
-    const page = input.page >= 1 ? Math.floor(input.page) : 1;
-    const pageSize = input.pageSize >= 1 ? Math.min(Math.floor(input.pageSize), MAX_PAGE_SIZE) : DEFAULT_PAGE_SIZE;
+    const page = Number.isFinite(input.page) && input.page >= 1 ? Math.floor(input.page) : 1;
+    const requestedSize = Number.isFinite(input.pageSize) && input.pageSize >= 1 ? Math.floor(input.pageSize) : DEFAULT_PAGE_SIZE;
+    const pageSize = Math.min(requestedSize, MAX_PAGE_SIZE);
 
-    // Situação na plataforma não ativa (Inactive ou Blocked): filtros exatos, um por situação.
-    const inativas = await listAllPessoas(ctx, 'Inactive');
-    const bloqueadas = await listAllPessoas(ctx, 'Blocked');
-    const aguardando = [...inativas, ...bloqueadas];
-    aguardando.sort((a, b) => a.details.identification.name.localeCompare(b.details.identification.name, 'pt-BR', { sensitivity: 'base' }));
+    const todas = await listarTodasPessoas(ctx);
+
+    // Situação na plataforma não ativa (Inactive ou Blocked). A ligação do login é decidida pela plataforma
+    // (ligacaoLoginPelaPlataforma); o Início não guarda pendência. Preencher dados não concede permissões
+    // (dadosNaoConcedemPermissoes): esta lista só mostra.
+    const aguardando: { pessoa: PessoaRecord; status: 'Inactive' | 'Blocked' }[] = [];
+    for (const pessoa of todas) {
+      const status = pessoa.details?.identification?.status;
+      if (status === 'Inactive' || status === 'Blocked') aguardando.push({ pessoa, status });
+    }
+
+    aguardando.sort((a, b) =>
+      String(a.pessoa.details?.identification?.name ?? '').localeCompare(
+        String(b.pessoa.details?.identification?.name ?? ''),
+        undefined,
+        { sensitivity: 'base' },
+      ),
+    );
 
     const start = (page - 1) * pageSize;
     const slice = aguardando.slice(start, start + pageSize);
-    const hasMore = start + slice.length < aguardando.length;
+    const hasMore = aguardando.length > start + pageSize;
 
-    const items = slice.map((p) => ({
-      id: p.id,
+    const items = slice.map(({ pessoa, status }) => ({
+      id: pessoa.id,
       details: {
         identification: {
-          name: p.details.identification.name,
-          status: toStatus(p.details.identification.status),
+          name: String(pessoa.details?.identification?.name ?? ''),
+          status,
         },
-        base: { contacts: contactsText(p.details.base.contacts) },
-        // acessoCompletoDadosMinimos: dadosFaltantes calculado, o consentimento em si não é exposto.
-        inicio: { dadosFaltantes: calcAcesso(p).dadosFaltantes },
+        base: {
+          contacts: resumirContatos(pessoa.details?.base?.contacts),
+        },
+        inicio: {
+          // acessoCompletoDadosMinimos
+          dadosFaltantes: calcularAcessoPessoa(pessoa).dadosFaltantes,
+        },
       },
     }));
 

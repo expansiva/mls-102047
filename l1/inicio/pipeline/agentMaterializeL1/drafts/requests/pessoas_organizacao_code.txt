@@ -1,233 +1,242 @@
 /// <mls fileReference="_102047_/l1/inicio/layer_2_application/requests/pessoas_organizacao.ts" enhancement="_blank"/>
-
-import type { Pessoas_organizacaoContracts, EmpresaPreparo, PessoaResumo, PessoaDetalhe, ContatoPessoa } from '/_102047_/l2/inicio/web/contracts/pessoas_organizacao.defs.js';
+import type { Pessoas_organizacaoContracts, PessoaResumo, PessoaDetalhe, ContatoPessoa, EmpresaPreparo } from '/_102047_/l2/inicio/web/contracts/pessoas_organizacao.defs.js';
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import { getEmpresa } from '/_102047_/l1/inicio/layer_2_application/usecases/getEmpresa.js';
-import type { GetEmpresaOutput } from '/_102047_/l1/inicio/layer_2_application/usecases/getEmpresa.js';
 import { getPessoaOrganizacao } from '/_102047_/l1/inicio/layer_2_application/usecases/getPessoaOrganizacao.js';
-import type { GetPessoaOrganizacaoOutput } from '/_102047_/l1/inicio/layer_2_application/usecases/getPessoaOrganizacao.js';
+import { listPessoaOrganizacao } from '/_102047_/l1/inicio/layer_2_application/usecases/listPessoaOrganizacao.js';
 
 type Status = 'Active' | 'Inactive' | 'Merged' | 'Blocked';
 type Etapa = 'pedidoEncaminhado' | 'acessoLiberado' | 'loginLigado' | 'acessoCompletado';
 
-// Brasil e países da União Europeia: o consentimento de privacidade é exigido.
-const PAISES_CONSENTIMENTO: string[] = [
-  'BR',
-  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE',
-  'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
-];
+type PessoaFonte = {
+  id: string;
+  details: {
+    identification: { name: string; countryCode: string; status: string };
+    base?: { relationshipRefs?: Record<string, unknown>; contacts?: Record<string, Record<string, unknown>[] | unknown> | Record<string, unknown>[] };
+    person?: { privacyConsent?: Record<string, unknown> };
+  };
+};
 
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
-}
+type PessoaCalculada = {
+  id: string;
+  name: string;
+  countryCode: string;
+  status: Status;
+  acessoCompleto: boolean;
+  dadosFaltantes: string[];
+  consentimentoExigido: boolean;
+};
+
+// Brasil e países da União Europeia: exigem consentimento de privacidade.
+const PAISES_COM_CONSENTIMENTO = new Set<string>([
+  'BR',
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
+]);
 
 function toStatus(value: string): Status {
   if (value === 'Active' || value === 'Inactive' || value === 'Merged' || value === 'Blocked') return value;
-  throw new AppError('INVALID_STATE', 'situação do cadastro desconhecida: ' + value, 500);
+  throw new AppError('INVALID_STATUS', 'Situação da pessoa na plataforma desconhecida: ' + String(value), 500);
 }
 
-function refIds(details: Record<string, unknown>, key: string): string[] {
+function idsFromRefs(refs: unknown, key: string): string[] {
+  if (refs == null || typeof refs !== 'object') return [];
+  const value = (refs as Record<string, unknown>)[key];
+  if (!Array.isArray(value)) return [];
+  return value.filter((v): v is string => typeof v === 'string');
+}
+
+function refsOf(details: unknown): unknown[] {
+  // O vínculo pode estar em details.base.relationshipRefs (documento da pessoa) ou em details.relationshipRefs (chaves compactas da plataforma).
+  if (details == null || typeof details !== 'object') return [];
+  const d = details as Record<string, unknown>;
+  const base = d['base'];
+  const baseRefs = base != null && typeof base === 'object' ? (base as Record<string, unknown>)['relationshipRefs'] : undefined;
+  return [baseRefs, d['relationshipRefs']];
+}
+
+function assignmentsOf(details: unknown): string[] {
   const out: string[] = [];
-  const sources: unknown[] = [details['relationshipRefs']];
-  const base = details['base'];
-  if (isRecord(base)) sources.push(base['relationshipRefs']);
-  for (const src of sources) {
-    if (!isRecord(src)) continue;
-    const list = src[key];
-    if (!Array.isArray(list)) continue;
-    for (const id of list) {
-      if (typeof id === 'string' && !out.includes(id)) out.push(id);
-    }
-  }
+  for (const refs of refsOf(details)) out.push(...idsFromRefs(refs, 'assignments'));
   return out;
 }
 
-function normalizeText(s: string): string {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function contactIdsOf(details: unknown): string[] {
+  const out: string[] = [];
+  for (const refs of refsOf(details)) out.push(...idsFromRefs(refs, 'contacts'));
+  return out;
 }
 
-function pageParams(page: number, pageSize: number): { page: number; pageSize: number } {
-  const p = Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
-  const sRaw = Number.isFinite(pageSize) && pageSize >= 1 ? Math.floor(pageSize) : 20;
-  return { page: p, pageSize: Math.min(sRaw, 200) };
+function normalizeText(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function paginate<T>(all: T[], page: number, pageSize: number): { items: T[]; page: number; pageSize: number; hasMore: boolean } {
-  const pp = pageParams(page, pageSize);
-  const start = (pp.page - 1) * pp.pageSize;
+function hasText(value: unknown): boolean {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+/** acessoCompletoDadosMinimos: nome e país; consentimento de privacidade válido se Brasil/UE; telefone não conta. */
+function calcularPessoa(p: PessoaFonte): PessoaCalculada {
+  const ident = p.details.identification;
+  const consentimentoExigido = hasText(ident.countryCode) && PAISES_COM_CONSENTIMENTO.has(ident.countryCode.toUpperCase());
+  const consent = p.details.person?.privacyConsent;
+  const consentimentoValido = consent != null && typeof consent === 'object' && Object.keys(consent).length > 0;
+  const dadosFaltantes: string[] = [];
+  if (!hasText(ident.name)) dadosFaltantes.push('nome');
+  if (!hasText(ident.countryCode)) dadosFaltantes.push('país');
+  if (consentimentoExigido && !consentimentoValido) dadosFaltantes.push('consentimento de privacidade');
   return {
-    items: all.slice(start, start + pp.pageSize),
-    page: pp.page,
-    pageSize: pp.pageSize,
-    hasMore: all.length > start + pp.pageSize,
+    id: p.id,
+    name: ident.name,
+    countryCode: ident.countryCode,
+    status: toStatus(ident.status),
+    acessoCompleto: dadosFaltantes.length === 0,
+    dadosFaltantes,
+    consentimentoExigido,
   };
 }
 
-function consentimentoValido(consent: Record<string, unknown> | undefined): boolean {
-  if (consent == null || !isRecord(consent)) return false;
-  if (Object.keys(consent).length === 0) return false;
-  if (consent['accepted'] === false || consent['granted'] === false) return false;
-  if (consent['revokedAt'] != null || consent['withdrawnAt'] != null) return false;
-  return true;
+function ordenar(list: PessoaCalculada[]): PessoaCalculada[] {
+  return [...list].sort((a, b) => {
+    if (a.acessoCompleto !== b.acessoCompleto) return a.acessoCompleto ? 1 : -1;
+    return a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' });
+  });
 }
 
-// acessoCompletoDadosMinimos: nome e país; consentimento válido se Brasil/UE; o telefone não conta.
-function calcularAcesso(p: GetPessoaOrganizacaoOutput): { acessoCompleto: boolean; dadosFaltantes: string[]; consentimentoExigido: boolean } {
-  const faltantes: string[] = [];
-  const name = p.details.identification.name;
-  const country = p.details.identification.countryCode;
-  if (typeof name !== 'string' || name.trim() === '') faltantes.push('nome');
-  if (typeof country !== 'string' || country.trim() === '') faltantes.push('país');
-  const exigido = typeof country === 'string' && PAISES_CONSENTIMENTO.includes(country.toUpperCase());
-  if (exigido && !consentimentoValido(p.details.person?.privacyConsent)) faltantes.push('consentimento de privacidade');
-  return { acessoCompleto: faltantes.length === 0, dadosFaltantes: faltantes, consentimentoExigido: exigido };
-}
-
-// empresaPreparadaDadosObrigatorios: nome, documento, ao menos um endereço e ao menos um contato.
-function calcularPreparo(e: GetEmpresaOutput): EmpresaPreparo {
-  const faltantes: string[] = [];
-  const ident = e.details.identification;
-  if (typeof ident.name !== 'string' || ident.name.trim() === '') faltantes.push('nome');
-  if (typeof ident.docId !== 'string' || ident.docId.trim() === '') faltantes.push('documento');
-  if (!Array.isArray(e.details.base.addresses) || e.details.base.addresses.length === 0) faltantes.push('endereço');
-  const temContato = refIds(e.details, 'contacts').length > 0
-    || (Array.isArray(e.details.base.contacts) && e.details.base.contacts.length > 0);
-  if (!temContato) faltantes.push('contato');
-  return {
-    id: e.id,
-    details: { inicio: { preparada: faltantes.length === 0, dadosFaltantes: faltantes } },
-  };
-}
-
-function toResumo(p: GetPessoaOrganizacaoOutput): PessoaResumo {
-  const acesso = calcularAcesso(p);
+function toResumo(p: PessoaCalculada): PessoaResumo {
   return {
     id: p.id,
     details: {
-      identification: {
-        name: p.details.identification.name,
-        countryCode: p.details.identification.countryCode,
-        status: toStatus(p.details.identification.status),
-      },
-      inicio: {
-        acessoCompleto: acesso.acessoCompleto,
-        dadosFaltantes: acesso.dadosFaltantes,
-      },
+      identification: { name: p.name, countryCode: p.countryCode, status: p.status },
+      inicio: { acessoCompleto: p.acessoCompleto, dadosFaltantes: p.dadosFaltantes },
     },
   };
 }
 
-function ordenar(list: PessoaResumo[]): PessoaResumo[] {
-  return list.slice().sort((a, b) => {
-    const ia = a.details.inicio.acessoCompleto ? 1 : 0;
-    const ib = b.details.inicio.acessoCompleto ? 1 : 0;
-    if (ia !== ib) return ia - ib;
-    return a.details.identification.name.localeCompare(b.details.identification.name, 'pt-BR', { sensitivity: 'base' });
-  });
+function paginar<T>(all: T[], page: number, pageSize: number): { items: T[]; page: number; pageSize: number; hasMore: boolean } {
+  const p = Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
+  const sizeRaw = Number.isFinite(pageSize) && pageSize >= 1 ? Math.floor(pageSize) : 20;
+  const size = Math.min(sizeRaw, 200);
+  const start = (p - 1) * size;
+  const end = start + size;
+  return { items: all.slice(start, end), page: p, pageSize: size, hasMore: all.length > end };
 }
 
-function callerId(ctx: RequestContext): string {
-  const id = ctx.sessionContext.person?.mdmId;
-  if (id == null || id === '') throw new AppError('FORBIDDEN', 'pessoa da sessão não identificada', 403);
-  return id;
-}
-
-// Resolve a empresa da organização do responsável logado (vínculo AssignedTo da pessoa da sessão).
-async function resolverEmpresa(ctx: RequestContext): Promise<{ empresa: GetEmpresaOutput; callerId: string }> {
-  const me = callerId(ctx);
-  const pessoa = await getPessoaOrganizacao({ id: me }, ctx);
-  const empresaIds = refIds(pessoa.details, 'assignments');
-  if (empresaIds.length === 0) throw new AppError('NOT_FOUND', 'empresa da organização não encontrada para o responsável', 404);
-  const empresa = await getEmpresa({ id: empresaIds[0] }, ctx);
-  return { empresa, callerId: me };
-}
-
-async function carregarPessoas(ctx: RequestContext, empresa: GetEmpresaOutput, me: string): Promise<GetPessoaOrganizacaoOutput[]> {
-  const ids: string[] = refIds(empresa.details, 'assignees');
-  if (!ids.includes(me)) ids.push(me);
-  return Promise.all(ids.map((id) => getPessoaOrganizacao({ id }, ctx)));
-}
-
-function derivarEtapa(status: Status, acessoCompleto: boolean): Etapa {
-  // ligacaoLoginPelaPlataforma: a ligação do login é decidida pela liberação da plataforma; nada é registrado aqui.
-  if (acessoCompleto) return 'acessoCompletado';
-  if (status === 'Active') return 'loginLigado';
-  if (status === 'Inactive') return 'acessoLiberado';
-  return 'pedidoEncaminhado';
-}
-
-function contatosDe(p: GetPessoaOrganizacaoOutput): ContatoPessoa[] {
-  const out: ContatoPessoa[] = [];
-  const list = p.details.base.contacts;
-  if (!Array.isArray(list)) return out;
-  for (const c of list) {
-    if (!isRecord(c)) continue;
-    const raw = c['value'] ?? c['contact'] ?? c['contacts'];
-    if (typeof raw === 'string' && raw !== '') out.push({ details: { base: { contacts: raw } } });
+/** Empresa da organização do responsável logado: o vínculo AssignedTo da pessoa da sessão. */
+async function resolveEmpresaId(ctx: RequestContext): Promise<string> {
+  const person = ctx.sessionContext.person;
+  if (person != null) {
+    const me = await getPessoaOrganizacao({ id: person.mdmId }, ctx);
+    const ids = assignmentsOf(me.details);
+    if (ids.length > 0) return ids[0];
   }
-  return out;
+  const active = ctx.sessionContext.activeCompanyId;
+  if (active != null && active !== '') return active;
+  throw new AppError('NOT_FOUND', 'Empresa da organização do responsável não encontrada', 404);
+}
+
+async function listarPessoasDaEmpresa(ctx: RequestContext, empresaId: string): Promise<{ fonte: PessoaFonte; calc: PessoaCalculada }[]> {
+  const result: { fonte: PessoaFonte; calc: PessoaCalculada }[] = [];
+  let page = 1;
+  for (;;) {
+    const res = await listPessoaOrganizacao({ page, pageSize: 200 }, ctx);
+    for (const item of res.items) {
+      const fonte: PessoaFonte = item;
+      if (!assignmentsOf(fonte.details).includes(empresaId)) continue;
+      result.push({ fonte, calc: calcularPessoa(fonte) });
+    }
+    if (!res.hasMore) break;
+    page += 1;
+  }
+  return result;
 }
 
 export const requests: { [K in keyof Pessoas_organizacaoContracts]: (input: Pessoas_organizacaoContracts[K]['input'], ctx: RequestContext) => Promise<Pessoas_organizacaoContracts[K]['output']> } = {
-  "inicio.pessoas_organizacao.abrirPessoasOrganizacao": async function (input, ctx) {
-    const { empresa, callerId: me } = await resolverEmpresa(ctx);
-    // empresaPreparadaDadosObrigatorios: preparada e dadosFaltantes calculados, nunca lidos.
-    const preparo = calcularPreparo(empresa);
-    const pessoas = await carregarPessoas(ctx, empresa, me);
-    // acessoCompletoDadosMinimos: calculado para cada pessoa.
-    const resumos = ordenar(pessoas.map(toResumo));
+  'inicio.pessoas_organizacao.abrirPessoasOrganizacao': async function (input, ctx) {
+    const empresaId = await resolveEmpresaId(ctx);
+    const empresa = await getEmpresa({ id: empresaId }, ctx);
+
+    // empresaPreparadaDadosObrigatorios: nome, documento, ao menos um endereço e ao menos um contato.
+    const faltantesEmpresa: string[] = [];
+    if (!hasText(empresa.details.identification.name)) faltantesEmpresa.push('nome');
+    if (!hasText(empresa.details.identification.docType) || !hasText(empresa.details.identification.docId)) faltantesEmpresa.push('documento');
+    if (!Array.isArray(empresa.details.base.addresses) || empresa.details.base.addresses.length === 0) faltantesEmpresa.push('endereço');
+    const temContato = (Array.isArray(empresa.details.base.contacts) && empresa.details.base.contacts.length > 0) || contactIdsOf(empresa.details).length > 0;
+    if (!temContato) faltantesEmpresa.push('contato');
+    const empresaPreparo: EmpresaPreparo = {
+      id: empresa.id,
+      details: { inicio: { preparada: faltantesEmpresa.length === 0, dadosFaltantes: faltantesEmpresa } },
+    };
+
+    // acessoCompletoDadosMinimos: calculado para cada pessoa, nunca lido do armazenamento.
+    const pessoas = await listarPessoasDaEmpresa(ctx, empresaId);
+    const ordenadas = ordenar(pessoas.map((p) => p.calc));
+    const pagina = paginar(ordenadas, input.page, input.pageSize);
     return {
-      empresa: preparo,
-      pessoas: paginate(resumos, input.page, input.pageSize),
+      empresa: empresaPreparo,
+      pessoas: { items: pagina.items.map(toResumo), page: pagina.page, pageSize: pagina.pageSize, hasMore: pagina.hasMore },
     };
   },
 
-  "inicio.pessoas_organizacao.buscarPessoas": async function (input, ctx) {
-    const { empresa, callerId: me } = await resolverEmpresa(ctx);
-    const pessoas = await carregarPessoas(ctx, empresa, me);
-    // acessoCompletoDadosMinimos: calculado antes de aplicar o filtro de situação.
-    let resumos = pessoas.map(toResumo);
-    const termo = typeof input.busca === 'string' ? normalizeText(input.busca.trim()) : '';
-    if (termo !== '') {
-      resumos = resumos.filter((p) => normalizeText(p.details.identification.name).includes(termo));
-    }
-    if (input.situacao === 'acessoIncompleto') {
-      resumos = resumos.filter((p) => !p.details.inicio.acessoCompleto);
-    } else if (input.situacao === 'aguardandoLiberacao') {
-      resumos = resumos.filter((p) => p.details.identification.status !== 'Active');
-    }
-    return { pessoas: paginate(ordenar(resumos), input.page, input.pageSize) };
+  'inicio.pessoas_organizacao.buscarPessoas': async function (input, ctx) {
+    const empresaId = await resolveEmpresaId(ctx);
+    const pessoas = await listarPessoasDaEmpresa(ctx, empresaId);
+    const termo = input.busca != null ? normalizeText(input.busca.trim()) : '';
+    const situacao = input.situacao ?? 'todas';
+    const filtradas = pessoas
+      .map((p) => p.calc)
+      // locate.byName: contém o trecho, sem diferenciar maiúsculas nem acentos.
+      .filter((p) => termo === '' || normalizeText(p.name).includes(termo))
+      // acessoCompletoDadosMinimos: o filtro de situação usa o valor calculado e o status.
+      .filter((p) => {
+        if (situacao === 'acessoIncompleto') return !p.acessoCompleto;
+        if (situacao === 'aguardandoLiberacao') return p.status !== 'Active';
+        return true;
+      });
+    const pagina = paginar(ordenar(filtradas), input.page, input.pageSize);
+    return {
+      pessoas: { items: pagina.items.map(toResumo), page: pagina.page, pageSize: pagina.pageSize, hasMore: pagina.hasMore },
+    };
   },
 
-  "inicio.pessoas_organizacao.obterPessoa": async function (input, ctx) {
-    const { empresa, callerId: me } = await resolverEmpresa(ctx);
-    const pessoa = await getPessoaOrganizacao({ id: String(input.pessoaId) }, ctx);
-    const pertence = pessoa.id === me
-      || refIds(pessoa.details, 'assignments').includes(empresa.id)
-      || refIds(empresa.details, 'assignees').includes(pessoa.id);
-    if (!pertence) throw new AppError('FORBIDDEN', 'a pessoa não pertence à organização do responsável', 403);
-    // acessoCompletoDadosMinimos: acessoCompleto, dadosFaltantes e consentimentoExigido calculados; o conteúdo do consentimento não sai.
-    const acesso = calcularAcesso(pessoa);
-    const status = toStatus(pessoa.details.identification.status);
-    // dadosNaoConcedemPermissoes: só lê e calcula; nenhum papel nem permissão é concedido.
-    const detalhe: PessoaDetalhe = {
-      id: pessoa.id,
+  'inicio.pessoas_organizacao.obterPessoa': async function (input, ctx) {
+    const empresaId = await resolveEmpresaId(ctx);
+    const record = await getPessoaOrganizacao({ id: String(input.pessoaId) }, ctx);
+    if (!assignmentsOf(record.details).includes(empresaId)) {
+      throw new AppError('FORBIDDEN', 'A pessoa não pertence à organização do responsável', 403);
+    }
+    const fonte: PessoaFonte = record;
+    const calc = calcularPessoa(fonte);
+
+    // Contatos: e-mail da conta e telefone opcional (resumo da plataforma).
+    const contacts: ContatoPessoa[] = [];
+    for (const c of record.details.base.contacts) {
+      const value = typeof c['value'] === 'string' ? c['value'] : typeof c['contact'] === 'string' ? c['contact'] : null;
+      if (value == null) continue;
+      contacts.push({ details: { base: { contacts: value } } });
+    }
+
+    // ligacaoLoginPelaPlataforma: a ligação do login é decidida pela plataforma; aqui só se deriva a etapa, sem registrar pendência.
+    // dadosNaoConcedemPermissoes: nenhum papel ou permissão é concedido nem lido aqui.
+    let etapa: Etapa;
+    if (calc.acessoCompleto) etapa = 'acessoCompletado';
+    else if (calc.status === 'Active') etapa = 'loginLigado';
+    else if (calc.status === 'Inactive') etapa = 'acessoLiberado';
+    else etapa = 'pedidoEncaminhado';
+
+    const pessoa: PessoaDetalhe = {
+      id: calc.id,
       details: {
-        identification: {
-          name: pessoa.details.identification.name,
-          countryCode: pessoa.details.identification.countryCode,
-          status,
-        },
+        identification: { name: calc.name, countryCode: calc.countryCode, status: calc.status },
         inicio: {
-          acessoCompleto: acesso.acessoCompleto,
-          dadosFaltantes: acesso.dadosFaltantes,
-          consentimentoExigido: acesso.consentimentoExigido,
+          acessoCompleto: calc.acessoCompleto,
+          dadosFaltantes: calc.dadosFaltantes,
+          consentimentoExigido: calc.consentimentoExigido,
         },
       },
-      contacts: contatosDe(pessoa),
-      etapaLiberacao: derivarEtapa(status, acesso.acessoCompleto),
+      contacts,
+      etapaLiberacao: etapa,
     };
-    return { pessoa: detalhe };
+    return { pessoa };
   },
 };

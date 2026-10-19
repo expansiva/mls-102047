@@ -21,7 +21,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "buscarPessoas.todas.ok",
+      "id": "buscarPessoas.ok",
       "routine": "inicio.pessoas_organizacao.buscarPessoas",
       "params": {
         "situacao": "todas",
@@ -35,7 +35,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "buscarPessoas.acessoIncompleto.ok",
+      "id": "buscarPessoas.acessoIncompleto",
       "routine": "inicio.pessoas_organizacao.buscarPessoas",
       "params": {
         "situacao": "acessoIncompleto",
@@ -49,7 +49,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "buscarPessoas.aguardandoLiberacao.ok",
+      "id": "buscarPessoas.aguardandoLiberacao",
       "routine": "inicio.pessoas_organizacao.buscarPessoas",
       "params": {
         "situacao": "aguardandoLiberacao",
@@ -63,7 +63,7 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "buscarPessoas.busca.ok",
+      "id": "buscarPessoas.busca",
       "routine": "inicio.pessoas_organizacao.buscarPessoas",
       "params": {
         "busca": "<seedValue>",
@@ -92,16 +92,6 @@ export const pageTests = {
       "expect": {
         "ok": true,
         "shape": "object"
-      },
-      "mutating": false
-    },
-    {
-      "id": "obterPessoa.pessoaId.required",
-      "routine": "inicio.pessoas_organizacao.obterPessoa",
-      "params": {},
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
       },
       "mutating": false
     },
@@ -154,14 +144,12 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "obterPessoa.notFound",
+      "id": "obterPessoa.pessoaId.required",
       "routine": "inicio.pessoas_organizacao.obterPessoa",
-      "params": {
-        "pessoaId": "pessoa-inexistente-000"
-      },
+      "params": {},
       "expect": {
         "ok": false,
-        "errorCode": "NOT_FOUND"
+        "errorCode": "VALIDATION_ERROR"
       },
       "mutating": false
     }

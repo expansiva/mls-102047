@@ -1,255 +1,226 @@
 /// <mls fileReference="_102047_/l1/inicio/layer_2_application/requests/empresa.ts" enhancement="_blank"/>
-import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { EmpresaContracts, ContatoEmpresaResumo, EmpresaPreparo } from '/_102047_/l2/inicio/web/contracts/empresa.defs.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { EmpresaContracts, EmpresaPreparo, ContatoEmpresaResumo } from '/_102047_/l2/inicio/web/contracts/empresa.defs.js';
 import { getEmpresa } from '/_102047_/l1/inicio/layer_2_application/usecases/getEmpresa.js';
 import type { GetEmpresaOutput } from '/_102047_/l1/inicio/layer_2_application/usecases/getEmpresa.js';
 import { listContatoEmpresa } from '/_102047_/l1/inicio/layer_2_application/usecases/listContatoEmpresa.js';
 import { updateEmpresa } from '/_102047_/l1/inicio/layer_2_application/usecases/updateEmpresa.js';
+import type { UpdateEmpresaInput } from '/_102047_/l1/inicio/layer_2_application/usecases/updateEmpresa.js';
 import { getPessoaOrganizacao } from '/_102047_/l1/inicio/layer_2_application/usecases/getPessoaOrganizacao.js';
 
 type DocType = NonNullable<EmpresaPreparo['details']['identification']['docType']>;
+type Falta = EmpresaPreparo['dadosFaltantes'];
 type ContactType = ContatoEmpresaResumo['details']['contactChannel']['contactType'];
-type Faltante = EmpresaPreparo['dadosFaltantes'];
 
-const DOC_TYPES: string[] = ['CNPJ', 'EIN', 'VAT', 'NationalId', 'Other'];
-const CONTACT_TYPES: string[] = ['Phone', 'Email', 'WhatsApp'];
+const DOC_TYPES: DocType[] = ['CNPJ', 'EIN', 'VAT', 'NationalId', 'Other'];
+const CONTACT_TYPES: ContactType[] = ['Phone', 'Email', 'WhatsApp'];
+const ADDRESS_LINE_KEY = 'line1';
 
-function toDocType(value: string): DocType {
-  if (!DOC_TYPES.includes(value)) {
-    throw new AppError('INVALID_DATA', 'unsupported document type: ' + value, 422);
+function hasText(value: string | undefined | null): value is string {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+function toDocType(value: string | undefined | null): DocType | undefined {
+  if (!hasText(value)) return undefined;
+  const found = DOC_TYPES.find((t) => t === value);
+  if (found === undefined) {
+    throw new AppError('INVALID_DOCUMENT', 'Tipo de documento não suportado: ' + value, 422, { ruleId: 'rule-document-shape-validated' });
   }
-  return value as DocType;
+  return found;
 }
 
 function toContactType(value: string): ContactType {
-  if (!CONTACT_TYPES.includes(value)) {
-    throw new AppError('INVALID_DATA', 'unsupported contact type: ' + value, 422);
+  const found = CONTACT_TYPES.find((t) => t === value);
+  if (found === undefined) {
+    throw new AppError('INVALID_CONTACT', 'Tipo de contato não suportado: ' + value, 422);
   }
-  return value as ContactType;
+  return found;
 }
 
-function hasText(value: string | undefined | null): value is string {
-  return value != null && value.trim() !== '';
+function addressText(address: Record<string, unknown>): string {
+  const preferred = [ADDRESS_LINE_KEY, 'formatted', 'street'];
+  for (const key of preferred) {
+    const v = address[key];
+    if (typeof v === 'string' && v.trim() !== '') return v;
+  }
+  return Object.values(address)
+    .filter((v): v is string => typeof v === 'string' && v.trim() !== '')
+    .join(', ');
 }
 
-function addressToText(address: Record<string, unknown>): string {
-  const parts: string[] = [];
-  for (const v of Object.values(address)) {
-    if (typeof v === 'string' && v.trim() !== '') parts.push(v.trim());
-    else if (typeof v === 'number') parts.push(String(v));
-  }
-  return parts.join(', ');
+function validCnpj(raw: string): boolean {
+  const d = raw.replace(/\D/g, '');
+  if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+  const digit = (len: number): number => {
+    const weights = len === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    let sum = 0;
+    for (let i = 0; i < len; i++) sum += Number(d.charAt(i)) * weights[i];
+    const r = sum % 11;
+    return r < 2 ? 0 : 11 - r;
+  };
+  return digit(12) === Number(d.charAt(12)) && digit(13) === Number(d.charAt(13));
 }
 
 function isResponsavel(ctx: RequestContext): boolean {
   const scope = ctx.sessionContext.actorScope ?? [];
-  return scope.some((s) => s === 'responsavel' || s.endsWith(':responsavel'));
-}
-
-function asIdList(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  const ids: string[] = [];
-  for (const v of value) if (typeof v === 'string') ids.push(v);
-  return ids;
+  return scope.some((item) => item === 'responsavel' || item.endsWith(':responsavel'));
 }
 
 async function resolveEmpresaId(ctx: RequestContext): Promise<string> {
   const active = ctx.sessionContext.activeCompanyId;
   if (hasText(active)) return active;
-  const personId = ctx.sessionContext.person?.mdmId;
-  if (!hasText(personId)) {
-    throw new AppError('NOT_FOUND', 'company of the session not found', 404);
+  const person = ctx.sessionContext.person;
+  if (person != null) {
+    const pessoa = await getPessoaOrganizacao({ id: person.mdmId }, ctx);
+    const assignments = pessoa.details.base.relationshipRefs['assignments'];
+    if (Array.isArray(assignments) && typeof assignments[0] === 'string') return assignments[0];
   }
-  const pessoa = await getPessoaOrganizacao({ id: personId }, ctx);
-  const assignments = asIdList(pessoa.details.base.relationshipRefs['assignments']);
-  if (assignments.length === 0) {
-    throw new AppError('NOT_FOUND', 'company of the session not found', 404);
-  }
-  return assignments[0];
+  throw new AppError('NOT_FOUND', 'Empresa da sessão não encontrada.', 404);
 }
 
-async function listarContatosLigados(empresa: GetEmpresaOutput, ctx: RequestContext): Promise<ContatoEmpresaResumo[]> {
-  const linkedIds = new Set<string>();
-  for (const summary of empresa.details.base.contacts) {
-    const id = summary['id'] ?? summary['mdmId'];
-    if (typeof id === 'string') linkedIds.add(id);
-  }
+async function listContatos(ctx: RequestContext): Promise<ContatoEmpresaResumo[]> {
   const result: ContatoEmpresaResumo[] = [];
-  if (linkedIds.size === 0) return result;
   let page = 1;
-  for (;;) {
-    const res = await listContatoEmpresa({ page, pageSize: 200 }, ctx);
+  let hasMore = true;
+  while (hasMore) {
+    const res = await listContatoEmpresa({ details: { identification: { status: 'Active' } }, page, pageSize: 200 }, ctx);
     for (const item of res.items) {
-      if (!linkedIds.has(item.id)) continue;
-      if (item.details.identification.status === 'Inactive') continue;
+      // inactive contacts are not contacts of the company
+      if (item.details.identification.status !== 'Active') continue;
       result.push({
         id: item.id,
         details: {
           identification: { name: item.details.identification.name },
           contactChannel: {
-            contactType: toContactType(String(item.details.contactChannel.contactType)),
+            contactType: toContactType(item.details.contactChannel.contactType),
             value: item.details.contactChannel.value,
             isVerified: item.details.contactChannel.isVerified,
           },
         },
       });
     }
-    if (!res.hasMore) break;
+    hasMore = res.hasMore;
     page += 1;
   }
   return result;
 }
 
-async function montarEmpresaPreparo(empresa: GetEmpresaOutput, ctx: RequestContext): Promise<EmpresaPreparo> {
-  const contacts = await listarContatosLigados(empresa, ctx);
+function firstMissing(list: Falta[]): Falta {
+  // When nothing is missing the list is empty and the field stays absent in the response.
+  return list[0];
+}
+
+function buildEmpresa(empresa: GetEmpresaOutput, contacts: ContatoEmpresaResumo[]): EmpresaPreparo {
   const ident = empresa.details.identification;
-  const addresses: string[] = [];
-  for (const a of empresa.details.base.addresses) {
-    const text = addressToText(a);
-    if (text !== '') addresses.push(text);
-  }
+  const docType = toDocType(ident.docType);
+  const addresses = empresa.details.base.addresses.map(addressText).filter((a) => a !== '');
 
-  // empresaPreparadaDadosObrigatorios / naoPedirDadoJaExistente: only what the platform still lacks is listed.
-  const faltantes: string[] = [];
-  if (!hasText(ident.name)) faltantes.push('nome');
-  if (!hasText(ident.docType) || !hasText(ident.docId)) faltantes.push('documento');
-  if (addresses.length === 0) faltantes.push('endereco');
-  if (contacts.length === 0) faltantes.push('contato');
-
-  const identification: EmpresaPreparo['details']['identification'] = {};
-  if (hasText(ident.name)) identification.name = ident.name;
-  if (hasText(ident.docType)) identification.docType = toDocType(ident.docType);
-  if (hasText(ident.docId)) identification.docId = ident.docId;
-  if (hasText(ident.countryCode)) identification.countryCode = ident.countryCode;
-
-  const company: EmpresaPreparo['details']['company'] = {};
-  if (hasText(empresa.details.company.legalName)) company.legalName = empresa.details.company.legalName;
-  if (hasText(empresa.details.company.tradeName)) company.tradeName = empresa.details.company.tradeName;
+  // naoPedirDadoJaExistente: only what the platform does not have yet is listed as missing.
+  // empresaPreparadaDadosObrigatorios: prepared only with name, document (type and number), one address and one contact.
+  const faltas: Falta[] = [];
+  if (!hasText(ident.name)) faltas.push('nome');
+  if (docType === undefined || !hasText(ident.docId)) faltas.push('documento');
+  if (addresses.length === 0) faltas.push('endereco');
+  if (contacts.length === 0) faltas.push('contato');
+  const preparada = faltas.length === 0;
 
   return {
     id: empresa.id,
     version: empresa.version,
-    details: { identification, company, base: { addresses } },
+    details: {
+      identification: {
+        ...(hasText(ident.name) ? { name: ident.name } : {}),
+        ...(docType !== undefined ? { docType } : {}),
+        ...(hasText(ident.docId) ? { docId: ident.docId } : {}),
+        ...(hasText(ident.countryCode) ? { countryCode: ident.countryCode } : {}),
+      },
+      company: {
+        ...(hasText(empresa.details.company.legalName) ? { legalName: empresa.details.company.legalName } : {}),
+        ...(hasText(empresa.details.company.tradeName) ? { tradeName: empresa.details.company.tradeName } : {}),
+      },
+      base: { addresses },
+    },
     contacts,
-    preparada: faltantes.length === 0,
-    // the list of missing data, joined by comma (l4: dadosFaltantes is the list as text)
-    dadosFaltantes: faltantes.join(',') as Faltante,
+    preparada,
+    dadosFaltantes: firstMissing(faltas),
   };
 }
 
-function validarDocumento(docType: string, docId: string, countryCode: string): void {
-  const digits = docId.replace(/\D/g, '');
-  if (docType === 'CNPJ' && digits.length !== 14) {
-    throw new AppError('INVALID_DOCUMENT', 'CNPJ must have 14 digits', 422, { ruleId: 'rule-document-shape-validated' });
-  }
-  if (docType === 'CNPJ' && countryCode !== 'BR') {
-    throw new AppError('INVALID_DOCUMENT', 'CNPJ is only valid for country BR', 422, { ruleId: 'rule-document-shape-validated' });
-  }
-  if (docType === 'EIN' && digits.length !== 9) {
-    throw new AppError('INVALID_DOCUMENT', 'EIN must have 9 digits', 422, { ruleId: 'rule-document-shape-validated' });
-  }
-  if (docId.trim() === '') {
-    throw new AppError('INVALID_DOCUMENT', 'document number is empty', 422, { ruleId: 'rule-document-shape-validated' });
-  }
-}
-
-function recusarSobrescrita(campo: string): never {
-  throw new AppError('DATA_ALREADY_EXISTS', 'the platform already has ' + campo, 409, { ruleId: 'naoPedirDadoJaExistente' });
-}
-
 export const requests: { [K in keyof EmpresaContracts]: (input: EmpresaContracts[K]['input'], ctx: RequestContext) => Promise<EmpresaContracts[K]['output']> } = {
-  "inicio.empresa.qryEmpresaPreparo": async function (input, ctx) {
+  'inicio.empresa.qryEmpresaPreparo': async function (input, ctx) {
     const empresaId = await resolveEmpresaId(ctx);
     const empresa = await getEmpresa({ id: empresaId }, ctx);
-    return { empresa: await montarEmpresaPreparo(empresa, ctx) };
+    const contacts = await listContatos(ctx);
+    return { empresa: buildEmpresa(empresa, contacts) };
   },
 
-  "inicio.empresa.cmdSalvarDadosEmpresa": async function (input, ctx) {
+  'inicio.empresa.cmdSalvarDadosEmpresa': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
 
-      const current = await getEmpresa({ id: String(input.id) }, bound);
-
-      // somenteResponsavelEditaEmpresa: the caller must be recognized by the platform as responsible for this company.
-      const personId = ctx.sessionContext.person?.mdmId;
-      let reconhecido = false;
-      if (isResponsavel(ctx) && hasText(personId)) {
-        const pessoa = await getPessoaOrganizacao({ id: personId }, bound);
-        reconhecido = asIdList(pessoa.details.base.relationshipRefs['assignments']).includes(current.id);
-      }
-      if (!reconhecido) {
-        throw new AppError('FORBIDDEN', 'only the responsible of the company can complete its data', 403, { ruleId: 'somenteResponsavelEditaEmpresa' });
+      // somenteResponsavelEditaEmpresa: the platform session must recognize the caller as the responsible of this company.
+      const sessionEmpresaId = isResponsavel(ctx) ? await resolveEmpresaId(bound) : undefined;
+      if (sessionEmpresaId === undefined || sessionEmpresaId !== input.id) {
+        throw new AppError('FORBIDDEN', 'Só o responsável reconhecido pela plataforma pode completar os dados da empresa.', 403, { ruleId: 'somenteResponsavelEditaEmpresa' });
       }
 
+      const current = await getEmpresa({ id: input.id }, bound);
       const cur = current.details;
-      const inId = input.details.identification;
-      const inCompany = input.details.company;
-      const inAddresses = input.details.base.addresses;
+      const sent = input.details;
 
-      // naoPedirDadoJaExistente: a datum the platform already has is never overwritten.
-      let name = cur.identification.name;
-      if (inId.name !== undefined) {
-        if (hasText(cur.identification.name) && cur.identification.name !== inId.name) recusarSobrescrita('name');
-        name = inId.name;
+      // naoPedirDadoJaExistente: data the platform already has is never overwritten; only missing data is applied.
+      const name = hasText(cur.identification.name) ? cur.identification.name : (sent.identification.name ?? cur.identification.name);
+
+      const curDocType = toDocType(cur.identification.docType);
+      const curHasDoc = curDocType !== undefined && hasText(cur.identification.docId);
+      const docType = curHasDoc ? curDocType : (toDocType(sent.identification.docType) ?? curDocType);
+      const docId = curHasDoc ? cur.identification.docId : (hasText(sent.identification.docId) ? sent.identification.docId.trim() : cur.identification.docId);
+      const settingDoc = !curHasDoc && (sent.identification.docType !== undefined || sent.identification.docId !== undefined);
+      const countryCode = !curHasDoc && hasText(sent.identification.countryCode) ? sent.identification.countryCode : cur.identification.countryCode;
+
+      // rule-document-shape-validated: the document format follows its type.
+      if (settingDoc && docType === 'CNPJ' && (!hasText(docId) || !validCnpj(docId))) {
+        throw new AppError('INVALID_DOCUMENT', 'CNPJ inválido.', 422, { ruleId: 'rule-document-shape-validated' });
       }
-      let docType = cur.identification.docType;
-      let docId = cur.identification.docId;
-      if (inId.docType !== undefined || inId.docId !== undefined) {
-        const hasDoc = hasText(cur.identification.docType) && hasText(cur.identification.docId);
-        if (hasDoc && (
-          (inId.docType !== undefined && inId.docType !== cur.identification.docType) ||
-          (inId.docId !== undefined && inId.docId !== cur.identification.docId)
-        )) recusarSobrescrita('document');
-        if (inId.docType !== undefined) docType = inId.docType;
-        if (inId.docId !== undefined) docId = inId.docId;
-      }
-      const countryCode = inId.countryCode !== undefined ? inId.countryCode : cur.identification.countryCode;
-      let legalName = cur.company.legalName;
-      if (inCompany.legalName !== undefined) {
-        if (hasText(cur.company.legalName) && cur.company.legalName !== inCompany.legalName) recusarSobrescrita('legalName');
-        legalName = inCompany.legalName;
-      }
-      let tradeName = cur.company.tradeName;
-      if (inCompany.tradeName !== undefined) {
-        if (hasText(cur.company.tradeName) && cur.company.tradeName !== inCompany.tradeName) recusarSobrescrita('tradeName');
-        tradeName = inCompany.tradeName;
-      }
-      let addresses: Record<string, unknown>[] = cur.base.addresses;
-      if (inAddresses !== undefined && inAddresses.length > 0) {
-        if (cur.base.addresses.length > 0) recusarSobrescrita('address');
-        addresses = inAddresses.map((line) => ({ line1: line }));
+      if (settingDoc && (docType === undefined || !hasText(docId))) {
+        throw new AppError('INVALID_DOCUMENT', 'Informe o tipo e o número do documento.', 422, { ruleId: 'rule-document-shape-validated' });
       }
 
-      // document shape by country (rule-document-shape-validated); duplicate check by document is done by the platform on write.
-      if (hasText(docType) && hasText(docId)) {
-        validarDocumento(docType, docId, countryCode);
-      } else if (hasText(docType) !== hasText(docId)) {
-        throw new AppError('INVALID_DOCUMENT', 'document type and number must be informed together', 422, { ruleId: 'rule-document-shape-validated' });
-      }
+      const legalName = hasText(cur.company.legalName) ? cur.company.legalName : (sent.company.legalName ?? cur.company.legalName);
+      const tradeName = hasText(cur.company.tradeName) ? cur.company.tradeName : (hasText(sent.company.tradeName) ? sent.company.tradeName : undefined);
 
-      const identification: { name: string; docType?: string; docId?: string; countryCode: string } = { name, countryCode };
-      if (hasText(docType)) identification.docType = docType;
-      if (hasText(docId)) identification.docId = docId;
-      const company: { companyKind: string; legalName: string; tradeName?: string } = {
-        companyKind: cur.company.companyKind,
-        legalName,
-      };
-      if (hasText(tradeName)) company.tradeName = tradeName;
+      const sentAddresses = (sent.base.addresses ?? []).filter(hasText);
+      const hasAddress = cur.base.addresses.map(addressText).some((a) => a !== '');
+      const addresses: Record<string, unknown>[] = hasAddress || sentAddresses.length === 0
+        ? cur.base.addresses
+        : sentAddresses.map((text) => ({ [ADDRESS_LINE_KEY]: text }));
 
-      const updated = await updateEmpresa({
-        id: String(input.id),
+      const updateInput: UpdateEmpresaInput = {
+        id: input.id,
         version: Number(input.version),
         details: {
-          identification,
+          identification: {
+            name,
+            countryCode,
+            ...(docType !== undefined ? { docType } : {}),
+            ...(hasText(docId) ? { docId } : {}),
+          },
           base: { aliases: cur.base.aliases, addresses },
-          company,
+          company: {
+            companyKind: cur.company.companyKind,
+            legalName,
+            ...(tradeName !== undefined ? { tradeName } : {}),
+          },
           ...(cur.general !== undefined ? { general: cur.general } : {}),
         },
-      }, bound);
+      };
 
-      // empresaPreparadaDadosObrigatorios: recalculated here, never stored.
-      return { empresa: await montarEmpresaPreparo(updated, bound) };
+      const updated = await updateEmpresa(updateInput, bound);
+      const contacts = await listContatos(bound);
+      // empresaPreparadaDadosObrigatorios: recalculated here, not stored.
+      return { empresa: buildEmpresa(updated, contacts) };
     });
   },
 };

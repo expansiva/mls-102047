@@ -8,7 +8,7 @@ export const pageTests = {
   "actor": "responsavel",
   "cases": [
     {
-      "id": "qryEmpresaPreparo.ok",
+      "id": "inicio.empresa.qryEmpresaPreparo.ok",
       "routine": "inicio.empresa.qryEmpresaPreparo",
       "params": {},
       "expect": {
@@ -18,19 +18,135 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "cmdSalvarDadosEmpresa.ok",
+      "id": "inicio.empresa.cmdSalvarDadosEmpresa.id.required",
+      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
+      "params": {
+        "version": 1,
+        "details": {
+          "identification": {
+            "name": "Empresa Teste"
+          },
+          "company": {},
+          "base": {}
+        }
+      },
+      "paramFieldRefs": {
+        "version": "Empresa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "inicio.empresa.cmdSalvarDadosEmpresa.version.required",
+      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
+      "params": {
+        "id": "<seedRef>",
+        "details": {
+          "identification": {
+            "name": "Empresa Teste"
+          },
+          "company": {},
+          "base": {}
+        }
+      },
+      "paramFieldRefs": {
+        "id": "Empresa.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "inicio.empresa.cmdSalvarDadosEmpresa.details.required",
+      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "id": "Empresa.id",
+        "version": "Empresa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "inicio.empresa.cmdSalvarDadosEmpresa.docInvalido",
       "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
       "params": {
         "id": "<seedRef>",
         "version": "<seedRef>",
         "details": {
-          "identification": {},
+          "identification": {
+            "docType": "CNPJ",
+            "docId": "123",
+            "countryCode": "BR"
+          },
+          "company": {},
+          "base": {}
+        }
+      },
+      "paramFieldRefs": {
+        "id": "Empresa.id",
+        "version": "Empresa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "VALIDATION_ERROR"
+      },
+      "mutating": true
+    },
+    {
+      "id": "inicio.empresa.cmdSalvarDadosEmpresa.versaoDesatualizada",
+      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
+      "params": {
+        "id": "<seedRef>",
+        "version": 999999,
+        "details": {
+          "identification": {
+            "name": "Empresa Teste"
+          },
+          "company": {},
+          "base": {}
+        }
+      },
+      "paramFieldRefs": {
+        "id": "Empresa.id"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "CONFLICT"
+      },
+      "mutating": true
+    },
+    {
+      "id": "inicio.empresa.cmdSalvarDadosEmpresa.ok",
+      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>",
+        "details": {
+          "identification": {
+            "name": "Empresa Teste",
+            "docType": "CNPJ",
+            "docId": "11222333000181",
+            "countryCode": "BR"
+          },
           "company": {
-            "tradeName": "Empresa Monitor"
+            "legalName": "Empresa Teste Ltda",
+            "tradeName": "Empresa Teste"
           },
           "base": {
             "addresses": [
-              "Rua Monitor, 100"
+              "Rua das Flores, 100, Sao Paulo"
             ]
           }
         }
@@ -41,85 +157,6 @@ export const pageTests = {
       },
       "expect": {
         "ok": true
-      },
-      "mutating": true
-    },
-    {
-      "id": "cmdSalvarDadosEmpresa.id.required",
-      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
-      "params": {
-        "version": "<seedRef>",
-        "details": {
-          "identification": {},
-          "company": {
-            "tradeName": "Empresa Monitor"
-          },
-          "base": {
-            "addresses": [
-              "Rua Monitor, 100"
-            ]
-          }
-        }
-      },
-      "paramFieldRefs": {
-        "version": "Empresa.version"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cmdSalvarDadosEmpresa.version.required",
-      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
-      "params": {
-        "id": "<seedRef>",
-        "details": {
-          "identification": {},
-          "company": {
-            "tradeName": "Empresa Monitor"
-          },
-          "base": {
-            "addresses": [
-              "Rua Monitor, 100"
-            ]
-          }
-        }
-      },
-      "paramFieldRefs": {
-        "id": "Empresa.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cmdSalvarDadosEmpresa.staleVersion",
-      "routine": "inicio.empresa.cmdSalvarDadosEmpresa",
-      "params": {
-        "id": "<seedRef>",
-        "version": 9999,
-        "details": {
-          "identification": {},
-          "company": {
-            "tradeName": "Empresa Monitor"
-          },
-          "base": {
-            "addresses": [
-              "Rua Monitor, 100"
-            ]
-          }
-        }
-      },
-      "paramFieldRefs": {
-        "id": "Empresa.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "CONFLICT"
       },
       "mutating": true
     }

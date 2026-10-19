@@ -2,151 +2,173 @@
 
 import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
 import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { Inicio_pessoaContracts } from '/_102047_/l2/inicio/web/contracts/inicio_pessoa.defs.js';
 import { getPessoaOrganizacao } from '/_102047_/l1/inicio/layer_2_application/usecases/getPessoaOrganizacao.js';
 import { getEmpresa } from '/_102047_/l1/inicio/layer_2_application/usecases/getEmpresa.js';
+import { listPessoaOrganizacao } from '/_102047_/l1/inicio/layer_2_application/usecases/listPessoaOrganizacao.js';
+import type { Inicio_pessoaContracts } from '/_102047_/l2/inicio/web/contracts/inicio_pessoa.defs.js';
 
-type Output = Inicio_pessoaContracts['inicio.inicio_pessoa.qryInicioPessoa']['output'];
-type PendenciaAcesso = Output['pendencias'][number];
-type StatusPessoa = Output['meuAcesso']['details']['identification']['status'];
+type Route = Inicio_pessoaContracts['inicio.inicio_pessoa.qryInicioPessoa'];
+type Output = Route['output'];
+type Status = Output['meuAcesso']['details']['identification']['status'];
 
-const STATUS_VALUES: StatusPessoa[] = ['Active', 'Inactive', 'Merged', 'Blocked'];
-
-const EU_COUNTRIES: string[] = [
+// Brasil e países da União Europeia: exigem consentimento de privacidade.
+const CONSENT_COUNTRIES: string[] = [
+  'BR',
   'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IE',
   'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE',
 ];
 
-function isStatus(value: string): value is StatusPessoa {
-  return (STATUS_VALUES as string[]).includes(value);
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+  return null;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
+function toStatus(value: string): Status {
+  switch (value) {
+    case 'Active':
+    case 'Inactive':
+    case 'Merged':
+    case 'Blocked':
+      return value;
+    default:
+      throw new AppError('INVALID_STATUS', 'Situação do cadastro da pessoa desconhecida: ' + value, 500);
+  }
 }
 
-function nonEmpty(value: string | undefined | null): value is string {
-  return typeof value === 'string' && value.trim().length > 0;
-}
-
-function readIds(refs: unknown, key: string): string[] {
-  if (!isRecord(refs)) return [];
-  const list = refs[key];
-  if (!Array.isArray(list)) return [];
-  return list.filter((item): item is string => typeof item === 'string' && item.length > 0);
-}
-
-/** Valid consent: a consent object that was not revoked nor refused. */
-function hasValidConsent(consent: Record<string, unknown> | undefined): boolean {
-  if (!isRecord(consent)) return false;
-  if (consent.revokedAt != null && consent.revokedAt !== '') return false;
-  if (consent.granted === false || consent.accepted === false || consent.valid === false) return false;
+function isValidConsent(consent: Record<string, unknown> | null | undefined): boolean {
+  if (consent == null) return false;
+  if ('granted' in consent) return consent.granted === true;
+  if ('accepted' in consent) return consent.accepted === true;
+  if ('consented' in consent) return consent.consented === true;
+  if (consent.revokedAt != null || consent.withdrawnAt != null) return false;
+  if (typeof consent.expiresAt === 'string' && consent.expiresAt !== '') {
+    const expires = Date.parse(consent.expiresAt);
+    if (!Number.isNaN(expires) && expires < Date.now()) return false;
+  }
   return true;
 }
 
-/** emailContaNaoEditavel: the e-mail is read only, extracted from the contacts of the person. */
-function extractAccountEmail(contacts: Record<string, unknown>[]): string | undefined {
-  for (const contact of contacts) {
-    const kind = String(contact.contactType ?? contact.type ?? '').toLowerCase();
-    const value = contact.value;
-    if (typeof value !== 'string' || value.trim().length === 0) continue;
-    if (kind === 'email' || (kind === '' && value.includes('@'))) return value;
+function contactsOf(record: { details?: unknown }): Record<string, unknown>[] {
+  const details = asRecord(record.details);
+  const base = details ? asRecord(details.base) : null;
+  const contacts = base ? base.contacts : null;
+  if (!Array.isArray(contacts)) return [];
+  const out: Record<string, unknown>[] = [];
+  for (const c of contacts) {
+    const r = asRecord(c);
+    if (r) out.push(r);
   }
-  return undefined;
+  return out;
+}
+
+function emailsOf(contacts: Record<string, unknown>[]): string[] {
+  const out: string[] = [];
+  for (const c of contacts) {
+    const raw = c.value ?? c.email;
+    if (typeof raw === 'string' && raw.includes('@')) out.push(raw.trim().toLowerCase());
+  }
+  return out;
 }
 
 export const requests: { [K in keyof Inicio_pessoaContracts]: (input: Inicio_pessoaContracts[K]['input'], ctx: RequestContext) => Promise<Inicio_pessoaContracts[K]['output']> } = {
-  'inicio.inicio_pessoa.qryInicioPessoa': async function (_input, ctx) {
+  'inicio.inicio_pessoa.qryInicioPessoa': async function (input, ctx) {
     const sessionPerson = ctx.sessionContext.person;
-    if (sessionPerson == null || !nonEmpty(sessionPerson.mdmId)) {
-      throw new AppError('NOT_FOUND', 'Pessoa da sessão não encontrada na plataforma', 404);
+    if (sessionPerson == null) {
+      throw new AppError('NOT_FOUND', 'Nenhuma pessoa da organização ligada à sessão.', 404);
     }
 
+    // read.byId: cadastro da pessoa logada.
     const pessoa = await getPessoaOrganizacao({ id: sessionPerson.mdmId }, ctx);
-    if (pessoa == null) {
-      throw new AppError('NOT_FOUND', 'Cadastro da pessoa não encontrado', 404);
-    }
-
-    const identification = pessoa.details.identification;
-    const name = identification.name;
-    const countryCode = identification.countryCode;
-    const countryUpper = nonEmpty(countryCode) ? countryCode.trim().toUpperCase() : '';
+    const ident = pessoa.details.identification;
+    const name = typeof ident.name === 'string' ? ident.name.trim() : '';
+    const countryCode = typeof ident.countryCode === 'string' ? ident.countryCode.trim().toUpperCase() : '';
 
     // acessoCompletoDadosMinimos: nome e país; consentimento válido se Brasil ou União Europeia; telefone não conta.
-    const consentimentoExigido = countryUpper === 'BR' || EU_COUNTRIES.includes(countryUpper);
-    // naoPedirDadoJaExistente: só lista o que a plataforma ainda não tem.
+    const consentimentoExigido = countryCode !== '' && CONSENT_COUNTRIES.includes(countryCode);
+    const consentOk = isValidConsent(pessoa.details.person?.privacyConsent);
+
+    // naoPedirDadoJaExistente: só o que a plataforma ainda não tem.
     const dadosFaltantes: string[] = [];
-    if (!nonEmpty(name)) dadosFaltantes.push('nome');
-    if (!nonEmpty(countryCode)) dadosFaltantes.push('país');
-    if (consentimentoExigido && !hasValidConsent(pessoa.details.person?.privacyConsent)) {
-      dadosFaltantes.push('consentimento de privacidade');
-    }
+    if (name === '') dadosFaltantes.push('nome');
+    if (countryCode === '') dadosFaltantes.push('país');
+    if (consentimentoExigido && !consentOk) dadosFaltantes.push('consentimento de privacidade');
     const acessoCompleto = dadosFaltantes.length === 0;
 
-    const contacts = Array.isArray(pessoa.details.base.contacts) ? pessoa.details.base.contacts : [];
-    const emailConta = extractAccountEmail(contacts);
+    // emailContaNaoEditavel: o e-mail vem só para leitura, extraído dos contatos.
+    const contacts = contactsOf(pessoa);
+    const ownEmails = emailsOf(contacts);
+    const emailConta = ownEmails.length > 0 ? ownEmails[0] : sessionPerson.email;
 
-    // ligacaoLoginPelaPlataforma: the login is linked when the session e-mail is the e-mail of the record;
-    // a different e-mail in the contacts means another registration with that e-mail already exists.
-    const loginLigado = emailConta == null
-      || !nonEmpty(sessionPerson.email)
-      || emailConta.trim().toLowerCase() === sessionPerson.email.trim().toLowerCase();
+    // ligacaoLoginPelaPlataforma: outro cadastro com o mesmo e-mail indica que o login não está ligado.
+    let outroCadastroComMesmoEmail = false;
+    if (emailConta != null && emailConta !== '') {
+      const alvo = emailConta.trim().toLowerCase();
+      let page = 1;
+      let hasMore = true;
+      while (hasMore && !outroCadastroComMesmoEmail) {
+        const res = await listPessoaOrganizacao({ page, pageSize: 200 }, ctx);
+        for (const item of res.items) {
+          if (String(item.id) === String(pessoa.id)) continue;
+          if (emailsOf(contactsOf(item)).includes(alvo)) {
+            outroCadastroComMesmoEmail = true;
+            break;
+          }
+        }
+        hasMore = res.hasMore;
+        page += 1;
+      }
+    }
 
-    const pendencias: PendenciaAcesso[] = [];
-    if (!loginLigado && emailConta != null) {
-      // ligacaoLoginPelaPlataforma: only shows the pending release; does not store it nor decide the link.
-      pendencias.push({ tipo: 'pedirLiberacao', emailConta, details: { inicio: {} } });
+    const pendencias: Output['pendencias'] = [];
+    if (outroCadastroComMesmoEmail) {
+      // ligacaoLoginPelaPlataforma: pendência calculada, sem guardar nem decidir a ligação.
+      pendencias.push({
+        tipo: 'pedirLiberacao',
+        emailConta,
+        details: { inicio: {} },
+      });
     } else if (!acessoCompleto) {
-      const pendencia: PendenciaAcesso = {
+      // login ligado e acesso incompleto.
+      pendencias.push({
         tipo: 'completarDadosMinimos',
+        emailConta,
         details: { inicio: { dadosFaltantes } },
-      };
-      if (emailConta != null) {
-        const comEmail: PendenciaAcesso = { ...pendencia, emailConta };
-        pendencias.push(comEmail);
-      } else {
-        pendencias.push(pendencia);
-      }
+      });
     }
-    // seguirDiretoSeCompleto: complete and linked gives an empty list.
+    // seguirDiretoSeCompleto: acesso completo e ligado -> lista vazia.
 
-    if (!isStatus(identification.status)) {
-      throw new AppError('INVALID_STATE', `Situação da pessoa desconhecida: ${identification.status}`, 500);
-    }
-
-    const meuAcessoIdentificacao: Output['meuAcesso']['details']['identification'] = {
-      status: identification.status,
+    const identificacao: Output['meuAcesso']['details']['identification'] = {
+      status: toStatus(ident.status),
     };
-    if (nonEmpty(name)) meuAcessoIdentificacao.name = name;
-    if (nonEmpty(countryCode)) meuAcessoIdentificacao.countryCode = countryCode;
+    if (name !== '') identificacao.name = name;
+    if (countryCode !== '') identificacao.countryCode = countryCode;
 
-    const output: Output = {
-      meuAcesso: {
-        id: pessoa.id,
-        details: {
-          identification: meuAcessoIdentificacao,
-          inicio: { acessoCompleto, dadosFaltantes, consentimentoExigido },
-        },
+    const meuAcesso: Output['meuAcesso'] = {
+      id: pessoa.id,
+      details: {
+        identification: identificacao,
+        inicio: { acessoCompleto, dadosFaltantes, consentimentoExigido },
       },
-      pendencias,
     };
 
-    // Company linked by AssignedTo: relationshipRefs.assignments.
-    const detailsRecord: Record<string, unknown> = pessoa.details;
-    let empresaIds = readIds(pessoa.details.base.relationshipRefs, 'assignments');
-    if (empresaIds.length === 0) empresaIds = readIds(detailsRecord.relationshipRefs, 'assignments');
-    if (empresaIds.length > 0) {
-      const empresa = await getEmpresa({ id: empresaIds[0] }, ctx);
-      if (empresa != null) {
-        // grant pessoaVerEmpresa: only name and tradeName.
-        const tradeName = empresa.details.company.tradeName;
-        output.empresa = {
-          details: {
-            identification: { name: empresa.details.identification.name },
-            company: nonEmpty(tradeName) ? { tradeName } : {},
-          },
-        };
-      }
+    const output: Output = { meuAcesso, pendencias };
+
+    // Empresa ligada por AssignedTo (relationshipRefs.assignments); só nome e nome fantasia (pessoaVerEmpresa).
+    const refs = asRecord(pessoa.details.base.relationshipRefs);
+    const assignments = refs ? refs.assignments : null;
+    if (Array.isArray(assignments) && assignments.length > 0) {
+      const empresa = await getEmpresa({ id: String(assignments[0]) }, ctx);
+      const company: Output['meuAcesso'] extends never ? never : { tradeName?: string } = {};
+      const tradeName = empresa.details.company.tradeName;
+      if (tradeName != null && tradeName !== '') company.tradeName = tradeName;
+      output.empresa = {
+        details: {
+          identification: { name: empresa.details.identification.name },
+          company,
+        },
+      };
     }
 
     return output;
