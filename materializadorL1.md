@@ -365,11 +365,18 @@ Inscricao.participanteId }`. Nenhuma chave nova: o passo é inverso quando o pre
     chamadas, cada uma com o `asUserId`;
   - **limites:** a porta é **só em memória** (volátil por processo; não usar em produção). A porta cm espera o acerto do contrato no cm. Ações
     disponíveis, prazos e entrada cm→app ficam fora.
-  - **A Task é para processo com etapa humana** (How, 18/10). O processo só com etapas automáticas e de alerta (ex.: `avisoDiario`) não abre
-    ocorrência: o rastro é o registro do módulo e a mensagem do aviso;
-  - **"notificar/avisar a pessoa"** é mensagem do cm na thread do módulo dela (`ensureModuleThread` pelo e-mail de login + `addMessage`, cliente da
-    rt79). O resultado vai para a transição de sistema do registro (ex.: `concluirAviso`/`falharAviso` com `motivoFalha`), nunca `completed` sem
-    envio (`l1_d1_89`);
+  - **Toda ocorrência é uma Task** (direção aprovada). No processo agendado, a ocorrência é o registro que ele cria (no `avisoDiario`, o
+    `AvisoVencimento` de cada responsável e dia), e a Task abre depois do registro, com o dono = a pessoa do registro;
+  - **o dono de cada etapa decide o que o L1 faz ao entrar nela** (`ownerOf(kind)`, §7 do doc do What):
+    - pessoa (`human`, `alert`): aviso a quem age, como mensagem do cm na thread do módulo da pessoa (`ensureModuleThread` pelo e-mail de login +
+      `addMessage`, cliente da rt79), e na sala da Task quando houver a porta cm;
+    - módulo (`mechanical`): a função do L1;
+    - relógio (`wait`): a espera;
+    - agente (`llm`) e canal: erro explícito até haver caso.
+
+    Quem avisa é o código do motor gerado (`engine.ts`), uma vez só; a função não avisa "quem age agora" por conta própria. O resultado do aviso
+    volta para a função, que aplica a transição de sistema do L4 (ex.: `concluirAviso`/`falharAviso` com `motivoFalha`), nunca `completed` sem envio
+    (`l1_d1_89`);
   - **a porta em memória é volátil e vale só para processo isolado** (testes). O app roda em cluster com mais de um worker, na lima e na VM
     remota, e a topologia do pm2 não muda (Wagner, 18/10). Por isso a porta em memória **recusa** mais de um worker de forma explícita
     (`WORKFLOW_MEMORY_REQUIRES_SINGLE_WORKER`, rt90 s1), e o ciclo do processo só roda de verdade com a porta cm.
