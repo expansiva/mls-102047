@@ -10,7 +10,7 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:tarefasParaAcao",
-        "persist": true,
+        "persist": false,
         "required": false
       }
     }

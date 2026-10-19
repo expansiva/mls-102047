@@ -10,7 +10,7 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:avisoDoDia",
-        "persist": true,
+        "persist": false,
         "required": false
       }
     }

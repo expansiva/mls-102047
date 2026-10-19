@@ -90,7 +90,7 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:detalheTarefa",
-        "persist": true,
+        "persist": false,
         "required": false
       }
     }

@@ -10,7 +10,7 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:formularioLista",
-        "persist": true,
+        "persist": false,
         "required": false
       }
     }

@@ -20,7 +20,7 @@ export const definition = {
           "localStorage"
         ],
         "effect": "select:cadastroPessoa",
-        "persist": true,
+        "persist": false,
         "required": false
       }
     }
