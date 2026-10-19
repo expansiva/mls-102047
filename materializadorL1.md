@@ -372,7 +372,8 @@ Inscricao.participanteId }`. Nenhuma chave nova: o passo é inverso quando o pre
     - **o plano de etapas vai para a Task na abertura**, e o L1 decide com o plano da Task, não com o da release atual. Etapa do plano que a
       função nova não conhece é incompatibilidade explícita;
     - **o dono de cada etapa decide a ação ao entrar nela** (`ownerOf(kind)`):
-      - pessoa: aviso a quem age, como mensagem de rotina na sala da Task (o cm resolve a sala pelo modo do processo; contrato do cm §4 e §6);
+      - pessoa: aviso a quem age, como mensagem de rotina na sala da Task, enviada por um **usuário virtual** do módulo (Wagner, 19/10), não pelo
+        moderator; o cm resolve a sala pelo modo do processo (contrato do cm §4 e §6);
       - módulo: a função;
       - relógio: pedido de despertar na Task. O cm chama a rotina do processo, e ela decide;
       - agente ou canal: erro explícito até haver caso. Tarefas não usa LLM, e o erro não é entrega de LLM;
@@ -380,6 +381,8 @@ Inscricao.participanteId }`. Nenhuma chave nova: o passo é inverso quando o pre
     - **as pendências** ("o que depende de mim") são uma projeção da plataforma, mantida pelo motor e lida pelas telas. O responsável fixo do
       registro não é "quem age agora". Transferir é um comando da execução;
     - **o histórico distingue pessoa de rotina**: rotina nunca aparece como ato do dono;
+    - **a comunicação app ↔ cm usa um token configurado nas duas pontas** (Wagner, 19/10), por app/organização. O token não é aprovação humana: o
+      L1 continua validando autoridade, processo, Task/step e escopo;
     - **o resultado do aviso** vai para a transição de sistema do L4 (ex.: `concluirAviso`/`falharAviso` com `motivoFalha`), nunca `completed`
       sem envio (`l1_d1_89`);
   - **a porta em memória é volátil e vale só para processo isolado** (testes). O app roda em cluster com mais de um worker, na lima e na VM

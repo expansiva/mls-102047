@@ -244,7 +244,9 @@ precisa ser feito, nunca como a tela faz (Wagner, 13/10). O que muda no que voc�
 - **A pessoa logada não vem como entrada de rota:** o servidor a resolve. Para mostrar ou esconder uma ação pela pessoa ("só o responsável
   executa"), o contrato já devolve o `criadorId`/`responsavelId` da linha, e as `rules` dizem quem pode. A pessoa da sessão na tela foi pedida ao
   runtime (`todo/runtime/tasks/backlog/fromHow_pessoa_da_sessao_na_tela.md`). Até lá, vale o §9: tratar a recusa sem quebrar a tela.
-- **Um param `select:<organismo>`** quer dizer que esse organismo seleciona um registro. **Os params de entrada** passam a ser só os filtros da
+- **Um param `select:<organismo>`** quer dizer que esse organismo seleciona um registro. Desde a `l2_d2_115` ele vem com `persist: false`: a seleção
+  vale só pela URL (o link abre o registro, o menu abre sem seleção), e os filtros continuam guardados. É a escolha do `tarefas`, delegada pelo
+  Wagner a quem cria o módulo (19/10). **Os params de entrada** passam a ser só os filtros da
   abertura da tela: busca, página e o id de uma consulta de detalhe não são params.
 - **Uma entrada de comando** que nenhum organismo mostra e que não vem da sessão nem da seleção é algo que a pessoa informa (ex.: o motivo da
   devolução). Como pedir, é de vocês. O How mediu um gate para isso e não o criou: recusaria 24 de 128 organismos em 11 módulos que usam ação
