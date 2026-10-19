@@ -4,7 +4,7 @@ import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { execBff } from '/_102029_/l2/bffClient.js';
 import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabState.js';
 import { runBlockingUiAction } from '/_102029_/l2/interactionRuntime.js';
-import type { Tarefas_equipeContracts, TarefaDetalhe, TarefaEquipeItem, ListaResumo, MembroResumo } from '/_102047_/l2/tarefas/web/contracts/tarefas_equipe.defs.js';
+import type { Tarefas_equipeContracts, TarefaDetalhe } from '/_102047_/l2/tarefas/web/contracts/tarefas_equipe.defs.js';
 
 export type {
   Tarefas_equipeContracts,
@@ -20,37 +20,55 @@ export type {
   TarefaDetalhe,
 } from '/_102047_/l2/tarefas/web/contracts/tarefas_equipe.defs.js';
 
-export type ErrorState = { code: string; message: string; details?: unknown } | null;
-
 type Input<R extends keyof Tarefas_equipeContracts> = Tarefas_equipeContracts[R]['input'];
 type Output<R extends keyof Tarefas_equipeContracts> = Tarefas_equipeContracts[R]['output'];
 
-/** Priority values accepted by the board filter. */
-export type TarefaPrioridade = TarefaEquipeItem['prioridade'];
-/** Status values accepted by the board filter. */
-export type TarefaSituacao = TarefaEquipeItem['status'];
-/** Paged list of team tasks, as the list route returns it. */
-export type TarefasPage = Output<'tarefas.tarefas_equipe.listarTarefasEquipe'>['tarefas'];
+export type ErrorState = { code: string; message: string; details?: unknown } | null;
 
-/** Draft of the reassign command: the member chosen as the new responsible. */
+const PRIORIDADES = ['low', 'medium', 'high'] as const;
+const STATUS_TAREFA = ['aFazer', 'emAndamento', 'emRevisao', 'concluida', 'cancelada'] as const;
+
+/** Task priority accepted by the board filter. */
+export type Prioridade = (typeof PRIORIDADES)[number];
+/** Task status accepted by the board filter. */
+export type StatusTarefa = (typeof STATUS_TAREFA)[number];
+
+/** The filters of the team board; every leaf is null when the filter is off. */
+export type FiltroTarefasEquipe = {
+  listaId: string | null;
+  responsavelId: string | null;
+  prioridade: Prioridade | null;
+  status: StatusTarefa | null;
+  prazoDe: string | null;
+  prazoAte: string | null;
+  venceHoje: boolean | null;
+  atrasada: boolean | null;
+};
+
+/** Draft of the reassign command: the new assignee the manager picks (id and version come from the selected task). */
 export type ReatribuirTarefaDraft = {
+  id: string | null;
+  version: number | null;
   responsavelId: string | null;
 };
 
-/** Filter values the person changes; an omitted key keeps its current value, null clears it. */
-export type TarefasEquipeFilterChange = {
-  listaId?: string | null;
-  responsavelId?: string | null;
-  prioridade?: TarefaPrioridade | null;
-  status?: TarefaSituacao | null;
-  prazoDe?: string | null;
-  prazoAte?: string | null;
-  venceHoje?: boolean | null;
-  atrasada?: boolean | null;
-};
+function emptyReatribuirTarefaDraft(): ReatribuirTarefaDraft {
+  return { id: null, version: null, responsavelId: null };
+}
 
-export function emptyReatribuirTarefaDraft(): ReatribuirTarefaDraft {
-  return { responsavelId: null };
+function parsePrioridade(raw: string | null): Prioridade | null {
+  const found = PRIORIDADES.find(item => item === raw);
+  return found ?? null;
+}
+
+function parseStatus(raw: string | null): StatusTarefa | null {
+  const found = STATUS_TAREFA.find(item => item === raw);
+  return found ?? null;
+}
+
+function parseBoolean(raw: string | null): boolean | null {
+  if (raw === null) return null;
+  return raw === 'true';
 }
 
 type StateMember =
@@ -111,15 +129,8 @@ const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
 };
 const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
 
-const DATA_KEYS = [
-  'ui.tarefas.tarefas_equipe.tarefas',
-  'ui.tarefas.tarefas_equipe.listas',
-  'ui.tarefas.tarefas_equipe.membros',
-  'ui.tarefas.tarefas_equipe.tarefa',
-];
-
-/** Members that are persisted entry params (filters), stored in localStorage under tarefas.tarefas_equipe.<name>. */
-const PERSISTED_MEMBERS: string[] = [
+/** Filter members persisted in localStorage under `tarefas.tarefas_equipe.<name>`. */
+const PERSISTED_MEMBERS: StateMember[] = [
   'listaId',
   'responsavelId',
   'prioridade',
@@ -130,72 +141,55 @@ const PERSISTED_MEMBERS: string[] = [
   'atrasada',
 ];
 
+const STORAGE_PREFIX = 'tarefas.tarefas_equipe.';
 const PAGE_SIZE = 20;
 
-function parsePrioridade(raw: string | null): TarefaPrioridade | null {
-  if (raw === 'low' || raw === 'medium' || raw === 'high') return raw;
-  return null;
-}
-
-function parseSituacao(raw: string | null): TarefaSituacao | null {
-  if (raw === 'aFazer' || raw === 'emAndamento' || raw === 'emRevisao' || raw === 'concluida' || raw === 'cancelada') return raw;
-  return null;
-}
-
-function parseBoolean(raw: string | null): boolean | null {
-  if (raw === null) return null;
-  return raw === 'true';
-}
-
-function emptyToNull(value: string | null): string | null {
-  if (value === null || value === '') return null;
-  return value;
-}
+type PendingListar = { page: number; append: boolean };
 
 export class TarefasTarefas_equipeShared extends StateLitElement {
-  /** state tarefas — the page of team tasks (title, list, responsible, priority, due date, status and indicators); source listarTarefasEquipe.tarefas; organism tarefasEquipe */
-  @property({ attribute: false }) tarefas: TarefasPage | null = null;
+  /** state tarefas — the list of team tasks with list, assignee, due date, status and indicators, as a page { items, page, pageSize, hasMore }; source listarTarefasEquipe.tarefas; organism tarefasEquipe */
+  @property({ attribute: false }) tarefas: Output<'tarefas.tarefas_equipe.listarTarefasEquipe'>['tarefas'] | null = null;
 
-  /** state listas — the lists (projects or areas) identified by name, used by the list filter; source carregarOpcoesEquipe.listas; organism tarefasEquipe */
-  @property({ attribute: false }) listas: ListaResumo[] = [];
+  /** state listas — the lists (project or area) identified by name, used by the board filter; source carregarOpcoesEquipe.listas; organism tarefasEquipe */
+  @property({ attribute: false }) listas: Output<'tarefas.tarefas_equipe.carregarOpcoesEquipe'>['listas'] = [];
 
-  /** state membros — the team members with name and registry status (only Active ones can be chosen as responsible); source carregarOpcoesEquipe.membros; organisms acoesGestor, tarefasEquipe */
-  @property({ attribute: false }) membros: MembroResumo[] = [];
+  /** state membros — the team members with name and registry status (only Active ones may be picked as new assignee); source carregarOpcoesEquipe.membros; organisms acoesGestor, tarefasEquipe */
+  @property({ attribute: false }) membros: Output<'tarefas.tarefas_equipe.carregarOpcoesEquipe'>['membros'] = [];
 
-  /** state tarefa — the selected task in full (creator, responsible, history milestones, checklist, version); source obterTarefa.tarefa; organisms acoesGestor, detalheTarefa, historicoTarefa */
+  /** state tarefa — the selected task in full: creator, assignee, history milestones and checklist items; source obterTarefa.tarefa; organisms acoesGestor, detalheTarefa, historicoTarefa */
   @property({ attribute: false }) tarefa: TarefaDetalhe | null = null;
 
-  /** state selectedTarefa — the id of the task selected in tarefasEquipe; source entry.params.tarefaId; organisms detalheTarefa, tarefasEquipe; lives in the URL */
+  /** state selectedTarefa — the id of the task selected in tarefasEquipe; source entry.params.tarefaId; organisms detalheTarefa, tarefasEquipe; lives in the URL query */
   @property({ attribute: false }) selectedTarefa: string | null = null;
 
-  /** state listaId — filter of the board by list id; source entry.params.listaId; organism tarefasEquipe; persisted */
+  /** state listaId — filter by list id of the board; gap-completed filter state for entry param listaId; organism tarefasEquipe; persisted */
   @property({ attribute: false }) listaId: string | null = null;
 
-  /** state responsavelId — filter of the board by responsible member id; source entry.params.responsavelId; organism tarefasEquipe; persisted */
+  /** state responsavelId — filter by assignee id of the board; gap-completed filter state for entry param responsavelId; organism tarefasEquipe; persisted */
   @property({ attribute: false }) responsavelId: string | null = null;
 
-  /** state prioridade — filter of the board by priority (low, medium, high); source entry.params.prioridade; organism tarefasEquipe; persisted */
-  @property({ attribute: false }) prioridade: TarefaPrioridade | null = null;
+  /** state prioridade — filter by priority (low, medium, high) of the board; gap-completed filter state for entry param prioridade; organism tarefasEquipe; persisted */
+  @property({ attribute: false }) prioridade: Prioridade | null = null;
 
-  /** state status — filter of the board by task status; source entry.params.status; organism tarefasEquipe; persisted */
-  @property({ attribute: false }) status: TarefaSituacao | null = null;
+  /** state status — filter by task status of the board; gap-completed filter state for entry param status; organism tarefasEquipe; persisted */
+  @property({ attribute: false }) status: StatusTarefa | null = null;
 
-  /** state prazoDe — filter of the board: start of the due date range; source entry.params.prazoDe; organism tarefasEquipe; persisted */
+  /** state prazoDe — filter, start of the due-date interval; gap-completed filter state for entry param prazoDe; organism tarefasEquipe; persisted */
   @property({ attribute: false }) prazoDe: string | null = null;
 
-  /** state prazoAte — filter of the board: end of the due date range; source entry.params.prazoAte; organism tarefasEquipe; persisted */
+  /** state prazoAte — filter, end of the due-date interval; gap-completed filter state for entry param prazoAte; organism tarefasEquipe; persisted */
   @property({ attribute: false }) prazoAte: string | null = null;
 
-  /** state venceHoje — filter of the board: when true only open tasks due today; source entry.params.venceHoje; organism tarefasEquipe; persisted */
+  /** state venceHoje — filter, when true only open tasks due today; gap-completed filter state for entry param venceHoje; organism tarefasEquipe; persisted */
   @property({ attribute: false }) venceHoje: boolean | null = null;
 
-  /** state atrasada — filter of the board: when true only open overdue tasks; source entry.params.atrasada; organism tarefasEquipe; persisted */
+  /** state atrasada — filter, when true only open overdue tasks; gap-completed filter state for entry param atrasada; organism tarefasEquipe; persisted */
   @property({ attribute: false }) atrasada: boolean | null = null;
 
-  /** state reatribuirTarefaDraft — draft of the reassign command: the member chosen as new responsible; source reatribuirTarefa.input; organism acoesGestor */
+  /** state reatribuirTarefaDraft — draft of the reassign command (the new assignee id chosen among active members); source reatribuirTarefa.input; organism acoesGestor */
   @property({ attribute: false }) reatribuirTarefaDraft: ReatribuirTarefaDraft = emptyReatribuirTarefaDraft();
 
-  /** state pageStatus — overall status of the page (loading while the initial queries run, empty when every loaded list is empty); source onLoad requests */
+  /** state pageStatus — overall status of the page: loading while the initial load runs, error if it failed, empty when every loaded list is empty, success otherwise */
   @property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
 
   /** state carregarOpcoesEquipeStatus — status of the request carregarOpcoesEquipe */
@@ -210,7 +204,7 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
   /** state listarTarefasEquipeError — error of the request listarTarefasEquipe, null when none */
   @property({ attribute: false }) listarTarefasEquipeError: ErrorState = null;
 
-  /** state obterTarefaStatus — status of the request obterTarefa (opening the selected task) */
+  /** state obterTarefaStatus — status of the request obterTarefa */
   @property({ attribute: false }) obterTarefaStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
 
   /** state obterTarefaError — error of the request obterTarefa, null when none */
@@ -231,36 +225,20 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
   /** state scenary — the visible scene of the page; '' until the page shows its first scene */
   @property({ attribute: false }) scenary = '';
 
-  private reloadPending = false;
+  private pendingListar: PendingListar | null = null;
+
+  private readonly onPopState = (): void => {
+    if (window.location.pathname.endsWith('/tarefas/tarefas_equipe')) {
+      this.resetVisit();
+      this.applyEntryParams();
+      void this.loadVisit();
+    }
+  };
 
   private publish<M extends StateMember>(member: M, value: this[M]): void {
     (this as unknown as Record<string, unknown>)[member] = value;
     setState(`ui.tarefas.tarefas_equipe.${member}`, value);
-    if (PERSISTED_MEMBERS.includes(member)) {
-      try {
-        const storageKey = `tarefas.tarefas_equipe.${member}`;
-        if (value === null) {
-          localStorage.removeItem(storageKey);
-        } else {
-          localStorage.setItem(storageKey, String(value));
-        }
-      } catch {
-        // storage unavailable: the value stays only in memory
-      }
-    }
-    if (member === 'selectedTarefa') {
-      try {
-        const url = new URL(window.location.href);
-        if (value === null) {
-          url.searchParams.delete('tarefaId');
-        } else {
-          url.searchParams.set('tarefaId', String(value));
-        }
-        history.replaceState(history.state, '', url.toString());
-      } catch {
-        // URL not writable: the selection stays only in memory
-      }
-    }
+    this.persistMember(member, value);
   }
 
   private assignState(key: string, value: unknown): void {
@@ -268,22 +246,76 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
     if (member) (this as unknown as Record<string, unknown>)[member] = value;
   }
 
+  private persistMember(member: StateMember, value: unknown): void {
+    if (member === 'selectedTarefa') {
+      this.writeUrlParam('tarefaId', value);
+      return;
+    }
+    if (!PERSISTED_MEMBERS.includes(member)) return;
+    try {
+      if (value === null || value === undefined) {
+        localStorage.removeItem(`${STORAGE_PREFIX}${member}`);
+      } else {
+        localStorage.setItem(`${STORAGE_PREFIX}${member}`, String(value));
+      }
+    } catch {
+      // storage unavailable: the state still lives in memory
+    }
+  }
+
+  private writeUrlParam(name: string, value: unknown): void {
+    try {
+      const url = new URL(window.location.href);
+      const current = url.searchParams.get(name);
+      const next = typeof value === 'string' && value !== '' ? value : null;
+      if (current === next) return;
+      if (next === null) {
+        url.searchParams.delete(name);
+      } else {
+        url.searchParams.set(name, next);
+      }
+      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    } catch {
+      // URL not writable: the state still lives in memory
+    }
+  }
+
+  private readParam(name: string, useStorage: boolean): string | null {
+    const fromUrl = new URLSearchParams(window.location.search).get(name);
+    if (fromUrl !== null && fromUrl !== '') return fromUrl;
+    if (!useStorage) return null;
+    try {
+      const stored = localStorage.getItem(`${STORAGE_PREFIX}${name}`);
+      if (stored !== null && stored !== '') return stored;
+    } catch {
+      // storage unavailable
+    }
+    return null;
+  }
+
+  private unexpected(error: unknown): ErrorState {
+    const name = error instanceof Error ? error.name : 'unknown';
+    return { code: 'client.unexpected', message: '', details: { name } };
+  }
+
   public connectedCallback(): void {
     super.connectedCallback();
     this.hydrateData();
     this.resetVisit();
     subscribe([...STATE_KEYS], this);
+    window.addEventListener('popstate', this.onPopState);
     this.applyEntryParams();
-    void this.startLoad();
+    void this.loadVisit();
   }
 
   public disconnectedCallback(): void {
+    window.removeEventListener('popstate', this.onPopState);
     unsubscribe([...STATE_KEYS], this);
     super.disconnectedCallback();
   }
 
   public handleIcaStateChange(key: string, value: any): void {
-    if (!STATE_KEYS.includes(key)) {
+    if (!(key in STATE_MEMBER_BY_KEY)) {
       super.handleIcaStateChange(key, value);
       return;
     }
@@ -293,16 +325,21 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
   }
 
   private hydrateData(): void {
-    for (const key of DATA_KEYS) {
+    const dataKeys = [
+      'ui.tarefas.tarefas_equipe.tarefas',
+      'ui.tarefas.tarefas_equipe.listas',
+      'ui.tarefas.tarefas_equipe.membros',
+      'ui.tarefas.tarefas_equipe.tarefa',
+    ];
+    for (const key of dataKeys) {
       const stored = getState(key);
       if (stored !== undefined) this.assignState(key, stored);
     }
   }
 
   private resetVisit(): void {
-    this.reloadPending = false;
+    this.pendingListar = null;
     this.publish('pageStatus', 'idle');
-    this.publish('scenary', '');
     this.publish('carregarOpcoesEquipeStatus', 'idle');
     this.publish('carregarOpcoesEquipeError', null);
     this.publish('listarTarefasEquipeStatus', 'idle');
@@ -314,6 +351,7 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
     this.publish('cancelarTarefaStatus', 'idle');
     this.publish('cancelarTarefaError', null);
     this.publish('reatribuirTarefaDraft', emptyReatribuirTarefaDraft());
+    this.publish('scenary', '');
   }
 
   private resetCommandResults(): void {
@@ -323,24 +361,11 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
     this.publish('cancelarTarefaError', null);
   }
 
-  private readParam(name: string, useStorage: boolean): string | null {
-    const raw = new URLSearchParams(window.location.search).get(name);
-    if (raw !== null && raw !== '') return raw;
-    if (!useStorage) return null;
-    try {
-      const stored = localStorage.getItem(`tarefas.tarefas_equipe.${name}`);
-      if (stored !== null && stored !== '') return stored;
-    } catch {
-      // storage unavailable
-    }
-    return null;
-  }
-
   private applyEntryParams(): void {
     this.publish('listaId', this.readParam('listaId', true));
     this.publish('responsavelId', this.readParam('responsavelId', true));
     this.publish('prioridade', parsePrioridade(this.readParam('prioridade', true)));
-    this.publish('status', parseSituacao(this.readParam('status', true)));
+    this.publish('status', parseStatus(this.readParam('status', true)));
     this.publish('prazoDe', this.readParam('prazoDe', true));
     this.publish('prazoAte', this.readParam('prazoAte', true));
     this.publish('venceHoje', parseBoolean(this.readParam('venceHoje', true)));
@@ -348,127 +373,107 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
     this.publish('selectedTarefa', this.readParam('tarefaId', false));
   }
 
-  private async startLoad(): Promise<void> {
-    await Promise.all([this.carregarOpcoesEquipe(), this.listarTarefasEquipe()]);
+  private async loadVisit(): Promise<void> {
+    this.publish('pageStatus', 'loading');
     const selected = this.selectedTarefa;
-    if (selected !== null) await this.obterTarefa(selected);
-  }
-
-  private unexpectedError(error: unknown): ErrorState {
-    const name = error instanceof Error ? error.name : 'unknown';
-    return { code: 'client.unexpected', message: '', details: { name } };
+    await Promise.all([
+      this.carregarOpcoesEquipe(),
+      this.listarTarefasEquipe(),
+      selected !== null ? this.obterTarefa(selected) : Promise.resolve(),
+    ]);
+    this.refreshPageStatus();
   }
 
   private refreshPageStatus(): void {
-    const statuses = [this.carregarOpcoesEquipeStatus, this.listarTarefasEquipeStatus];
-    if (statuses.includes('loading')) {
-      this.publish('pageStatus', 'loading');
-      return;
-    }
-    if (statuses.includes('error')) {
+    if (this.carregarOpcoesEquipeStatus === 'loading' || this.listarTarefasEquipeStatus === 'loading') return;
+    if (this.carregarOpcoesEquipeStatus === 'error' || this.listarTarefasEquipeStatus === 'error') {
       this.publish('pageStatus', 'error');
       return;
     }
-    if (statuses.includes('idle')) return;
-    const rows = this.tarefas ? this.tarefas.items : [];
-    if (rows.length === 0 && this.listas.length === 0 && this.membros.length === 0) {
+    const noTarefas = this.tarefas === null || this.tarefas.items.length === 0;
+    if (noTarefas && this.listas.length === 0 && this.membros.length === 0) {
       this.publish('pageStatus', 'empty');
       return;
     }
     this.publish('pageStatus', 'success');
   }
 
-  /** setScenario — publishes the visible scene of the page; resets the result of every command. */
+  /** scene — publishes the visible scene of the page and clears the results of the commands */
   public setScenario(value: string): void {
     this.resetCommandResults();
     this.publish('scenary', value);
   }
 
-  /** draft — replaces the draft of the reassign command (the member chosen as new responsible); resets the result of every command. */
+  /** draft — replaces the draft of the reassign command (the new assignee the manager picks); clears the results of the commands */
   public setReatribuirTarefaDraft(value: ReatribuirTarefaDraft): void {
     this.resetCommandResults();
     this.publish('reatribuirTarefaDraft', value);
   }
 
-  /** request carregarOpcoesEquipe — loads the lists and the team members used by the board filters and by the choice of the new responsible; redraws listas and membros (replace); no arguments, also the method to reload the options */
+  /** request carregarOpcoesEquipe — loads at once the lists and the team members used by the board filters and by the choice of the new assignee; redraws listas and membros (replace); no arguments, the scope is the manager's team */
   public async carregarOpcoesEquipe(): Promise<void> {
     if (this.carregarOpcoesEquipeStatus === 'loading') return;
+    this.publish('pageStatus', 'loading');
     this.publish('carregarOpcoesEquipeStatus', 'loading');
     this.publish('carregarOpcoesEquipeError', null);
-    this.publish('pageStatus', 'loading');
     try {
       const response = await execBff<Output<'tarefas.tarefas_equipe.carregarOpcoesEquipe'>>(
         'tarefas.tarefas_equipe.carregarOpcoesEquipe',
-        {} satisfies Input<'tarefas.tarefas_equipe.carregarOpcoesEquipe'>,
+        {},
         { mode: 'silent' },
       );
       if (!response.ok || !response.data) {
-        this.publish('carregarOpcoesEquipeError', response.error ?? this.unexpectedError(null));
+        this.publish('carregarOpcoesEquipeError', response.error);
         this.publish('carregarOpcoesEquipeStatus', 'error');
-        this.refreshPageStatus();
-        return;
+      } else {
+        this.publish('listas', response.data.listas);
+        this.publish('membros', response.data.membros);
+        this.publish('carregarOpcoesEquipeStatus', 'success');
       }
-      this.publish('listas', response.data.listas);
-      this.publish('membros', response.data.membros);
-      this.publish('carregarOpcoesEquipeStatus', 'success');
     } catch (error) {
-      this.publish('carregarOpcoesEquipeError', this.unexpectedError(error));
+      this.publish('carregarOpcoesEquipeError', this.unexpected(error));
       this.publish('carregarOpcoesEquipeStatus', 'error');
     }
     this.refreshPageStatus();
   }
 
-  private applyFilterChange(filters: TarefasEquipeFilterChange): boolean {
-    let changed = false;
-    if (filters.listaId !== undefined) {
-      this.publish('listaId', emptyToNull(filters.listaId));
-      changed = true;
-    }
-    if (filters.responsavelId !== undefined) {
-      this.publish('responsavelId', emptyToNull(filters.responsavelId));
-      changed = true;
-    }
-    if (filters.prioridade !== undefined) {
-      this.publish('prioridade', filters.prioridade);
-      changed = true;
-    }
-    if (filters.status !== undefined) {
-      this.publish('status', filters.status);
-      changed = true;
-    }
-    if (filters.prazoDe !== undefined) {
-      this.publish('prazoDe', emptyToNull(filters.prazoDe));
-      changed = true;
-    }
-    if (filters.prazoAte !== undefined) {
-      this.publish('prazoAte', emptyToNull(filters.prazoAte));
-      changed = true;
-    }
-    if (filters.venceHoje !== undefined) {
-      this.publish('venceHoje', filters.venceHoje);
-      changed = true;
-    }
-    if (filters.atrasada !== undefined) {
-      this.publish('atrasada', filters.atrasada);
-      changed = true;
-    }
-    return changed;
+  /** filter — sets the given filters of the board (a key left out keeps its value; null turns a filter off), persists them and reloads the list from the first page */
+  public async filtrarTarefasEquipe(filtro: Partial<FiltroTarefasEquipe>): Promise<void> {
+    if (filtro.listaId !== undefined) this.publish('listaId', filtro.listaId);
+    if (filtro.responsavelId !== undefined) this.publish('responsavelId', filtro.responsavelId);
+    if (filtro.prioridade !== undefined) this.publish('prioridade', filtro.prioridade);
+    if (filtro.status !== undefined) this.publish('status', filtro.status);
+    if (filtro.prazoDe !== undefined) this.publish('prazoDe', filtro.prazoDe);
+    if (filtro.prazoAte !== undefined) this.publish('prazoAte', filtro.prazoAte);
+    if (filtro.venceHoje !== undefined) this.publish('venceHoje', filtro.venceHoje);
+    if (filtro.atrasada !== undefined) this.publish('atrasada', filtro.atrasada);
+    await this.listarTarefasEquipe(1, false);
   }
 
-  /** request listarTarefasEquipe — loads the paged board of every team task with the current filters; redraws tarefas (replace, or append the next page when append is true); filters: values the person changed (omitted keeps, null clears; any change reloads from the first page; with no argument it reloads the current view); page: page to load (default 1); append: true for "load more", only when tarefas.hasMore */
-  public async listarTarefasEquipe(filters: TarefasEquipeFilterChange = {}, page = 1, append = false): Promise<void> {
-    const changed = this.applyFilterChange(filters);
-    const pageToLoad = changed ? 1 : page;
-    const appendRows = changed ? false : append;
+  /** filter — turns every filter of the board off and reloads the list from the first page */
+  public async limparFiltrosTarefasEquipe(): Promise<void> {
+    await this.filtrarTarefasEquipe({
+      listaId: null,
+      responsavelId: null,
+      prioridade: null,
+      status: null,
+      prazoDe: null,
+      prazoAte: null,
+      venceHoje: null,
+      atrasada: null,
+    });
+  }
+
+  /** request listarTarefasEquipe — paged list of all team tasks with the current filters of the board; runs on open and is also the method to reload and to page; redraws tarefas (replace, or append the next page's items when append is true; append does nothing when the list has no more); page: page to load, starting at 1; append: true for "load more" */
+  public async listarTarefasEquipe(page = 1, append = false): Promise<void> {
     if (this.listarTarefasEquipeStatus === 'loading') {
-      if (changed) this.reloadPending = true;
+      this.pendingListar = { page, append };
       return;
     }
-    const current = this.tarefas;
-    if (appendRows && (current === null || !current.hasMore)) return;
+    if (append && !(this.tarefas !== null && this.tarefas.hasMore)) return;
+    this.publish('pageStatus', 'loading');
     this.publish('listarTarefasEquipeStatus', 'loading');
     this.publish('listarTarefasEquipeError', null);
-    this.publish('pageStatus', 'loading');
     const input: Input<'tarefas.tarefas_equipe.listarTarefasEquipe'> = {
       ...(this.listaId !== null && this.listaId !== '' ? { listaId: this.listaId } : {}),
       ...(this.responsavelId !== null && this.responsavelId !== '' ? { responsavelId: this.responsavelId } : {}),
@@ -480,7 +485,7 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
         ...(this.venceHoje === true ? { venceHoje: true } : {}),
         ...(this.atrasada === true ? { atrasada: true } : {}),
       },
-      page: pageToLoad,
+      page,
       pageSize: PAGE_SIZE,
     };
     try {
@@ -490,108 +495,79 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
         { mode: 'silent' },
       );
       if (!response.ok || !response.data) {
-        this.publish('listarTarefasEquipeError', response.error ?? this.unexpectedError(null));
+        this.publish('listarTarefasEquipeError', response.error);
         this.publish('listarTarefasEquipeStatus', 'error');
       } else {
-        const incoming = response.data.tarefas;
-        const base = this.tarefas;
-        const next: TarefasPage = appendRows && base !== null ? { ...incoming, items: [...base.items, ...incoming.items] } : incoming;
-        this.publish('tarefas', next);
+        const loaded = response.data.tarefas;
+        const current = this.tarefas;
+        if (append && current !== null) {
+          this.publish('tarefas', { ...loaded, items: [...current.items, ...loaded.items] });
+        } else {
+          this.publish('tarefas', loaded);
+        }
         this.publish('listarTarefasEquipeStatus', 'success');
       }
     } catch (error) {
-      this.publish('listarTarefasEquipeError', this.unexpectedError(error));
+      this.publish('listarTarefasEquipeError', this.unexpected(error));
       this.publish('listarTarefasEquipeStatus', 'error');
     }
     this.refreshPageStatus();
-    if (this.reloadPending) {
-      this.reloadPending = false;
-      void this.listarTarefasEquipe();
-    }
+    const next = this.pendingListar;
+    this.pendingListar = null;
+    if (next !== null) await this.listarTarefasEquipe(next.page, next.append);
   }
 
-  /** request obterTarefa — selects a task and opens it in full (detail, checklist and history milestones); redraws selectedTarefa (replace, kept in the URL) and tarefa (replace); tarefaId: id of the picked task, or null to clear the selection */
+  /** request obterTarefa — selects a task of the board and opens it with detail, checklist and history milestones; redraws selectedTarefa (the id, kept in the URL) and tarefa (replace; cleared on null or on failure) and empties the reassign draft; tarefaId: id of the task to open, or null to clear the selection */
   public async obterTarefa(tarefaId: string | null): Promise<void> {
+    if (this.obterTarefaStatus === 'loading') return;
+    this.resetCommandResults();
+    this.publish('obterTarefaError', null);
     if (tarefaId === null || tarefaId === '') {
-      this.resetCommandResults();
       this.publish('selectedTarefa', null);
       this.publish('tarefa', null);
       this.publish('reatribuirTarefaDraft', emptyReatribuirTarefaDraft());
-      this.publish('obterTarefaError', null);
       this.publish('obterTarefaStatus', 'idle');
       return;
     }
-    if (this.obterTarefaStatus === 'loading') return;
-    this.resetCommandResults();
-    if (tarefaId !== this.selectedTarefa) {
-      this.publish('reatribuirTarefaDraft', emptyReatribuirTarefaDraft());
-    }
-    this.publish('selectedTarefa', tarefaId);
     this.publish('obterTarefaStatus', 'loading');
-    this.publish('obterTarefaError', null);
+    this.publish('selectedTarefa', tarefaId);
     try {
       const response = await execBff<Output<'tarefas.tarefas_equipe.obterTarefa'>>(
         'tarefas.tarefas_equipe.obterTarefa',
-        { tarefaId } satisfies Input<'tarefas.tarefas_equipe.obterTarefa'>,
+        { tarefaId },
         { mode: 'silent' },
       );
       if (!response.ok || !response.data) {
         this.publish('tarefa', null);
-        this.publish('obterTarefaError', response.error ?? this.unexpectedError(null));
+        this.publish('obterTarefaError', response.error);
         this.publish('obterTarefaStatus', 'error');
-        return;
+      } else {
+        this.publish('tarefa', response.data.tarefa);
+        this.publish('reatribuirTarefaDraft', emptyReatribuirTarefaDraft());
+        this.publish('obterTarefaStatus', 'success');
       }
-      this.publish('tarefa', response.data.tarefa);
-      this.publish('obterTarefaStatus', 'success');
     } catch (error) {
       this.publish('tarefa', null);
-      this.publish('obterTarefaError', this.unexpectedError(error));
+      this.publish('obterTarefaError', this.unexpected(error));
       this.publish('obterTarefaStatus', 'error');
     }
   }
 
-  /** Applies the returned task to its board row (upsert by id, never inserted when absent); removes the row when it no longer matches the active filters. */
-  private patchRow(updated: TarefaDetalhe): void {
-    const current = this.tarefas;
-    if (current === null) return;
-    const matchesResponsavel = this.responsavelId === null || this.responsavelId === updated.responsavelId;
-    const matchesStatus = this.status === null || this.status === updated.status;
-    const matchesOpen = (this.venceHoje !== true && this.atrasada !== true) || updated.details.aberta;
-    const stays = matchesResponsavel && matchesStatus && matchesOpen;
-    const items: TarefaEquipeItem[] = [];
-    for (const row of current.items) {
-      if (row.id !== updated.id) {
-        items.push(row);
-      } else if (stays) {
-        items.push({
-          ...row,
-          titulo: updated.titulo,
-          responsavelId: updated.responsavelId,
-          responsavel: updated.responsavel,
-          prioridade: updated.prioridade,
-          prazo: updated.prazo,
-          status: updated.status,
-        });
-      }
-    }
-    this.publish('tarefas', { ...current, items });
-  }
-
-  /** request reatribuirTarefa — swaps the responsible of the selected task for the member in reatribuirTarefaDraft (must be an Active member); redraws tarefa (replace with the returned task, new version) and the matching row of tarefas (upsert), then clears the draft; no arguments, reads the selected tarefa (id, version) and the draft */
+  /** command reatribuirTarefa — changes the assignee of the selected task to the member picked in the draft (must be an Active member); redraws tarefa (replace with the returned record), the matching row of tarefas (updated, or removed when it no longer matches the filters) and refills the draft from the record; no arguments: reads the selected tarefa (id, version) and reatribuirTarefaDraft.responsavelId */
   public async reatribuirTarefa(): Promise<void> {
     if (this.reatribuirTarefaStatus === 'loading') return;
     const tarefa = this.tarefa;
     const responsavelId = this.reatribuirTarefaDraft.responsavelId;
     if (tarefa === null || responsavelId === null || responsavelId === '') {
       const stateKeys: string[] = [];
-      if (tarefa === null) stateKeys.push('ui.tarefas.tarefas_equipe.tarefa');
-      if (responsavelId === null || responsavelId === '') stateKeys.push('ui.tarefas.tarefas_equipe.reatribuirTarefaDraft');
+      if (tarefa === null) stateKeys.push('tarefa');
+      if (responsavelId === null || responsavelId === '') stateKeys.push('reatribuirTarefaDraft.responsavelId');
       this.publish('reatribuirTarefaError', { code: 'client.requiredMissing', message: '', details: { stateKeys } });
       this.publish('reatribuirTarefaStatus', 'error');
       return;
     }
-    this.publish('reatribuirTarefaStatus', 'loading');
     this.publish('reatribuirTarefaError', null);
+    this.publish('reatribuirTarefaStatus', 'loading');
     const input: Input<'tarefas.tarefas_equipe.reatribuirTarefa'> = {
       id: tarefa.id,
       version: tarefa.version,
@@ -599,7 +575,11 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
     };
     try {
       const response = await runBlockingUiAction(signal =>
-        execBff<Output<'tarefas.tarefas_equipe.reatribuirTarefa'>>('tarefas.tarefas_equipe.reatribuirTarefa', input, { mode: 'blocking', signal }),
+        execBff<Output<'tarefas.tarefas_equipe.reatribuirTarefa'>>(
+          'tarefas.tarefas_equipe.reatribuirTarefa',
+          input,
+          { mode: 'blocking', signal },
+        ),
       );
       if (response === undefined) {
         this.publish('reatribuirTarefaError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
@@ -607,39 +587,42 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
         return;
       }
       if (!response.ok || !response.data) {
-        this.publish('reatribuirTarefaError', response.error ?? this.unexpectedError(null));
+        this.publish('reatribuirTarefaError', response.error);
         this.publish('reatribuirTarefaStatus', 'error');
         return;
       }
       const updated = response.data.tarefa;
-      this.publish('tarefa', updated);
-      this.patchRow(updated);
-      this.publish('reatribuirTarefaDraft', emptyReatribuirTarefaDraft());
+      this.applyTarefaResult(updated);
+      this.publish('reatribuirTarefaDraft', { id: updated.id, version: updated.version, responsavelId: updated.responsavelId });
       this.publish('reatribuirTarefaStatus', 'success');
     } catch (error) {
-      this.publish('reatribuirTarefaError', this.unexpectedError(error));
+      this.publish('reatribuirTarefaError', this.unexpected(error));
       this.publish('reatribuirTarefaStatus', 'error');
     }
   }
 
-  /** request cancelarTarefa — cancels the selected task while it is still open; redraws tarefa (replace with the returned cancelled task, new version) and the matching row of tarefas (upsert, or remove when it no longer matches the filters); no arguments, reads the selected tarefa (id, version) */
+  /** command cancelarTarefa — cancels the selected task while it is still open; redraws tarefa (replace with the returned cancelled record) and the matching row of tarefas (updated, or removed when it no longer matches the filters); no arguments: reads the selected tarefa (id, version) */
   public async cancelarTarefa(): Promise<void> {
     if (this.cancelarTarefaStatus === 'loading') return;
     const tarefa = this.tarefa;
     if (tarefa === null) {
-      this.publish('cancelarTarefaError', { code: 'client.requiredMissing', message: '', details: { stateKeys: ['ui.tarefas.tarefas_equipe.tarefa'] } });
+      this.publish('cancelarTarefaError', { code: 'client.requiredMissing', message: '', details: { stateKeys: ['tarefa'] } });
       this.publish('cancelarTarefaStatus', 'error');
       return;
     }
-    this.publish('cancelarTarefaStatus', 'loading');
     this.publish('cancelarTarefaError', null);
+    this.publish('cancelarTarefaStatus', 'loading');
     const input: Input<'tarefas.tarefas_equipe.cancelarTarefa'> = {
       id: tarefa.id,
       version: tarefa.version,
     };
     try {
       const response = await runBlockingUiAction(signal =>
-        execBff<Output<'tarefas.tarefas_equipe.cancelarTarefa'>>('tarefas.tarefas_equipe.cancelarTarefa', input, { mode: 'blocking', signal }),
+        execBff<Output<'tarefas.tarefas_equipe.cancelarTarefa'>>(
+          'tarefas.tarefas_equipe.cancelarTarefa',
+          input,
+          { mode: 'blocking', signal },
+        ),
       );
       if (response === undefined) {
         this.publish('cancelarTarefaError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
@@ -647,17 +630,50 @@ export class TarefasTarefas_equipeShared extends StateLitElement {
         return;
       }
       if (!response.ok || !response.data) {
-        this.publish('cancelarTarefaError', response.error ?? this.unexpectedError(null));
+        this.publish('cancelarTarefaError', response.error);
         this.publish('cancelarTarefaStatus', 'error');
         return;
       }
-      const updated = response.data.tarefa;
-      this.publish('tarefa', updated);
-      this.patchRow(updated);
+      this.applyTarefaResult(response.data.tarefa);
       this.publish('cancelarTarefaStatus', 'success');
     } catch (error) {
-      this.publish('cancelarTarefaError', this.unexpectedError(error));
+      this.publish('cancelarTarefaError', this.unexpected(error));
       this.publish('cancelarTarefaStatus', 'error');
     }
+  }
+
+  /** Redraws the selected record and its row in the board with the record a command returned. */
+  private applyTarefaResult(updated: TarefaDetalhe): void {
+    this.publish('tarefa', updated);
+    const page = this.tarefas;
+    if (page === null) return;
+    if (!page.items.some(row => row.id === updated.id)) return;
+    const stays =
+      (this.status === null || this.status === updated.status) &&
+      (this.responsavelId === null || this.responsavelId === '' || this.responsavelId === updated.responsavelId) &&
+      ((this.venceHoje !== true && this.atrasada !== true) || updated.details.aberta);
+    if (!stays) {
+      this.publish('tarefas', { ...page, items: page.items.filter(row => row.id !== updated.id) });
+      return;
+    }
+    const items = page.items.map(row => {
+      if (row.id !== updated.id) return row;
+      return {
+        ...row,
+        titulo: updated.titulo,
+        status: updated.status,
+        prioridade: updated.prioridade,
+        prazo: updated.prazo,
+        responsavelId: updated.responsavelId,
+        responsavel: updated.responsavel,
+        details: {
+          ...row.details,
+          progressoChecklist: updated.details.progressoChecklist,
+          venceHoje: updated.details.aberta ? row.details.venceHoje : false,
+          atrasada: updated.details.aberta ? row.details.atrasada : false,
+        },
+      };
+    });
+    this.publish('tarefas', { ...page, items });
   }
 }

@@ -4,10 +4,12 @@ import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { TarefasMinhas_tarefasShared } from '/_102047_/l2/tarefas/web/shared/minhas_tarefas.js';
 import type {
+  ChecklistItemDraft,
+  CriarTarefaDraft,
   ErrorState,
-  ItemChecklistDraft,
-  MinhasTarefasFiltro,
+  FiltroTarefas,
   Prioridade,
+  RequestStatus,
   SalvarEdicaoDraft,
   TarefaDetalhe,
   TarefaResumo,
@@ -22,180 +24,233 @@ import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
 import '/_102040_/l2/molecules/groupselectone/ml-combobox.js';
 import '/_102040_/l2/molecules/groupselectone/ml-segmented-control.js';
 import '/_102040_/l2/molecules/groupselectone/ml-select-one-autocomplete.js';
-import '/_102040_/l2/molecules/grouptriggeraction/ml-button-group.js';
+import '/_102040_/l2/molecules/groupviewcard/ml-vertical-card.js';
 import '/_102040_/l2/molecules/groupviewdata/ml-timeline-view.js';
 import '/_102040_/l2/molecules/groupviewtable/ml-data-table.js';
 
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
-  titulo: 'Minhas tarefas',
-  subtitulo: 'Tarefas que você criou ou pelas quais é responsável, por prazo.',
+  pageTitle: 'Minhas tarefas',
+  pageSubtitle: 'Acompanhe prazo, situação e checklist do que você criou ou executa.',
   novaTarefa: 'Nova tarefa',
-  fTodas: 'Todas',
-  fCriadas: 'Criadas por mim',
-  fAtribuidas: 'Atribuídas a mim',
-  fRevisao: 'Em revisão',
-  fDevolvidas: 'Devolvidas',
+  filtroTodas: 'Todas',
+  filtroCriadas: 'Criadas por mim',
+  filtroAtribuidas: 'Atribuídas a mim',
+  filtroRevisao: 'Em revisão',
+  filtroDevolvidas: 'Devolvidas',
   colTarefa: 'Tarefa',
-  colResp: 'Responsável',
-  colChecklist: 'Checklist',
-  colPrazo: 'Prazo',
+  colResponsavel: 'Responsável',
+  colPrioridade: 'Prioridade',
   colSituacao: 'Situação',
-  subtarefas: 'Subtarefas',
-  venceHoje: 'Vence hoje',
-  atrasada: 'Atrasada',
-  devolvidaEm: 'Devolvida em',
-  listaVazia: 'Nenhuma tarefa por aqui.',
-  listaVaziaAjuda: 'Mude o filtro ou crie uma nova tarefa.',
-  carregandoLista: 'Carregando tarefas…',
+  colPrazo: 'Prazo',
+  carregandoTarefas: 'Carregando suas tarefas…',
+  listaVaziaTitulo: 'Nenhuma tarefa nesta visão',
+  listaVaziaDica: 'Troque o filtro ou crie uma nova tarefa.',
   carregarMais: 'Carregar mais tarefas',
-  erroLista: 'Não foi possível carregar suas tarefas.',
-  tentarNovamente: 'Tentar novamente',
-  semContexto: 'Esta página foi aberta sem o que precisa para mostrar as tarefas.',
-  semContextoAjuda: 'Volte para a página de onde você veio e abra as tarefas novamente.',
-  voltarAnterior: 'Voltar à página anterior',
-  voltar: 'Voltar',
-  semValor: '—',
+  processando: 'Aguarde…',
+  subtarefas: 'subtarefas',
+  checklist: 'Checklist',
+  atrasada: 'Atrasada',
+  venceHoje: 'Vence hoje',
+  devolvidaEm: 'Devolvida em',
   stAFazer: 'A fazer',
   stEmAndamento: 'Em andamento',
   stEmRevisao: 'Em revisão',
   stConcluida: 'Concluída',
   stCancelada: 'Cancelada',
-  prLow: 'Baixa',
-  prMedium: 'Média',
-  prHigh: 'Alta',
-  tarefaAberta: 'Tarefa',
-  escolhaTarefa: 'Escolha uma tarefa na lista para ver os detalhes, o histórico e as ações disponíveis para você.',
-  carregandoTarefa: 'Abrindo a tarefa…',
-  erroTarefa: 'Não foi possível abrir a tarefa.',
-  editarTarefa: 'Editar tarefa',
-  lblDescricao: 'Descrição',
-  lblLista: 'Lista',
-  lblCriador: 'Criada por',
-  lblResponsavel: 'Responsável',
-  lblPrazo: 'Prazo',
-  lblPrioridade: 'Prioridade',
-  lblSituacao: 'Situação',
-  lblCriadaEm: 'Criada em',
+  prBaixa: 'Baixa',
+  prMedia: 'Média',
+  prAlta: 'Alta',
+  erroPaginaTitulo: 'Não foi possível carregar suas tarefas',
+  tentarNovamente: 'Tentar novamente',
+  semContextoTitulo: 'Faltam informações para abrir esta página',
+  semContextoMsg: 'A página foi aberta sem o contexto de que precisa. Volte para onde você estava e abra Minhas tarefas de lá.',
+  voltarPagina: 'Voltar para a página anterior',
+  tituloInicio: 'Painel da tarefa',
+  inicioMsg: 'Escolha uma tarefa na lista para ver os detalhes e agir sobre ela.',
+  inicioDica: 'Para registrar algo novo, use o botão acima da lista.',
+  tituloDetalhe: 'Tarefa aberta',
+  tituloNova: 'Dados da nova tarefa',
+  tituloEditar: 'Ajustar tarefa',
+  voltar: 'Voltar',
+  carregandoDetalhe: 'Carregando a tarefa…',
+  erroDetalhe: 'Não foi possível abrir a tarefa.',
+  papelCriador: 'Você criou esta tarefa',
+  papelResponsavel: 'Você é o responsável',
+  lista: 'Lista',
+  criadaPor: 'Criada por',
+  responsavel: 'Responsável',
+  prazo: 'Prazo',
+  prioridade: 'Prioridade',
+  situacao: 'Situação',
+  criadaEm: 'Criada em',
+  descricao: 'Descrição',
   semDescricao: 'Sem descrição.',
   motivoTitulo: 'Motivo da devolução',
-  lblChecklist: 'Checklist',
-  feito: 'Feito',
-  pendente: 'Pendente',
-  checklistVazia: 'Esta tarefa não tem itens na checklist.',
+  editarTarefa: 'Editar tarefa',
+  semChecklist: 'Esta tarefa não tem itens na checklist.',
+  salvarChecklist: 'Salvar checklist',
+  checklistSalva: 'Checklist salva.',
+  erroAcao: 'Não foi possível concluir:',
   iniciar: 'Iniciar tarefa',
   enviarRevisao: 'Enviar para revisão',
   reenviarRevisao: 'Reenviar para revisão',
   aceitar: 'Aceitar entrega',
   devolver: 'Devolver para ajuste',
+  devolverConfirmar: 'Devolver com este motivo',
+  motivoLabel: 'Motivo da devolução (obrigatório)',
+  motivoPh: 'Explique o que precisa ser ajustado',
   cancelarTarefa: 'Cancelar tarefa',
-  semAcoes: 'Nenhuma ação de ciclo disponível para você nesta etapa.',
-  motivoDevolver: 'O que precisa ser ajustado',
-  motivoAjuda: 'Obrigatório para devolver a tarefa.',
-  historicoTitulo: 'Histórico',
-  histColQuando: 'Quando',
-  histColEvento: 'O que aconteceu',
-  evCriada: 'Tarefa criada por',
-  evDevolvida: 'Devolvida para ajuste',
-  evConcluida: 'Entrega aceita, tarefa concluída',
-  evCancelada: 'Tarefa cancelada',
-  tituloCancelar: 'Cancelar esta tarefa?',
-  cancelarAviso: 'A tarefa será cancelada e não mudará mais de situação:',
-  confirmarCancelar: 'Sim, cancelar tarefa',
-  manter: 'Manter tarefa',
-  tituloEditar: 'Ajustar tarefa',
-  tituloCriar: 'Detalhes da nova tarefa',
+  cancelarConfirma: 'Confirma o cancelamento da tarefa',
+  cancelarSim: 'Sim, cancelar esta tarefa',
+  semAcoes: 'Nenhuma ação sua nesta etapa da tarefa.',
+  historico: 'Histórico da tarefa',
+  colQuando: 'Quando',
+  colEvento: 'O que aconteceu',
+  hCriada: 'Tarefa criada por',
+  hAtribuida: 'Atribuída a',
+  hDevolvida: 'Devolvida para ajuste',
+  hConcluida: 'Entrega aceita, tarefa concluída',
+  hCancelada: 'Tarefa cancelada',
+  semHistorico: 'Sem registros ainda.',
   dadosTarefa: 'Dados da tarefa',
-  fLista: 'Lista',
-  fTitulo: 'Título',
-  fDescricao: 'Descrição',
-  fPrioridade: 'Prioridade',
-  fPrazo: 'Prazo',
-  fResp: 'Responsável',
-  ajudaRespEditar: 'Digite o nome para buscar. Só quem criou a tarefa troca o responsável.',
-  ajudaRespCriar: 'Digite o nome para buscar um membro ativo da equipe.',
-  phPrazo: 'Escolha a data',
+  titulo: 'Título',
+  phTitulo: 'Resuma a tarefa em poucas palavras',
+  phLista: 'Escolha a lista',
   semListas: 'Nenhuma lista ativa disponível',
-  semMembros: 'Nenhum membro encontrado',
-  salvarEdicao: 'Salvar alterações',
-  criarTarefa: 'Criar tarefa',
-  salvarChecklist: 'Salvar checklist',
-  checklistInicial: 'Checklist inicial',
-  itemDescricao: 'Descrição do item',
+  phResponsavel: 'Busque o responsável pelo nome',
+  dicaResponsavel: 'Digite o nome para buscar. Só quem criou a tarefa troca o responsável.',
+  phPrazo: 'Escolha a data limite',
+  feito: 'Marcar como feito',
+  subir: 'Subir item',
+  descer: 'Descer item',
+  remover: 'Remover item',
   adicionarItem: 'Adicionar item',
-  removerItem: 'Remover item',
-  obrigatorios: 'Preencha lista, título, prazo e responsável para continuar.',
+  phItem: 'O que precisa ser feito',
+  registrarTarefa: 'Registrar tarefa',
+  salvarTarefa: 'Salvar tarefa',
+  erroSalvar: 'Não foi possível salvar:',
 };
 type PageMessageType = typeof pageMessage_pt_br;
-const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+const pageMessages: Record<string, PageMessageType> = {
+  'pt-br': pageMessage_pt_br,
+};
 /// **collab_i18n_end**
 
-type Status = TarefaResumo['status'];
-type CamposDraft = Pick<SalvarEdicaoDraft, 'listaId' | 'titulo' | 'details' | 'prioridade' | 'prazo' | 'responsavelId'>;
+type Campos = {
+  listaId: string | null;
+  titulo: string | null;
+  descricao: string | null;
+  prioridade: Prioridade | null;
+  prazo: string | null;
+  responsavelId: string | null;
+};
 
-const STATUS_KEY: Record<Status, keyof PageMessageType> = {
-  aFazer: 'stAFazer',
-  emAndamento: 'stEmAndamento',
-  emRevisao: 'stEmRevisao',
-  concluida: 'stConcluida',
-  cancelada: 'stCancelada',
-};
-const STATUS_CLS: Record<Status, string> = {
-  aFazer: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]',
-  emAndamento: 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]',
-  emRevisao: 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]',
-  concluida: 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]',
-  cancelada: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--text-muted,currentColor)]',
-};
-const PRIO_KEY: Record<Prioridade, keyof PageMessageType> = { low: 'prLow', medium: 'prMedium', high: 'prHigh' };
-const PRIO_CLS: Record<Prioridade, string> = {
-  low: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]',
-  medium: 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]',
-  high: 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]',
-};
-const FILTROS: { value: string; key: keyof PageMessageType }[] = [
-  { value: 'todas', key: 'fTodas' },
-  { value: 'criadasPorMim', key: 'fCriadas' },
-  { value: 'atribuidasAMim', key: 'fAtribuidas' },
-  { value: 'emRevisao', key: 'fRevisao' },
-  { value: 'devolvidas', key: 'fDevolvidas' },
-];
-const ABERTAS: string[] = ['aFazer', 'emAndamento', 'emRevisao'];
+type Variante = 'primary' | 'secondary' | 'danger' | 'ghost';
 
-const lang = () => document.documentElement.lang || undefined;
-function toDate(v: string) {
-  return new Date(/^\d{4}-\d{2}-\d{2}$/.test(v) ? `${v}T00:00:00` : v);
+const BTN_BASE =
+  'inline-flex items-center justify-center gap-2 rounded-md px-3.5 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] disabled:opacity-50 disabled:cursor-not-allowed';
+
+function btnClass(v: Variante): string {
+  switch (v) {
+    case 'primary':
+      return `${BTN_BASE} bg-[var(--button-primary-bg,transparent)] text-[var(--button-primary-text,currentColor)] border border-transparent`;
+    case 'secondary':
+      return `${BTN_BASE} bg-[var(--button-secondary-bg,transparent)] text-[var(--button-secondary-text,currentColor)] border border-[var(--button-secondary-border,currentColor)]`;
+    case 'danger':
+      return `${BTN_BASE} bg-[var(--button-danger-bg,transparent)] text-[var(--button-danger-text,currentColor)] border border-transparent`;
+    default:
+      return `${BTN_BASE} bg-transparent text-[var(--text-default,currentColor)] border border-[var(--border-default,currentColor)]`;
+  }
 }
-function fmtDate(v?: string | null) {
+
+function btn(v: Variante, label: string, onClick: () => void, disabled = false) {
+  return html`<button type="button" class=${btnClass(v)} ?disabled=${disabled} @click=${onClick}>${label}</button>`;
+}
+
+function statusClass(s: TarefaResumo['status']): string {
+  switch (s) {
+    case 'emAndamento':
+      return 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]';
+    case 'emRevisao':
+      return 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
+    case 'concluida':
+      return 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]';
+    default:
+      return 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
+  }
+}
+
+function prioClass(p: TarefaResumo['prioridade']): string {
+  if (p === 'high') return 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)] font-semibold';
+  if (p === 'medium') return 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
+  return 'text-[var(--text-muted,currentColor)]';
+}
+
+const CHIP = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs';
+
+function pick(e: Event): string | null | undefined {
+  const d = (e as CustomEvent<{ value?: string | null }>).detail;
+  if (!d || typeof d !== 'object' || !('value' in d)) return undefined;
+  return d.value ?? null;
+}
+
+function pickBool(e: Event): boolean | undefined {
+  const d = (e as CustomEvent<{ value?: boolean }>).detail;
+  if (!d || typeof d !== 'object' || typeof d.value !== 'boolean') return undefined;
+  return d.value;
+}
+
+function fmtDate(v: string | null | undefined): string {
   if (!v) return '';
-  const d = toDate(v);
-  return Number.isNaN(d.getTime()) ? v : new Intl.DateTimeFormat(lang(), { dateStyle: 'medium' }).format(d);
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(v);
+  if (Number.isNaN(d.getTime())) return v;
+  return new Intl.DateTimeFormat(document.documentElement.lang || undefined, { dateStyle: 'medium' }).format(d);
 }
-function fmtDateTime(v?: string | null) {
+
+function fmtDateTime(v: string | null | undefined): string {
   if (!v) return '';
-  const d = toDate(v);
-  return Number.isNaN(d.getTime()) ? v : new Intl.DateTimeFormat(lang(), { dateStyle: 'short', timeStyle: 'short' }).format(d);
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return v;
+  return new Intl.DateTimeFormat(document.documentElement.lang || undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(d);
 }
-function val<T>(e: Event): T | undefined {
-  return (e as CustomEvent<{ value: T }>).detail?.value;
-}
-const on =
-  <T,>(fn: (v: T) => void) =>
-  (e: Event) => {
-    const v = val<T>(e);
-    if (v !== undefined) fn(v);
+
+function camposDe(d: CriarTarefaDraft | SalvarEdicaoDraft): Campos {
+  return {
+    listaId: d.listaId,
+    titulo: d.titulo,
+    descricao: d.details.descricao,
+    prioridade: d.prioridade,
+    prazo: d.prazo,
+    responsavelId: d.responsavelId,
   };
-const patchItem = (list: ItemChecklistDraft[], i: number, patch: Partial<ItemChecklistDraft>): ItemChecklistDraft[] =>
-  list.map((it, k) => (k === i ? { ...it, ...patch } : it));
-const novoItem = (list: ItemChecklistDraft[]): ItemChecklistDraft[] => [
-  ...list,
-  { id: null, version: null, descricao: '', ordem: list.length + 1, feito: false },
-];
-const semItem = (list: ItemChecklistDraft[], i: number): ItemChecklistDraft[] =>
-  list.filter((_, k) => k !== i).map((it, k) => ({ ...it, ordem: k + 1 }));
+}
 
-const CARD = 'rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]';
-const MUTED = 'text-[var(--text-muted,currentColor)]';
+function aplicar<T extends CriarTarefaDraft | SalvarEdicaoDraft>(d: T, p: Partial<Campos>): T {
+  const { descricao, ...rest } = p;
+  return { ...d, ...rest, details: descricao !== undefined ? { ...d.details, descricao } : d.details } as T;
+}
+
+function camposValidos(c: Campos): boolean {
+  return Boolean(c.listaId && c.titulo && c.titulo.trim() && c.prioridade && c.prazo && c.responsavelId);
+}
+
+function itensValidos(itens: ChecklistItemDraft[]): boolean {
+  return itens.every((i) => (i.details.descricao ?? '').trim() !== '');
+}
+
+function reordenar(itens: ChecklistItemDraft[], de: number, para: number): ChecklistItemDraft[] {
+  if (para < 0 || para >= itens.length) return itens;
+  const next = itens.slice();
+  const [it] = next.splice(de, 1);
+  next.splice(para, 0, it);
+  return next.map((x, i) => ({ ...x, ordem: i + 1 }));
+}
+
+function novoItem(ordem: number): ChecklistItemDraft {
+  return { id: null, version: null, details: { descricao: '' }, ordem, feito: false };
+}
 
 @customElement('tarefas--web--desktop--page11--minhas_tarefas-102047')
 export class TarefasDesktopPage11Minhas_tarefasPage extends TarefasMinhas_tarefasShared {
@@ -204,575 +259,650 @@ export class TarefasDesktopPage11Minhas_tarefasPage extends TarefasMinhas_tarefa
   render() {
     this.msg = pageMessages[this.getMessageKey(pageMessages)];
     const m = this.msg;
+    const semContexto = this.pageStatus === 'error' && this.qryMinhasTarefasError?.code === 'client.preconditionMissing';
     return html`
-      <div class="flex min-h-full flex-col gap-5 bg-[var(--page-bg,transparent)] p-6 text-[var(--text-default,currentColor)]">
-        <header class="flex items-start justify-between gap-4">
+      <div class="min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-6">
+        <header class="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${m.titulo}</h1>
-            <p class="mt-1 text-sm ${MUTED}">${m.subtitulo}</p>
+            <h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${m.pageTitle}</h1>
+            <p class="mt-1 text-sm text-[var(--text-muted,currentColor)]">${m.pageSubtitle}</p>
           </div>
-          ${this.btn(m.novaTarefa, 'primary', () => this.abrirCriar())}
+          ${semContexto
+            ? nothing
+            : btn('primary', m.novaTarefa, () => {
+                this.clearCmdCriarTarefaDraft();
+                this.selectDetalheTarefa(null);
+                this.setScenario('nova');
+                if (this.listas.length === 0) this.qryListasAtivas();
+              })}
         </header>
-        <div class="grid grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-start gap-6">
-          ${this.renderLista()} ${this.renderPainel()}
-        </div>
+        ${semContexto ? this.renderSemContexto() : this.renderCorpo()}
       </div>
     `;
   }
 
-  private abrirCriar() {
-    this.clearCmdCriarTarefaDraft();
-    if (!this.listas.length) void this.qryListasAtivas();
-    this.setScenario('criar');
-  }
-
-  private btn(
-    label: string,
-    variant: string,
-    onAction: () => unknown,
-    opts: { loading?: boolean; disabled?: boolean; size?: string } = {},
-  ) {
-    return html`<grouptriggeraction--ml-button-group
-      data-variant=${variant}
-      size=${opts.size ?? 'md'}
-      .loading=${!!opts.loading}
-      .disabled=${!!opts.disabled}
-      @action=${() => {
-        onAction();
-      }}
-    >
-      <Label>${label}</Label>
-    </grouptriggeraction--ml-button-group>`;
-  }
-
-  private erro(e: ErrorState) {
-    return e
-      ? html`<div aria-live="polite">
-          <groupnotifyuser--ml-contextual-feedback type="error" .visible=${true} .dismissible=${false}>
-            <Message>${e.message}</Message>
-          </groupnotifyuser--ml-contextual-feedback>
-        </div>`
-      : nothing;
-  }
-
-  private chip(cls: string, text: string) {
-    return html`<span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${cls}">${text}</span>`;
-  }
-
-  // ───────────── Lista ─────────────
-  private renderLista() {
+  private renderSemContexto() {
     const m = this.msg;
-    const items = this.tarefas?.items ?? [];
-    const sel = items.findIndex((t) => t.id === this.selectedTarefa);
-    const loading = this.qryMinhasTarefasStatus === 'loading';
-    const err = this.qryMinhasTarefasError;
-    const semContexto = err?.code === 'client.preconditionMissing';
     return html`
-      <section data-organism-id="listaTarefas" class="flex min-w-0 flex-col gap-3" aria-busy=${loading ? 'true' : 'false'}>
-        <groupnavigatesection--ml-navigate-pills
-          .value=${this.filtro ?? 'todas'}
-          @change=${on<string>((v) => {
-            void this.qryMinhasTarefas(v === 'todas' ? null : (v as MinhasTarefasFiltro));
-          })}
-        >
-          ${FILTROS.map((f) => html`<Tab value=${f.value} title=${m[f.key]}></Tab>`)}
-        </groupnavigatesection--ml-navigate-pills>
-        ${semContexto
-          ? html`<div class="${CARD} flex flex-col items-start gap-3 p-6" aria-live="polite">
-              <p class="font-medium text-[var(--text-strong,currentColor)]">${m.semContexto}</p>
-              <p class="text-sm ${MUTED}">${m.semContextoAjuda}</p>
-              ${this.btn(m.voltarAnterior, 'secondary', () => history.back())}
-            </div>`
-          : err
-            ? html`<div class="${CARD} flex flex-col items-start gap-3 p-4" aria-live="polite">
-                <p class="text-sm">${m.erroLista} ${err.message}</p>
-                ${this.btn(m.tentarNovamente, 'secondary', () => this.qryMinhasTarefas(), { size: 'sm' })}
-              </div>`
-            : nothing}
-        <div class="${loading && items.length ? 'opacity-60' : ''}">
-          <groupviewtable--ml-data-table
-            .value=${sel >= 0 ? String(sel) : ''}
-            .loading=${loading && items.length === 0}
-            @rowClick=${(e: CustomEvent<{ index: number }>) => {
-              const row = items[e.detail?.index];
-              if (row) {
-                void this.selectTarefa(row.id);
-                this.setScenario('detalhe');
-              }
-            }}
-          >
-            <TableHeader>
-              <TableRow>
-                <TableHead key="titulo">${m.colTarefa}</TableHead>
-                <TableHead key="responsavel">${m.colResp}</TableHead>
-                <TableHead key="checklist">${m.colChecklist}</TableHead>
-                <TableHead key="prazo" align="right">${m.colPrazo}</TableHead>
-                <TableHead key="situacao">${m.colSituacao}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>${items.map((r) => this.renderLinha(r))}</TableBody>
-            <Empty>
-              <div class="py-8 text-center">
-                <p class="font-medium">${m.listaVazia}</p>
-                <p class="text-sm ${MUTED}">${m.listaVaziaAjuda}</p>
-              </div>
-            </Empty>
-            <Loading><div class="py-8 text-center ${MUTED}">${m.carregandoLista}</div></Loading>
-          </groupviewtable--ml-data-table>
-        </div>
-        ${this.tarefas?.hasMore
-          ? html`<div>
-              ${this.btn(m.carregarMais, 'secondary', () => this.qryMinhasTarefas(undefined, (this.tarefas?.page ?? 1) + 1, true), {
-                loading,
-                size: 'sm',
-              })}
-            </div>`
-          : nothing}
-      </section>
+      <div role="alert" class="mx-auto max-w-xl rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6">
+        <h2 class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${m.semContextoTitulo}</h2>
+        <p class="mt-2 text-sm">${m.semContextoMsg}</p>
+        <div class="mt-4">${btn('secondary', m.voltarPagina, () => history.back())}</div>
+      </div>
     `;
   }
 
-  private renderLinha(r: TarefaResumo) {
-    const m = this.msg;
+  private renderCorpo() {
     return html`
-      <TableRow key=${r.id}>
+      <div class="grid grid-cols-[minmax(0,1fr)_minmax(420px,34rem)] items-start gap-6">
+        <section data-organism-id="listaTarefas" class="min-w-0" aria-busy=${this.qryMinhasTarefasStatus === 'loading' ? 'true' : 'false'}>
+          ${this.renderLista()}
+        </section>
+        <aside class="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
+          ${this.renderPainel()}
+        </aside>
+      </div>
+    `;
+  }
+
+  /* ---------------- list ---------------- */
+
+  private renderLista() {
+    const m = this.msg;
+    const pg = this.tarefas;
+    const rows = pg ? pg.items : [];
+    const sel = rows.findIndex((r) => r.id === this.selectedTarefa);
+    const loading = this.pageStatus === 'loading' || (this.qryMinhasTarefasStatus === 'loading' && rows.length === 0);
+    return html`
+      <div class="mb-3">
+        <groupnavigatesection--ml-navigate-pills
+          .value=${this.filtro ?? 'todas'}
+          @change=${(e: Event) => {
+            const v = pick(e);
+            if (typeof v !== 'string') return;
+            this.qryMinhasTarefas(v === 'todas' ? null : (v as FiltroTarefas));
+          }}
+        >
+          <Tab value="todas" title=${m.filtroTodas}></Tab>
+          <Tab value="criadasPorMim" title=${m.filtroCriadas}></Tab>
+          <Tab value="atribuidasAMim" title=${m.filtroAtribuidas}></Tab>
+          <Tab value="emRevisao" title=${m.filtroRevisao}></Tab>
+          <Tab value="devolvidas" title=${m.filtroDevolvidas}></Tab>
+        </groupnavigatesection--ml-navigate-pills>
+      </div>
+      ${this.pageStatus === 'error'
+        ? html`
+            <div class="mb-3 flex items-center gap-3 rounded-md border border-[var(--border-default,currentColor)] p-3" role="alert">
+              <div class="flex-1 text-sm">
+                <p class="font-medium text-[var(--text-strong,currentColor)]">${m.erroPaginaTitulo}</p>
+                <p>${this.qryMinhasTarefasError?.message ?? ''}</p>
+              </div>
+              ${btn('secondary', m.tentarNovamente, () => this.qryMinhasTarefas())}
+            </div>
+          `
+        : nothing}
+      <groupviewtable--ml-data-table
+        .loading=${loading}
+        .value=${sel >= 0 ? String(sel) : ''}
+        @rowClick=${(e: CustomEvent<{ index: number }>) => {
+          const row = rows[e.detail.index];
+          if (!row) return;
+          this.setScenario('detalhe');
+          this.selectDetalheTarefa(row.id);
+        }}
+      >
+        <TableHeader>
+          <TableRow>
+            <TableHead key="tarefa">${m.colTarefa}</TableHead>
+            <TableHead key="responsavel">${m.colResponsavel}</TableHead>
+            <TableHead key="prioridade">${m.colPrioridade}</TableHead>
+            <TableHead key="situacao">${m.colSituacao}</TableHead>
+            <TableHead key="prazo" align="right">${m.colPrazo}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>${rows.map((t) => this.renderLinha(t))}</TableBody>
+        <Empty>
+          <div class="py-10 text-center">
+            <p class="font-medium text-[var(--text-strong,currentColor)]">${m.listaVaziaTitulo}</p>
+            <p class="mt-1 text-sm text-[var(--text-muted,currentColor)]">${m.listaVaziaDica}</p>
+          </div>
+        </Empty>
+        <Loading><div class="py-10 text-center text-[var(--text-muted,currentColor)]">${m.carregandoTarefas}</div></Loading>
+      </groupviewtable--ml-data-table>
+      ${pg && pg.hasMore
+        ? html`<div class="mt-3 flex justify-center">
+            <button
+              type="button"
+              class=${btnClass('secondary')}
+              ?disabled=${this.qryMinhasTarefasStatus === 'loading'}
+              @click=${() => this.qryMinhasTarefas(undefined, pg.page + 1, true)}
+            >
+              ${this.qryMinhasTarefasStatus === 'loading' ? m.processando : m.carregarMais}
+            </button>
+          </div>`
+        : nothing}
+    `;
+  }
+
+  private statusLabel(s: TarefaResumo['status']) {
+    const m = this.msg;
+    switch (s) {
+      case 'aFazer':
+        return m.stAFazer;
+      case 'emAndamento':
+        return m.stEmAndamento;
+      case 'emRevisao':
+        return m.stEmRevisao;
+      case 'concluida':
+        return m.stConcluida;
+      default:
+        return m.stCancelada;
+    }
+  }
+
+  private prioLabel(p: TarefaResumo['prioridade']) {
+    const m = this.msg;
+    if (p === 'high') return m.prAlta;
+    if (p === 'medium') return m.prMedia;
+    return m.prBaixa;
+  }
+
+  private renderLinha(t: TarefaResumo) {
+    const m = this.msg;
+    const dataClass = t.details.atrasada
+      ? 'font-semibold text-[var(--status-error-text,currentColor)]'
+      : t.details.venceHoje
+        ? 'font-semibold text-[var(--text-strong,currentColor)]'
+        : '';
+    return html`
+      <TableRow key=${t.id}>
         <TableCell>
-          <div class="font-medium text-[var(--text-strong,currentColor)]">${r.titulo}</div>
-          <div class="text-xs ${MUTED}">
-            ${r.lista.nome} · ${m[PRIO_KEY[r.prioridade]]} · ${m.subtarefas}: ${r.details.quantidadeSubtarefas}
+          <div class="font-medium text-[var(--text-strong,currentColor)]">${t.titulo}</div>
+          <div class="text-xs text-[var(--text-muted,currentColor)]">
+            ${t.lista.nome}${t.details.quantidadeSubtarefas ? html` · ${t.details.quantidadeSubtarefas} ${m.subtarefas}` : nothing}${t.details.progressoChecklist
+              ? html` · ${m.checklist} ${t.details.progressoChecklist}`
+              : nothing}
           </div>
         </TableCell>
-        <TableCell>${r.responsavel.details.identification.name}</TableCell>
-        <TableCell>${r.details.progressoChecklist}</TableCell>
+        <TableCell>${t.responsavel.details.identification.name}</TableCell>
+        <TableCell><span class="${CHIP} ${prioClass(t.prioridade)}">${this.prioLabel(t.prioridade)}</span></TableCell>
         <TableCell>
-          <div class="text-right">
-            <div class="${r.details.atrasada ? 'font-semibold text-[var(--status-error-text,currentColor)]' : ''}">
-              ${fmtDate(r.prazo) || m.semValor}
-            </div>
-            ${r.details.atrasada
-              ? html`<div class="text-xs ${MUTED}">${m.atrasada}</div>`
-              : r.details.venceHoje
-                ? html`<div class="text-xs font-medium">${m.venceHoje}</div>`
+          <span class="${CHIP} ${statusClass(t.status)}">${this.statusLabel(t.status)}</span>
+          ${t.details.devolvidaEm
+            ? html`<div class="mt-1 text-xs text-[var(--text-muted,currentColor)]">${m.devolvidaEm} ${fmtDate(t.details.devolvidaEm)}</div>`
+            : nothing}
+        </TableCell>
+        <TableCell>
+          <div class="whitespace-nowrap text-right">
+            <div class=${dataClass}>${fmtDate(t.prazo)}</div>
+            ${t.details.atrasada
+              ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${m.atrasada}</div>`
+              : t.details.venceHoje
+                ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${m.venceHoje}</div>`
                 : nothing}
           </div>
-        </TableCell>
-        <TableCell>
-          ${this.chip(STATUS_CLS[r.status], m[STATUS_KEY[r.status]])}
-          ${r.details.devolvidaEm
-            ? html`<div class="mt-1 text-xs ${MUTED}">${m.devolvidaEm} ${fmtDate(r.details.devolvidaEm)}</div>`
-            : nothing}
         </TableCell>
       </TableRow>
     `;
   }
 
-  // ───────────── Painel (cenas) ─────────────
+  /* ---------------- panel (scene host) ---------------- */
+
   private renderPainel() {
     const m = this.msg;
     return html`
-      <div class="${CARD} min-w-0 p-4">
-        <molecules--ml-scenary-102020
-          mode="scenary"
-          .value=${this.scenary || 'detalhe'}
-          .backLabel=${m.voltar}
-          @change=${(e: CustomEvent<{ value: string }>) => {
-            if (e.target === e.currentTarget) this.setScenario(e.detail.value);
-          }}
-        >
-          <Scene value="detalhe" title=${this.tarefa?.titulo ?? m.tarefaAberta}>${this.renderDetalheScene()}</Scene>
-          <Scene value="editar" nav="back" backTo="detalhe" title=${m.tituloEditar}>${this.renderEditar()}</Scene>
-          <Scene value="criar" nav="back" backTo="detalhe" title=${m.tituloCriar}>${this.renderCriar()}</Scene>
-          <Scene value="cancelar" nav="back" backTo="detalhe" title=${m.tituloCancelar}>${this.renderCancelar()}</Scene>
-        </molecules--ml-scenary-102020>
-      </div>
+      <molecules--ml-scenary-102020
+        mode="scenary"
+        backLabel=${m.voltar}
+        .value=${this.scenary || (this.selectedTarefa !== null ? 'detalhe' : 'inicio')}
+        @change=${(e: CustomEvent<{ value: string }>) => {
+          if (e.target === e.currentTarget) {
+            this.setScenario(e.detail.value);
+            if (e.detail.value === 'inicio' || e.detail.value === 'nova') this.selectDetalheTarefa(null);
+          }
+        }}
+      >
+        <Scene value="inicio" title=${m.tituloInicio}>
+          <div class="p-4 text-sm">
+            <p class="text-[var(--text-strong,currentColor)]">${m.inicioMsg}</p>
+            <p class="mt-2 text-[var(--text-muted,currentColor)]">${m.inicioDica}</p>
+          </div>
+        </Scene>
+        <Scene value="detalhe" title=${m.tituloDetalhe} nav="back" backTo="inicio">
+          <div class="p-4">${this.renderDetalheEstado()}</div>
+        </Scene>
+        <Scene value="nova" title=${m.tituloNova} nav="back" backTo="inicio">
+          <div class="p-4">${this.renderNova()}</div>
+        </Scene>
+        <Scene value="editar" title=${m.tituloEditar} nav="back" backTo="detalhe">
+          <div class="p-4">${this.tarefa ? this.renderEditar(this.tarefa) : nothing}</div>
+        </Scene>
+      </molecules--ml-scenary-102020>
     `;
   }
 
-  private renderDetalheScene() {
+  private renderErro(prefix: string, err: ErrorState) {
+    if (!err) return nothing;
+    return html`<p role="alert" class="text-sm text-[var(--text-default,currentColor)]">${prefix} ${err.message}</p>`;
+  }
+
+  private renderDetalheEstado() {
     const m = this.msg;
-    const t = this.tarefa;
-    if (!t) {
-      const loading = this.qryTarefaStatus === 'loading';
-      return html`<div data-organism-id="detalheTarefa" class="py-10 text-center text-sm ${MUTED}" aria-live="polite" aria-busy=${loading ? 'true' : 'false'}>
-        ${loading ? m.carregandoTarefa : this.qryTarefaError ? `${m.erroTarefa} ${this.qryTarefaError.message}` : m.escolhaTarefa}
-      </div>`;
+    if (this.qryTarefaStatus === 'loading') {
+      return html`<p aria-busy="true" class="text-sm text-[var(--text-muted,currentColor)]">${m.carregandoDetalhe}</p>`;
     }
-    return html`
-      <div class="flex flex-col gap-6 ${this.qryTarefaStatus === 'loading' ? 'opacity-60' : ''}" aria-busy=${this.qryTarefaStatus === 'loading' ? 'true' : 'false'}>
-        ${this.renderAcoes(t)} ${this.renderDetalhe(t)} ${this.renderHistorico(t)}
-      </div>
-    `;
+    if (this.qryTarefaStatus === 'error') {
+      const id = this.selectedTarefa;
+      return html`
+        <div class="flex flex-col gap-3">
+          ${this.renderErro(m.erroDetalhe, this.qryTarefaError)}
+          ${id !== null ? btn('secondary', m.tentarNovamente, () => this.selectDetalheTarefa(id)) : nothing}
+        </div>
+      `;
+    }
+    return this.tarefa ? this.renderDetalhe(this.tarefa) : nothing;
   }
 
-  private dd(label: string, value: unknown) {
-    return html`<div>
-      <dt class="text-xs ${MUTED}">${label}</dt>
-      <dd class="text-sm font-medium text-[var(--text-strong,currentColor)]">${value}</dd>
-    </div>`;
-  }
+  /* ---------------- detail ---------------- */
 
   private renderDetalhe(t: TarefaDetalhe) {
     const m = this.msg;
+    const encerrada = t.status === 'concluida' || t.status === 'cancelada';
+    const d = this.cmdSalvarChecklistDraft;
     return html`
-      <div data-organism-id="detalheTarefa" class="flex flex-col gap-4">
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex flex-wrap items-center gap-2">
-            ${this.chip(STATUS_CLS[t.status], m[STATUS_KEY[t.status]])} ${this.chip(PRIO_CLS[t.prioridade], m[PRIO_KEY[t.prioridade]])}
+      <div class="flex flex-col gap-5">
+        <div data-organism-id="detalheTarefa" class="flex flex-col gap-4">
+          <div>
+            <h3 class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${t.titulo}</h3>
+            <div class="mt-2 flex flex-wrap items-center gap-2">
+              <span class="${CHIP} ${statusClass(t.status)}">${this.statusLabel(t.status)}</span>
+              <span class="${CHIP} ${prioClass(t.prioridade)}">${this.prioLabel(t.prioridade)}</span>
+              ${t.souCriador ? html`<span class="text-xs text-[var(--text-muted,currentColor)]">${m.papelCriador}</span>` : nothing}
+              ${t.souResponsavel ? html`<span class="text-xs text-[var(--text-muted,currentColor)]">${m.papelResponsavel}</span>` : nothing}
+            </div>
           </div>
-          ${this.btn(m.editarTarefa, 'secondary', () => this.setScenario('editar'), { size: 'sm' })}
+          ${t.details.motivoDevolucao
+            ? html`
+                <groupnotifyuser--ml-contextual-feedback type="warning" .visible=${true} .dismissible=${false}>
+                  <Title>${m.motivoTitulo}</Title>
+                  <Message>${t.details.motivoDevolucao}</Message>
+                </groupnotifyuser--ml-contextual-feedback>
+              `
+            : nothing}
+          <groupviewcard--ml-vertical-card>
+            <CardContent>
+              <p class="mb-4 whitespace-pre-wrap text-sm">${t.details.descricao ? t.details.descricao : m.semDescricao}</p>
+              <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                <div><dt class="text-xs text-[var(--text-muted,currentColor)]">${m.lista}</dt><dd>${t.lista.nome}</dd></div>
+                <div><dt class="text-xs text-[var(--text-muted,currentColor)]">${m.prazo}</dt><dd>${fmtDate(t.prazo)}</dd></div>
+                <div><dt class="text-xs text-[var(--text-muted,currentColor)]">${m.responsavel}</dt><dd>${t.responsavel.details.identification.name}</dd></div>
+                <div><dt class="text-xs text-[var(--text-muted,currentColor)]">${m.criadaPor}</dt><dd>${t.criador.details.identification.name}</dd></div>
+                <div><dt class="text-xs text-[var(--text-muted,currentColor)]">${m.criadaEm}</dt><dd>${fmtDateTime(t.criadaEm)}</dd></div>
+              </dl>
+            </CardContent>
+          </groupviewcard--ml-vertical-card>
+          <div>
+            <h4 class="mb-2 text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.checklist}</h4>
+            ${d.itens.length === 0
+              ? html`<p class="text-sm text-[var(--text-muted,currentColor)]">${m.semChecklist}</p>`
+              : html`
+                  <ul class="flex flex-col gap-1">
+                    ${d.itens.map(
+                      (it, i) => html`
+                        <li>
+                          <groupenterboolean--ml-checkbox-preference
+                            .value=${Boolean(it.feito)}
+                            ?disabled=${encerrada}
+                            @change=${(e: Event) => {
+                              const v = pickBool(e);
+                              if (v === undefined) return;
+                              this.setCmdSalvarChecklistDraft({
+                                ...d,
+                                itens: d.itens.map((x, j) => (j === i ? { ...x, feito: v } : x)),
+                              });
+                            }}
+                          >
+                            <Label>${it.details.descricao}</Label>
+                          </groupenterboolean--ml-checkbox-preference>
+                        </li>
+                      `,
+                    )}
+                  </ul>
+                  ${encerrada
+                    ? nothing
+                    : html`
+                        <div class="mt-3 flex flex-col gap-2">
+                          ${this.renderErro(m.erroSalvar, this.cmdSalvarChecklistError)}
+                          <div class="flex items-center gap-3">
+                            ${this.cmdBtn('secondary', m.salvarChecklist, this.cmdSalvarChecklistStatus, () => this.cmdSalvarChecklist())}
+                            <span aria-live="polite" class="text-xs text-[var(--text-muted,currentColor)]">
+                              ${this.cmdSalvarChecklistStatus === 'success' ? m.checklistSalva : ''}
+                            </span>
+                          </div>
+                        </div>
+                      `}
+                `}
+          </div>
+          <div>
+            ${btn('ghost', m.editarTarefa, () => {
+              this.setScenario('editar');
+              if (this.listas.length === 0) this.qryListasAtivas();
+            })}
+          </div>
         </div>
-        ${t.details.motivoDevolucao
-          ? html`<groupnotifyuser--ml-contextual-feedback type="warning" .visible=${true} .dismissible=${false}>
-              <Title>${m.motivoTitulo}</Title>
-              <Message>${t.details.motivoDevolucao}</Message>
-            </groupnotifyuser--ml-contextual-feedback>`
-          : nothing}
-        <p class="text-sm">${t.details.descricao || m.semDescricao}</p>
-        <dl class="grid grid-cols-2 gap-x-4 gap-y-3">
-          ${this.dd(m.lblLista, t.lista.nome)} ${this.dd(m.lblPrazo, fmtDate(t.prazo) || m.semValor)}
-          ${this.dd(m.lblResponsavel, t.responsavel.details.identification.name)}
-          ${this.dd(m.lblCriador, t.criador.details.identification.name)} ${this.dd(m.lblCriadaEm, fmtDateTime(t.criadaEm))}
-        </dl>
-        <div>
-          <h3 class="mb-2 text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.lblChecklist}</h3>
-          ${t.checklist.length
-            ? html`<ul class="flex flex-col gap-1.5">
-                ${t.checklist.map(
-                  (it) => html`<li class="flex items-start gap-2 text-sm">
-                    <span aria-hidden="true" class="${it.feito ? 'text-[var(--status-success-text,currentColor)]' : MUTED}">${it.feito ? '✓' : '○'}</span>
-                    <span class="sr-only">${it.feito ? m.feito : m.pendente}</span>
-                    <span class="${it.feito ? MUTED : ''}">${it.details.descricao}</span>
-                  </li>`,
-                )}
-              </ul>`
-            : html`<p class="text-sm ${MUTED}">${m.checklistVazia}</p>`}
-        </div>
+        ${this.renderHistorico(t)}
+        ${this.renderAcoes(t)}
       </div>
     `;
   }
 
-  private renderAcoes(t: TarefaDetalhe) {
-    const m = this.msg;
-    const aberta = ABERTAS.includes(t.status);
-    const executa = t.souResponsavel && (t.status === 'aFazer' || t.status === 'emAndamento');
-    const revisa = t.souCriador && t.status === 'emRevisao';
-    const cancela = t.souCriador && aberta;
-    const motivo = this.cmdDevolverDraft.details.motivoDevolucao ?? '';
-    const err =
-      this.cmdIniciarError ?? this.cmdEnviarRevisaoError ?? this.cmdAceitarError ?? this.cmdDevolverError ?? this.cmdCancelarError;
-    return html`
-      <div data-organism-id="acoesTarefa" class="flex flex-col gap-3">
-        ${executa || revisa || cancela
-          ? html`<div class="flex flex-wrap items-center gap-2">
-              ${t.souResponsavel && t.status === 'aFazer'
-                ? this.btn(m.iniciar, 'primary', () => this.cmdIniciar(), { loading: this.cmdIniciarStatus === 'loading' })
-                : nothing}
-              ${t.souResponsavel && t.status === 'emAndamento'
-                ? this.btn(
-                    t.details.motivoDevolucao ? m.reenviarRevisao : m.enviarRevisao,
-                    'primary',
-                    () => this.cmdEnviarRevisao(),
-                    { loading: this.cmdEnviarRevisaoStatus === 'loading' },
-                  )
-                : nothing}
-              ${revisa ? this.btn(m.aceitar, 'primary', () => this.cmdAceitar(), { loading: this.cmdAceitarStatus === 'loading' }) : nothing}
-              ${cancela ? this.btn(m.cancelarTarefa, 'secondary', () => this.setScenario('cancelar')) : nothing}
-            </div>`
-          : html`<p class="text-sm ${MUTED}">${m.semAcoes}</p>`}
-        ${revisa
-          ? html`<div class="flex flex-col gap-2">
-              <groupentertext--ml-multiline-text
-                .rows=${3}
-                .value=${motivo}
-                @input=${on<string>((v) => this.setCmdDevolverDraft({ details: { motivoDevolucao: v } }))}
-                @change=${on<string>((v) => this.setCmdDevolverDraft({ details: { motivoDevolucao: v } }))}
-              >
-                <Label>${m.motivoDevolver}</Label>
-                <Helper>${m.motivoAjuda}</Helper>
-              </groupentertext--ml-multiline-text>
-              <div>
-                ${this.btn(m.devolver, 'secondary', () => this.cmdDevolver(), {
-                  loading: this.cmdDevolverStatus === 'loading',
-                  disabled: !motivo.trim(),
-                })}
-              </div>
-            </div>`
-          : nothing}
-        ${this.erro(err)}
-      </div>
-    `;
+  private cmdBtn(v: Variante, label: string, status: RequestStatus, onClick: () => void, disabled = false) {
+    const busy = status === 'loading';
+    return html`<button type="button" class=${btnClass(v)} aria-busy=${busy ? 'true' : 'false'} ?disabled=${busy || disabled} @click=${onClick}>
+      ${busy ? this.msg.processando : label}
+    </button>`;
   }
 
   private renderHistorico(t: TarefaDetalhe) {
     const m = this.msg;
     return html`
-      <div data-organism-id="historicoTarefa">
-        <h3 class="mb-2 text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.historicoTitulo}</h3>
-        <groupviewdata--ml-timeline-view>
-          <Columns>
-            <Column field="quando" header=${m.histColQuando}></Column>
-            <Column field="evento" header=${m.histColEvento}></Column>
-          </Columns>
-          <Rows>
-            <Row>
-              <Cell>${fmtDateTime(t.criadaEm)}</Cell>
-              <Cell>${m.evCriada} ${t.criador.details.identification.name}</Cell>
-            </Row>
-            ${t.details.devolvidaEm
-              ? html`<Row>
-                  <Cell>${fmtDateTime(t.details.devolvidaEm)}</Cell>
-                  <Cell>
-                    <div>${m.evDevolvida}</div>
-                    ${t.details.motivoDevolucao ? html`<div class="text-xs ${MUTED}">${t.details.motivoDevolucao}</div>` : nothing}
-                  </Cell>
-                </Row>`
-              : nothing}
-            ${t.details.concluidaEm
-              ? html`<Row><Cell>${fmtDateTime(t.details.concluidaEm)}</Cell><Cell>${m.evConcluida}</Cell></Row>`
-              : nothing}
-            ${t.details.canceladaEm
-              ? html`<Row><Cell>${fmtDateTime(t.details.canceladaEm)}</Cell><Cell>${m.evCancelada}</Cell></Row>`
-              : nothing}
-          </Rows>
-        </groupviewdata--ml-timeline-view>
-      </div>
+      <details data-organism-id="historicoTarefa" class="rounded-md border border-[var(--border-subtle,currentColor)] p-3">
+        <summary class="cursor-pointer text-sm font-semibold text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">
+          ${m.historico}
+        </summary>
+        <div class="mt-3">
+          <groupviewdata--ml-timeline-view>
+            <Columns>
+              <Column field="quando" header=${m.colQuando}></Column>
+              <Column field="evento" header=${m.colEvento}></Column>
+            </Columns>
+            <Rows>
+              <Row>
+                <Cell>${fmtDateTime(t.criadaEm)}</Cell>
+                <Cell>
+                  <div>${m.hCriada} ${t.criador.details.identification.name}</div>
+                  <div class="text-xs text-[var(--text-muted,currentColor)]">${m.hAtribuida} ${t.responsavel.details.identification.name}</div>
+                </Cell>
+              </Row>
+              ${t.details.devolvidaEm
+                ? html`<Row>
+                    <Cell>${fmtDateTime(t.details.devolvidaEm)}</Cell>
+                    <Cell>
+                      <div>${m.hDevolvida}</div>
+                      ${t.details.motivoDevolucao ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${t.details.motivoDevolucao}</div>` : nothing}
+                    </Cell>
+                  </Row>`
+                : nothing}
+              ${t.details.concluidaEm
+                ? html`<Row><Cell>${fmtDateTime(t.details.concluidaEm)}</Cell><Cell>${m.hConcluida}</Cell></Row>`
+                : nothing}
+              ${t.details.canceladaEm
+                ? html`<Row><Cell>${fmtDateTime(t.details.canceladaEm)}</Cell><Cell>${m.hCancelada}</Cell></Row>`
+                : nothing}
+            </Rows>
+            <Empty>${m.semHistorico}</Empty>
+          </groupviewdata--ml-timeline-view>
+        </div>
+      </details>
     `;
   }
 
-  // ───────────── Cancelar (confirmação) ─────────────
-  private renderCancelar() {
+  private renderAcoes(t: TarefaDetalhe) {
     const m = this.msg;
-    const t = this.tarefa;
-    if (!t) return html`<p class="text-sm ${MUTED}">${m.escolhaTarefa}</p>`;
+    const aberta = t.status === 'aFazer' || t.status === 'emAndamento' || t.status === 'emRevisao';
+    const podeIniciar = t.souResponsavel && t.status === 'aFazer';
+    const podeEnviar = t.souResponsavel && t.status === 'emAndamento';
+    const podeRevisar = t.souCriador && t.status === 'emRevisao';
+    const podeCancelar = t.souCriador && aberta;
+    const temAcao = podeIniciar || podeEnviar || podeRevisar || podeCancelar;
+    const err =
+      this.cmdIniciarError ?? this.cmdEnviarRevisaoError ?? this.cmdAceitarError ?? this.cmdDevolverError ?? this.cmdCancelarError;
+    const motivo = this.cmdDevolverDraft.details.motivoDevolucao ?? '';
     return html`
-      <div class="flex flex-col gap-4">
-        <p class="text-sm">${m.cancelarAviso}</p>
-        <p class="font-semibold text-[var(--text-strong,currentColor)]">${t.titulo}</p>
-        ${this.erro(this.cmdCancelarError)}
-        <div class="flex flex-wrap gap-2">
-          ${this.btn(
-            m.confirmarCancelar,
-            'danger',
-            () =>
-              this.cmdCancelar().then(() => {
-                if (this.cmdCancelarStatus === 'success') this.setScenario('detalhe');
-              }),
-            { loading: this.cmdCancelarStatus === 'loading' },
-          )}
-          ${this.btn(m.manter, 'secondary', () => this.setScenario('detalhe'))}
+      <div
+        data-organism-id="acoesTarefa"
+        class="sticky bottom-0 flex flex-col gap-3 rounded-md border border-[var(--border-default,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-3"
+      >
+        ${temAcao ? nothing : html`<p class="text-sm text-[var(--text-muted,currentColor)]">${m.semAcoes}</p>`}
+        ${this.renderErro(m.erroAcao, err)}
+        <div class="flex flex-wrap items-start gap-2">
+          ${podeIniciar ? this.cmdBtn('primary', m.iniciar, this.cmdIniciarStatus, () => this.cmdIniciar()) : nothing}
+          ${podeEnviar
+            ? this.cmdBtn('primary', t.details.devolvidaEm ? m.reenviarRevisao : m.enviarRevisao, this.cmdEnviarRevisaoStatus, () => this.cmdEnviarRevisao())
+            : nothing}
+          ${podeRevisar ? this.cmdBtn('primary', m.aceitar, this.cmdAceitarStatus, () => this.cmdAceitar()) : nothing}
         </div>
+        ${podeRevisar
+          ? html`
+              <details class="rounded-md border border-[var(--border-subtle,currentColor)] p-3">
+                <summary class="${btnClass('ghost')} w-fit cursor-pointer list-none">${m.devolver}</summary>
+                <div class="mt-3 flex flex-col gap-3">
+                  <groupentertext--ml-multiline-text
+                    .rows=${3}
+                    .value=${motivo}
+                    placeholder=${m.motivoPh}
+                    required
+                    @input=${(e: Event) => this.setMotivo(e)}
+                    @change=${(e: Event) => this.setMotivo(e)}
+                  >
+                    <Label>${m.motivoLabel}</Label>
+                  </groupentertext--ml-multiline-text>
+                  <div>
+                    ${this.cmdBtn('secondary', m.devolverConfirmar, this.cmdDevolverStatus, () => this.cmdDevolver(), motivo.trim() === '')}
+                  </div>
+                </div>
+              </details>
+            `
+          : nothing}
+        ${podeCancelar
+          ? html`
+              <details class="rounded-md border border-[var(--border-subtle,currentColor)] p-3">
+                <summary class="${btnClass('ghost')} w-fit cursor-pointer list-none">${m.cancelarTarefa}</summary>
+                <div class="mt-3 flex flex-col gap-3">
+                  <p class="text-sm">${m.cancelarConfirma} «${t.titulo}»?</p>
+                  <div>${this.cmdBtn('danger', m.cancelarSim, this.cmdCancelarStatus, () => this.cmdCancelar())}</div>
+                </div>
+              </details>
+            `
+          : nothing}
       </div>
     `;
   }
 
-  // ───────────── Formulário ─────────────
-  private renderCampos(
-    d: CamposDraft,
-    patch: (p: Partial<CamposDraft>) => void,
-    dono: { id: string; nome: string } | null,
-    podeTrocarDono: boolean,
-  ) {
+  private setMotivo(e: Event) {
+    const v = pick(e);
+    if (typeof v === 'string') this.setCmdDevolverDraft({ details: { motivoDevolucao: v } });
+  }
+
+  /* ---------------- forms ---------------- */
+
+  private renderNova() {
     const m = this.msg;
-    const opcoes = this.membros.map((x) => ({ id: x.id, nome: x.details.identification.name }));
-    if (dono && !opcoes.some((o) => o.id === dono.id)) opcoes.unshift(dono);
-    const lingua = document.documentElement.lang || 'pt-BR';
+    const d = this.cmdCriarTarefaDraft;
+    const valido = camposValidos(camposDe(d)) && itensValidos(d.checklist);
     return html`
-      <div class="grid grid-cols-2 gap-4">
-        <div class="col-span-2">
-          <groupselectone--ml-select-one-autocomplete
-            .value=${d.listaId}
-            .required=${true}
-            @change=${on<string | null>((v) => patch({ listaId: v }))}
-          >
-            <Label>${m.fLista}</Label>
-            ${this.listas.map((l) => html`<Item value=${l.id}>${l.nome}</Item>`)}
-            <Empty>${m.semListas}</Empty>
-          </groupselectone--ml-select-one-autocomplete>
-        </div>
-        <div class="col-span-2">
-          <groupentertext--ml-enter-text
-            .value=${d.titulo ?? ''}
-            .required=${true}
-            @input=${on<string>((v) => patch({ titulo: v }))}
-            @change=${on<string>((v) => patch({ titulo: v }))}
-          >
-            <Label>${m.fTitulo}</Label>
-          </groupentertext--ml-enter-text>
-        </div>
-        <div class="col-span-2">
-          <groupentertext--ml-multiline-text
-            .rows=${4}
-            .value=${d.details.descricao ?? ''}
-            @input=${on<string>((v) => patch({ details: { ...d.details, descricao: v } }))}
-            @change=${on<string>((v) => patch({ details: { ...d.details, descricao: v } }))}
-          >
-            <Label>${m.fDescricao}</Label>
-          </groupentertext--ml-multiline-text>
-        </div>
-        <div class="col-span-2">
-          <groupselectone--ml-segmented-control
-            .value=${d.prioridade}
-            @change=${on<string | null>((v) => patch({ prioridade: v as Prioridade | null }))}
-          >
-            <Label>${m.fPrioridade}</Label>
-            <Item value="low">${m.prLow}</Item>
-            <Item value="medium">${m.prMedium}</Item>
-            <Item value="high">${m.prHigh}</Item>
-          </groupselectone--ml-segmented-control>
-        </div>
+      <div data-organism-id="formTarefa" class="flex flex-col gap-5">
+        ${this.renderCampos(camposDe(d), (p) => this.setCmdCriarTarefaDraft(aplicar(d, p)), null)}
         <div>
-          <groupenterdate--ml-date-picker
-            .value=${d.prazo}
-            .locale=${lingua}
-            .required=${true}
-            .placeholder=${m.phPrazo}
-            @change=${on<string | null>((v) => patch({ prazo: v }))}
-          >
-            <Label>${m.fPrazo}</Label>
-          </groupenterdate--ml-date-picker>
+          <h4 class="mb-2 text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.checklist}</h4>
+          ${this.renderChecklistEditor(d.checklist, (itens) => this.setCmdCriarTarefaDraft({ ...d, checklist: itens }), false)}
         </div>
+        ${this.renderErro(m.erroSalvar, this.cmdCriarTarefaError)}
         <div>
-          <groupselectone--ml-combobox
-            .value=${d.responsavelId}
-            .required=${true}
-            .disabled=${!podeTrocarDono}
-            @input=${(e: Event) => {
-              const v = val<string>(e);
-              if (typeof v === 'string') void this.qryBuscarMembros(v);
-            }}
-            @change=${on<string | null>((v) => patch({ responsavelId: v }))}
-          >
-            <Label>${m.fResp}</Label>
-            <Helper>${podeTrocarDono && !dono ? m.ajudaRespCriar : m.ajudaRespEditar}</Helper>
-            ${opcoes.map((o) => html`<Item value=${o.id}>${o.nome}</Item>`)}
-            <Empty>${m.semMembros}</Empty>
-          </groupselectone--ml-combobox>
+          ${this.cmdBtn('primary', m.registrarTarefa, this.cmdCriarTarefaStatus, () => {
+            this.cmdCriarTarefa().then(() => {
+              if (this.cmdCriarTarefaStatus === 'success') this.setScenario('detalhe');
+            });
+          }, !valido)}
         </div>
       </div>
     `;
   }
 
-  private renderItemChecklist(
-    it: ItemChecklistDraft,
-    i: number,
-    onPatch: (i: number, p: Partial<ItemChecklistDraft>) => void,
-    onRemove: ((i: number) => void) | null,
-  ) {
+  private renderEditar(t: TarefaDetalhe) {
     const m = this.msg;
-    return html`<li class="flex items-start gap-3">
-      <groupenterboolean--ml-checkbox-preference
-        .value=${!!it.feito}
-        @change=${on<boolean>((v) => onPatch(i, { feito: v }))}
-      >
-        <Label>${m.feito}</Label>
-      </groupenterboolean--ml-checkbox-preference>
-      <groupentertext--ml-enter-text
-        class="min-w-0 flex-1"
-        .value=${it.descricao ?? ''}
-        @input=${on<string>((v) => onPatch(i, { descricao: v }))}
-        @change=${on<string>((v) => onPatch(i, { descricao: v }))}
-      >
-        <Label data-class="sr-only">${m.itemDescricao}</Label>
-      </groupentertext--ml-enter-text>
-      ${onRemove ? this.btn(m.removerItem, 'ghost', () => onRemove(i), { size: 'sm' }) : nothing}
-    </li>`;
-  }
-
-  private renderEditar() {
-    const m = this.msg;
-    const t = this.tarefa;
-    if (!t) return html`<div data-organism-id="formTarefa"><p class="text-sm ${MUTED}">${m.escolhaTarefa}</p></div>`;
     const d = this.cmdSalvarEdicaoDraft;
     const c = this.cmdSalvarChecklistDraft;
-    const valido = !!d.titulo?.trim() && !!d.listaId && !!d.prazo && !!d.responsavelId;
-    const alterado =
-      d.titulo !== t.titulo ||
-      d.listaId !== t.listaId ||
-      (d.details.descricao ?? '') !== (t.details.descricao ?? '') ||
-      d.prioridade !== t.prioridade ||
-      d.prazo !== t.prazo ||
-      d.responsavelId !== t.responsavelId;
-    const checkValido = c.itens.every((i) => !!i.descricao?.trim());
-    const setItem = (i: number, p: Partial<ItemChecklistDraft>) =>
-      this.setCmdSalvarChecklistDraft({ itens: patchItem(c.itens, i, p) });
+    const valido = camposValidos(camposDe(d));
     return html`
       <div data-organism-id="formTarefa" class="flex flex-col gap-6">
         <section class="flex flex-col gap-4">
-          <h3 class="text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.dadosTarefa}</h3>
+          <h4 class="text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.dadosTarefa}</h4>
           ${this.renderCampos(
-            d,
-            (p) => this.setCmdSalvarEdicaoDraft({ ...d, ...p }),
+            camposDe(d),
+            (p) => this.setCmdSalvarEdicaoDraft(aplicar(d, p)),
             { id: t.responsavelId, nome: t.responsavel.details.identification.name },
-            t.souCriador,
           )}
-          ${valido ? nothing : html`<p class="text-xs ${MUTED}">${m.obrigatorios}</p>`}
-          ${this.erro(this.cmdSalvarEdicaoError)}
+          ${this.renderErro(m.erroSalvar, this.cmdSalvarEdicaoError)}
           <div>
-            ${this.btn(
-              m.salvarEdicao,
-              'primary',
-              () =>
-                this.cmdSalvarEdicao().then(() => {
-                  if (this.cmdSalvarEdicaoStatus === 'success') this.setScenario('detalhe');
-                }),
-              { loading: this.cmdSalvarEdicaoStatus === 'loading', disabled: !valido || !alterado },
-            )}
+            ${this.cmdBtn('primary', m.salvarTarefa, this.cmdSalvarEdicaoStatus, () => {
+              this.cmdSalvarEdicao().then(() => {
+                if (this.cmdSalvarEdicaoStatus === 'success') this.setScenario('detalhe');
+              });
+            }, !valido)}
           </div>
         </section>
-        <section class="flex flex-col gap-3 border-t border-[var(--border-subtle,currentColor)] pt-4">
-          <h3 class="text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.lblChecklist}</h3>
-          <ul class="flex flex-col gap-2">${c.itens.map((it, i) => this.renderItemChecklist(it, i, setItem, null))}</ul>
-          <div>
-            ${this.btn(m.adicionarItem, 'ghost', () => this.setCmdSalvarChecklistDraft({ itens: novoItem(c.itens) }), { size: 'sm' })}
-          </div>
-          ${this.erro(this.cmdSalvarChecklistError)}
-          <div>
-            ${this.btn(
-              m.salvarChecklist,
-              'primary',
-              () =>
-                this.cmdSalvarChecklist().then(() => {
-                  if (this.cmdSalvarChecklistStatus === 'success') this.setScenario('detalhe');
-                }),
-              { loading: this.cmdSalvarChecklistStatus === 'loading', disabled: !checkValido },
-            )}
+        <section class="flex flex-col gap-3 border-t border-[var(--border-subtle,currentColor)] pt-5">
+          <h4 class="text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.checklist}</h4>
+          ${this.renderChecklistEditor(c.itens, (itens) => this.setCmdSalvarChecklistDraft({ ...c, itens }), true)}
+          ${this.renderErro(m.erroSalvar, this.cmdSalvarChecklistError)}
+          <div class="flex items-center gap-3">
+            ${this.cmdBtn('secondary', m.salvarChecklist, this.cmdSalvarChecklistStatus, () => this.cmdSalvarChecklist(), !itensValidos(c.itens))}
+            <span aria-live="polite" class="text-xs text-[var(--text-muted,currentColor)]">
+              ${this.cmdSalvarChecklistStatus === 'success' ? m.checklistSalva : ''}
+            </span>
           </div>
         </section>
       </div>
     `;
   }
 
-  private renderCriar() {
+  private renderCampos(v: Campos, set: (p: Partial<Campos>) => void, atual: { id: string; nome: string } | null) {
     const m = this.msg;
-    const d = this.cmdCriarTarefaDraft;
-    const valido = !!d.titulo?.trim() && !!d.listaId && !!d.prazo && !!d.responsavelId;
-    const setItem = (i: number, p: Partial<ItemChecklistDraft>) =>
-      this.setCmdCriarTarefaDraft({ ...d, checklist: patchItem(d.checklist, i, p) });
-    const remover = (i: number) => this.setCmdCriarTarefaDraft({ ...d, checklist: semItem(d.checklist, i) });
+    const lang = document.documentElement.lang || 'pt-BR';
+    const onText = (apply: (s: string) => void) => (e: Event) => {
+      const x = pick(e);
+      if (typeof x === 'string') apply(x);
+    };
+    const tituloH = onText((s) => set({ titulo: s }));
+    const descH = onText((s) => set({ descricao: s }));
+    const extra =
+      atual && !this.membros.some((x) => x.id === atual.id) ? html`<Item value=${atual.id}>${atual.nome}</Item>` : nothing;
     return html`
-      <div data-organism-id="formTarefa" class="flex flex-col gap-5">
-        ${this.renderCampos(d, (p) => this.setCmdCriarTarefaDraft({ ...d, ...p }), null, true)}
-        <section class="flex flex-col gap-3 border-t border-[var(--border-subtle,currentColor)] pt-4">
-          <h3 class="text-sm font-semibold text-[var(--text-strong,currentColor)]">${m.checklistInicial}</h3>
-          <ul class="flex flex-col gap-2">${d.checklist.map((it, i) => this.renderItemChecklist(it, i, setItem, remover))}</ul>
-          <div>
-            ${this.btn(m.adicionarItem, 'ghost', () => this.setCmdCriarTarefaDraft({ ...d, checklist: novoItem(d.checklist) }), {
-              size: 'sm',
-            })}
-          </div>
-        </section>
-        ${valido ? nothing : html`<p class="text-xs ${MUTED}">${m.obrigatorios}</p>`} ${this.erro(this.cmdCriarTarefaError)}
-        <div>
-          ${this.btn(
-            m.criarTarefa,
-            'primary',
-            () =>
-              this.cmdCriarTarefa().then(() => {
-                if (this.cmdCriarTarefaStatus === 'success') this.setScenario('detalhe');
-              }),
-            { loading: this.cmdCriarTarefaStatus === 'loading', disabled: !valido },
-          )}
+      <div class="flex flex-col gap-4">
+        <groupselectone--ml-select-one-autocomplete
+          .value=${v.listaId}
+          placeholder=${m.phLista}
+          required
+          ?loading=${this.qryListasAtivasStatus === 'loading'}
+          @change=${(e: Event) => {
+            const x = pick(e);
+            if (x !== undefined) set({ listaId: x });
+          }}
+        >
+          <Label>${m.lista}</Label>
+          ${this.listas.map((l) => html`<Item value=${l.id}>${l.nome}</Item>`)}
+          <Empty>${m.semListas}</Empty>
+        </groupselectone--ml-select-one-autocomplete>
+        <groupentertext--ml-enter-text .value=${v.titulo ?? ''} placeholder=${m.phTitulo} required @input=${tituloH} @change=${tituloH}>
+          <Label>${m.titulo}</Label>
+        </groupentertext--ml-enter-text>
+        <groupentertext--ml-multiline-text .rows=${4} .value=${v.descricao ?? ''} @input=${descH} @change=${descH}>
+          <Label>${m.descricao}</Label>
+        </groupentertext--ml-multiline-text>
+        <div class="grid grid-cols-2 items-start gap-4">
+          <groupselectone--ml-segmented-control
+            .value=${v.prioridade}
+            required
+            @change=${(e: Event) => {
+              const x = pick(e);
+              if (x !== undefined) set({ prioridade: x as Prioridade | null });
+            }}
+          >
+            <Label>${m.prioridade}</Label>
+            <Item value="low">${m.prBaixa}</Item>
+            <Item value="medium">${m.prMedia}</Item>
+            <Item value="high">${m.prAlta}</Item>
+          </groupselectone--ml-segmented-control>
+          <groupenterdate--ml-date-picker
+            .value=${v.prazo}
+            locale=${lang}
+            placeholder=${m.phPrazo}
+            required
+            @change=${(e: Event) => {
+              const x = pick(e);
+              if (x !== undefined) set({ prazo: x });
+            }}
+          >
+            <Label>${m.prazo}</Label>
+          </groupenterdate--ml-date-picker>
         </div>
+        <groupselectone--ml-combobox
+          .value=${v.responsavelId}
+          placeholder=${m.phResponsavel}
+          required
+          ?loading=${this.qryBuscarMembrosStatus === 'loading'}
+          @input=${(e: Event) => {
+            const q = pick(e);
+            if (typeof q === 'string') this.qryBuscarMembros(q);
+          }}
+          @change=${(e: Event) => {
+            const x = pick(e);
+            if (x !== undefined) set({ responsavelId: x });
+          }}
+        >
+          <Label>${m.responsavel}</Label>
+          <Helper>${m.dicaResponsavel}</Helper>
+          ${extra}
+          ${this.membros.map((mb) => html`<Item value=${mb.id}>${mb.details.identification.name}</Item>`)}
+        </groupselectone--ml-combobox>
+      </div>
+    `;
+  }
+
+  private renderChecklistEditor(itens: ChecklistItemDraft[], onChange: (itens: ChecklistItemDraft[]) => void, comFeito: boolean) {
+    const m = this.msg;
+    const small =
+      'inline-flex h-11 w-11 items-center justify-center rounded-md border border-[var(--border-default,currentColor)] text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] disabled:opacity-40';
+    return html`
+      <div class="flex flex-col gap-2">
+        ${itens.map((it, i) => {
+          const h = (e: Event) => {
+            const x = pick(e);
+            if (typeof x === 'string') onChange(itens.map((y, j) => (j === i ? { ...y, details: { ...y.details, descricao: x } } : y)));
+          };
+          return html`
+            <div class="flex items-center gap-2">
+              ${comFeito
+                ? html`<groupenterboolean--ml-checkbox-preference
+                    .value=${Boolean(it.feito)}
+                    @change=${(e: Event) => {
+                      const x = pickBool(e);
+                      if (x !== undefined) onChange(itens.map((y, j) => (j === i ? { ...y, feito: x } : y)));
+                    }}
+                  >
+                    <Label><span class="sr-only">${m.feito}</span></Label>
+                  </groupenterboolean--ml-checkbox-preference>`
+                : nothing}
+              <div class="min-w-0 flex-1">
+                <groupentertext--ml-enter-text .value=${it.details.descricao ?? ''} placeholder=${m.phItem} @input=${h} @change=${h}>
+                  <Label><span class="sr-only">${m.phItem}</span></Label>
+                </groupentertext--ml-enter-text>
+              </div>
+              <button type="button" class=${small} aria-label=${m.subir} ?disabled=${i === 0} @click=${() => onChange(reordenar(itens, i, i - 1))}>▲</button>
+              <button type="button" class=${small} aria-label=${m.descer} ?disabled=${i === itens.length - 1} @click=${() => onChange(reordenar(itens, i, i + 1))}>▼</button>
+              ${it.id === null
+                ? html`<button
+                    type="button"
+                    class=${small}
+                    aria-label=${m.remover}
+                    @click=${() => onChange(itens.filter((_, j) => j !== i).map((y, j) => ({ ...y, ordem: j + 1 })))}
+                  >✕</button>`
+                : nothing}
+            </div>
+          `;
+        })}
+        <div>${btn('ghost', m.adicionarItem, () => onChange([...itens, novoItem(itens.length + 1)]))}</div>
       </div>
     `;
   }

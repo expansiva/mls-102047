@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_membro",
   "device": "desktop",
-  "contextHash": "sha256:68efb67097475db88c4172067e65eb1a2031d7c6860e940d323917914999967c",
+  "contextHash": "sha256:eec53707c3c6a2db27c7e6831b431a6c2083ebf19528f25b58ff1f0a1087f93a",
   "sourcePath": "l2/tarefas/web/desktop/page11/inicio_membro.ts",
-  "sourceHash": "sha256:fb8993a68bd8f15c3b259deaff34da91949a28ce77aaf1bc1b5ef17505429782",
+  "sourceHash": "sha256:d03eeaad735b8cd4a803ac643aff9f726532a445414ce6fd80dba610160c8710",
   "attempt": 1,
   "design": {
-    "concept": "Uma tela de triagem do dia do membro: uma frase no topo diz quanto exige atenção (atrasadas e vencendo hoje), a coluna principal traz as filas do que espera por ele, da pior para a mais leve (devolvidas, entregas para revisar, para enviar, para iniciar), e a coluna lateral guarda o que é contexto: as tarefas mais urgentes, uma linha discreta de números e o aviso das 8h.",
+    "concept": "Uma tela de triagem para o começo do dia: a primeira coisa que se lê é uma frase curta com o que está atrasado e o que vence hoje. Logo abaixo vêm as faixas de ação (tarefas mais urgentes, devolvidas, entregas para revisar, prontas para enviar, para iniciar), cada uma com identidade, o prazo à direita e o botão que resolve. Os números da carga ficam numa linha discreta no fim, e o aviso das 8h numa coluna lateral.",
     "views": [],
-    "decisions": "Página de uma só vista, sem scene host: as filas são paralelas e todas visíveis, porque triagem pede ver tudo de uma vez, e esconder filas atrás de abas esconderia pendências. Por isso não usei as pílulas de navegação recomendadas; as filas são seções com título de negócio, ordenadas por urgência. Segui o template exceptionTriage: a manchete vem primeiro e é só texto, montada com os campos prontos do backend (quantidadeAtrasadas e quantidadeVencemHoje), sem nenhum cálculo. O resumo virou uma faixa discreta de valor + rótulo, sem cartões, abaixo da lista de urgentes. A cor de alarme só aparece no número de atrasadas e na etiqueta 'Atrasada'. Cada pendência mostra identidade (o título é o link que abre a tarefa), o fato decisivo (prazo, alinhado à direita, tabular) e a ação do item. Desvio consciente do template: as ações de transição ficam na linha, porque as intents da página são submits. A devolução com motivo abre um campo inline na própria linha; a página não guarda estado, então o rascunho do shared (id preenchido) é o que diz qual linha está aberta. Estado de boa notícia calmo ('Nada precisa de atenção agora'), esqueleto no carregamento, erro com tentar de novo e caminho para Minhas tarefas, falha de comando no próprio painel das filas com aria-live. Sem barra de progresso: o progresso da checklist vem como texto pronto do backend e não pode ser calculado na página. O aviso das 8h usa o banner inline do molecule, com ação para abrir o aviso completo."
+    "decisions": "A página tem uma única view, então não usa o scene host. A devolução com motivo abre inline sob a linha da entrega, guiada pelo rascunho do shared (draft.id marca a linha aberta). Assim a pessoa não perde o lugar, e o formulário só aparece sob demanda.\n\nSegui a hierarquia do template: frase de triagem, faixas da pior para a menos grave, linha de saúde discreta e o resto rebaixado. O aviso das 8h fica numa coluna lateral porque é secundário, mas continua visível sem rolar.\n\nA frase usa só as quantidades que o backend entrega (atrasadas e vencem hoje) e nada é somado ou filtrado na página. Cor de alarme só aparece no fato decisivo (selo Atrasada / Vence hoje) e nos erros reais.\n\nO progresso da checklist é mostrado como o texto que o backend envia (ex.: 2/5), sem barra, porque calcular a porcentagem seria derivar dado. A linha de saúde não tem cartões nem gráficos.\n\nUsei molecules para os botões de ação, para a lista das tarefas urgentes (a linha inteira leva a Minhas tarefas) e para o banner do aviso. As faixas de pendência usam linhas próprias, porque precisam de ações e de formulário inline.\n\nHá estados de carregamento (esqueleto), erro com nova tentativa, bom-notícia (pageStatus 'empty') e feedback de sucesso e erro dos comandos. O contêiner de resumoMinhasTarefas envolve esperaPorMim para manter a ordem exigida (faixas antes da linha de saúde) com cada organismo identificável."
   },
   "advisories": [
     {
@@ -32,19 +32,11 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism resumoMinhasTarefas (tarefas abertas em destaque) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism resumoMinhasTarefas (progresso da checklist por tarefa) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism esperaPorMim (separar iniciar, revisar e ajustar) renders neither <groupnavigatesection--ml-navigate-pills> nor <groupnavigatesection--ml-tabs>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism esperaPorMim (itens pendentes) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",

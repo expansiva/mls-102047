@@ -4,35 +4,43 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "mobile",
-  "contextHash": "sha256:8f1ffc461951f10622e27b7dbfffd45811b19280fea433a6b2f756fd560c6689",
+  "contextHash": "sha256:c36d68e4b3e9ef04fb5e6fd326c5aad4447017802049e5ef8d13e36a0ac16ace",
   "sourcePath": "l2/tarefas/web/mobile/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:276dd6c46f21ce35c5ece1c87ace1822e56ac4311339d284f62081e0c60b5974",
+  "sourceHash": "sha256:ed98c04f26c15b0086a21bbd784a14d41278197b203d14cf5135f9f7684bd280",
   "attempt": 1,
   "design": {
-    "concept": "Uma lista de tarefas empilhada para o polegar, ordenada como o backend entrega, com filtros rápidos em pílulas rolando na horizontal. Tocar numa tarefa leva ao detalhe (dados, checklist marcável, histórico recolhido) com a ação de ciclo do meu papel numa barra fixa embaixo. Criar, editar e as ações secundárias (devolver, cancelar) são telas próprias, com voltar, para que haja uma coisa por vez entre 360px e 430px.",
+    "concept": "A thumb-first task queue. The list of my tasks (filter pills on top, one stacked card per task, deadline and status visible) is the home. Tapping a task slides to its detail with role-based lifecycle actions pinned at the bottom within thumb reach. Create, edit, checklist, return-with-reason and cancel-confirmation are separate one-purpose steps that always have a back path.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Minhas tarefas com filtros rápidos, estados de carregando, vazio, erro e pré-condição ausente, carregar mais e o botão fixo 'Nova tarefa'."
+        "purpose": "Home. Quick filters, 'Nova tarefa' button and the stacked list of tasks (overdue date in alarm color, status chip, checklist progress). Loading, empty, error and precondition states."
       },
       {
-        "id": "detalhe",
-        "purpose": "Tarefa aberta: motivo da devolução em destaque, cartão com os dados, checklist que se marca com um toque, histórico recolhido e barra fixa com a ação principal do meu papel e o menu 'Mais ações'."
+        "id": "tarefa",
+        "purpose": "Open task: returned-reason banner, task card, read-only checklist, shortcuts to edit and to tick the checklist, collapsed history, and a sticky action bar with the main lifecycle action for my role plus a 'more actions' menu."
       },
       {
-        "id": "acoes",
-        "purpose": "Ações secundárias do criador: devolver com motivo (obrigatório) e cancelar a tarefa, com confirmação que cita o título."
+        "id": "campos",
+        "purpose": "Edit the task fields (list, title, description, priority, deadline, owner by name). Editing never changes status."
       },
       {
-        "id": "criar",
-        "purpose": "Formulário de criação com campos empilhados e checklist inicial."
+        "id": "checklist",
+        "purpose": "Tick, rewrite and add checklist items of the open task and save them on their own."
       },
       {
-        "id": "editar",
-        "purpose": "Edição dos dados (com troca de responsável só para o criador) e, em seção própria com save próprio, ajuste e marcação da checklist."
+        "id": "devolver",
+        "purpose": "Creator sends a task in review back, with the mandatory reason."
+      },
+      {
+        "id": "cancelar",
+        "purpose": "Plain confirmation naming the task before the only destructive action."
+      },
+      {
+        "id": "nova",
+        "purpose": "Create a task: stacked fields plus the initial checklist, with a single outcome button."
       }
     ],
-    "decisions": "Usei o host de cenas em mode=scenary com cinco cenas, porque a página é uma sequência (lista → detalhe → ação/edição) e no celular uma coisa por vez vence espremer. O título de cada cena é o único título da vista; nenhum título repete o rótulo de um botão próximo (cena 'Dados da nova tarefa' vs. botão 'Criar tarefa').\n\nLista: escolhi ml-responsive-table (alternativa) em vez do data-table, porque o data-table esconde colunas e rola na horizontal, o que é ruim no celular. A primeira célula carrega título, lista, responsável, prioridade, subtarefas e progresso da checklist (texto vindo pronto do backend, sem calcular porcentagem). Só a data de prazo atrasada recebe a cor de alarme; 'vence hoje' é só texto. A seleção é marcada pelo índice. Não incluí busca por título porque a consulta não tem termo. Os valores do filtro rápido (criadas, atribuidas, emRevisao, devolvidas) são uma suposição, pois o tipo vem do contrato que não recebi; a conversão fica num único helper.\n\nAções: a ação principal depende de papel e situação (iniciar, enviar/reenviar, aceitar) e fica numa barra fixa embaixo. As demais ficam no kebab, que abre a cena 'Outras ações'. Como a página não guarda estado, essa cena substitui um menu suspenso. Cancelar é o único controle perigoso e exige a confirmação com o título. A confirmação de sucesso é local (a situação do cartão muda); erros aparecem em feedback contextual perto da ação, sem toast.\n\nChecklist: marcar um item no detalhe monta o rascunho a partir da própria tarefa e salva na hora, para cobrir 'marcar à medida que avança' com um toque. O formulário de edição também permite editar, adicionar e marcar, com save próprio.\n\nFormulários: título e descrição atualizam o rascunho a cada digitação, para o botão habilitar sem depender do blur. O responsável usa combobox, que dispara a busca por nome. Salvar fica desabilitado até os campos obrigatórios estarem preenchidos. Voltar não perde nada, porque os rascunhos vivem no shared; por isso não há confirmação de descarte. Alguns organismos (formTarefa, acoesTarefa) aparecem em duas cenas, cada uma com seu data-organism-id."
+    "decisions": "The scene host in mode 'scenary' carries the whole flow; the default scene follows selectedTarefa so a reload with the task id reopens it, and going back to the list clears the selection. I chose groupviewtable--ml-responsive-table (the alternative) because it turns rows into labeled cards on narrow screens, avoiding horizontal scroll and the hidden-columns behaviour of the data table. Filter pills carry empty tab bodies (the molecule renders tab bodies as raw HTML) and the list sits below them. The secondary-actions menu is a native details element rather than the kebab molecule, because the kebab does not render a menu and the page may hold no open/closed state. Return-with-reason and cancel are their own scenes instead of modals or inline toggles for the same reason (no state), and the cancel scene names the task and holds the only danger button. Owner is chosen with the combobox, whose keystroke event feeds qryBuscarMembros. Deadline uses the plain date picker, since the shortcut picker offers mostly past dates. Checklist progress, status and flags are shown exactly as the backend returns them; nothing is counted or derived (no progress bar, since progress is a string). Success is local: the chip, card and row update in place and creating/saving moves to the task; only errors get a banner. Save buttons stay disabled until required fields are filled. The dirty-close confirm was left out because it would need page state."
   },
   "advisories": [
     {
@@ -58,6 +66,10 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism listaTarefas (busca por título) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism acoesTarefa (ações secundárias) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",

@@ -4,33 +4,41 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "unitInputHash": "sha256:a826e6d8b152c94890aced85530a33f78442112acd72c2f71fcc9c787c631834",
-  "promptHash": "sha256:128edd0624b6bcb1af9d654c9db6ad5323430b5c7a72cd3a40a23ea1eef55f55",
+  "promptHash": "sha256:701b5b53bb4fa32229a61e8084167ceffe57e9478b5b1fc1835237f67e9b7ff8",
   "rulesHash": "sha256:949fb2b49678e5b865db22fb4ca08daaece960d5ff9e5471b6581caaff240fe9",
   "sourcePath": "l2/tarefas/web/shared/tarefas_equipe.ts",
-  "sourceHash": "sha256:89afc987640ca66cfc97b46e04d801b758847b6a6202ad7142b8fc4bf5b8efff",
+  "sourceHash": "sha256:339318237e7fbbfaae0f3f2b1531b04e65b79cac55a79b09d09571591d4322b2",
   "declarationPath": "l2/tarefas/web/shared/tarefas_equipeDts.txt",
-  "declarationHash": "sha256:7ce7660c095653160478a7be62e1eef183fac30127308f539d21fca4011af84b",
+  "declarationHash": "sha256:9b6d5a435b206c0095899febf0403bee58ce4f13e8662698d3105c30fc7a876b",
   "attempt": 1,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "The eight filter params (listaId, responsavelId, prioridade, status, prazoDe, prazoAte, venceHoje, atrasada) have effect filter:tarefasEquipe but no state holds them. Added one public persisted state per param, and listarTarefasEquipe(filters, page, append) takes a TarefasEquipeFilterChange that publishes them and reloads from the first page."
+      "message": "Entry params listaId, responsavelId, prioridade, status, prazoDe, prazoAte, venceHoje and atrasada filter tarefasEquipe but no state holds them. Added persisted public states with the param names, filled from URL/localStorage on entry, plus filtrarTarefasEquipe(filtro) and limparFiltrosTarefasEquipe() that publish them and reload from page 1."
     },
     {
       "code": "FORM_DRAFT_MISSING",
-      "message": "reatribuirTarefa needs the member the person chooses, but no state has reatribuirTarefa.input as its source. Added the reatribuirTarefaDraft state (ReatribuirTarefaDraft) and its setter setReatribuirTarefaDraft; id and version come from the selected tarefa."
+      "message": "Command reatribuirTarefa has no <command>.input state although the manager must pick the new assignee. Added reatribuirTarefaDraft (ReatribuirTarefaDraft) with setReatribuirTarefaDraft; id and version are taken from the selected tarefa at submit."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "reatribuirTarefa and cancelarTarefa return a TarefaDetalhe, but the board rows (TarefaEquipeItem) have extra fields (lista, details.venceHoje, details.atrasada, details.progressoChecklist) that the output does not carry. The shared patches only the shared fields of the row (title, responsible, priority, due date, status) and removes the row when it no longer matches the active filters; the row indicators stay stale until the list is reloaded."
+      "message": "reatribuirTarefa and cancelarTarefa return a TarefaDetalhe, but the board rows are TarefaEquipeItem. The row is patched with the shared fields (titulo, status, prioridade, prazo, responsavel, progressoChecklist) and removed when it no longer matches the status, assignee or due-today/overdue filters. The venceHoje/atrasada indicators of rows that stay open and the ordering of the list are only refreshed on the next listarTarefasEquipe call."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "The returned tarefa (output of both commands) has no state whose source is the command output; it is applied to the state tarefa (obterTarefa.tarefa) and to the matching row of tarefas."
+      "message": "The historicoTarefa timeline has no reassignment events in the contract output (only the milestones of TarefaDetalhe); nothing was invented for it."
     },
     {
       "code": "MEMBER_ADDED",
       "message": "public atrasada is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public filtrarTarefasEquipe is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public limparFiltrosTarefasEquipe is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",

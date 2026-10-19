@@ -4,27 +4,27 @@
   "module": "tarefas",
   "pageId": "membros_equipe",
   "device": "desktop",
-  "contextHash": "sha256:529129646dabaeda0fdab7b0122445e3b6d3200ce5ab6d49b0b671e96a23a287",
+  "contextHash": "sha256:c3eccd5cb92a7be7e68ef805420dc73fa379fe4eedc706f88edf6b23b75a8387",
   "sourcePath": "l2/tarefas/web/desktop/page11/membros_equipe.ts",
-  "sourceHash": "sha256:4dc90844153284d5f3bc31f984f8f320a26c576ab409c832c8ece89ca8811bdf",
-  "attempt": 2,
+  "sourceHash": "sha256:c9c1745d35c280d12b48d504b65d1c4df7ec98d12dee24e108e969f9abf73434",
+  "attempt": 1,
   "design": {
-    "concept": "Uma superfície de referência calma: a tabela da equipe lê-se de relance à esquerda e, à direita, um painel lateral edita a pessoa escolhida ou cadastra uma nova, sem nunca cobrir a tabela. Busca discreta e um único botão de criação ficam acima da tabela.",
+    "concept": "Uma superfície de referência calma para o gestor: a tabela de pessoas da equipe lidera a página e nunca sai da tela; ao lado, um painel de trabalho abre sob demanda para corrigir nome e país de quem foi escolhido na linha, ou para cadastrar uma pessoa nova. Busca discreta e um único botão de criação ficam acima da tabela.",
     "views": [
       {
-        "id": "inicio",
-        "purpose": "Painel em repouso: uma dica curta convida a escolher uma pessoa ou cadastrar uma nova."
+        "id": "fechado",
+        "purpose": "Painel em repouso ao lado da tabela, com uma dica curta; é a vista padrão quando nada está selecionado."
       },
       {
         "id": "novo",
-        "purpose": "Formulário vazio para cadastrar uma pessoa da equipe (nome e país), com voltar."
+        "purpose": "Formulário vazio (nome e país) para cadastrar uma nova pessoa, aberto pelo botão 'Nova pessoa'."
       },
       {
         "id": "editar",
-        "purpose": "Painel da pessoa selecionada: título é o nome dela, campos de nome e país, dados somente leitura (situação, papéis, contatos) e Salvar."
+        "purpose": "Formulário preenchido com a pessoa selecionada na tabela (título = nome da pessoa), com situação e contatos apenas para leitura. Abre também ao recarregar a página com o id na URL."
       }
     ],
-    "decisions": "Seguimos o template compactCrudTable: tabela é a hierarquia 1, busca 2, botão criar 3, painel 4. As cenas do painel usam o host ml-scenary em modo scenary só na região do painel; a tabela fica sempre visível com a linha selecionada marcada pelo índice. A tabela não é editável; clicar na linha abre o painel preenchido. Salvar fica desabilitado até os campos obrigatórios estarem preenchidos e algo mudar. Erros de comando aparecem no painel acima do botão; o sucesso é local e curto. Trocar de linha com alterações não salvas pede confirmação. Paginação com 'Mostrar mais pessoas'. Pessoas inativas ficam com texto esmaecido. Correção: a página não lê mais this.scenary fora do .value do host; o handler @change do host usa apenas a guarda padrão e a limpeza da seleção ao voltar para 'inicio' passou para um override de setScenario."
+    "decisions": "Segui o template compactCrudTable: tabela primeiro (nome, país, situação, contatos), busca única acima, botão de criar, painel lateral só quando necessário e sem cobrir a tabela. O host de cenas (mode=scenary) cobre apenas a região do painel, enquanto a tabela fica fora dele e permanece visível, com a linha selecionada marcada pelo índice. Sair das vistas 'novo'/'editar' via voltar chama selectMembroEquipe(null) para limpar o id da URL. A paginação do contrato não informa total de páginas, então usei 'Carregar mais pessoas' (append) em vez do controle de paginação, mantendo a superfície pequena; sem colunas ordenáveis para que o índice da linha sempre corresponda à lista. Departi do template em um ponto: depois de salvar/cadastrar o painel não fecha, pois setScenario limpa o resultado do comando e o feedback de sucesso sumiria; mostro confirmação local no painel (a linha já atualiza na tabela). Erros de comando aparecem dentro do painel acima do botão, em cor de texto normal; o botão fica desabilitado até nome e país estarem preenchidos. Situação inativa/unificada/bloqueada usa tons neutros ou de aviso, nunca vermelho. Estados de carregamento, vazio, erro, pré-condição ausente (com botão de voltar) e seleção inválida estão tratados. Não confirmei saída com alterações não salvas, pois detectar mudança exigiria comparar valores na página."
   },
   "advisories": [
     {

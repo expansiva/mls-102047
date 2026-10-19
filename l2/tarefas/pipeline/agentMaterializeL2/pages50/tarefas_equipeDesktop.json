@@ -4,14 +4,23 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "desktop",
-  "contextHash": "sha256:d9698afc10480a04dc2361cedd03ed87c8d7170d973411ace815374c52d7001e",
+  "contextHash": "sha256:2c945815b104d885b6085bbefce3ba81e561dc96d8a34c4a07bf84dd5f73f7c2",
   "sourcePath": "l2/tarefas/web/desktop/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:18c425078a03a18598392751226720e1fa94e06c670e9268fa7ae82e162d1170",
+  "sourceHash": "sha256:0655aa11634a67052607c7e6f30511bdbdc3c0ebc7a7cedde69cdae15893dced",
   "attempt": 1,
   "design": {
-    "concept": "Uma mesa de trabalho do gestor em duas colunas: à esquerda o quadro de todas as tarefas da equipe na ordem de prazo que o backend entrega, com filtros no topo; à direita um painel fixo que mostra a tarefa escolhida (resumo, checklist), as ações do gestor e o histórico. A lista nunca sai da tela: escolher, trocar o responsável ou cancelar acontecem sem navegar.",
-    "views": [],
-    "decisions": "Página de uma só vista, sem scene host: o painel lateral é o mesmo lugar o tempo todo e só muda de conteúdo conforme os dados (vazio, abrindo, erro, tarefa), então não há troca de vistas escondida por estado. Seguiu-se o template timelineList: ordem de prazo do backend preservada (nenhuma coluna é ordenável para não quebrar a ordem), somente a data atrasada recebe a cor de alarme, e vence-hoje aparece como texto discreto. Os filtros (lista, responsável, prioridade, situação, período, vencem hoje, atrasadas) ficam numa barra acima do quadro, com 'Limpar filtros' só quando há filtro ativo. A reatribuição é a ação principal do painel (autocomplete de pessoas, inativas desabilitadas); cancelar é secundário e passa por um modal que nomeia a tarefa, sendo o único elemento de estilo perigo. Como a página não guarda estado, o modal é aberto e fechado pelo próprio elemento no handler do evento. Sucesso aparece em toast e o próprio painel/linha se atualiza; falha aparece dentro do painel, acima dos botões, que continuam servindo de nova tentativa. O histórico mostra apenas os marcos que o contrato traz (criação, devolução com motivo, conclusão, cancelamento). Há estados desenhados para carregamento, vazio, erro com nova tentativa e precondição ausente com botão Voltar."
+    "concept": "Um quadro de trabalho do gestor: à esquerda, a fila de todas as tarefas da equipe na ordem em que o backend entrega (prazo mais próximo primeiro), com uma barra de filtros compacta no topo; à direita, um painel que mostra a tarefa escolhida (detalhe, ações do gestor e histórico) sem tirar o gestor da lista. As datas atrasadas ganham a cor de alerta e só elas.",
+    "views": [
+      {
+        "id": "vazio",
+        "purpose": "Estado do painel lateral quando nenhuma tarefa está escolhida: orienta a escolher uma tarefa no quadro."
+      },
+      {
+        "id": "detalhe",
+        "purpose": "Painel da tarefa escolhida: resumo, checklist, ações de reatribuir/cancelar e histórico. Tem controle de voltar, que limpa a seleção."
+      }
+    ],
+    "decisions": "Seguimos o template timelineList: lista como protagonista e painel de detalhe ao lado (master-detail); a lista nunca some. O scene host cobre apenas a região do painel (mode scenary), com default seguindo selectedTarefa para que o id na URL reabra a tarefa; voltar chama obterTarefa(null). Colunas do quadro sem ordenação própria para preservar a ordem única por prazo e manter o índice da linha confiável; paginação por 'Carregar mais' usando hasMore. Filtros: selects para lista, responsável, prioridade e situação, calendário duplo para prazo e dois botões alternáveis para 'vence hoje' e 'atrasadas'. A cor de alarme só aparece na data de tarefas atrasadas; 'vence hoje' é uma etiqueta de aviso. Reatribuir usa autocomplete de membros (inativos aparecem desabilitados) e fica desabilitado até haver uma escolha diferente do atual. Cancelar é secundário na tela e só o botão de confirmar dentro do alert-modal usa estilo de perigo, nomeando a tarefa; o modal é aberto de forma imperativa porque a página não guarda estado. Retorno das ações é local, em feedback contextual acima dos botões, sem toast global. O histórico usa a timeline com os marcos que o contrato entrega (criação, devolução com motivo, conclusão, cancelamento). Erros de carga têm estado próprio com tentar de novo e, quando faltar pré-condição, texto claro e botão de voltar."
   },
   "advisories": [
     {

@@ -4,7 +4,7 @@ import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import { execBff } from '/_102029_/l2/bffClient.js';
 import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabState.js';
 import { runBlockingUiAction } from '/_102029_/l2/interactionRuntime.js';
-import type { ListasContracts, ListaCadastrada } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
+import type { ListasContracts, ListaCadastrada, ListaDetalhes } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
 
 export type { ListasContracts, ListaCadastrada, ListaDetalhes } from '/_102047_/l2/tarefas/web/contracts/listas.defs.js';
 
@@ -12,18 +12,17 @@ type Input<R extends keyof ListasContracts> = ListasContracts[R]['input'];
 type Output<R extends keyof ListasContracts> = ListasContracts[R]['output'];
 
 export type ErrorState = { code: string; message: string; details?: unknown } | null;
-export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
-export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+
 export type ListaTipo = 'project' | 'area';
 
-/** Draft of the new lista form (input of criarLista); every leaf is null until the person fills it. */
+/** Draft of the criarLista command input; every leaf is null until the person fills it. */
 export type CriarListaDraft = {
   nome: string | null;
   details: { tipo: ListaTipo | null; descricao: string | null };
   ativa: boolean | null;
 };
 
-/** Draft of the lista edit form (input of salvarLista); id and version come from the selected record. */
+/** Draft of the salvarLista command input; id and version come from the selected record. */
 export type SalvarListaDraft = {
   id: string | null;
   version: number | null;
@@ -32,23 +31,8 @@ export type SalvarListaDraft = {
   ativa: boolean | null;
 };
 
-function emptyCriarListaDraft(): CriarListaDraft {
-  return { nome: null, details: { tipo: null, descricao: null }, ativa: true };
-}
-
-function emptySalvarListaDraft(): SalvarListaDraft {
-  return { id: null, version: null, nome: null, details: { tipo: null, descricao: null }, ativa: null };
-}
-
-function draftFromLista(lista: ListaCadastrada): SalvarListaDraft {
-  return {
-    id: lista.id,
-    version: lista.version,
-    nome: lista.nome,
-    details: { tipo: lista.details.tipo, descricao: lista.details.descricao ?? null },
-    ativa: lista.ativa,
-  };
-}
+type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
+type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
 
 type StateMember =
   | 'listas'
@@ -86,74 +70,81 @@ const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
 };
 const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
 
+function emptyCriarListaDraft(): CriarListaDraft {
+  return { nome: null, details: { tipo: null, descricao: null }, ativa: null };
+}
+
+function emptySalvarListaDraft(): SalvarListaDraft {
+  return { id: null, version: null, nome: null, details: { tipo: null, descricao: null }, ativa: null };
+}
+
+function draftFromLista(lista: ListaCadastrada): SalvarListaDraft {
+  return {
+    id: lista.id,
+    version: lista.version,
+    nome: lista.nome,
+    details: { tipo: lista.details.tipo, descricao: lista.details.descricao ?? null },
+    ativa: lista.ativa,
+  };
+}
+
 export class TarefasListasShared extends StateLitElement {
-  /** state listas — the list of Lista de tarefas de um projeto ou área, com seus dados editáveis, versão e a quantidade de tarefas abertas; source listarListas.listas; organism formularioLista, listasCadastradas */
+  /** state listas — the Listas de tarefas de um projeto ou área, with editable data, version and open task count; source listarListas.listas; organism formularioLista, listasCadastradas */
   @property({ attribute: false }) listas: ListaCadastrada[] = [];
 
-  /** state selectedLista — the id of the Lista selected in listasCadastradas (null when none); source entry.params.listaId; organism formularioLista, listasCadastradas; lives in the URL (listaId) */
+  /** state selectedLista — the id of the Lista selected in listasCadastradas (null when none); source entry.params.listaId; organism formularioLista, listasCadastradas; lives in the URL */
   @property({ attribute: false }) selectedLista: string | null = null;
 
-  /** state busca — filter: the name fragment last searched through buscarListas ('' lists everything); source buscarListas.input; organism listasCadastradas */
+  /** state busca — the name fragment the manager typed to search the listas ('' returns all); source buscarListas.input (filter state added by the shared); organism listasCadastradas */
   @property({ attribute: false }) busca = '';
 
-  /** state criarListaDraft — draft of the new lista form (nome, details.tipo, details.descricao, ativa); source criarLista.input; organism formularioLista */
+  /** state criarListaDraft — draft of the new lista being typed in formularioLista (nome, details.tipo, details.descricao, ativa; every leaf null until filled); source criarLista.input; organism formularioLista */
   @property({ attribute: false }) criarListaDraft: CriarListaDraft = emptyCriarListaDraft();
 
-  /** state salvarListaDraft — draft of the edit form, filled from the selected lista (id, version, nome, details, ativa); source salvarLista.input; organism formularioLista */
+  /** state salvarListaDraft — draft of the selected lista being edited in formularioLista (id and version come from the record; filled when a lista is selected); source salvarLista.input; organism formularioLista */
   @property({ attribute: false }) salvarListaDraft: SalvarListaDraft = emptySalvarListaDraft();
 
-  /** state pageStatus — overall status of the page: loading while the initial load runs, empty when there is no lista, error when it failed */
+  /** state pageStatus — overall status of the page: loading while the initial load runs, empty when there is no lista, error when it failed, success otherwise */
   @property({ attribute: false }) pageStatus: PageStatus = 'idle';
 
-  /** state listarListasStatus — status of the initial load of every lista */
+  /** state listarListasStatus — status of the request listarListas (initial load and reload) */
   @property({ attribute: false }) listarListasStatus: RequestStatus = 'idle';
 
-  /** state listarListasError — error of the initial load (also client.selectionInvalid when the listaId param matches no lista); null when none */
+  /** state listarListasError — error of the request listarListas, null when none (also client.selectionInvalid when the listaId param matches no lista) */
   @property({ attribute: false }) listarListasError: ErrorState = null;
 
-  /** state buscarListasStatus — status of the search by name */
+  /** state buscarListasStatus — status of the request buscarListas (search by name) */
   @property({ attribute: false }) buscarListasStatus: RequestStatus = 'idle';
 
-  /** state buscarListasError — error of the search by name; null when none */
+  /** state buscarListasError — error of the request buscarListas, null when none */
   @property({ attribute: false }) buscarListasError: ErrorState = null;
 
-  /** state criarListaStatus — status of the creation of a lista; success stays until the person changes something */
+  /** state criarListaStatus — status of the command criarLista; success stays until the person changes something */
   @property({ attribute: false }) criarListaStatus: RequestStatus = 'idle';
 
-  /** state criarListaError — error of the creation (client.requiredMissing or a backend rule such as listaNomeUnico); null when none */
+  /** state criarListaError — error of the command criarLista, null when none */
   @property({ attribute: false }) criarListaError: ErrorState = null;
 
-  /** state salvarListaStatus — status of the update of a lista; success stays until the person changes something */
+  /** state salvarListaStatus — status of the command salvarLista; success stays until the person changes something */
   @property({ attribute: false }) salvarListaStatus: RequestStatus = 'idle';
 
-  /** state salvarListaError — error of the update (client.requiredMissing or a backend rule such as listaNomeUnico or a version conflict); null when none */
+  /** state salvarListaError — error of the command salvarLista, null when none */
   @property({ attribute: false }) salvarListaError: ErrorState = null;
 
   /** state scenary — the visible scene of the page; '' until the page shows its first scene */
   @property({ attribute: false }) scenary = '';
 
-  /** selected formularioLista — the loaded lista whose id is in selectedLista, or null when nothing is selected or the row is not in the loaded list */
-  public get formularioLista(): ListaCadastrada | null {
-    const id = this.selectedLista;
-    if (id === null) return null;
-    return this.listas.find((row) => row.id === id) ?? null;
-  }
+  private readonly onPopState = (): void => {
+    if (window.location.pathname.endsWith('/tarefas/listas')) {
+      this.startVisit();
+    }
+  };
 
   private publish<M extends StateMember>(member: M, value: this[M]): void {
     (this as unknown as Record<string, unknown>)[member] = value;
     setState(`ui.tarefas.listas.${member}`, value);
     if (member === 'selectedLista') {
-      try {
-        const url = new URL(window.location.href);
-        if (value === null) {
-          url.searchParams.delete('listaId');
-        } else {
-          url.searchParams.set('listaId', String(value));
-        }
-        history.replaceState(null, '', url.toString());
-      } catch {
-        // the URL could not be updated; the state stays published
-      }
+      this.syncUrlParam(typeof value === 'string' ? value : null);
     }
   }
 
@@ -162,17 +153,34 @@ export class TarefasListasShared extends StateLitElement {
     if (member) (this as unknown as Record<string, unknown>)[member] = value;
   }
 
+  /** Keeps the url-only param listaId in the query without changing page. */
+  private syncUrlParam(value: string | null): void {
+    try {
+      const url = new URL(window.location.href);
+      if (value === null || value === '') {
+        url.searchParams.delete('listaId');
+      } else {
+        url.searchParams.set('listaId', value);
+      }
+      history.replaceState(history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    } catch {
+      // the query is only a convenience; ignore failures
+    }
+  }
+
   public connectedCallback(): void {
     super.connectedCallback();
-    const storedListas = getState('ui.tarefas.listas.listas');
-    if (storedListas !== undefined) this.assignState('ui.tarefas.listas.listas', storedListas);
+    const stored = getState('ui.tarefas.listas.listas');
+    if (stored !== undefined) this.assignState('ui.tarefas.listas.listas', stored);
     this.resetVisit();
     subscribe([...STATE_KEYS], this);
+    window.addEventListener('popstate', this.onPopState);
     this.applyEntryParams();
-    void this.listarListas().then(() => this.applySelection());
+    void this.listarListas();
   }
 
   public disconnectedCallback(): void {
+    window.removeEventListener('popstate', this.onPopState);
     unsubscribe([...STATE_KEYS], this);
     super.disconnectedCallback();
   }
@@ -185,6 +193,12 @@ export class TarefasListasShared extends StateLitElement {
     if (value === undefined) return;
     this.assignState(key, value);
     this.requestUpdate();
+  }
+
+  private startVisit(): void {
+    this.resetVisit();
+    this.applyEntryParams();
+    void this.listarListas();
   }
 
   private resetVisit(): void {
@@ -212,33 +226,78 @@ export class TarefasListasShared extends StateLitElement {
 
   private applyEntryParams(): void {
     const raw = new URLSearchParams(window.location.search).get('listaId');
-    this.publish('selectedLista', raw !== null && raw !== '' ? raw : null);
+    const id = raw !== null && raw !== '' ? raw : null;
+    this.publish('selectedLista', id);
   }
 
-  /** Applied after the load: the selected id wins over the filters; it fills the edit draft or reports client.selectionInvalid. */
-  private applySelection(): void {
-    const id = this.selectedLista;
-    if (id === null) return;
-    if (this.listarListasStatus !== 'success') return;
-    const row = this.listas.find((item) => item.id === id);
+  private unexpectedError(error: unknown): ErrorState {
+    const name = error instanceof Error ? error.name : 'unknown';
+    return { code: 'client.unexpected', message: '', details: { name } };
+  }
+
+  private upsertLista(lista: ListaCadastrada): void {
+    const exists = this.listas.some(row => row.id === lista.id);
+    const next = exists ? this.listas.map(row => (row.id === lista.id ? lista : row)) : [...this.listas, lista];
+    this.publish('listas', next);
+  }
+
+  /** The selected lista record: the row of the loaded listas whose id is selectedLista, null when none. Feeds formularioLista. */
+  public get formularioLista(): ListaCadastrada | null {
+    if (this.selectedLista === null) return null;
+    return this.listas.find(row => row.id === this.selectedLista) ?? null;
+  }
+
+  /** Fills the edit draft from the selected row, or publishes client.selectionInvalid when the id matches no loaded lista. */
+  private syncSelection(): void {
+    if (this.selectedLista === null) {
+      this.publish('salvarListaDraft', emptySalvarListaDraft());
+      return;
+    }
+    const row = this.listas.find(item => item.id === this.selectedLista);
     if (!row) {
-      this.publish('listarListasError', { code: 'client.selectionInvalid', message: '', details: { id } });
+      this.publish('listarListasError', {
+        code: 'client.selectionInvalid',
+        message: '',
+        details: { listaId: this.selectedLista },
+      });
+      this.publish('salvarListaDraft', emptySalvarListaDraft());
       return;
     }
     this.publish('salvarListaDraft', draftFromLista(row));
   }
 
-  private unexpected(error: unknown): ErrorState {
-    return { code: 'client.unexpected', message: '', details: { name: error instanceof Error ? error.name : 'unknown' } };
+  /** select — chooses the lista to edit in formularioLista by its id (null clears the selection); fills salvarListaDraft from the loaded row; an id no loaded lista has publishes client.selectionInvalid in listarListasError */
+  public selectLista(id: string | null): void {
+    this.resetCommandResults();
+    if (id === null || id === '') {
+      this.publish('selectedLista', null);
+      this.publish('salvarListaDraft', emptySalvarListaDraft());
+      return;
+    }
+    this.publish('selectedLista', id);
+    this.publish('listarListasError', null);
+    this.syncSelection();
   }
 
-  private upsertLista(lista: ListaCadastrada): void {
-    const exists = this.listas.some((row) => row.id === lista.id);
-    const next = exists ? this.listas.map((row) => (row.id === lista.id ? lista : row)) : [...this.listas, lista];
-    this.publish('listas', next);
+  /** draft — replaces the whole draft of a new lista (nome, details.tipo, details.descricao, ativa); the page sends the draft it edited */
+  public setCriarListaDraft(value: CriarListaDraft): void {
+    this.resetCommandResults();
+    this.publish('criarListaDraft', value);
   }
 
-  /** request listarListas — initial load of every lista of the organization (active and inactive) with its open task count; redraws listas (replace), pageStatus and, when listaId is in the URL, the edit draft; no arguments; call it again to reload without a filter */
+  /** draft — replaces the whole draft of the lista being edited (id and version must stay those of the selected record); the page sends the draft it edited */
+  public setSalvarListaDraft(value: SalvarListaDraft): void {
+    this.resetCommandResults();
+    this.publish('salvarListaDraft', value);
+  }
+
+  /** scene — publishes the visible scene of the page */
+  public setScenario(value: string): void {
+    this.resetCommandResults();
+    this.publish('scenary', value);
+  }
+
+  /** request listarListas — loads every lista of the organization (active and inactive) with its open task count; redraws listas (replace), pageStatus, and the edit draft when a lista is selected; no arguments, also the method to reload the page */
   public async listarListas(): Promise<void> {
     if (this.listarListasStatus === 'loading') return;
     this.publish('listarListasStatus', 'loading');
@@ -248,93 +307,56 @@ export class TarefasListasShared extends StateLitElement {
       const input: Input<'tarefas.listas.listarListas'> = {};
       const response = await execBff<Output<'tarefas.listas.listarListas'>>('tarefas.listas.listarListas', input, { mode: 'silent' });
       if (!response.ok || !response.data) {
-        this.publish('listarListasError', response.error ?? this.unexpected(null));
+        this.publish('listarListasError', response.error ?? this.unexpectedError(null));
         this.publish('listarListasStatus', 'error');
         this.publish('pageStatus', 'error');
         return;
       }
       this.publish('listas', response.data.listas);
+      this.syncSelection();
       this.publish('listarListasStatus', 'success');
       this.publish('pageStatus', response.data.listas.length === 0 ? 'empty' : 'success');
     } catch (error) {
-      this.publish('listarListasError', this.unexpected(error));
+      this.publish('listarListasError', this.unexpectedError(error));
       this.publish('listarListasStatus', 'error');
       this.publish('pageStatus', 'error');
     }
   }
 
-  /** request buscarListas — search the listas whose name contains a fragment (case-insensitive, '' returns all); redraws listas (replace) and busca; argument busca = the fragment typed by the gestor */
+  /** request buscarListas — searches the listas whose name contains the typed fragment ('' returns all); redraws listas (replace) and busca; argument busca is the name fragment */
   public async buscarListas(busca: string): Promise<void> {
-    if (this.buscarListasStatus === 'loading') return;
     this.publish('busca', busca);
+    if (this.buscarListasStatus === 'loading') return;
     this.publish('buscarListasStatus', 'loading');
     this.publish('buscarListasError', null);
     try {
       const input: Input<'tarefas.listas.buscarListas'> = { busca };
       const response = await execBff<Output<'tarefas.listas.buscarListas'>>('tarefas.listas.buscarListas', input, { mode: 'silent' });
       if (!response.ok || !response.data) {
-        this.publish('buscarListasError', response.error ?? this.unexpected(null));
+        this.publish('buscarListasError', response.error ?? this.unexpectedError(null));
         this.publish('buscarListasStatus', 'error');
         return;
       }
       this.publish('listas', response.data.listas);
       this.publish('buscarListasStatus', 'success');
     } catch (error) {
-      this.publish('buscarListasError', this.unexpected(error));
+      this.publish('buscarListasError', this.unexpectedError(error));
       this.publish('buscarListasStatus', 'error');
     }
   }
 
-  /** select — select a lista by id (null clears the selection); publishes selectedLista, fills salvarListaDraft from the loaded row (or empties it) and clears old command results; an id with no loaded row publishes client.selectionInvalid in listarListasError */
-  public selectLista(id: string | null): void {
-    this.resetCommandResults();
-    if (id === null || id === '') {
-      this.publish('selectedLista', null);
-      this.publish('salvarListaDraft', emptySalvarListaDraft());
-      return;
-    }
-    const row = this.listas.find((item) => item.id === id);
-    if (!row) {
-      this.publish('listarListasError', { code: 'client.selectionInvalid', message: '', details: { id } });
-      return;
-    }
-    if (this.listarListasError !== null && this.listarListasError.code === 'client.selectionInvalid') {
-      this.publish('listarListasError', null);
-    }
-    this.publish('selectedLista', id);
-    this.publish('salvarListaDraft', draftFromLista(row));
-  }
-
-  /** draft — replace the whole draft of the new lista form (nome, details.tipo, details.descricao, ativa); clears old command results */
-  public setCriarListaDraft(value: CriarListaDraft): void {
-    this.resetCommandResults();
-    this.publish('criarListaDraft', value);
-  }
-
-  /** draft — replace the whole draft of the edit lista form (id, version, nome, details.tipo, details.descricao, ativa); clears old command results */
-  public setSalvarListaDraft(value: SalvarListaDraft): void {
-    this.resetCommandResults();
-    this.publish('salvarListaDraft', value);
-  }
-
-  /** setScenario — publish the visible scene of the page (state scenary); clears old command results */
-  public setScenario(value: string): void {
-    this.resetCommandResults();
-    this.publish('scenary', value);
-  }
-
-  /** request criarLista — register a new lista from criarListaDraft (nome, tipo, descricao, ativa); redraws listas (upsert of the returned lista) and empties criarListaDraft; no arguments; a missing nome or tipo publishes client.requiredMissing without calling the backend */
+  /** request criarLista — registers a new lista of project or area from criarListaDraft (nome, details.tipo and ativa required; details.descricao optional); redraws listas (the created lista is inserted by id) and resets criarListaDraft to empty; no arguments */
   public async criarLista(): Promise<void> {
     if (this.criarListaStatus === 'loading') return;
     const draft = this.criarListaDraft;
-    const nome = draft.nome ?? '';
+    const nome = draft.nome;
     const tipo = draft.details.tipo;
     const ativa = draft.ativa;
     const missing: string[] = [];
-    if (nome === '') missing.push('ui.tarefas.listas.criarListaDraft.nome');
+    if (nome === null || nome === '') missing.push('ui.tarefas.listas.criarListaDraft.nome');
     if (tipo === null) missing.push('ui.tarefas.listas.criarListaDraft.details.tipo');
     if (ativa === null) missing.push('ui.tarefas.listas.criarListaDraft.ativa');
-    if (nome === '' || tipo === null || ativa === null) {
+    if (nome === null || nome === '' || tipo === null || ativa === null) {
       this.publish('criarListaError', { code: 'client.requiredMissing', message: '', details: { stateKeys: missing } });
       this.publish('criarListaStatus', 'error');
       return;
@@ -348,7 +370,7 @@ export class TarefasListasShared extends StateLitElement {
     this.publish('criarListaStatus', 'loading');
     this.publish('criarListaError', null);
     try {
-      const response = await runBlockingUiAction((signal) =>
+      const response = await runBlockingUiAction(signal =>
         execBff<Output<'tarefas.listas.criarLista'>>('tarefas.listas.criarLista', input, { mode: 'blocking', signal }),
       );
       if (response === undefined) {
@@ -357,7 +379,7 @@ export class TarefasListasShared extends StateLitElement {
         return;
       }
       if (!response.ok || !response.data) {
-        this.publish('criarListaError', response.error ?? this.unexpected(null));
+        this.publish('criarListaError', response.error ?? this.unexpectedError(null));
         this.publish('criarListaStatus', 'error');
         return;
       }
@@ -365,27 +387,27 @@ export class TarefasListasShared extends StateLitElement {
       this.publish('criarListaDraft', emptyCriarListaDraft());
       this.publish('criarListaStatus', 'success');
     } catch (error) {
-      this.publish('criarListaError', this.unexpected(error));
+      this.publish('criarListaError', this.unexpectedError(error));
       this.publish('criarListaStatus', 'error');
     }
   }
 
-  /** request salvarLista — save the changes of the selected lista from salvarListaDraft (id, version, nome, tipo, descricao, ativa); redraws listas (upsert of the returned lista) and refills salvarListaDraft from the saved record with its new version; no arguments; select a lista first, otherwise client.requiredMissing is published without calling the backend */
+  /** request salvarLista — saves the changes of the selected lista from salvarListaDraft (id, version, nome and details.tipo and ativa required; details.descricao optional); redraws listas (the saved lista replaces its row by id, with the new version) and refills salvarListaDraft from the saved record; no arguments */
   public async salvarLista(): Promise<void> {
     if (this.salvarListaStatus === 'loading') return;
     const draft = this.salvarListaDraft;
     const id = draft.id;
     const version = draft.version;
-    const nome = draft.nome ?? '';
+    const nome = draft.nome;
     const tipo = draft.details.tipo;
     const ativa = draft.ativa;
     const missing: string[] = [];
-    if (id === null) missing.push('ui.tarefas.listas.salvarListaDraft.id');
+    if (id === null || id === '') missing.push('ui.tarefas.listas.selectedLista');
     if (version === null) missing.push('ui.tarefas.listas.salvarListaDraft.version');
-    if (nome === '') missing.push('ui.tarefas.listas.salvarListaDraft.nome');
+    if (nome === null || nome === '') missing.push('ui.tarefas.listas.salvarListaDraft.nome');
     if (tipo === null) missing.push('ui.tarefas.listas.salvarListaDraft.details.tipo');
     if (ativa === null) missing.push('ui.tarefas.listas.salvarListaDraft.ativa');
-    if (id === null || version === null || nome === '' || tipo === null || ativa === null) {
+    if (id === null || id === '' || version === null || nome === null || nome === '' || tipo === null || ativa === null) {
       this.publish('salvarListaError', { code: 'client.requiredMissing', message: '', details: { stateKeys: missing } });
       this.publish('salvarListaStatus', 'error');
       return;
@@ -401,7 +423,7 @@ export class TarefasListasShared extends StateLitElement {
     this.publish('salvarListaStatus', 'loading');
     this.publish('salvarListaError', null);
     try {
-      const response = await runBlockingUiAction((signal) =>
+      const response = await runBlockingUiAction(signal =>
         execBff<Output<'tarefas.listas.salvarLista'>>('tarefas.listas.salvarLista', input, { mode: 'blocking', signal }),
       );
       if (response === undefined) {
@@ -410,7 +432,7 @@ export class TarefasListasShared extends StateLitElement {
         return;
       }
       if (!response.ok || !response.data) {
-        this.publish('salvarListaError', response.error ?? this.unexpected(null));
+        this.publish('salvarListaError', response.error ?? this.unexpectedError(null));
         this.publish('salvarListaStatus', 'error');
         return;
       }
@@ -419,7 +441,7 @@ export class TarefasListasShared extends StateLitElement {
       this.publish('salvarListaDraft', draftFromLista(lista));
       this.publish('salvarListaStatus', 'success');
     } catch (error) {
-      this.publish('salvarListaError', this.unexpected(error));
+      this.publish('salvarListaError', this.unexpectedError(error));
       this.publish('salvarListaStatus', 'error');
     }
   }

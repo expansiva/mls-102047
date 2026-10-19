@@ -4,31 +4,31 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "desktop",
-  "contextHash": "sha256:da00c3d61fd9dddf4c138d8020cc05a6daa411feac29bc226b7e0a5c8ffdc62b",
+  "contextHash": "sha256:5d038ea005eb9c4138c0d26ab68bd652d2f5ef1c655ad345537fd195ef48a10a",
   "sourcePath": "l2/tarefas/web/desktop/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:e98bf128c2dd0894d99b70bda6800e7fb8181ee0f8ef52fb63f3a153f494a37e",
+  "sourceHash": "sha256:6bc0c4a1f0dcc25c6319e9c7d4c50d1b584fe4447e4ea502d80234c2dcbe04b3",
   "attempt": 1,
   "design": {
-    "concept": "Uma fila de trabalho em mestre-detalhe: à esquerda a lista de tarefas por prazo, com filtros rápidos em pílulas, as atrasadas com a data em cor de alarme; à direita um painel de trabalho que muda de modo (tarefa aberta, ajustar, criar, confirmar cancelamento) sem tirar a lista da tela. A pessoa escaneia, escolhe uma linha, age conforme seu papel (iniciar, enviar, aceitar, devolver) e ajusta dados e checklist no mesmo painel.",
+    "concept": "A planner's working list with a working panel beside it. On the left, quick filters and the task table in the order the backend returns it (deadline first). On the right, a panel that changes mode: empty prompt, open task, edit task, new task. The list stays visible and the selected row stays marked, so the person never leaves the list.",
     "views": [
       {
+        "id": "inicio",
+        "purpose": "Empty panel. It asks the person to pick a task or start a new one."
+      },
+      {
         "id": "detalhe",
-        "purpose": "Tarefa aberta: ações de ciclo conforme meu papel, dados, motivo da devolução, checklist e histórico em linha do tempo."
+        "purpose": "The open task. It shows status, role, return reason, fields, a checklist you can tick and save, and the history. A sticky bar at the bottom holds the lifecycle actions allowed for my role. Back closes the task and clears the selection."
       },
       {
         "id": "editar",
-        "purpose": "Ajustar os campos da tarefa (incluindo trocar o responsável, só para o criador) e, em bloco separado, marcar e ajustar a checklist."
+        "purpose": "Edit the fields of the open task (list, title, description, priority, deadline, owner) and, in a second block, its checklist (text, done, order, add). Each block has its own save. Back returns to the task."
       },
       {
-        "id": "criar",
-        "purpose": "Painel de criação de tarefa com campos, responsável buscado pelo nome e checklist inicial."
-      },
-      {
-        "id": "cancelar",
-        "purpose": "Confirmação que nomeia a tarefa antes do único gesto destrutivo (cancelar)."
+        "id": "nova",
+        "purpose": "Create a task with its initial checklist, in the same panel next to the list. On success the new task opens in the detail view."
       }
     ],
-    "decisions": "Usei dois hosts de cena de forma coerente: apenas um host (modo scenary) cobre o painel direito, e a lista fica sempre visível, como pede o template timelineList. O botão 'Nova tarefa' fica no cabeçalho e abre o painel de criação; ao salvar, a tarefa criada fica selecionada e o painel volta ao detalhe (sucesso local, sem banner). A confirmação de cancelamento é uma cena com voltar (não um modal) porque a página não guarda estado e o template proíbe modal substituindo painéis; o botão de perigo aparece só ali. A atribuição inline na linha não foi feita: o contrato exige responsável em toda tarefa, então não há lacuna de responsável para preencher; a troca fica no painel de edição, habilitada só para quem criou. A lista não é ordenável pela tabela (a ordem vem do backend e o índice da linha selecionada precisa bater com os itens). Totais, progresso da checklist e alertas de prazo vêm prontos do backend e são só exibidos. Botão salvar fica desabilitado até válido e alterado; erros de comando aparecem acima do botão. Estado de contexto ausente mostra o que falta e um voltar. Os valores do filtro rápido são mapeados por cast porque a declaração não os lista."
+    "decisions": "Template followed: master-detail with the list always visible and a single 'Nova tarefa' button above it. The create and edit forms are panel modes. The scene host covers only the right region (mode=scenary), and the list lives outside it. The host default follows selectedTarefa so a reload with the id in the URL opens the record. Going back to 'inicio' or opening 'nova' clears the selection.\n\nAfter create and after save-edit success the page moves to the detail view with a .then() on the shared command. Success is shown locally: the row and the card change in place, and there are no page banners.\n\nThe template's lifecycle actions are plain native buttons, because the button-group event carries no data and cannot tell which button was pressed. Cancelling and returning use native <details> disclosures: cancelling is a confirmation that names the task, and returning holds the reason field. This gives a confirmation without page state. Danger style appears once, on the confirm-cancel button.\n\nCommand errors render inside the panel in normal body colour, above the buttons. Alarm colour is used only on overdue dates. Due-today gets weight and a caption instead.\n\nLeft out on purpose: the quick-assign picker and the search-by-title box, because the contract has no assign command and no search parameter. The checklist progress bar is also left out, because the progress is a string and the page must not parse it, so it shows as text. Save buttons are disabled until the required fields are filled, but there is no dirty tracking or close-confirm because the page holds no state. A missing opening context (client.preconditionMissing) shows a plain explanation with a back button. The row array is read from tarefas.items, with page and hasMore, as the shared JSDoc describes the list."
   },
   "advisories": [
     {
@@ -57,7 +57,7 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism detalheTarefa (cartão da tarefa) renders neither <groupviewcard--ml-view-card-horizontal> nor <groupviewcard--ml-vertical-card>."
+      "message": "Organism acoesTarefa (ações principais) renders neither <grouptriggeraction--ml-button-group> nor <grouptriggeraction--ml-split-button>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",

@@ -4,27 +4,23 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "mobile",
-  "contextHash": "sha256:c86557524fbb357f335e599b151fd1ff0a9617b42e371bf94995f9e9e55cd4c6",
+  "contextHash": "sha256:c7148f5246a6736c5e169e945469dab82ead5ec303797fd256309f5ed4497844",
   "sourcePath": "l2/tarefas/web/mobile/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:26b320dfb225f86f7261677e4dc7f335ea2a8a03d2355508e991fb9822af0d4c",
+  "sourceHash": "sha256:e7b4bd4b12c945369e7e5f57bb3eea6ed2a6de9dd8d0e6801039fe78d0dcb84d",
   "attempt": 1,
   "design": {
-    "concept": "Uma coluna fluida em duas etapas: o gestor percorre a lista de tarefas da equipe (com atalhos para atrasadas e as que vencem hoje e filtros recolhíveis), toca numa tarefa e vê o detalhe empilhado, com as ações do gestor logo abaixo e o histórico no fim. Cancelar passa por uma etapa própria de confirmação que nomeia a tarefa.",
+    "concept": "Uma coluna única em dois passos: o quadro de tarefas da equipe (lista compacta em cartões, atalhos Atrasadas/Vencem hoje e filtros recolhíveis) e, ao tocar numa tarefa, a tela da tarefa com o resumo, as ações do gestor logo abaixo e o histórico por último. Voltar devolve ao quadro e limpa a seleção.",
     "views": [
       {
         "id": "quadro",
-        "purpose": "Lista compacta das tarefas da equipe, filtros recolhíveis e atalhos de atrasadas e vencem hoje. É a vista principal."
+        "purpose": "Percorrer, filtrar e escolher uma tarefa da equipe; atrasadas e as que vencem hoje saltam à vista."
       },
       {
         "id": "tarefa",
-        "purpose": "Detalhe da tarefa tocada, ações do gestor (reatribuir e cancelar) e histórico ao final; tem botão de voltar para o quadro."
-      },
-      {
-        "id": "cancelar",
-        "purpose": "Confirmação do cancelamento, com o título da tarefa e a escolha entre manter ou cancelar; volta para o detalhe."
+        "purpose": "Ver a tarefa tocada em detalhe, trocar o responsável ou cancelar, e consultar o histórico ao final."
       }
     ],
-    "decisions": "Usei o host de cenas em modo scenary com três cenas, porque a página não guarda estado e o host é o único jeito de trocar de vista. A confirmação de cancelamento virou uma cena em vez de modal, pois um modal precisaria de estado local de visibilidade. A lista usa ml-responsive-table (alternativa), que vira cartões em tela estreita e rotula cada campo. A data só ganha a cor de alarme quando a tarefa está atrasada (flag do backend); vence hoje aparece como etiqueta de aviso. Os filtros ficam em um <details> nativo, que recolhe sem estado. Atrasadas e Vencem hoje ficam sempre visíveis como atalhos de um toque. Nada é calculado na página: sinais, progresso da checklist e se a tarefa está aberta vêm do contrato. As ações só aparecem para tarefa aberta; reatribuir só habilita com uma pessoa escolhida (as inativas ficam desabilitadas na lista). O retorno de sucesso é um toast local, e os erros aparecem dentro da região da ação. O histórico mostra só os marcos que o contrato traz (criação, devolução, conclusão, cancelamento). A busca por título não foi incluída, porque o filtro do contrato não tem busca textual. O período do prazo usa o seletor de intervalo, sem atalhos prontos, pois a página não deve calcular datas."
+    "decisions": "Usei o host de cenas em mode=scenary com duas cenas; a cena da tarefa segue a seleção (default pelo selectedTarefa, para recarregar com o id na URL) e voltar chama obterTarefa(null). A lista usa ml-responsive-table (alternativa) porque vira cartões em tela estreita, sem rolagem horizontal. Filtros ficam em <details> nativo (recolhido, sem estado na página) e os dois sinais mais úteis (atrasadas, vencem hoje) viram chips de alternância sempre à mão. A cor de alarme é só da data atrasada; vence hoje é uma etiqueta de aviso. Reatribuir: autocomplete com membros não ativos desabilitados (sem filtrar na página); cancelar é o único botão de perigo, atrás de um alert-modal que cita a tarefa (aberto direto no elemento, sem estado). Retorno de sucesso por toast; falhas aparecem acima dos botões, com nova tentativa pelo próprio botão. Tarefa encerrada mostra uma nota no lugar das ações. O histórico mostra só os marcos que o contrato traz (criada, devolvida, concluída, cancelada). Se a abertura falhar por falta de contexto (client.preconditionMissing), a página explica e oferece voltar à tela anterior. Não há campo de busca por título porque o shared não tem esse filtro."
   },
   "advisories": [
     {
@@ -42,10 +38,6 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism tarefasEquipe (Busca pelo título da tarefa) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesGestor (Confirmação antes de cancelar) renders neither <groupnotifyuser--ml-alert-modal>."
     }
   ]
 }

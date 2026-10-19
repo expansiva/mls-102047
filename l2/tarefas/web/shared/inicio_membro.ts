@@ -43,17 +43,23 @@ type Input<R extends keyof Inicio_membroContracts> = Inicio_membroContracts[R]['
 type Output<R extends keyof Inicio_membroContracts> = Inicio_membroContracts[R]['output'];
 
 export type ErrorState = { code: string; message: string; details?: unknown } | null;
+export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
 
-/** Draft of the devolverComMotivo command input; every leaf is nullable until typed. */
+/** Draft of the devolverComMotivo command: the typed reason lives in details.motivoDevolucao. */
 export type DevolverComMotivoDraft = {
   id: string | null;
   version: number | null;
   details: { motivoDevolucao: string | null };
 };
 
-function emptyDevolverComMotivoDraft(): DevolverComMotivoDraft {
+export function emptyDevolverComMotivoDraft(): DevolverComMotivoDraft {
   return { id: null, version: null, details: { motivoDevolucao: null } };
 }
+
+type CommandId = 'iniciarTarefa' | 'enviarParaRevisao' | 'aceitarEntrega' | 'devolverComMotivo';
+type CommandOutput = Output<'tarefas.inicio_membro.iniciarTarefa'>;
+type CommandResponse = { ok: boolean; data: CommandOutput | null; error: ErrorState };
 
 type StateMember =
   | 'resumo'
@@ -97,46 +103,46 @@ export class TarefasInicio_membroShared extends StateLitElement {
   /** state resumo — workload of the person: totals of open, due-today and overdue tasks and the most urgent open tasks; source carregarInicio.resumo; organism resumoMinhasTarefas */
   @property({ attribute: false }) resumo: ResumoMinhasTarefas | null = null;
 
-  /** state avisoDoDia — today's daily due-date notice with delivery status and included tasks (null when not generated yet); source carregarInicio.avisoDoDia; organism avisoDoDia */
+  /** state avisoDoDia — the person's daily due-date notice for today, with delivery status and included tasks; null when not generated yet; source carregarInicio.avisoDoDia; organism avisoDoDia */
   @property({ attribute: false }) avisoDoDia: AvisoDoDia | null = null;
 
-  /** state esperaPorMim — tasks waiting for the person, grouped by expected action: paraIniciar, paraEnviarRevisao, paraRevisar, devolvidas; source carregarInicio.esperaPorMim; organism esperaPorMim */
+  /** state esperaPorMim — tasks waiting on the person grouped by expected action (paraIniciar, paraEnviarRevisao, paraRevisar, devolvidas); source carregarInicio.esperaPorMim; organism esperaPorMim */
   @property({ attribute: false }) esperaPorMim: EsperaPorMim | null = null;
 
-  /** state devolverComMotivoDraft — draft of the return-with-reason form (the typed reason lives in details.motivoDevolucao); source devolverComMotivo.input; organism esperaPorMim */
+  /** state devolverComMotivoDraft — draft of the return-with-reason form (details.motivoDevolucao is the typed reason); source devolverComMotivo.input; organism esperaPorMim */
   @property({ attribute: false }) devolverComMotivoDraft: DevolverComMotivoDraft = emptyDevolverComMotivoDraft();
 
-  /** state pageStatus — overall status of the page: idle, loading, empty (nothing loaded in any list), success or error; source carregarInicio */
-  @property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
+  /** state pageStatus — overall page status: loading while the initial load runs, error if it failed, empty when every loaded list is empty, success otherwise */
+  @property({ attribute: false }) pageStatus: PageStatus = 'idle';
 
-  /** state carregarInicioStatus — status of the initial load request; source carregarInicio */
-  @property({ attribute: false }) carregarInicioStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state carregarInicioStatus — status of the initial load request */
+  @property({ attribute: false }) carregarInicioStatus: RequestStatus = 'idle';
 
-  /** state carregarInicioError — error of the initial load request (also used by navigations refused on a missing value); source carregarInicio */
+  /** state carregarInicioError — error of the initial load request (also used by refused navigations); null when none */
   @property({ attribute: false }) carregarInicioError: ErrorState = null;
 
-  /** state iniciarTarefaStatus — status of the start-task command; source iniciarTarefa */
-  @property({ attribute: false }) iniciarTarefaStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state iniciarTarefaStatus — status of the start-task command */
+  @property({ attribute: false }) iniciarTarefaStatus: RequestStatus = 'idle';
 
-  /** state iniciarTarefaError — error of the start-task command; source iniciarTarefa */
+  /** state iniciarTarefaError — error of the start-task command; null when none */
   @property({ attribute: false }) iniciarTarefaError: ErrorState = null;
 
-  /** state enviarParaRevisaoStatus — status of the send-to-review command; source enviarParaRevisao */
-  @property({ attribute: false }) enviarParaRevisaoStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state enviarParaRevisaoStatus — status of the send-to-review command */
+  @property({ attribute: false }) enviarParaRevisaoStatus: RequestStatus = 'idle';
 
-  /** state enviarParaRevisaoError — error of the send-to-review command; source enviarParaRevisao */
+  /** state enviarParaRevisaoError — error of the send-to-review command; null when none */
   @property({ attribute: false }) enviarParaRevisaoError: ErrorState = null;
 
-  /** state aceitarEntregaStatus — status of the accept-delivery command; source aceitarEntrega */
-  @property({ attribute: false }) aceitarEntregaStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state aceitarEntregaStatus — status of the accept-delivery command */
+  @property({ attribute: false }) aceitarEntregaStatus: RequestStatus = 'idle';
 
-  /** state aceitarEntregaError — error of the accept-delivery command; source aceitarEntrega */
+  /** state aceitarEntregaError — error of the accept-delivery command; null when none */
   @property({ attribute: false }) aceitarEntregaError: ErrorState = null;
 
-  /** state devolverComMotivoStatus — status of the return-with-reason command; source devolverComMotivo */
-  @property({ attribute: false }) devolverComMotivoStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  /** state devolverComMotivoStatus — status of the return-with-reason command */
+  @property({ attribute: false }) devolverComMotivoStatus: RequestStatus = 'idle';
 
-  /** state devolverComMotivoError — error of the return-with-reason command; source devolverComMotivo */
+  /** state devolverComMotivoError — error of the return-with-reason command; null when none */
   @property({ attribute: false }) devolverComMotivoError: ErrorState = null;
 
   /** state scenary — the visible scene of the page; '' until the page shows its first scene */
@@ -152,20 +158,29 @@ export class TarefasInicio_membroShared extends StateLitElement {
     if (member) (this as unknown as Record<string, unknown>)[member] = value;
   }
 
+  private readonly onPopState = (): void => {
+    if (window.location.pathname.endsWith('/tarefas/inicio_membro')) {
+      this.startVisit();
+    }
+  };
+
   public connectedCallback(): void {
     super.connectedCallback();
-    const resumo = getState('ui.tarefas.inicio_membro.resumo');
-    if (resumo !== undefined) this.assignState('ui.tarefas.inicio_membro.resumo', resumo);
-    const aviso = getState('ui.tarefas.inicio_membro.avisoDoDia');
-    if (aviso !== undefined) this.assignState('ui.tarefas.inicio_membro.avisoDoDia', aviso);
-    const espera = getState('ui.tarefas.inicio_membro.esperaPorMim');
-    if (espera !== undefined) this.assignState('ui.tarefas.inicio_membro.esperaPorMim', espera);
+    const storedResumo = getState('ui.tarefas.inicio_membro.resumo');
+    if (storedResumo !== undefined) this.assignState('ui.tarefas.inicio_membro.resumo', storedResumo);
+    const storedAviso = getState('ui.tarefas.inicio_membro.avisoDoDia');
+    if (storedAviso !== undefined) this.assignState('ui.tarefas.inicio_membro.avisoDoDia', storedAviso);
+    const storedEspera = getState('ui.tarefas.inicio_membro.esperaPorMim');
+    if (storedEspera !== undefined) this.assignState('ui.tarefas.inicio_membro.esperaPorMim', storedEspera);
     this.resetVisit();
     subscribe([...STATE_KEYS], this);
+    window.addEventListener('popstate', this.onPopState);
+    this.applyEntryParams();
     void this.carregarInicio();
   }
 
   public disconnectedCallback(): void {
+    window.removeEventListener('popstate', this.onPopState);
     unsubscribe([...STATE_KEYS], this);
     super.disconnectedCallback();
   }
@@ -180,6 +195,13 @@ export class TarefasInicio_membroShared extends StateLitElement {
     this.requestUpdate();
   }
 
+  private startVisit(): void {
+    this.resetVisit();
+    this.applyEntryParams();
+    void this.carregarInicio();
+  }
+
+  /** Transient members go back to their initial value on every entry. */
   private resetVisit(): void {
     this.publish('pageStatus', 'idle');
     this.publish('scenary', '');
@@ -189,62 +211,40 @@ export class TarefasInicio_membroShared extends StateLitElement {
     this.resetCommandResults();
   }
 
+  /** The page has no entry params. */
+  private applyEntryParams(): void {
+    // no entry params declared
+  }
+
   private resetCommandResults(): void {
-    this.publish('iniciarTarefaStatus', 'idle');
     this.publish('iniciarTarefaError', null);
-    this.publish('enviarParaRevisaoStatus', 'idle');
+    this.publish('iniciarTarefaStatus', 'idle');
     this.publish('enviarParaRevisaoError', null);
-    this.publish('aceitarEntregaStatus', 'idle');
+    this.publish('enviarParaRevisaoStatus', 'idle');
     this.publish('aceitarEntregaError', null);
-    this.publish('devolverComMotivoStatus', 'idle');
+    this.publish('aceitarEntregaStatus', 'idle');
     this.publish('devolverComMotivoError', null);
+    this.publish('devolverComMotivoStatus', 'idle');
   }
 
-  private unexpected(error: unknown): ErrorState {
-    const name = error instanceof Error ? error.name : 'unknown';
-    return { code: 'client.unexpected', message: '', details: { name } };
-  }
-
-  /** Finds the version of a pending task by id across the four pending lists (picks an element, computes nothing). */
-  private findVersion(id: string): number | null {
-    const espera = this.esperaPorMim;
-    if (!espera) return null;
-    const groups: TarefaPendencia[][] = [espera.paraIniciar, espera.paraEnviarRevisao, espera.paraRevisar, espera.devolvidas];
-    for (const group of groups) {
-      const found = group.find((item) => item.id === id);
-      if (found) return found.version;
-    }
-    return null;
-  }
-
-  private isEverythingEmpty(resumo: ResumoMinhasTarefas, espera: EsperaPorMim): boolean {
-    return (
-      resumo.tarefas.length === 0 &&
-      espera.paraIniciar.length === 0 &&
-      espera.paraEnviarRevisao.length === 0 &&
-      espera.paraRevisar.length === 0 &&
-      espera.devolvidas.length === 0
-    );
-  }
-
-  private applyCommandOutput(output: { resumo: ResumoMinhasTarefas; esperaPorMim: EsperaPorMim }): void {
-    this.publish('resumo', output.resumo);
-    this.publish('esperaPorMim', output.esperaPorMim);
-  }
-
-  /** setScenario — publishes the visible scene of the page; clears the results of every command. */
+  /** scene — publishes the visible scene of the page (value is the scene id); clears old command results */
   public setScenario(value: string): void {
     this.resetCommandResults();
     this.publish('scenary', value);
   }
 
-  /** draft — replaces the draft of the return-with-reason form (set details.motivoDevolucao with the typed reason); clears the results of every command. */
+  /** draft — replaces the draft of the return-with-reason form (set details.motivoDevolucao to the typed reason); clears old command results */
   public setDevolverComMotivoDraft(value: DevolverComMotivoDraft): void {
     this.resetCommandResults();
     this.publish('devolverComMotivoDraft', value);
   }
 
-  /** request carregarInicio — loads the workload summary, today's daily notice and the tasks waiting for the person (the person is the session's); redraws resumo, avisoDoDia and esperaPorMim by replace; no arguments, also the method to reload the page */
+  private unexpectedError(error: unknown): ErrorState {
+    const name = error instanceof Error ? error.name : 'unknown';
+    return { code: 'client.unexpected', message: '', details: { name } };
+  }
+
+  /** request carregarInicio — loads at once the workload summary, today's daily notice and the pending tasks waiting on the person (the person is the session's); redraws resumo, avisoDoDia and esperaPorMim by replace; no arguments, also the method to reload the page */
   public async carregarInicio(): Promise<void> {
     if (this.carregarInicioStatus === 'loading') return;
     this.publish('carregarInicioStatus', 'loading');
@@ -263,185 +263,188 @@ export class TarefasInicio_membroShared extends StateLitElement {
         this.publish('pageStatus', 'error');
         return;
       }
-      const data = response.data;
-      this.publish('resumo', data.resumo);
-      this.publish('avisoDoDia', data.avisoDoDia ?? null);
-      this.publish('esperaPorMim', data.esperaPorMim);
+      const output = response.data;
+      this.publish('resumo', output.resumo);
+      this.publish('avisoDoDia', output.avisoDoDia ?? null);
+      this.publish('esperaPorMim', output.esperaPorMim);
       this.publish('carregarInicioStatus', 'success');
-      this.publish('pageStatus', this.isEverythingEmpty(data.resumo, data.esperaPorMim) ? 'empty' : 'success');
+      const espera = output.esperaPorMim;
+      const isEmpty =
+        output.resumo.tarefas.length === 0 &&
+        espera.paraIniciar.length === 0 &&
+        espera.paraEnviarRevisao.length === 0 &&
+        espera.paraRevisar.length === 0 &&
+        espera.devolvidas.length === 0;
+      this.publish('pageStatus', isEmpty ? 'empty' : 'success');
     } catch (error) {
-      this.publish('carregarInicioError', this.unexpected(error));
+      this.publish('carregarInicioError', this.unexpectedError(error));
       this.publish('carregarInicioStatus', 'error');
       this.publish('pageStatus', 'error');
     }
   }
 
-  /** request iniciarTarefa — starts a task assigned to the person (aFazer to emAndamento); redraws resumo and esperaPorMim by replace with the recalculated values; id: the pending task to start (its version is read from esperaPorMim) */
-  public async iniciarTarefa(id: string): Promise<void> {
-    if (this.iniciarTarefaStatus === 'loading') return;
-    const version = this.findVersion(id);
-    if (version === null) {
-      this.publish('iniciarTarefaError', { code: 'client.selectionInvalid', message: '', details: { id } });
-      this.publish('iniciarTarefaStatus', 'error');
-      return;
-    }
-    this.publish('iniciarTarefaStatus', 'loading');
-    this.publish('iniciarTarefaError', null);
-    try {
-      const input: Input<'tarefas.inicio_membro.iniciarTarefa'> = { id, version };
-      const response = await runBlockingUiAction((signal) =>
-        execBff<Output<'tarefas.inicio_membro.iniciarTarefa'>>('tarefas.inicio_membro.iniciarTarefa', input, { mode: 'blocking', signal }),
-      );
-      if (!response) {
-        this.publish('iniciarTarefaError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
-        this.publish('iniciarTarefaStatus', 'error');
-        return;
-      }
-      if (!response.ok || !response.data) {
-        this.publish('iniciarTarefaError', response.error);
-        this.publish('iniciarTarefaStatus', 'error');
-        return;
-      }
-      this.applyCommandOutput(response.data);
-      this.publish('iniciarTarefaStatus', 'success');
-    } catch (error) {
-      this.publish('iniciarTarefaError', this.unexpected(error));
-      this.publish('iniciarTarefaStatus', 'error');
+  private setCommandState(request: CommandId, status: RequestStatus, error: ErrorState): void {
+    switch (request) {
+      case 'iniciarTarefa':
+        this.publish('iniciarTarefaError', error);
+        this.publish('iniciarTarefaStatus', status);
+        break;
+      case 'enviarParaRevisao':
+        this.publish('enviarParaRevisaoError', error);
+        this.publish('enviarParaRevisaoStatus', status);
+        break;
+      case 'aceitarEntrega':
+        this.publish('aceitarEntregaError', error);
+        this.publish('aceitarEntregaStatus', status);
+        break;
+      case 'devolverComMotivo':
+        this.publish('devolverComMotivoError', error);
+        this.publish('devolverComMotivoStatus', status);
+        break;
     }
   }
 
-  /** request enviarParaRevisao — sends an in-progress task of the person (also a returned one) to the creator's review; redraws resumo and esperaPorMim by replace with the recalculated values; id: the pending task to send (its version is read from esperaPorMim) */
-  public async enviarParaRevisao(id: string): Promise<void> {
-    if (this.enviarParaRevisaoStatus === 'loading') return;
-    const version = this.findVersion(id);
-    if (version === null) {
-      this.publish('enviarParaRevisaoError', { code: 'client.selectionInvalid', message: '', details: { id } });
-      this.publish('enviarParaRevisaoStatus', 'error');
-      return;
-    }
-    this.publish('enviarParaRevisaoStatus', 'loading');
-    this.publish('enviarParaRevisaoError', null);
-    try {
-      const input: Input<'tarefas.inicio_membro.enviarParaRevisao'> = { id, version };
-      const response = await runBlockingUiAction((signal) =>
-        execBff<Output<'tarefas.inicio_membro.enviarParaRevisao'>>('tarefas.inicio_membro.enviarParaRevisao', input, { mode: 'blocking', signal }),
-      );
-      if (!response) {
-        this.publish('enviarParaRevisaoError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
-        this.publish('enviarParaRevisaoStatus', 'error');
-        return;
-      }
-      if (!response.ok || !response.data) {
-        this.publish('enviarParaRevisaoError', response.error);
-        this.publish('enviarParaRevisaoStatus', 'error');
-        return;
-      }
-      this.applyCommandOutput(response.data);
-      this.publish('enviarParaRevisaoStatus', 'success');
-    } catch (error) {
-      this.publish('enviarParaRevisaoError', this.unexpected(error));
-      this.publish('enviarParaRevisaoStatus', 'error');
+  private commandStatus(request: CommandId): RequestStatus {
+    switch (request) {
+      case 'iniciarTarefa':
+        return this.iniciarTarefaStatus;
+      case 'enviarParaRevisao':
+        return this.enviarParaRevisaoStatus;
+      case 'aceitarEntrega':
+        return this.aceitarEntregaStatus;
+      case 'devolverComMotivo':
+        return this.devolverComMotivoStatus;
     }
   }
 
-  /** request aceitarEntrega — accepts the delivery of a task the person created, concluding it; redraws resumo and esperaPorMim by replace (the task leaves paraRevisar); id: the task in review (its version is read from esperaPorMim) */
-  public async aceitarEntrega(id: string): Promise<void> {
-    if (this.aceitarEntregaStatus === 'loading') return;
-    const version = this.findVersion(id);
-    if (version === null) {
-      this.publish('aceitarEntregaError', { code: 'client.selectionInvalid', message: '', details: { id } });
-      this.publish('aceitarEntregaStatus', 'error');
-      return;
-    }
-    this.publish('aceitarEntregaStatus', 'loading');
-    this.publish('aceitarEntregaError', null);
+  /** Runs a command: replaces resumo and esperaPorMim with the returned values (never reloads), then onSuccess, then publishes success last. */
+  private async runCommand(
+    request: CommandId,
+    call: (signal: AbortSignal) => Promise<CommandResponse>,
+    onSuccess?: () => void,
+  ): Promise<void> {
+    if (this.commandStatus(request) === 'loading') return;
+    this.setCommandState(request, 'loading', null);
     try {
-      const input: Input<'tarefas.inicio_membro.aceitarEntrega'> = { id, version };
-      const response = await runBlockingUiAction((signal) =>
-        execBff<Output<'tarefas.inicio_membro.aceitarEntrega'>>('tarefas.inicio_membro.aceitarEntrega', input, { mode: 'blocking', signal }),
-      );
-      if (!response) {
-        this.publish('aceitarEntregaError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
-        this.publish('aceitarEntregaStatus', 'error');
+      const response = await runBlockingUiAction(call);
+      if (response === undefined) {
+        this.setCommandState(request, 'error', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
         return;
       }
       if (!response.ok || !response.data) {
-        this.publish('aceitarEntregaError', response.error);
-        this.publish('aceitarEntregaStatus', 'error');
+        this.setCommandState(request, 'error', response.error);
         return;
       }
-      this.applyCommandOutput(response.data);
-      this.publish('aceitarEntregaStatus', 'success');
+      const output = response.data;
+      this.publish('resumo', output.resumo);
+      this.publish('esperaPorMim', output.esperaPorMim);
+      if (onSuccess) onSuccess();
+      this.setCommandState(request, 'success', null);
     } catch (error) {
-      this.publish('aceitarEntregaError', this.unexpected(error));
-      this.publish('aceitarEntregaStatus', 'error');
+      this.setCommandState(request, 'error', this.unexpectedError(error));
     }
   }
 
-  /** request devolverComMotivo — returns a task in review that the person created back for adjustment, with the reason typed in devolverComMotivoDraft.details.motivoDevolucao; redraws resumo and esperaPorMim by replace and clears the draft; id: the task in review (its version is read from esperaPorMim) */
-  public async devolverComMotivo(id: string): Promise<void> {
-    if (this.devolverComMotivoStatus === 'loading') return;
-    const version = this.findVersion(id);
-    if (version === null) {
-      this.publish('devolverComMotivoError', { code: 'client.selectionInvalid', message: '', details: { id } });
-      this.publish('devolverComMotivoStatus', 'error');
+  private requiredMissing(request: CommandId, stateKeys: string[]): void {
+    this.setCommandState(request, 'error', { code: 'client.requiredMissing', message: '', details: { stateKeys } });
+  }
+
+  /** request iniciarTarefa — starts a task assigned to the person (aFazer to emAndamento); redraws resumo and esperaPorMim by replace with the recalculated values; arguments: id of the task, version read with it (optimistic concurrency) */
+  public async iniciarTarefa(id: string, version: number): Promise<void> {
+    if (!id) {
+      this.requiredMissing('iniciarTarefa', ['id']);
       return;
     }
+    const input: Input<'tarefas.inicio_membro.iniciarTarefa'> = { id, version };
+    await this.runCommand('iniciarTarefa', (signal) =>
+      execBff<Output<'tarefas.inicio_membro.iniciarTarefa'>>('tarefas.inicio_membro.iniciarTarefa', input, {
+        mode: 'blocking',
+        signal,
+      }),
+    );
+  }
+
+  /** request enviarParaRevisao — sends an in-progress task of the person (also one returned for adjustment) to the creator's review; redraws resumo and esperaPorMim by replace with the recalculated values; arguments: id of the task, version read with it */
+  public async enviarParaRevisao(id: string, version: number): Promise<void> {
+    if (!id) {
+      this.requiredMissing('enviarParaRevisao', ['id']);
+      return;
+    }
+    const input: Input<'tarefas.inicio_membro.enviarParaRevisao'> = { id, version };
+    await this.runCommand('enviarParaRevisao', (signal) =>
+      execBff<Output<'tarefas.inicio_membro.enviarParaRevisao'>>('tarefas.inicio_membro.enviarParaRevisao', input, {
+        mode: 'blocking',
+        signal,
+      }),
+    );
+  }
+
+  /** request aceitarEntrega — accepts the delivery of a task created by the person, concluding it; redraws resumo and esperaPorMim by replace (the task leaves the to-review list); arguments: id of the task in review, version read with it */
+  public async aceitarEntrega(id: string, version: number): Promise<void> {
+    if (!id) {
+      this.requiredMissing('aceitarEntrega', ['id']);
+      return;
+    }
+    const input: Input<'tarefas.inicio_membro.aceitarEntrega'> = { id, version };
+    await this.runCommand('aceitarEntrega', (signal) =>
+      execBff<Output<'tarefas.inicio_membro.aceitarEntrega'>>('tarefas.inicio_membro.aceitarEntrega', input, {
+        mode: 'blocking',
+        signal,
+      }),
+    );
+  }
+
+  /** request devolverComMotivo — returns for adjustment a task in review created by the person, with the reason typed in devolverComMotivoDraft.details.motivoDevolucao (required; set it with setDevolverComMotivoDraft first); redraws resumo and esperaPorMim by replace and clears the draft; arguments: id of the task in review, version read with it */
+  public async devolverComMotivo(id: string, version: number): Promise<void> {
     const motivo = this.devolverComMotivoDraft.details.motivoDevolucao;
-    if (motivo === null || motivo.trim() === '') {
-      this.publish('devolverComMotivoError', {
-        code: 'client.requiredMissing',
-        message: '',
-        details: { stateKeys: ['ui.tarefas.inicio_membro.devolverComMotivoDraft'] },
-      });
-      this.publish('devolverComMotivoStatus', 'error');
+    const missing: string[] = [];
+    if (!id) missing.push('id');
+    if (motivo === null || motivo.trim() === '') missing.push('ui.tarefas.inicio_membro.devolverComMotivoDraft');
+    if (motivo === null || missing.length > 0) {
+      this.requiredMissing('devolverComMotivo', missing);
       return;
     }
-    this.publish('devolverComMotivoStatus', 'loading');
-    this.publish('devolverComMotivoError', null);
-    try {
-      const input: Input<'tarefas.inicio_membro.devolverComMotivo'> = { id, version, details: { motivoDevolucao: motivo } };
-      const response = await runBlockingUiAction((signal) =>
-        execBff<Output<'tarefas.inicio_membro.devolverComMotivo'>>('tarefas.inicio_membro.devolverComMotivo', input, { mode: 'blocking', signal }),
-      );
-      if (!response) {
-        this.publish('devolverComMotivoError', { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
-        this.publish('devolverComMotivoStatus', 'error');
-        return;
-      }
-      if (!response.ok || !response.data) {
-        this.publish('devolverComMotivoError', response.error);
-        this.publish('devolverComMotivoStatus', 'error');
-        return;
-      }
-      this.applyCommandOutput(response.data);
-      this.publish('devolverComMotivoDraft', emptyDevolverComMotivoDraft());
-      this.publish('devolverComMotivoStatus', 'success');
-    } catch (error) {
-      this.publish('devolverComMotivoError', this.unexpected(error));
-      this.publish('devolverComMotivoStatus', 'error');
-    }
+    const input: Input<'tarefas.inicio_membro.devolverComMotivo'> = {
+      id,
+      version,
+      details: { motivoDevolucao: motivo },
+    };
+    await this.runCommand(
+      'devolverComMotivo',
+      (signal) =>
+        execBff<Output<'tarefas.inicio_membro.devolverComMotivo'>>('tarefas.inicio_membro.devolverComMotivo', input, {
+          mode: 'blocking',
+          signal,
+        }),
+      () => {
+        this.publish('devolverComMotivoDraft', emptyDevolverComMotivoDraft());
+      },
+    );
   }
 
-  /** navigate — opens the page minhas_tarefas (carries nothing) from the workload summary */
+  /** navigate — opens the person's task list page (minhas_tarefas) from the summary; carries nothing */
   public abrirMinhasTarefas(): void {
     auraNavigate('/tarefas/minhas_tarefas', { basePath: '/tarefas' });
   }
 
-  /** navigate — opens the page meus_avisos, carrying today's notice id (avisoVencimentoId) when the notice exists */
+  /** navigate — opens the daily notices page (meus_avisos) from the notice card; carries the id of today's notice when one is loaded, otherwise just opens the page */
   public abrirMeusAvisos(): void {
-    const aviso = this.avisoDoDia;
-    if (aviso && aviso.id) {
-      auraNavigate(`/tarefas/meus_avisos?avisoVencimentoId=${encodeURIComponent(aviso.id)}`, { basePath: '/tarefas' });
+    const avisoId = this.avisoDoDia ? this.avisoDoDia.id : '';
+    if (avisoId) {
+      auraNavigate(`/tarefas/meus_avisos?avisoVencimentoId=${encodeURIComponent(avisoId)}`, { basePath: '/tarefas' });
       return;
     }
     auraNavigate('/tarefas/meus_avisos', { basePath: '/tarefas' });
   }
 
-  /** navigate — opens minhas_tarefas with the given task selected (tarefaId) so the person adjusts a returned task; tarefaId: id of the task picked */
+  /** navigate — opens a task on the minhas_tarefas page to adjust it (selects it there through tarefaId); argument: id of the task the person picked; refused with client.preconditionMissing in carregarInicioError when null */
   public abrirTarefaParaAjustar(tarefaId: string | null): void {
     if (tarefaId === null || tarefaId === '') {
-      this.publish('carregarInicioError', { code: 'client.preconditionMissing', message: '', details: { params: ['tarefaId'] } });
+      this.publish('carregarInicioError', {
+        code: 'client.preconditionMissing',
+        message: '',
+        details: { params: ['tarefaId'] },
+      });
       return;
     }
     auraNavigate(`/tarefas/minhas_tarefas?tarefaId=${encodeURIComponent(tarefaId)}`, { basePath: '/tarefas' });

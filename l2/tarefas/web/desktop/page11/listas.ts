@@ -1,351 +1,81 @@
 /// <mls fileReference="_102047_/l2/tarefas/web/desktop/page11/listas.ts" enhancement="_102020_/l2/enhancementAura"/>
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import {
-TarefasListasShared,
-type CriarListaDraft,
-type ListaCadastrada,
-type ListaTipo,
-type SalvarListaDraft,
-} from '/_102047_/l2/tarefas/web/shared/listas.js';
+import { TarefasListasShared } from '/_102047_/l2/tarefas/web/shared/listas.js';
+import type { ListaTipo } from '/_102047_/l2/tarefas/web/shared/listas.js';
 import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
 import '/_102040_/l2/molecules/groupentertext/ml-multiline-text.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-toast-notification.js';
 import '/_102040_/l2/molecules/groupsearchcontent/ml-search-bar.js';
 import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
 import '/_102040_/l2/molecules/groupviewtable/ml-data-table.js';
 import '/_102020_/l2/molecules/ml-scenary.js';
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
-tituloPagina: 'Listas de tarefas',
-subtituloPagina: 'As listas agrupam as tarefas da equipe por projeto ou área.',
+titulo: 'Listas de tarefas',
+subtitulo: 'Projetos e áreas que agrupam as tarefas da equipe.',
 novaLista: 'Nova lista',
-buscaRotulo: 'Buscar pelo nome',
-buscaPlaceholder: 'Digite parte do nome da lista',
+buscaPlaceholder: 'Buscar pelo nome da lista',
+buscaLabel: 'Buscar lista',
 colNome: 'Nome',
 colTipo: 'Tipo',
 colSituacao: 'Situação',
-colTarefas: 'Tarefas abertas',
-tipoProjeto: 'Projeto',
+colTarefasAbertas: 'Tarefas abertas',
+tipoProject: 'Projeto',
 tipoArea: 'Área',
 ativa: 'Ativa',
 inativa: 'Inativa',
-nenhumaLista: 'Nenhuma lista cadastrada ainda. Use “Nova lista” para começar.',
-nadaEncontrado: 'Nenhuma lista tem esse nome. Tente outro trecho.',
-erroCarregar: 'Não foi possível carregar as listas.',
-erroSelecao: 'A lista indicada no endereço não foi encontrada entre as listas cadastradas.',
-erroBusca: 'Não foi possível buscar as listas agora. Tente de novo.',
-tentarNovamente: 'Tentar novamente',
-painelRepousoTitulo: 'Manutenção das listas',
-painelRepousoTexto: 'Escolha uma lista na tabela para alterar seus dados ou cadastre uma nova.',
-criarTitulo: 'Dados da nova lista',
-editarFallback: 'Lista selecionada',
-listaNaoEncontrada: 'Esta lista não está entre as listas carregadas. Escolha outra na tabela.',
+vazioSemListas: 'Ainda não há listas. Cadastre a primeira para agrupar as tarefas.',
+vazioBusca: 'Nenhuma lista tem esse nome.',
+carregando: 'Carregando as listas…',
+erroCarga: 'Não foi possível carregar as listas.',
+tentarDeNovo: 'Tentar de novo',
+faltaContexto: 'Esta página foi aberta sem o que precisa para carregar as listas. Volte à página de onde você veio e abra a manutenção de listas de novo.',
+voltar: 'Voltar à página anterior',
+selecaoInvalida: 'A lista indicada no endereço não foi encontrada. Escolha uma lista na tabela.',
+painelTitulo: 'Manutenção',
+painelDica: 'Escolha uma lista na tabela para alterar seus dados ou cadastre uma nova lista.',
+fecharPainel: 'Fechar painel',
+novaTitulo: 'Dados da nova lista',
+editarFallback: 'Lista escolhida',
 campoNome: 'Nome da lista',
 campoNomeAjuda: 'Não pode haver duas listas com o mesmo nome.',
 campoTipo: 'Tipo',
 tipoEscolha: 'Escolha o tipo',
+campoSituacao: 'Situação',
+situacaoAtiva: 'Ativa: recebe novas tarefas',
+situacaoInativa: 'Inativa: some da escolha ao criar tarefa',
 campoDescricao: 'Descrição',
-campoDescricaoAjuda: 'Explique o objetivo da lista (opcional).',
-campoAtiva: 'Lista ativa',
-campoAtivaAjuda: 'Listas inativas deixam de aparecer na escolha ao criar tarefa.',
-tarefasAbertasNota: 'Tarefas abertas nesta lista',
+campoDescricaoPlaceholder: 'Para que serve esta lista',
+tarefasAbertas: 'Tarefas abertas',
 cadastrar: 'Cadastrar lista',
 salvar: 'Salvar alterações',
-fecharPainel: 'Fechar painel',
-confirmarDescartar: 'Há alterações que ainda não foram salvas. Descartar e continuar?',
-sucessoCriar: 'Lista cadastrada. Você já pode cadastrar outra.',
-sucessoSalvar: 'Alterações salvas.',
-erroObrigatorios: 'Informe o nome e o tipo da lista para continuar.',
-erroNomeObrigatorio: 'Informe o nome da lista.',
-erroNomeRepetido: 'Já existe uma lista com esse nome. Escolha outro nome.',
-erroSelecionar: 'Escolha uma lista na tabela antes de salvar.',
-erroGenerico: 'Não foi possível salvar. Confira os dados e tente de novo; se persistir, recarregue as listas.',
-voltarLista: 'Fechar',
+erroComando: 'Não foi possível concluir.',
+toastCriada: 'Lista cadastrada.',
+toastSalva: 'Alterações da lista salvas.'
 };
-/// **collab_i18n_end**
 type PageMessageType = typeof pageMessage_pt_br;
 const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
-type FormShape = CriarListaDraft;
-function formatNumber(n: number) {
+/// **collab_i18n_end**
+type FormValues = {
+nome: string | null;
+details: { tipo: ListaTipo | null; descricao: string | null };
+ativa: boolean | null;
+};
+function fmtNumber(n: number) {
 return new Intl.NumberFormat(document.documentElement.lang || undefined).format(n);
-}
-function norm(v: string | null | undefined) {
-return (v ?? '').trim();
-}
-function criarSujo(d: CriarListaDraft) {
-return norm(d.nome) !== '' || norm(d.details.descricao) !== '' || d.details.tipo !== null;
-}
-function editarSujo(d: SalvarListaDraft, l: ListaCadastrada | null) {
-if (!l) return false;
-return (
-norm(d.nome) !== norm(l.nome) ||
-(d.details.tipo ?? '') !== l.details.tipo ||
-norm(d.details.descricao) !== norm(l.details.descricao) ||
-(d.ativa ?? l.ativa) !== l.ativa
-);
-}
-function erroTexto(msg: PageMessageType, code: string | undefined) {
-if (!code) return '';
-if (code === 'client.requiredMissing') return msg.erroObrigatorios;
-if (code === 'listaNomeUnico') return msg.erroNomeRepetido;
-return msg.erroGenerico;
 }
 @customElement('tarefas--web--desktop--page11--listas-102047')
 export class TarefasDesktopPage11ListasPage extends TarefasListasShared {
 private msg: PageMessageType = pageMessage_pt_br;
-render() {
-this.msg = pageMessages[this.getMessageKey(pageMessages)];
+private renderCampos(id: string, d: FormValues, onChange: (n: FormValues) => void, busy: boolean) {
+const focus = 'focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]';
 return html`
-<div class="min-h-full bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-6">
-<header class="flex items-start justify-between gap-4 mb-5">
-<div>
-<h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg['tituloPagina']}</h1>
-<p class="text-sm text-[var(--text-muted,currentColor)] mt-1">${this.msg['subtituloPagina']}</p>
-</div>
-<grouptriggeraction--ml-button-standard
-data-variant="primary"
-size="md"
-@action=${() => this.abrirCriar()}
->
-<Label>${this.msg['novaLista']}</Label>
-</grouptriggeraction--ml-button-standard>
-</header>
-<div class="grid gap-6 items-start grid-cols-[minmax(0,1fr)_400px]">
-${this.renderListas()} ${this.renderPainel()}
-</div>
-</div>
-`;
-}
-private abrirCriar() {
-if (!this.podeSair()) return;
-this.selectLista(null);
-this.setScenario('criar');
-}
-private podeSair() {
-const sujo =
-criarSujo(this.criarListaDraft) ||
-editarSujo(this.salvarListaDraft, this.formularioLista);
-return !sujo || window.confirm(this.msg['confirmarDescartar']);
-}
-private renderListas() {
-const loading = this.pageStatus === 'loading' || this.buscarListasStatus === 'loading';
-const selIdx = this.selectedLista ? this.listas.findIndex((l) => l.id === this.selectedLista) : -1;
-const erroCarga = this.pageStatus === 'error' && this.listarListasError?.code !== 'client.selectionInvalid';
-return html`
-<section data-organism-id="listasCadastradas" class="flex flex-col gap-3 min-w-0">
-<groupsearchcontent--ml-search-bar
-.value=${this.busca}
-placeholder=${this.msg['buscaPlaceholder']}
-debounce="350"
-?loading=${this.buscarListasStatus === 'loading'}
-@search=${(e: CustomEvent<{ query: string }>) => this.buscarListas(e.detail.query)}
-@change=${(e: CustomEvent<{ value: string | null }>) => this.buscarListas(e.detail.value ?? '')}
-@clear=${() => this.buscarListas('')}
->
-<Label>${this.msg['buscaRotulo']}</Label>
-</groupsearchcontent--ml-search-bar>
-${this.listarListasError?.code === 'client.selectionInvalid'
-? html`<p aria-live="polite" class="text-sm text-[var(--text-default,currentColor)]">${this.msg['erroSelecao']}</p>`
-: nothing}
-${this.buscarListasError
-? html`<p aria-live="polite" class="text-sm text-[var(--text-default,currentColor)]">${this.msg['erroBusca']}</p>`
-: nothing}
-${erroCarga
-? html`
-<div
-aria-live="polite"
-class="flex items-center justify-between gap-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4"
->
-<span>${this.msg['erroCarregar']}</span>
-<grouptriggeraction--ml-button-standard
-data-variant="secondary"
-size="sm"
-@action=${() => this.listarListas()}
->
-<Label>${this.msg['tentarNovamente']}</Label>
-</grouptriggeraction--ml-button-standard>
-</div>
-`
-: html`
-<div class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)]">
-<groupviewtable--ml-data-table
-.value=${selIdx >= 0 ? String(selIdx) : ''}
-?loading=${loading}
-@rowClick=${(e: CustomEvent<{ index: number }>) => {
-const l = this.listas[e.detail.index];
-if (!l || l.id === this.selectedLista) {
-if (l) this.setScenario('editar');
-return;
-}
-if (!this.podeSair()) return;
-this.selectLista(l.id);
-this.setScenario('editar');
-}}
->
-<TableHeader>
-<TableRow>
-<TableHead key="nome">${this.msg['colNome']}</TableHead>
-<TableHead key="tipo">${this.msg['colTipo']}</TableHead>
-<TableHead key="situacao">${this.msg['colSituacao']}</TableHead>
-<TableHead key="tarefas">${this.msg['colTarefas']}</TableHead>
-</TableRow>
-</TableHeader>
-<TableBody>${this.listas.map((l) => this.renderLinha(l))}</TableBody>
-<Empty>${this.busca ? this.msg['nadaEncontrado'] : this.msg['nenhumaLista']}</Empty>
-</groupviewtable--ml-data-table>
-</div>
-`}
-</section>
-`;
-}
-private renderLinha(l: ListaCadastrada) {
-const muted = l.ativa ? 'text-[var(--text-strong,currentColor)]' : 'text-[var(--text-muted,currentColor)]';
-const badge = l.ativa
-? 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]'
-: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
-return html`
-<TableRow key=${l.id}>
-<TableCell><span class="font-medium ${muted}">${l.nome}</span></TableCell>
-<TableCell>
-<span class=${l.ativa ? '' : 'text-[var(--text-muted,currentColor)]'}>
-${l.details.tipo === 'project' ? this.msg['tipoProjeto'] : this.msg['tipoArea']}
-</span>
-</TableCell>
-<TableCell>
-<span class="inline-block rounded-full px-2 py-0.5 text-xs ${badge}">
-${l.ativa ? this.msg['ativa'] : this.msg['inativa']}
-</span>
-</TableCell>
-<TableCell sort-value=${String(l.details.quantidadeTarefasAbertas)}>
-<span class=${l.ativa ? '' : 'text-[var(--text-muted,currentColor)]'}>
-${formatNumber(l.details.quantidadeTarefasAbertas)}
-</span>
-</TableCell>
-</TableRow>
-`;
-}
-private renderPainel() {
-const lista = this.formularioLista;
-return html`
-<aside
-data-organism-id="formularioLista"
-class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 sticky top-4"
->
-<molecules--ml-scenary-102020
-mode="scenary"
-.value=${this.scenary || 'fechado'}
-backLabel=${this.msg['voltarLista']}
-@change=${(e: CustomEvent<{ value: string }>) => {
-if (e.target === e.currentTarget) this.setScenario(e.detail.value);
-}}
->
-<Scene value="fechado" title=${this.msg['painelRepousoTitulo']}>
-<p class="text-sm text-[var(--text-muted,currentColor)] py-2">${this.msg['painelRepousoTexto']}</p>
-</Scene>
-<Scene value="criar" title=${this.msg['criarTitulo']}>${this.renderCriar()}</Scene>
-<Scene value="editar" title=${lista ? lista.nome : this.msg['editarFallback']}>
-${this.renderEditar(lista)}
-</Scene>
-</molecules--ml-scenary-102020>
-</aside>
-`;
-}
-private renderCriar() {
-const d = this.criarListaDraft;
-const loading = this.criarListaStatus === 'loading';
-const pronto = norm(d.nome) !== '' && d.details.tipo !== null;
-const code = this.criarListaError?.code;
-return html`
-<form class="flex flex-col gap-4 pt-2" @submit=${(e: Event) => e.preventDefault()}>
-${this.renderCampos(d, (v) => this.setCriarListaDraft(v), 'criar', code)}
-${this.renderFeedback(code, this.criarListaStatus === 'success', this.msg['sucessoCriar'])}
-<div class="flex items-center gap-2">
-<grouptriggeraction--ml-button-standard
-data-variant="primary"
-size="md"
-?disabled=${!pronto}
-?loading=${loading}
-@action=${() => this.criarLista()}
->
-<Label>${this.msg['cadastrar']}</Label>
-</grouptriggeraction--ml-button-standard>
-${this.renderFechar()}
-</div>
-</form>
-`;
-}
-private renderEditar(lista: ListaCadastrada | null) {
-if (!lista) {
-return html`<p aria-live="polite" class="text-sm text-[var(--text-muted,currentColor)] py-2">${this.msg['listaNaoEncontrada']}</p>`;
-}
-const d = this.salvarListaDraft;
-const loading = this.salvarListaStatus === 'loading';
-const pronto = norm(d.nome) !== '' && d.details.tipo !== null && editarSujo(d, lista);
-const code = this.salvarListaError?.code;
-return html`
-<form class="flex flex-col gap-4 pt-2" @submit=${(e: Event) => e.preventDefault()}>
-<p class="text-sm text-[var(--text-muted,currentColor)]">
-${this.msg['tarefasAbertasNota']}:
-<span class="font-medium text-[var(--text-strong,currentColor)]">${formatNumber(lista.details.quantidadeTarefasAbertas)}</span>
-</p>
-${this.renderCampos(d, (v) => this.setSalvarListaDraft({ ...d, ...v }), 'editar', code)}
-${this.renderFeedback(code, this.salvarListaStatus === 'success', this.msg['sucessoSalvar'])}
-<div class="flex items-center gap-2">
-<grouptriggeraction--ml-button-standard
-data-variant="primary"
-size="md"
-?disabled=${!pronto}
-?loading=${loading}
-@action=${() => this.salvarLista()}
->
-<Label>${this.msg['salvar']}</Label>
-</grouptriggeraction--ml-button-standard>
-${this.renderFechar()}
-</div>
-</form>
-`;
-}
-private renderFechar() {
-return html`
-<grouptriggeraction--ml-button-standard
-data-variant="secondary"
-size="md"
-@action=${() => {
-if (!this.podeSair()) return;
-this.selectLista(null);
-this.setScenario('fechado');
-}}
->
-<Label>${this.msg['fecharPainel']}</Label>
-</grouptriggeraction--ml-button-standard>
-`;
-}
-private renderFeedback(code: string | undefined, sucesso: boolean, textoSucesso: string) {
-if (code) {
-return html`
-<groupnotifyuser--ml-contextual-feedback type="error" visible dismissible="false">
-<Message>${erroTexto(this.msg, code)}</Message>
-</groupnotifyuser--ml-contextual-feedback>
-`;
-}
-if (sucesso) {
-return html`
-<groupnotifyuser--ml-contextual-feedback type="success" visible dismissible="false">
-<Message>${textoSucesso}</Message>
-</groupnotifyuser--ml-contextual-feedback>
-`;
-}
-return nothing;
-}
-private renderCampos(d: FormShape, onChange: (v: FormShape) => void, prefix: string, code: string | undefined) {
-const nomeErro = code === 'client.requiredMissing' && norm(d.nome) === '' ? this.msg['erroNomeObrigatorio'] : '';
-const selectId = `${prefix}-tipo`;
-return html`
+<div class="flex flex-col gap-4">
 <groupentertext--ml-enter-text
 .value=${d.nome ?? ''}
-.error=${nomeErro}
-maxLength="120"
+?disabled=${busy}
 required
 @input=${(e: CustomEvent<{ value: string }>) => onChange({ ...d, nome: e.detail.value })}
 >
@@ -353,43 +83,291 @@ required
 <Helper>${this.msg['campoNomeAjuda']}</Helper>
 </groupentertext--ml-enter-text>
 <div class="flex flex-col gap-1">
-<label for=${selectId} class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['campoTipo']}</label>
+<label for="${id}-tipo" class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['campoTipo']}</label>
 <select
-id=${selectId}
-class="h-10 rounded-md border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] text-[var(--text-default,currentColor)] px-2 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] outline-none"
+id="${id}-tipo"
+?disabled=${busy}
+class="h-10 rounded-md border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] px-2 text-sm text-[var(--text-default,currentColor)] outline-none ${focus}"
 @change=${(e: Event) => {
 const v = (e.target as HTMLSelectElement).value;
-const tipo: ListaTipo | null = v === 'project' || v === 'area' ? v : null;
-onChange({ ...d, details: { ...d.details, tipo } });
+onChange({ ...d, details: { ...d.details, tipo: v === 'project' || v === 'area' ? v : null } });
 }}
 >
 <option value="" ?selected=${d.details.tipo === null}>${this.msg['tipoEscolha']}</option>
-<option value="project" ?selected=${d.details.tipo === 'project'}>${this.msg['tipoProjeto']}</option>
+<option value="project" ?selected=${d.details.tipo === 'project'}>${this.msg['tipoProject']}</option>
 <option value="area" ?selected=${d.details.tipo === 'area'}>${this.msg['tipoArea']}</option>
 </select>
 </div>
+<fieldset class="flex flex-col gap-2">
+<legend class="mb-1 text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['campoSituacao']}</legend>
+<label class="flex min-h-[2rem] items-center gap-2 text-sm text-[var(--text-default,currentColor)]">
+<input
+type="radio"
+name="${id}-ativa"
+class="${focus}"
+.checked=${d.ativa === true}
+?disabled=${busy}
+@change=${() => onChange({ ...d, ativa: true })}
+/>
+${this.msg['situacaoAtiva']}
+</label>
+<label class="flex min-h-[2rem] items-center gap-2 text-sm text-[var(--text-default,currentColor)]">
+<input
+type="radio"
+name="${id}-ativa"
+class="${focus}"
+.checked=${d.ativa === false}
+?disabled=${busy}
+@change=${() => onChange({ ...d, ativa: false })}
+/>
+${this.msg['situacaoInativa']}
+</label>
+</fieldset>
 <groupentertext--ml-multiline-text
 .value=${d.details.descricao ?? ''}
-rows="4"
-maxLength="500"
+.rows=${4}
+?disabled=${busy}
+placeholder=${this.msg['campoDescricaoPlaceholder']}
 @input=${(e: CustomEvent<{ value: string }>) =>
-onChange({ ...d, details: { ...d.details, descricao: e.detail.value } })}
+onChange({ ...d, details: { ...d.details, descricao: e.detail.value || null } })}
 >
 <Label>${this.msg['campoDescricao']}</Label>
-<Helper>${this.msg['campoDescricaoAjuda']}</Helper>
 </groupentertext--ml-multiline-text>
-<label class="flex items-start gap-3 min-h-[44px] cursor-pointer">
-<input
-type="checkbox"
-class="mt-1 h-4 w-4 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
-.checked=${d.ativa ?? true}
-@change=${(e: Event) => onChange({ ...d, ativa: (e.target as HTMLInputElement).checked })}
-/>
-<span class="flex flex-col">
-<span class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['campoAtiva']}</span>
-<span class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['campoAtivaAjuda']}</span>
+</div>
+`;
+}
+private renderAcao(
+label: string,
+d: FormValues,
+loading: boolean,
+error: { message: string } | null,
+onSubmit: () => void
+) {
+const incompleto = !(d.nome && d.nome.trim()) || d.details.tipo === null || d.ativa === null;
+return html`
+<div class="mt-5 flex flex-col gap-3">
+<groupnotifyuser--ml-contextual-feedback type="error" .visible=${error !== null} .dismissible=${false}>
+<Title>${this.msg['erroComando']}</Title>
+<Message>${error?.message ?? ''}</Message>
+</groupnotifyuser--ml-contextual-feedback>
+<grouptriggeraction--ml-button-standard
+size="md"
+?disabled=${incompleto}
+?loading=${loading}
+@action=${onSubmit}
+>
+<Label>${label}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+`;
+}
+private renderTabela() {
+const status = this.pageStatus;
+if (status === 'error') {
+const semContexto = this.listarListasError?.code === 'client.preconditionMissing';
+return html`
+<div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6" aria-live="polite">
+<p class="text-sm text-[var(--text-default,currentColor)]">
+${semContexto ? this.msg['faltaContexto'] : this.msg['erroCarga']}
+</p>
+<div class="mt-4">
+${semContexto
+? html`<grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => history.back()}>
+<Label>${this.msg['voltar']}</Label>
+</grouptriggeraction--ml-button-standard>`
+: html`<grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => { this.listarListas(); }}>
+<Label>${this.msg['tentarDeNovo']}</Label>
+</grouptriggeraction--ml-button-standard>`}
+</div>
+</div>
+`;
+}
+const idx = this.selectedLista === null ? -1 : this.listas.findIndex((l) => l.id === this.selectedLista);
+const carregando = status === 'loading' || this.buscarListasStatus === 'loading';
+return html`
+<groupviewtable--ml-data-table
+.value=${idx >= 0 ? String(idx) : ''}
+?loading=${carregando}
+@rowClick=${(e: CustomEvent<{ index: number }>) => {
+const l = this.listas[e.detail.index];
+if (l) {
+this.selectLista(l.id);
+this.setScenario('editar');
+}
+}}
+>
+<TableHeader>
+<TableRow>
+<TableHead key="nome">${this.msg['colNome']}</TableHead>
+<TableHead key="tipo">${this.msg['colTipo']}</TableHead>
+<TableHead key="ativa">${this.msg['colSituacao']}</TableHead>
+<TableHead key="abertas">${this.msg['colTarefasAbertas']}</TableHead>
+</TableRow>
+</TableHeader>
+<TableBody>
+${this.listas.map(
+(l) => html`
+<TableRow key=${l.id}>
+<TableCell>
+<span class="${l.ativa ? 'font-medium text-[var(--text-strong,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}">${l.nome}</span>
+</TableCell>
+<TableCell>
+<span class="${l.ativa ? 'text-[var(--text-default,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}">
+${l.details.tipo === 'project' ? this.msg['tipoProject'] : this.msg['tipoArea']}
 </span>
-</label>
+</TableCell>
+<TableCell>
+<span
+class="inline-block rounded-full px-2 py-0.5 text-xs ${l.ativa
+? 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]'
+: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]'}"
+>${l.ativa ? this.msg['ativa'] : this.msg['inativa']}</span>
+</TableCell>
+<TableCell>
+<span class="${l.ativa ? 'text-[var(--text-default,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}">${fmtNumber(l.details.quantidadeTarefasAbertas)}</span>
+</TableCell>
+</TableRow>
+`
+)}
+</TableBody>
+<Empty>${this.busca !== '' ? this.msg['vazioBusca'] : this.msg['vazioSemListas']}</Empty>
+<Loading>${this.msg['carregando']}</Loading>
+</groupviewtable--ml-data-table>
+`;
+}
+private renderPainel() {
+const lista = this.formularioLista;
+const criar = this.criarListaDraft;
+const salvar = this.salvarListaDraft;
+return html`
+<molecules--ml-scenary-102020
+mode="scenary"
+.value=${this.scenary || 'fechado'}
+backLabel=${this.msg['fecharPainel']}
+@change=${(e: CustomEvent<{ value: string }>) => {
+if (e.target === e.currentTarget) {
+this.setScenario(e.detail.value);
+if (e.detail.value !== 'editar') this.selectLista(null);
+}
+}}
+>
+<Scene value="fechado" title=${this.msg['painelTitulo']}>
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['painelDica']}</p>
+</Scene>
+<Scene value="nova" title=${this.msg['novaTitulo']} nav="back" backTo="fechado">
+<div class="pt-2">
+${this.renderCampos(
+'nova',
+criar,
+(n) => this.setCriarListaDraft({ ...criar, nome: n.nome, details: n.details, ativa: n.ativa }),
+this.criarListaStatus === 'loading'
+)}
+${this.renderAcao(
+this.msg['cadastrar'],
+criar,
+this.criarListaStatus === 'loading',
+this.criarListaError,
+() => {
+this.criarLista().then(() => {
+if (this.criarListaStatus === 'success') this.setScenario('fechado');
+});
+}
+)}
+</div>
+</Scene>
+<Scene value="editar" title=${lista ? lista.nome : this.msg['editarFallback']} nav="back" backTo="fechado">
+${lista
+? html`<div class="pt-2">
+<dl class="mb-4 flex items-baseline justify-between rounded-md bg-[var(--surface-alt-bg,transparent)] px-3 py-2 text-sm">
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg['tarefasAbertas']}</dt>
+<dd class="font-medium text-[var(--text-strong,currentColor)]">${fmtNumber(lista.details.quantidadeTarefasAbertas)}</dd>
+</dl>
+${this.renderCampos(
+'editar',
+salvar,
+(n) => this.setSalvarListaDraft({ ...salvar, nome: n.nome, details: n.details, ativa: n.ativa }),
+this.salvarListaStatus === 'loading'
+)}
+${this.renderAcao(
+this.msg['salvar'],
+salvar,
+this.salvarListaStatus === 'loading',
+this.salvarListaError,
+() => {
+this.salvarLista().then(() => {
+if (this.salvarListaStatus === 'success') {
+this.setScenario('fechado');
+this.selectLista(null);
+}
+});
+}
+)}
+</div>`
+: nothing}
+</Scene>
+</molecules--ml-scenary-102020>
+`;
+}
+render() {
+this.msg = pageMessages[this.getMessageKey(pageMessages)];
+const sucesso = this.criarListaStatus === 'success' || this.salvarListaStatus === 'success';
+return html`
+<div class="min-h-full bg-[var(--page-bg,transparent)] p-6 text-[var(--text-default,currentColor)]">
+<header class="mb-5">
+<h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg['titulo']}</h1>
+<p class="mt-1 text-sm text-[var(--text-muted,currentColor)]">${this.msg['subtitulo']}</p>
+</header>
+<div class="grid grid-cols-[minmax(0,1fr)_24rem] items-start gap-6">
+<section data-organism-id="listasCadastradas" class="flex min-w-0 flex-col gap-4">
+<div class="flex items-end justify-between gap-4">
+<div class="w-80 max-w-full">
+<groupsearchcontent--ml-search-bar
+.value=${this.busca}
+?loading=${this.buscarListasStatus === 'loading'}
+placeholder=${this.msg['buscaPlaceholder']}
+@search=${(e: CustomEvent<{ query: string }>) => { this.buscarListas(e.detail.query); }}
+@change=${(e: CustomEvent<{ value: string | null }>) => { this.buscarListas(e.detail.value ?? ''); }}
+@clear=${() => { this.buscarListas(''); }}
+>
+<Label>${this.msg['buscaLabel']}</Label>
+<Empty>${this.msg['vazioBusca']}</Empty>
+</groupsearchcontent--ml-search-bar>
+</div>
+<grouptriggeraction--ml-button-standard
+size="md"
+@action=${() => {
+this.selectLista(null);
+this.setScenario('nova');
+}}
+>
+<Label>${this.msg['novaLista']}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+<groupnotifyuser--ml-contextual-feedback
+type="warning"
+.visible=${this.listarListasError?.code === 'client.selectionInvalid'}
+.dismissible=${false}
+>
+<Message>${this.msg['selecaoInvalida']}</Message>
+</groupnotifyuser--ml-contextual-feedback>
+${this.renderTabela()}
+</section>
+<section
+data-organism-id="formularioLista"
+class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5"
+>
+${this.renderPainel()}
+</section>
+</div>
+<groupnotifyuser--ml-toast-notification
+type="success"
+position="bottom-right"
+.visible=${sucesso}
+.duration=${4000}
+>
+<Message>${this.salvarListaStatus === 'success' ? this.msg['toastSalva'] : this.msg['toastCriada']}</Message>
+</groupnotifyuser--ml-toast-notification>
+</div>
 `;
 }
 }

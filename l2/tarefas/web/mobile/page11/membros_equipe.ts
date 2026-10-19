@@ -1,323 +1,348 @@
-/// <mls fileReference="_102047_/l2/tarefas/web/mobile/page11/membros_equipe.ts" enhancement="_blank" />
+/// <mls fileReference="_102047_/l2/tarefas/web/mobile/page11/membros_equipe.ts" enhancement="_102020_/l2/enhancementAura"/>
 
-import { html, css, nothing } from 'lit';
+import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
+import { TarefasMembros_equipeShared, type PessoaEquipe } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
+import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
+import '/_102040_/l2/molecules/groupentertext/ml-floating-text-input.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
+import '/_102040_/l2/molecules/groupsearchcontent/ml-search-bar.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
 import '/_102020_/l2/molecules/ml-scenary.js';
-import { TarefasMembros_equipeShared } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
-import type { PessoaEquipe } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
 
+/// **collab_i18n_start**
 const pageMessage_pt_br = {
-  'scene.back': 'Voltar',
-  'scene.lista': 'Equipe',
-  'scene.cadastro': 'Pessoa',
-  'search.label': 'Buscar por nome',
-  'search.placeholder': 'Nome da pessoa',
-  'list.loading': 'Carregando a equipe…',
-  'list.empty': 'Nenhuma pessoa encontrada.',
-  'list.loadMore': 'Carregar mais',
-  'list.new': 'Nova pessoa',
-  'list.country': 'País',
-  'status.Active': 'Ativo',
-  'status.Inactive': 'Inativo',
-  'status.Merged': 'Unificado',
-  'status.Blocked': 'Bloqueado',
-  'form.name': 'Nome',
-  'form.country': 'País (código)',
-  'form.status': 'Situação',
-  'form.roles': 'Papéis',
-  'form.contacts': 'Contatos',
-  'form.save': 'Salvar alterações',
-  'form.register': 'Cadastrar pessoa',
-  'form.saving': 'Salvando…',
-  'form.unnamed': 'Sem nome',
-  'form.noValue': '—'
+  tituloLista: 'Pessoas da equipe',
+  tituloNova: 'Dados da nova pessoa',
+  semNome: 'Pessoa sem nome',
+  voltarLista: 'Voltar para a lista',
+  buscaLabel: 'Buscar pessoa pelo nome',
+  buscaPlaceholder: 'Buscar pelo nome',
+  buscaVazio: 'Ninguém com esse nome',
+  novaPessoa: 'Nova pessoa',
+  carregarMais: 'Mostrar mais pessoas',
+  carregando: 'Carregando a equipe…',
+  vazioTitulo: 'Ainda não há pessoas na equipe.',
+  vazioAjuda: 'Cadastre a primeira pessoa para poder atribuir tarefas a ela.',
+  vazioBusca: 'Nenhuma pessoa encontrada com esse nome. Tente outro trecho do nome.',
+  erroLista: 'Não foi possível carregar a equipe.',
+  precondicao: 'Esta tela foi aberta sem o que ela precisa para mostrar a equipe. Volte para a tela anterior e abra a equipe de novo.',
+  voltar: 'Voltar',
+  tentarNovamente: 'Tentar de novo',
+  pessoaNaoEncontrada: 'Essa pessoa não está mais na lista. Volte e escolha outra.',
+  campoNome: 'Nome',
+  ajudaNome: 'Como aparece nas tarefas e na escolha de quem recebe a tarefa.',
+  campoPais: 'País',
+  ajudaPais: 'Código do país, por exemplo BR. Define as regras de privacidade aplicáveis.',
+  situacao: 'Situação no cadastro',
+  papeis: 'Papéis',
+  contatos: 'Contatos',
+  statusActive: 'Ativo',
+  statusInactive: 'Inativo',
+  statusMerged: 'Unificado',
+  statusBlocked: 'Bloqueado',
+  cadastrar: 'Cadastrar pessoa',
+  salvar: 'Salvar alterações',
+  erroCadastrar: 'Não foi possível cadastrar a pessoa.',
+  erroSalvar: 'Não foi possível salvar as alterações.',
 };
-
 type PageMessageType = typeof pageMessage_pt_br;
+const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
+/// **collab_i18n_end**
 
-const pageMessages: Record<string, PageMessageType> = {
-  'pt-br': pageMessage_pt_br
-};
+function textFromEvent(e: Event): string | null {
+  const detail = (e as CustomEvent<{ value?: unknown }>).detail;
+  return detail && typeof detail.value === 'string' ? detail.value : null;
+}
 
 @customElement('tarefas--web--mobile--page11--membros_equipe-102047')
 export class TarefasMobilePage11Membros_equipePage extends TarefasMembros_equipeShared {
-  msg: PageMessageType = pageMessage_pt_br;
+  private msg: PageMessageType = pageMessage_pt_br;
 
-  static styles = css`
-    :host {
-      display: block;
-      font-family: system-ui, sans-serif;
-      color: #1f2933;
-    }
-    .view {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-    label {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 14px;
-    }
-    input {
-      min-height: 44px;
-      padding: 0 12px;
-      border: 1px solid #cbd2d9;
-      border-radius: 8px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .row {
-      width: 100%;
-      min-height: 56px;
-      padding: 8px 12px;
-      text-align: left;
-      border: 1px solid #e4e7eb;
-      border-radius: 8px;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      font-size: 16px;
-    }
-    .meta {
-      font-size: 13px;
-      color: #616e7c;
-    }
-    .fact {
-      display: flex;
-      flex-direction: column;
-      font-size: 14px;
-    }
-    .fact span:first-child {
-      font-size: 13px;
-      color: #616e7c;
-    }
-    .primary {
-      min-height: 48px;
-      border: none;
-      border-radius: 8px;
-      background: #1f5fbf;
-      color: #fff;
-      font-size: 16px;
-    }
-    .primary[disabled] {
-      opacity: 0.6;
-    }
-    .secondary {
-      min-height: 44px;
-      border: 1px solid #cbd2d9;
-      border-radius: 8px;
-      background: #fff;
-      font-size: 15px;
-    }
-    .error {
-      color: #b42318;
-      font-size: 14px;
-    }
-    .note {
-      color: #616e7c;
-      font-size: 14px;
-    }
-    .foot {
-      position: sticky;
-      bottom: 0;
-      padding-top: 8px;
-      background: #fff;
-    }
-  `;
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.msg = pageMessages[this.getMessageKey(pageMessages)] ?? pageMessage_pt_br;
-  }
-
-  private statusLabel(status: PessoaEquipe['details']['identification']['status']): string {
+  private statusLabel(status: PessoaEquipe['details']['identification']['status']) {
     switch (status) {
-      case 'Active':
-        return this.msg['status.Active'];
-      case 'Inactive':
-        return this.msg['status.Inactive'];
-      case 'Merged':
-        return this.msg['status.Merged'];
-      case 'Blocked':
-        return this.msg['status.Blocked'];
+      case 'Active': return this.msg.statusActive;
+      case 'Inactive': return this.msg.statusInactive;
+      case 'Merged': return this.msg.statusMerged;
+      default: return this.msg.statusBlocked;
     }
   }
 
-  private openPessoa(id: string) {
-    this.selectMembroEquipe(id);
-    this.setScenario('cadastro');
+  private renderStatus(status: PessoaEquipe['details']['identification']['status']) {
+    let tone = 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
+    if (status === 'Active') tone = 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]';
+    else if (status === 'Blocked') tone = 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
+    return html`<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${tone}">${this.statusLabel(status)}</span>`;
   }
 
-  private openNova() {
-    this.selectMembroEquipe(null);
-    this.setCmdCadastrarPessoaDraft({
-      details: { identification: { name: null, countryCode: null } }
-    });
-    this.setScenario('cadastro');
-  }
-
-  private loadMore() {
-    const page = this.pessoas?.page ?? 1;
-    void this.qryPessoasEquipe(undefined, page + 1, true);
-  }
-
-  private renderRow(item: PessoaEquipe) {
-    const ident = item.details.identification;
-    return html`<li>
-      <button class="row" type="button" @click=${() => this.openPessoa(item.id)}>
-        <span>${ident.name || this.msg['form.unnamed']}</span>
-        <span class="meta">${this.statusLabel(ident.status)} · ${this.msg['list.country']}: ${ident.countryCode || this.msg['form.noValue']}</span>
-      </button>
-    </li>`;
+  private renderRow(p: PessoaEquipe) {
+    const ident = p.details.identification;
+    const inactive = ident.status !== 'Active';
+    const selected = this.selectedMembroEquipe === p.id;
+    const contacts = p.details.base.contacts;
+    return html`
+      <li>
+        <button
+          type="button"
+          class="w-full min-h-[56px] text-left rounded-lg border px-4 py-3 flex flex-col gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] ${selected
+            ? 'bg-[var(--selected-bg,transparent)] text-[var(--selected-text,currentColor)] border-[var(--selected-border,currentColor)]'
+            : 'bg-[var(--surface-bg,transparent)] border-[var(--border-subtle,currentColor)]'}"
+          @click=${() => {
+            this.selectMembroEquipe(p.id);
+            this.setScenario('registro');
+          }}
+        >
+          <span class="flex items-start justify-between gap-3">
+            <span class="text-base font-semibold break-words ${inactive ? 'text-[var(--text-muted,currentColor)]' : 'text-[var(--text-strong,currentColor)]'}">${ident.name || this.msg.semNome}</span>
+            ${this.renderStatus(ident.status)}
+          </span>
+          <span class="text-xs text-[var(--text-muted,currentColor)] break-words">
+            ${ident.countryCode}${contacts ? html` · ${contacts}` : nothing}
+          </span>
+        </button>
+      </li>
+    `;
   }
 
   private renderListBody() {
+    const status = this.pageStatus;
+    const err = this.qryPessoasEquipeError;
     const items = this.pessoas?.items ?? [];
-    if (this.pageStatus === 'loading' && items.length === 0) {
-      return html`<p class="note">${this.msg['list.loading']}</p>`;
+
+    if (err && items.length === 0) {
+      const missing = err.code === 'client.preconditionMissing';
+      return html`
+        <div role="alert" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 flex flex-col gap-3">
+          <p class="text-sm text-[var(--text-default,currentColor)]">${missing ? this.msg.precondicao : this.msg.erroLista}</p>
+          ${missing
+            ? html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => window.history.back()}><Label>${this.msg.voltar}</Label></grouptriggeraction--ml-button-standard>`
+            : html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => { this.qryPessoasEquipe(); }}><Label>${this.msg.tentarNovamente}</Label></grouptriggeraction--ml-button-standard>`}
+        </div>
+      `;
     }
-    if (this.pageStatus === 'error' && this.qryPessoasEquipeError) {
-      return html`<p class="error">${this.qryPessoasEquipeError.message}</p>`;
+
+    if ((status === 'loading' || status === 'idle') && items.length === 0) {
+      return html`
+        <div aria-busy="true" aria-live="polite" class="flex flex-col gap-2">
+          <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.carregando}</p>
+          ${[0, 1, 2, 3].map(() => html`<div class="h-14 rounded-lg animate-pulse bg-[var(--surface-alt-bg,transparent)]"></div>`)}
+        </div>
+      `;
     }
+
     if (items.length === 0) {
-      return html`<p class="note">${this.msg['list.empty']}</p>`;
+      return html`
+        <div class="rounded-lg border border-dashed border-[var(--border-default,currentColor)] p-5 text-center flex flex-col gap-1">
+          ${this.busca
+            ? html`<p class="text-sm text-[var(--text-default,currentColor)]">${this.msg.vazioBusca}</p>`
+            : html`<p class="text-base font-medium text-[var(--text-strong,currentColor)]">${this.msg.vazioTitulo}</p>
+                   <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.vazioAjuda}</p>`}
+        </div>
+      `;
     }
-    return html`<ul>${items.map((item: PessoaEquipe) => this.renderRow(item))}</ul>
-      ${this.pessoas?.hasMore
-        ? html`<button class="secondary" type="button" @click=${() => this.loadMore()}>${this.msg['list.loadMore']}</button>`
-        : nothing}`;
+
+    const page = this.pessoas;
+    return html`
+      <ul class="flex flex-col gap-2" aria-busy=${status === 'loading' ? 'true' : 'false'}>
+        ${items.map((p) => this.renderRow(p))}
+      </ul>
+      ${page && page.hasMore
+        ? html`<grouptriggeraction--ml-button-standard
+            data-variant="secondary"
+            size="lg"
+            data-class="w-full"
+            ?loading=${this.qryPessoasEquipeStatus === 'loading'}
+            @action=${() => { this.qryPessoasEquipe(undefined, page.page + 1, true); }}
+          ><Label>${this.msg.carregarMais}</Label></grouptriggeraction--ml-button-standard>`
+        : nothing}
+    `;
   }
 
-  private renderSceneLista() {
-    return html`<div class="view">
-      <label>
-        <span>${this.msg['search.label']}</span>
-        <input
-          type="search"
-          placeholder=${this.msg['search.placeholder']}
-          .value=${this.busca ?? ''}
-          @change=${(e: Event) => {
-            const value = (e.target as HTMLInputElement).value;
-            void this.qryPessoasEquipe(value);
-          }}
-        />
-      </label>
-      ${this.renderListBody()}
-      <div class="foot">
-        <button class="primary" style="width:100%" type="button" @click=${() => this.openNova()}>${this.msg['list.new']}</button>
-      </div>
-    </div>`;
+  private renderListScene() {
+    return html`
+      <Scene value="lista" title=${this.msg.tituloLista}>
+        <div class="flex flex-col gap-3 pb-4">
+          <div data-organism-id="pessoasEquipe" class="flex flex-col gap-3">
+            <groupsearchcontent--ml-search-bar
+              .value=${this.busca}
+              placeholder=${this.msg.buscaPlaceholder}
+              ?loading=${this.qryPessoasEquipeStatus === 'loading'}
+              @search=${(e: CustomEvent<{ query: string }>) => { this.qryPessoasEquipe(e.detail.query); }}
+              @clear=${() => { this.qryPessoasEquipe(null); }}
+            >
+              <Label data-class="sr-only">${this.msg.buscaLabel}</Label>
+              <Empty>${this.msg.buscaVazio}</Empty>
+            </groupsearchcontent--ml-search-bar>
+            ${this.renderListBody()}
+          </div>
+          <div class="sticky bottom-0 -mx-1 px-1 pt-2 pb-3 bg-[var(--page-bg,transparent)]">
+            <grouptriggeraction--ml-button-standard
+              data-variant="primary"
+              size="lg"
+              data-class="w-full"
+              @action=${() => {
+                this.selectMembroEquipe(null);
+                this.setScenario('registro');
+              }}
+            ><Label>${this.msg.novaPessoa}</Label></grouptriggeraction--ml-button-standard>
+          </div>
+        </div>
+      </Scene>
+    `;
   }
 
-  private renderSceneCadastro() {
-    const selected = this.cadastroPessoa;
-    const editing = selected !== null;
+  private renderRecordBody(rec: PessoaEquipe | null) {
+    const editing = this.selectedMembroEquipe !== null;
+
+    if (editing && rec === null) {
+      return html`
+        <div role="alert" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 text-sm text-[var(--text-default,currentColor)]">
+          ${this.msg.pessoaNaoEncontrada}
+        </div>
+      `;
+    }
+
     const draft = editing ? this.cmdSalvarAlteracoesDraft : this.cmdCadastrarPessoaDraft;
     const ident = draft.details.identification;
+    const name = ident.name ?? '';
+    const country = ident.countryCode ?? '';
+
+    const setField = (field: 'name' | 'countryCode', value: string) => {
+      if (editing) {
+        this.setCmdSalvarAlteracoesDraft({
+          ...this.cmdSalvarAlteracoesDraft,
+          details: { identification: { ...this.cmdSalvarAlteracoesDraft.details.identification, [field]: value } },
+        });
+      } else {
+        this.setCmdCadastrarPessoaDraft({
+          details: { identification: { ...this.cmdCadastrarPessoaDraft.details.identification, [field]: value } },
+        });
+      }
+    };
+
     const status = editing ? this.cmdSalvarAlteracoesStatus : this.cmdCadastrarPessoaStatus;
     const error = editing ? this.cmdSalvarAlteracoesError : this.cmdCadastrarPessoaError;
-    const saving = status === 'loading';
+    const busy = status === 'loading';
+    const incomplete = name.trim() === '' || country.trim() === '';
 
-    const onName = (e: Event) => {
-      const name = (e.target as HTMLInputElement).value;
+    const save = () => {
       if (editing) {
-        const d = this.cmdSalvarAlteracoesDraft;
-        this.setCmdSalvarAlteracoesDraft({
-          ...d,
-          details: { identification: { ...d.details.identification, name } }
+        this.cmdSalvarAlteracoes().then(() => {
+          if (this.cmdSalvarAlteracoesStatus === 'success') {
+            this.setScenario('lista');
+            this.selectMembroEquipe(null);
+          }
         });
       } else {
-        const d = this.cmdCadastrarPessoaDraft;
-        this.setCmdCadastrarPessoaDraft({
-          ...d,
-          details: { identification: { ...d.details.identification, name } }
+        this.cmdCadastrarPessoa().then(() => {
+          if (this.cmdCadastrarPessoaStatus === 'success') {
+            this.setScenario('lista');
+          }
         });
       }
     };
 
-    const onCountry = (e: Event) => {
-      const countryCode = (e.target as HTMLInputElement).value;
-      if (editing) {
-        const d = this.cmdSalvarAlteracoesDraft;
-        this.setCmdSalvarAlteracoesDraft({
-          ...d,
-          details: { identification: { ...d.details.identification, countryCode } }
-        });
-      } else {
-        const d = this.cmdCadastrarPessoaDraft;
-        this.setCmdCadastrarPessoaDraft({
-          ...d,
-          details: { identification: { ...d.details.identification, countryCode } }
-        });
-      }
-    };
+    return html`
+      <form class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
+        <groupentertext--ml-floating-text-input
+          .value=${name}
+          autocomplete="name"
+          required
+          @input=${(e: Event) => { const v = textFromEvent(e); if (v !== null) setField('name', v); }}
+          @change=${(e: Event) => { const v = textFromEvent(e); if (v !== null) setField('name', v); }}
+        >
+          <Label>${this.msg.campoNome}</Label>
+          <Helper>${this.msg.ajudaNome}</Helper>
+        </groupentertext--ml-floating-text-input>
 
-    const onSave = () => {
-      if (editing) {
-        void this.cmdSalvarAlteracoes();
-      } else {
-        void this.cmdCadastrarPessoa();
-      }
-    };
+        <groupentertext--ml-enter-text
+          .value=${country}
+          autocomplete="country"
+          required
+          @input=${(e: Event) => { const v = textFromEvent(e); if (v !== null) setField('countryCode', v); }}
+          @change=${(e: Event) => { const v = textFromEvent(e); if (v !== null) setField('countryCode', v); }}
+        >
+          <Label>${this.msg.campoPais}</Label>
+          <Helper>${this.msg.ajudaPais}</Helper>
+        </groupentertext--ml-enter-text>
 
-    return html`<div class="view">
-      <label>
-        <span>${this.msg['form.name']}</span>
-        <input type="text" .value=${ident.name ?? ''} @input=${onName} />
-      </label>
-      <label>
-        <span>${this.msg['form.country']}</span>
-        <input type="text" .value=${ident.countryCode ?? ''} @input=${onCountry} />
-      </label>
-      ${selected
-        ? html`
-            <div class="fact">
-              <span>${this.msg['form.status']}</span>
-              <span>${this.statusLabel(selected.details.identification.status)}</span>
-            </div>
-            <div class="fact">
-              <span>${this.msg['form.roles']}</span>
-              <span>${selected.details.identification.tags || this.msg['form.noValue']}</span>
-            </div>
-            <div class="fact">
-              <span>${this.msg['form.contacts']}</span>
-              <span>${selected.details.base.contacts || this.msg['form.noValue']}</span>
-            </div>
-          `
-        : nothing}
-      <div class="foot">
-        ${error ? html`<p class="error">${error.message}</p>` : nothing}
-        <button class="primary" style="width:100%" type="button" ?disabled=${saving} @click=${onSave}>
-          ${saving ? this.msg['form.saving'] : editing ? this.msg['form.save'] : this.msg['form.register']}
-        </button>
-      </div>
-    </div>`;
+        ${rec
+          ? html`
+              <dl class="flex flex-col gap-3 rounded-lg bg-[var(--surface-alt-bg,transparent)] p-4">
+                <div class="flex flex-col gap-1">
+                  <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.situacao}</dt>
+                  <dd>${this.renderStatus(rec.details.identification.status)}</dd>
+                </div>
+                ${rec.details.identification.tags
+                  ? html`<div class="flex flex-col gap-1">
+                      <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.papeis}</dt>
+                      <dd class="text-sm text-[var(--text-default,currentColor)] break-words">${rec.details.identification.tags}</dd>
+                    </div>`
+                  : nothing}
+                ${rec.details.base.contacts
+                  ? html`<div class="flex flex-col gap-1">
+                      <dt class="text-xs text-[var(--text-muted,currentColor)]">${this.msg.contatos}</dt>
+                      <dd class="text-sm text-[var(--text-default,currentColor)] break-words">${rec.details.base.contacts}</dd>
+                    </div>`
+                  : nothing}
+              </dl>
+            `
+          : nothing}
+
+        <div aria-live="polite">
+          <groupnotifyuser--ml-contextual-feedback type="error" .visible=${error !== null} .dismissible=${false}>
+            <Title>${editing ? this.msg.erroSalvar : this.msg.erroCadastrar}</Title>
+            <Message>${error ? error.message : ''}</Message>
+          </groupnotifyuser--ml-contextual-feedback>
+        </div>
+
+        <div class="sticky bottom-0 -mx-1 px-1 pt-2 pb-3 bg-[var(--page-bg,transparent)]">
+          <grouptriggeraction--ml-button-standard
+            data-variant="primary"
+            size="lg"
+            type="button"
+            data-class="w-full"
+            ?disabled=${incomplete}
+            ?loading=${busy}
+            @action=${save}
+          ><Label>${editing ? this.msg.salvar : this.msg.cadastrar}</Label></grouptriggeraction--ml-button-standard>
+        </div>
+      </form>
+    `;
+  }
+
+  private renderRecordScene() {
+    const rec = this.cadastroPessoa;
+    const editing = this.selectedMembroEquipe !== null;
+    const title = editing ? (rec ? rec.details.identification.name || this.msg.semNome : this.msg.semNome) : this.msg.tituloNova;
+    return html`
+      <Scene value="registro" title=${title} nav="back" backTo="lista">
+        <div data-organism-id="cadastroPessoa" class="pb-2">
+          ${this.renderRecordBody(rec)}
+        </div>
+      </Scene>
+    `;
   }
 
   render() {
-    return html`<molecules--ml-scenary-102020
-      mode="scenary"
-      .value=${this.scenary || 'lista'}
-      backLabel=${this.msg['scene.back']}
-      @change=${(e: CustomEvent<{ value: string }>) => {
-        if (e.target === e.currentTarget) this.setScenario(e.detail.value);
-      }}
-    >
-      <Scene value="lista" title=${this.msg['scene.lista']}>${this.renderSceneLista()}</Scene>
-      <Scene value="cadastro" title=${this.msg['scene.cadastro']} nav="back">${this.renderSceneCadastro()}</Scene>
-    </molecules--ml-scenary-102020>`;
+    this.msg = pageMessages[this.getMessageKey(pageMessages)];
+    return html`
+      <div class="mx-auto w-full max-w-[430px] px-4 py-3 bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)]">
+        <molecules--ml-scenary-102020
+          mode="scenary"
+          .backLabel=${this.msg.voltarLista}
+          .value=${this.scenary || (this.selectedMembroEquipe !== null ? 'registro' : 'lista')}
+          @change=${(e: CustomEvent<{ value: string }>) => {
+            if (e.target === e.currentTarget) {
+              this.setScenario(e.detail.value);
+              if (e.detail.value === 'lista') this.selectMembroEquipe(null);
+            }
+          }}
+        >
+          ${this.renderListScene()}
+          ${this.renderRecordScene()}
+        </molecules--ml-scenary-102020>
+      </div>
+    `;
   }
 }

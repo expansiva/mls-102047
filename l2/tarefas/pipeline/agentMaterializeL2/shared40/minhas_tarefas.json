@@ -4,29 +4,37 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "unitInputHash": "sha256:ff8cfed6bc69caf93567350557adbc7ac74175cac50a4448662a52ed7d201c8d",
-  "promptHash": "sha256:128edd0624b6bcb1af9d654c9db6ad5323430b5c7a72cd3a40a23ea1eef55f55",
+  "promptHash": "sha256:701b5b53bb4fa32229a61e8084167ceffe57e9478b5b1fc1835237f67e9b7ff8",
   "rulesHash": "sha256:5d73976ee984523f9eac1ba0952c7159b8495f4f8fcd735cb7f4ca1c17b34438",
   "sourcePath": "l2/tarefas/web/shared/minhas_tarefas.ts",
-  "sourceHash": "sha256:17caead5e3c31f69ab7529938c93c9502e2d24ed7b1e31671a05ddc33f19939f",
+  "sourceHash": "sha256:16d7328740afd2d7f71f7b4ac74175ac4cdf21b3d616a9fd7422241c64189356",
   "declarationPath": "l2/tarefas/web/shared/minhas_tarefasDts.txt",
-  "declarationHash": "sha256:a4f0f3951a2e42f696ea28ab09f6c9dcdd363cc57ae7619c1a5396e7c406ccb7",
+  "declarationHash": "sha256:ea0aa27a5e578f98c0ebc6a9ce6e0a880c81f5cbca195bfe2dd4420b93d4fd4d",
   "attempt": 2,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "Entry param filtro has effect filter:listaTarefas but no state holds it. Added public state `filtro` (persisted in localStorage) that qryMinhasTarefas(filtro?, page, append) publishes and sends in the query input."
+      "message": "Param filtro (filter:listaTarefas) has no state in the definition. Added the public state filtro (FiltroTarefas | null, persisted in localStorage) that takes part in the qryMinhasTarefas input; qryMinhasTarefas(filtro) publishes it and loads from the first page."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "State selectedTarefa (select:detalheTarefa) had no setter. Added public `selectTarefa(id | null)`, which publishes selectedTarefa (kept in the URL param tarefaId) and loads the record into `tarefa` through qryTarefa."
+      "message": "selectedTarefa (select:detalheTarefa) holds only the id and no member selects. Added selectDetalheTarefa(id | null), which publishes the id (kept in the URL), calls qryTarefa and keeps its output in tarefa; null clears both."
     },
     {
-      "code": "FORM_DRAFT_MISSING",
-      "message": "No state has <command>.input as its source. Added drafts cmdCriarTarefaDraft (with generated chaveCriacao, prefilled by listaId/responsavelId params), cmdSalvarEdicaoDraft and cmdSalvarChecklistDraft (filled from the loaded task) and cmdDevolverDraft (return reason), with their setters; plus clearCmdCriarTarefaDraft to start a fresh creation key."
+      "code": "DRAFT_STATE_MISSING",
+      "message": "The definition has no <command>.input state for the commands the person fills in. Added drafts with setters: cmdCriarTarefaDraft (with the generated chaveCriacao and clearCmdCriarTarefaDraft; prefilled from params listaId and responsavelId), cmdSalvarEdicaoDraft and cmdSalvarChecklistDraft (prefilled from the open task), cmdDevolverDraft (reason)."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "cmdCriarTarefa returns a TarefaDetalhe but the list holds TarefaResumo rows whose indicators (venceHoje, atrasada, quantidadeSubtarefas, progressoChecklist) cannot be computed in the browser. A created task is NOT inserted into `tarefas`; existing rows are updated only with the fields the detail carries (indicators keep their previous values) or removed when the filter no longer matches. After a creation or a checklist save the list indicators/membership may be stale until qryMinhasTarefas is called again."
+      "message": "cmdCriarTarefa returns a TarefaDetalhe, but a new row of tarefas (TarefaResumo) needs derived indicators (venceHoje, atrasada, quantidadeSubtarefas, progressoChecklist) that the output does not carry. The created task is shown in tarefa and selected, but not inserted into tarefas; the list shows it only on its next load."
+    },
+    {
+      "code": "STATE_LEFT_STALE",
+      "message": "Commands that return a task update the existing row of tarefas by id (or remove it when it leaves the current quick filter), but the derived indicators of the row (venceHoje, atrasada, quantidadeSubtarefas, progressoChecklist) keep their previous values because the detail output does not carry them (for example after a deadline edit or a checklist save)."
+    },
+    {
+      "code": "PAGE_STATE_MISSING",
+      "message": "The paged list has no page param/state; the page and hasMore live inside tarefas. qryMinhasTarefas(filtro, page, append) takes the page to load; a pager replaces, a load-more appends."
     },
     {
       "code": "MEMBER_ADDED",
@@ -54,7 +62,7 @@
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public selectTarefa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public selectDetalheTarefa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",

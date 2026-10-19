@@ -3,9 +3,10 @@
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { TarefasTarefas_equipeShared } from '/_102047_/l2/tarefas/web/shared/tarefas_equipe.js';
-import type { TarefaEquipeItem, TarefasPage, TarefaPrioridade, TarefaSituacao } from '/_102047_/l2/tarefas/web/shared/tarefas_equipe.js';
+import type { TarefaDetalhe, Prioridade, StatusTarefa } from '/_102047_/l2/tarefas/web/shared/tarefas_equipe.js';
 import '/_102020_/l2/molecules/ml-scenary.js';
 import '/_102040_/l2/molecules/groupenterdateinterval/ml-date-interval-presets.js';
+import '/_102040_/l2/molecules/groupnotifyuser/ml-alert-modal.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-toast-notification.js';
 import '/_102040_/l2/molecules/groupselectone/ml-select.js';
 import '/_102040_/l2/molecules/groupselectone/ml-select-one-autocomplete.js';
@@ -17,111 +18,112 @@ import '/_102040_/l2/molecules/groupviewtable/ml-responsive-table.js';
 
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
-  pageTitle: 'Tarefas da equipe',
-  sceneDetail: 'Detalhe da tarefa',
-  sceneConfirm: 'Confirmar cancelamento',
-  back: 'Voltar',
-  atrasadas: 'Atrasadas',
-  venceHoje: 'Vencem hoje',
+  sceneQuadro: 'Tarefas da equipe',
+  sceneTarefa: 'Detalhe da tarefa',
+  back: 'Voltar às tarefas',
   filtros: 'Filtros',
+  filtroLista: 'Lista',
+  filtroResponsavel: 'Responsável',
+  filtroPrioridade: 'Prioridade',
+  filtroSituacao: 'Situação',
+  filtroPrazo: 'Período do prazo',
+  prazoDe: 'De',
+  prazoAte: 'Até',
+  todas: 'Todas',
+  todos: 'Todos',
+  escolher: 'Escolher',
   limparFiltros: 'Limpar filtros',
-  lista: 'Lista',
-  responsavel: 'Responsável',
-  prioridade: 'Prioridade',
-  situacao: 'Situação',
-  prazo: 'Prazo',
-  periodoPrazo: 'Período do prazo',
-  de: 'De',
-  ate: 'Até',
-  todasListas: 'Todas as listas',
-  todosResponsaveis: 'Todos os responsáveis',
-  todasPrioridades: 'Todas as prioridades',
-  todasSituacoes: 'Todas as situações',
-  stAFazer: 'A fazer',
-  stEmAndamento: 'Em andamento',
-  stEmRevisao: 'Em revisão',
-  stConcluida: 'Concluída',
-  stCancelada: 'Cancelada',
-  prBaixa: 'Baixa',
-  prMedia: 'Média',
-  prAlta: 'Alta',
+  chipAtrasadas: 'Atrasadas',
+  chipVenceHoje: 'Vencem hoje',
+  prio_low: 'Baixa',
+  prio_medium: 'Média',
+  prio_high: 'Alta',
+  status_aFazer: 'A fazer',
+  status_emAndamento: 'Em andamento',
+  status_emRevisao: 'Em revisão',
+  status_concluida: 'Concluída',
+  status_cancelada: 'Cancelada',
   colTarefa: 'Tarefa',
-  chipVenceHoje: 'Vence hoje',
-  chipAtrasada: 'Atrasada',
-  emptyBoard: 'Nenhuma tarefa encontrada',
-  emptyHint: 'Ajuste ou limpe os filtros para ver outras tarefas.',
-  loadMore: 'Carregar mais tarefas',
-  loadingBoard: 'Carregando tarefas…',
-  errorBoard: 'Não foi possível carregar as tarefas.',
-  retry: 'Tentar novamente',
-  preconditionTitle: 'Faltam informações para abrir esta tela',
-  preconditionBody: 'Abra as tarefas da equipe a partir do menu do módulo para que a lista possa ser carregada.',
-  goBack: 'Voltar para a tela anterior',
-  opening: 'Abrindo tarefa…',
-  errorDetail: 'Não foi possível abrir a tarefa.',
+  colPrazo: 'Prazo',
+  colResponsavel: 'Responsável',
+  colSituacao: 'Situação',
+  colPrioridade: 'Prioridade',
+  venceHojeTag: 'Vence hoje',
+  atrasadaSr: 'Atrasada.',
+  carregando: 'Carregando tarefas…',
+  atualizando: 'Atualizando a lista…',
+  vazio: 'Nenhuma tarefa encontrada com estes filtros.',
+  carregarMais: 'Carregar mais tarefas',
+  erroLista: 'Não foi possível carregar as tarefas da equipe.',
+  tentarNovamente: 'Tentar de novo',
+  precondicao: 'Esta tela foi aberta sem o que precisa para mostrar as tarefas da equipe. Volte para a tela anterior e abra de novo.',
+  voltarTela: 'Voltar à tela anterior',
+  carregandoDetalhe: 'Abrindo a tarefa…',
+  erroDetalhe: 'Não foi possível abrir esta tarefa.',
   descricao: 'Descrição',
-  noDescricao: 'Sem descrição',
-  criador: 'Criada por',
-  criadaEm: 'Criada em',
-  subtarefas: 'Subtarefas',
   motivoDevolucao: 'Motivo da devolução',
+  criadaPor: 'Criada por',
+  responsavel: 'Responsável',
+  prazo: 'Prazo',
+  situacao: 'Situação',
+  prioridade: 'Prioridade',
+  subtarefas: 'Subtarefas',
   checklist: 'Checklist',
-  checkItem: 'Item',
-  checkDone: 'Feito',
-  checkPending: 'Pendente',
-  emptyChecklist: 'Esta tarefa não tem itens na checklist.',
-  acoesTitle: 'Ações do gestor',
-  novoResp: 'Novo responsável',
-  novoRespPlaceholder: 'Escolha uma pessoa da equipe',
-  novoRespHelper: 'Só pessoas ativas podem receber a tarefa, e ela será avisada.',
-  btnReatribuir: 'Reatribuir tarefa',
-  btnCancelar: 'Cancelar tarefa',
-  closedNote: 'Esta tarefa está encerrada e não aceita mais ações.',
-  confirmMessage: 'Você vai cancelar a tarefa abaixo. Depois disso, ela não muda mais de situação.',
-  btnConfirmCancel: 'Sim, cancelar a tarefa',
-  btnKeep: 'Manter a tarefa',
-  toastReatribuida: 'Responsável trocado. A nova pessoa foi avisada.',
-  toastCancelada: 'Tarefa cancelada.',
-  historico: 'Histórico',
-  hQuando: 'Quando',
-  hEvento: 'O que aconteceu',
-  hCriada: 'Tarefa criada por',
-  hDevolvida: 'Devolvida para ajuste',
-  hConcluida: 'Concluída',
-  hCancelada: 'Cancelada',
-  semDados: '—',
+  criadaEm: 'Criada em',
+  checklistVazia: 'Esta tarefa não tem itens na checklist.',
+  itemFeito: 'Feito',
+  itemPendente: 'Pendente',
+  colItem: 'Item',
+  colFeito: 'Feito',
+  acoes: 'Ações do gestor',
+  novoResponsavel: 'Novo responsável',
+  escolherPessoa: 'Escolha uma pessoa da equipe',
+  semPessoa: 'Nenhuma pessoa encontrada',
+  indisponivel: '(indisponível)',
+  trocarResponsavel: 'Trocar responsável',
+  cancelarTarefa: 'Cancelar tarefa',
+  erroReatribuir: 'Não foi possível trocar o responsável. Tente de novo.',
+  erroCancelar: 'Não foi possível cancelar a tarefa. Tente de novo.',
+  confirmaTitulo: 'Confirmar cancelamento',
+  confirmaMsg: 'Cancelar a tarefa "{titulo}"? Depois disso ela não muda mais de situação.',
+  confirmaSim: 'Sim, cancelar a tarefa',
+  confirmaNao: 'Manter a tarefa',
+  toastReatribuida: 'Responsável trocado. A pessoa foi avisada.',
+  toastCancelada: 'A tarefa foi cancelada.',
+  encerrada: 'Esta tarefa está encerrada e não aceita mais ações.',
+  historico: 'Histórico da tarefa',
+  colQuando: 'Quando',
+  colEvento: 'Evento',
+  evCriada: 'Tarefa criada',
+  evDevolvida: 'Devolvida para ajuste',
+  evConcluida: 'Concluída',
+  evCancelada: 'Cancelada',
 };
 type PageMessageType = typeof pageMessage_pt_br;
 const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
 /// **collab_i18n_end**
 
-const ALL = '__all';
-const PRECONDITION = 'client.preconditionMissing';
+const TODOS = '__todos';
 
 function lang() {
   return document.documentElement.lang || undefined;
 }
 
-function fmtDate(value: string | undefined) {
-  if (!value) return '';
-  const d = new Date(value.length === 10 ? `${value}T00:00:00` : value);
-  if (Number.isNaN(d.getTime())) return value;
+function formatDate(iso: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
   return new Intl.DateTimeFormat(lang(), { dateStyle: 'medium' }).format(d);
 }
 
-function fmtDateTime(value: string | undefined) {
-  if (!value) return '';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return new Intl.DateTimeFormat(lang(), { dateStyle: 'short', timeStyle: 'short' }).format(d);
+function formatDateTime(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat(lang(), { dateStyle: 'medium', timeStyle: 'short' }).format(d);
 }
 
-function rowsOf(page: TarefasPage | null): TarefaEquipeItem[] {
-  return page ? page.items : [];
-}
-
-function chipClass(status: TarefaSituacao) {
-  switch (status) {
+function statusChipClass(s: string) {
+  switch (s) {
     case 'emAndamento':
       return 'bg-[var(--status-info-bg,transparent)] text-[var(--status-info-text,currentColor)]';
     case 'emRevisao':
@@ -133,398 +135,452 @@ function chipClass(status: TarefaSituacao) {
   }
 }
 
-const btnQuick = 'min-h-[44px] px-4 rounded-full border text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]';
-const btnQuickOn = 'bg-[var(--selected-bg,transparent)] text-[var(--selected-text,currentColor)] border-[var(--selected-border,currentColor)]';
-const btnQuickOff = 'bg-[var(--surface-bg,transparent)] text-[var(--text-default,currentColor)] border-[var(--border-default,currentColor)]';
+function setModal(e: Event, visible: boolean) {
+  const modal = (e.currentTarget as HTMLElement)
+    .closest('[data-organism-id="acoesGestor"]')
+    ?.querySelector('groupnotifyuser--ml-alert-modal') as (HTMLElement & { visible: boolean }) | null;
+  if (modal) modal.visible = visible;
+}
+
+function goBack() {
+  window.history.back();
+}
 
 @customElement('tarefas--web--mobile--page11--tarefas_equipe-102047')
 export class TarefasMobilePage11Tarefas_equipePage extends TarefasTarefas_equipeShared {
   private msg: PageMessageType = pageMessage_pt_br;
 
-  private statusLabel(s: TarefaSituacao) {
-    const m = this.msg;
-    const map: Record<TarefaSituacao, string> = {
-      aFazer: m.stAFazer,
-      emAndamento: m.stEmAndamento,
-      emRevisao: m.stEmRevisao,
-      concluida: m.stConcluida,
-      cancelada: m.stCancelada,
-    };
-    return map[s];
+  private label(prefix: string, key: string) {
+    return this.msg[(prefix + key) as keyof PageMessageType];
   }
 
-  private prioridadeLabel(p: TarefaPrioridade) {
-    const m = this.msg;
-    const map: Record<TarefaPrioridade, string> = { low: m.prBaixa, medium: m.prMedia, high: m.prAlta };
-    return map[p];
+  private chip(s: string) {
+    return html`<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusChipClass(s)}">${this.label('status_', s)}</span>`;
   }
 
-  private chip(s: TarefaSituacao) {
-    return html`<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${chipClass(s)}">${this.statusLabel(s)}</span>`;
-  }
-
-  private abrir(t: TarefaEquipeItem | undefined) {
-    if (!t) return;
-    this.setScenario('tarefa');
-    this.obterTarefa(t.id);
-  }
-
-  private limparFiltros() {
-    this.listarTarefasEquipe({
-      listaId: null,
-      responsavelId: null,
-      prioridade: null,
-      status: null,
-      prazoDe: null,
-      prazoAte: null,
-      venceHoje: null,
-      atrasada: null,
-    });
-  }
-
-  private filterSelect(
+  private filtroSelect(
     label: string,
-    allLabel: string,
     value: string | null,
-    items: { value: string; label: string }[],
+    options: { value: string; label: string }[],
+    allLabel: string,
     onPick: (v: string | null) => void,
   ) {
     return html`
       <groupselectone--ml-select
-        .value=${value ?? ALL}
-        @change=${(e: CustomEvent<{ value: string | null }>) => onPick(e.detail.value === ALL ? null : e.detail.value)}
+        .value=${value ?? TODOS}
+        placeholder=${this.msg['escolher']}
+        @change=${(e: CustomEvent<{ value: string | null }>) => onPick(e.detail.value === TODOS ? null : e.detail.value)}
       >
         <Label>${label}</Label>
-        <Trigger>${allLabel}</Trigger>
-        <Item value=${ALL}>${allLabel}</Item>
-        ${items.map((i) => html`<Item value=${i.value}>${i.label}</Item>`)}
+        <Item value=${TODOS}>${allLabel}</Item>
+        ${options.map((o) => html`<Item value=${o.value}>${o.label}</Item>`)}
       </groupselectone--ml-select>
     `;
   }
 
+  private chipToggle(label: string, on: boolean, onClick: () => void) {
+    const cls = on
+      ? 'bg-[var(--selected-bg,transparent)] text-[var(--selected-text,currentColor)] border-[var(--selected-border,currentColor)]'
+      : 'bg-[var(--surface-bg,transparent)] text-[var(--text-default,currentColor)] border-[var(--border-default,currentColor)]';
+    return html`<button
+      type="button"
+      aria-pressed=${on ? 'true' : 'false'}
+      class="min-h-[44px] flex-1 rounded-full border px-4 text-sm font-medium focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] ${cls}"
+      @click=${onClick}
+    >${label}</button>`;
+  }
+
   private renderFiltros() {
-    const m = this.msg;
+    const prioridades: Prioridade[] = ['low', 'medium', 'high'];
+    const situacoes: StatusTarefa[] = ['aFazer', 'emAndamento', 'emRevisao', 'concluida', 'cancelada'];
     return html`
       <details class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
-        <summary class="min-h-[44px] flex items-center px-3 cursor-pointer text-sm font-medium text-[var(--text-strong,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${m.filtros}</summary>
-        <div class="grid gap-3 p-3 border-t border-[var(--border-subtle,currentColor)]">
-          ${this.filterSelect(m.lista, m.todasListas, this.listaId, this.listas.map((l) => ({ value: l.id, label: l.nome })), (v) => this.listarTarefasEquipe({ listaId: v }))}
-          ${this.filterSelect(m.responsavel, m.todosResponsaveis, this.responsavelId, this.membros.map((x) => ({ value: x.id, label: x.details.identification.name })), (v) => this.listarTarefasEquipe({ responsavelId: v }))}
-          ${this.filterSelect(m.prioridade, m.todasPrioridades, this.prioridade, [
-            { value: 'low', label: m.prBaixa },
-            { value: 'medium', label: m.prMedia },
-            { value: 'high', label: m.prAlta },
-          ], (v) => this.listarTarefasEquipe({ prioridade: v as TarefaPrioridade | null }))}
-          ${this.filterSelect(m.situacao, m.todasSituacoes, this.status, [
-            { value: 'aFazer', label: m.stAFazer },
-            { value: 'emAndamento', label: m.stEmAndamento },
-            { value: 'emRevisao', label: m.stEmRevisao },
-            { value: 'concluida', label: m.stConcluida },
-            { value: 'cancelada', label: m.stCancelada },
-          ], (v) => this.listarTarefasEquipe({ status: v as TarefaSituacao | null }))}
+        <summary class="flex min-h-[44px] cursor-pointer items-center px-4 font-medium text-[var(--text-strong,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${this.msg['filtros']}</summary>
+        <div class="flex flex-col gap-3 border-t border-[var(--border-subtle,currentColor)] p-4">
+          ${this.filtroSelect(
+            this.msg['filtroLista'],
+            this.listaId,
+            this.listas.map((l) => ({ value: l.id, label: l.nome })),
+            this.msg['todas'],
+            (v) => this.filtrarTarefasEquipe({ listaId: v }),
+          )}
+          ${this.filtroSelect(
+            this.msg['filtroResponsavel'],
+            this.responsavelId,
+            this.membros.map((m) => ({ value: m.id, label: m.details.identification.name })),
+            this.msg['todos'],
+            (v) => this.filtrarTarefasEquipe({ responsavelId: v }),
+          )}
+          ${this.filtroSelect(
+            this.msg['filtroPrioridade'],
+            this.prioridade,
+            prioridades.map((p) => ({ value: p, label: this.label('prio_', p) })),
+            this.msg['todas'],
+            (v) => this.filtrarTarefasEquipe({ prioridade: v as Prioridade | null }),
+          )}
+          ${this.filtroSelect(
+            this.msg['filtroSituacao'],
+            this.status,
+            situacoes.map((s) => ({ value: s, label: this.label('status_', s) })),
+            this.msg['todas'],
+            (v) => this.filtrarTarefasEquipe({ status: v as StatusTarefa | null }),
+          )}
           <groupenterdateinterval--ml-date-interval-presets
             .startDate=${this.prazoDe}
             .endDate=${this.prazoAte}
-            locale=${lang() || 'pt-BR'}
+            locale="pt-BR"
             @change=${(e: CustomEvent<{ startDate: string | null; endDate: string | null }>) =>
-              this.listarTarefasEquipe({ prazoDe: e.detail.startDate, prazoAte: e.detail.endDate })}
+              this.filtrarTarefasEquipe({ prazoDe: e.detail.startDate, prazoAte: e.detail.endDate })}
           >
-            <Label>${m.periodoPrazo}</Label>
-            <LabelStart>${m.de}</LabelStart>
-            <LabelEnd>${m.ate}</LabelEnd>
+            <Label>${this.msg['filtroPrazo']}</Label>
+            <LabelStart>${this.msg['prazoDe']}</LabelStart>
+            <LabelEnd>${this.msg['prazoAte']}</LabelEnd>
           </groupenterdateinterval--ml-date-interval-presets>
-          <grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => this.limparFiltros()}>
-            <Label>${m.limparFiltros}</Label>
+          <grouptriggeraction--ml-button-standard
+            data-variant="secondary"
+            size="lg"
+            data-class="w-full"
+            @action=${() => this.limparFiltrosTarefasEquipe()}
+          >
+            <Label>${this.msg['limparFiltros']}</Label>
           </grouptriggeraction--ml-button-standard>
         </div>
       </details>
     `;
   }
 
-  private renderErroQuadro() {
-    const m = this.msg;
-    const err = this.listarTarefasEquipeError ?? this.carregarOpcoesEquipeError;
-    if (!err) return nothing;
-    if (err.code === PRECONDITION) {
-      return html`
-        <div role="alert" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-4 flex flex-col gap-3">
-          <p class="font-semibold text-[var(--text-strong,currentColor)]">${m.preconditionTitle}</p>
-          <p class="text-sm text-[var(--text-default,currentColor)]">${m.preconditionBody}</p>
-          <grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => history.back()}>
-            <Label>${m.goBack}</Label>
-          </grouptriggeraction--ml-button-standard>
-        </div>
-      `;
-    }
+  private renderLista() {
+    const items = this.tarefas?.items ?? [];
+    const idx = items.findIndex((i) => i.id === this.selectedTarefa);
+    const loadingMore = this.listarTarefasEquipeStatus === 'loading';
     return html`
-      <div role="alert" aria-live="polite" class="rounded-lg bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)] p-3 flex flex-col gap-2">
-        <p class="text-sm font-medium">${m.errorBoard}</p>
-        <p class="text-sm">${err.message}</p>
-        <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => this.listarTarefasEquipe()}>
-          <Label>${m.retry}</Label>
-        </grouptriggeraction--ml-button-standard>
+      <div class="flex gap-2">
+        ${this.chipToggle(this.msg['chipAtrasadas'], this.atrasada === true, () =>
+          this.filtrarTarefasEquipe({ atrasada: this.atrasada ? null : true }),
+        )}
+        ${this.chipToggle(this.msg['chipVenceHoje'], this.venceHoje === true, () =>
+          this.filtrarTarefasEquipe({ venceHoje: this.venceHoje ? null : true }),
+        )}
       </div>
+      ${this.renderFiltros()}
+      <p class="min-h-[1rem] text-xs text-[var(--text-muted,currentColor)]" aria-live="polite">
+        ${loadingMore && this.pageStatus !== 'loading' ? this.msg['atualizando'] : ''}
+      </p>
+      <groupviewtable--ml-responsive-table
+        .value=${idx >= 0 ? String(idx) : ''}
+        .loading=${this.pageStatus === 'loading'}
+        @rowClick=${(e: CustomEvent<{ index: number }>) => {
+          const item = items[e.detail.index];
+          if (item) {
+            this.obterTarefa(item.id);
+            this.setScenario('tarefa');
+          }
+        }}
+      >
+        <TableHeader>
+          <TableRow>
+            <TableHead key="titulo">${this.msg['colTarefa']}</TableHead>
+            <TableHead key="prazo">${this.msg['colPrazo']}</TableHead>
+            <TableHead key="responsavel">${this.msg['colResponsavel']}</TableHead>
+            <TableHead key="status">${this.msg['colSituacao']}</TableHead>
+            <TableHead key="prioridade">${this.msg['colPrioridade']}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          ${items.map(
+            (t) => html`
+              <TableRow key=${t.id}>
+                <TableCell>
+                  <div class="flex flex-col gap-0.5">
+                    <span class="font-medium text-[var(--text-strong,currentColor)]">${t.titulo}</span>
+                    <span class="text-xs text-[var(--text-muted,currentColor)]">${t.lista.nome} · ${this.msg['checklist']} ${t.details.progressoChecklist}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class=${t.details.atrasada ? 'font-semibold text-[var(--status-error-text,currentColor)]' : ''}>${formatDate(t.prazo)}${t.details.atrasada ? html`<span class="sr-only"> ${this.msg['atrasadaSr']}</span>` : nothing}</span>
+                    ${t.details.venceHoje
+                      ? html`<span class="rounded-full px-2 py-0.5 text-xs font-medium bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]">${this.msg['venceHojeTag']}</span>`
+                      : nothing}
+                  </div>
+                </TableCell>
+                <TableCell>${t.responsavel.details.identification.name}</TableCell>
+                <TableCell>${this.chip(t.status)}</TableCell>
+                <TableCell><span class=${t.prioridade === 'high' ? 'font-semibold' : ''}>${this.label('prio_', t.prioridade)}</span></TableCell>
+              </TableRow>
+            `,
+          )}
+        </TableBody>
+        <Empty>
+          <div class="py-8 text-center text-[var(--text-muted,currentColor)]">${this.msg['vazio']}</div>
+        </Empty>
+        <Loading>
+          <div class="py-8 text-center text-[var(--text-muted,currentColor)]">${this.msg['carregando']}</div>
+        </Loading>
+      </groupviewtable--ml-responsive-table>
+      ${this.tarefas?.hasMore
+        ? html`<grouptriggeraction--ml-button-standard
+            data-variant="secondary"
+            size="lg"
+            data-class="w-full"
+            .loading=${loadingMore}
+            @action=${() => this.listarTarefasEquipe((this.tarefas?.page ?? 1) + 1, true)}
+          >
+            <Label>${this.msg['carregarMais']}</Label>
+          </grouptriggeraction--ml-button-standard>`
+        : nothing}
     `;
   }
 
   private renderQuadro() {
-    const m = this.msg;
-    const rows = rowsOf(this.tarefas);
-    const loading = this.listarTarefasEquipeStatus === 'loading' || this.pageStatus === 'loading';
-    const idx = rows.findIndex((r) => r.id === this.selectedTarefa);
-    const hasMore = this.tarefas ? this.tarefas.hasMore : false;
+    const precondicao =
+      this.listarTarefasEquipeError?.code === 'client.preconditionMissing' ||
+      this.carregarOpcoesEquipeError?.code === 'client.preconditionMissing';
     return html`
-      <section data-organism-id="tarefasEquipe" class="flex flex-col gap-3">
-        <div class="flex gap-2 flex-wrap">
-          <button type="button" aria-pressed=${this.atrasada ? 'true' : 'false'} class="${btnQuick} ${this.atrasada ? btnQuickOn : btnQuickOff}"
-            @click=${() => this.listarTarefasEquipe({ atrasada: this.atrasada ? null : true })}>${m.atrasadas}</button>
-          <button type="button" aria-pressed=${this.venceHoje ? 'true' : 'false'} class="${btnQuick} ${this.venceHoje ? btnQuickOn : btnQuickOff}"
-            @click=${() => this.listarTarefasEquipe({ venceHoje: this.venceHoje ? null : true })}>${m.venceHoje}</button>
-        </div>
-        ${this.renderFiltros()}
-        ${this.renderErroQuadro()}
-        <groupviewtable--ml-responsive-table
-          .value=${idx >= 0 ? String(idx) : ''}
-          .loading=${loading}
-          @rowClick=${(e: CustomEvent<{ index: number }>) => this.abrir(rows[e.detail.index])}
-        >
-          <TableHeader>
-            <TableRow>
-              <TableHead key="titulo">${m.colTarefa}</TableHead>
-              <TableHead key="responsavel">${m.responsavel}</TableHead>
-              <TableHead key="prazo">${m.prazo}</TableHead>
-              <TableHead key="status">${m.situacao}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            ${rows.map((r) => html`
-              <TableRow key=${r.id}>
-                <TableCell>
-                  <div class="font-medium text-[var(--text-strong,currentColor)]">${r.titulo}</div>
-                  <div class="text-xs text-[var(--text-muted,currentColor)]">${r.lista.nome} · ${r.details.progressoChecklist} · ${this.prioridadeLabel(r.prioridade)}</div>
-                </TableCell>
-                <TableCell>${r.responsavel.details.identification.name}</TableCell>
-                <TableCell>
-                  <span class="${r.details.atrasada ? 'font-semibold text-[var(--status-error-text,currentColor)]' : 'text-[var(--text-default,currentColor)]'}">${fmtDate(r.prazo)}</span>
-                  ${r.details.atrasada
-                    ? html`<span class="ml-1 text-xs text-[var(--status-error-text,currentColor)]">${m.chipAtrasada}</span>`
-                    : r.details.venceHoje
-                      ? html`<span class="ml-1 inline-flex rounded-full px-2 py-0.5 text-xs bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]">${m.chipVenceHoje}</span>`
-                      : nothing}
-                </TableCell>
-                <TableCell>${this.chip(r.status)}</TableCell>
-              </TableRow>`)}
-          </TableBody>
-          <Loading><div class="py-8 text-center text-[var(--text-muted,currentColor)]">${m.loadingBoard}</div></Loading>
-          <Empty>
-            <div class="py-8 px-4 text-center flex flex-col gap-2">
-              <p class="font-medium text-[var(--text-strong,currentColor)]">${m.emptyBoard}</p>
-              <p class="text-sm text-[var(--text-muted,currentColor)]">${m.emptyHint}</p>
-            </div>
-          </Empty>
-        </groupviewtable--ml-responsive-table>
-        ${hasMore
-          ? html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full"
-              ?loading=${this.listarTarefasEquipeStatus === 'loading'}
-              @action=${() => this.listarTarefasEquipe(undefined, (this.tarefas ? this.tarefas.page : 1) + 1, true)}>
-              <Label>${m.loadMore}</Label>
-            </grouptriggeraction--ml-button-standard>`
-          : nothing}
+      <section data-organism-id="tarefasEquipe" class="flex flex-col gap-3" aria-busy=${this.pageStatus === 'loading' ? 'true' : 'false'}>
+        ${this.pageStatus === 'error'
+          ? html`<div role="alert" class="flex flex-col gap-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
+              <p class="text-[var(--text-default,currentColor)]">${precondicao ? this.msg['precondicao'] : this.msg['erroLista']}</p>
+              ${precondicao
+                ? html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${goBack}>
+                    <Label>${this.msg['voltarTela']}</Label>
+                  </grouptriggeraction--ml-button-standard>`
+                : html`<grouptriggeraction--ml-button-standard size="lg" data-class="w-full" @action=${() => this.listarTarefasEquipe()}>
+                    <Label>${this.msg['tentarNovamente']}</Label>
+                  </grouptriggeraction--ml-button-standard>`}
+            </div>`
+          : this.renderLista()}
       </section>
     `;
   }
 
-  private renderDetalhe() {
-    const m = this.msg;
-    const t = this.tarefa;
-    if (this.obterTarefaStatus === 'loading') {
-      return html`<section data-organism-id="detalheTarefa" aria-busy="true" class="py-8 text-center text-[var(--text-muted,currentColor)]">${m.opening}</section>`;
-    }
-    if (this.obterTarefaError) {
-      return html`
-        <section data-organism-id="detalheTarefa" role="alert" aria-live="polite" class="rounded-lg bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)] p-3 flex flex-col gap-2">
-          <p class="text-sm font-medium">${m.errorDetail}</p>
-          <p class="text-sm">${this.obterTarefaError.message}</p>
-          <grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => this.obterTarefa(this.selectedTarefa)}>
-            <Label>${m.retry}</Label>
-          </grouptriggeraction--ml-button-standard>
-        </section>`;
-    }
-    if (!t) return html`<section data-organism-id="detalheTarefa"></section>`;
+  private dt(label: string, value: unknown) {
+    return html`<div class="flex flex-col gap-0.5">
+      <dt class="text-xs text-[var(--text-muted,currentColor)]">${label}</dt>
+      <dd class="text-sm text-[var(--text-strong,currentColor)]">${value}</dd>
+    </div>`;
+  }
+
+  private renderDetalhe(t: TarefaDetalhe) {
     return html`
-      <section data-organism-id="detalheTarefa" class="flex flex-col gap-4">
+      <section data-organism-id="detalheTarefa" class="flex flex-col gap-3">
         <groupviewcard--ml-vertical-card>
           <CardHeader>
             <CardTitle>${t.titulo}</CardTitle>
-            <CardDescription>
-              <span class="inline-flex items-center gap-2">${this.chip(t.status)}<span>${this.prioridadeLabel(t.prioridade)}</span></span>
-            </CardDescription>
+            <CardDescription>${this.chip(t.status)}</CardDescription>
           </CardHeader>
           <CardContent>
-            <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-              <dt class="text-[var(--text-muted,currentColor)]">${m.responsavel}</dt>
-              <dd class="text-[var(--text-strong,currentColor)]">${t.responsavel.details.identification.name}</dd>
-              <dt class="text-[var(--text-muted,currentColor)]">${m.criador}</dt>
-              <dd class="text-[var(--text-strong,currentColor)]">${t.criador.details.identification.name}</dd>
-              <dt class="text-[var(--text-muted,currentColor)]">${m.prazo}</dt>
-              <dd class="text-[var(--text-strong,currentColor)]">${fmtDate(t.prazo)}</dd>
-              <dt class="text-[var(--text-muted,currentColor)]">${m.subtarefas}</dt>
-              <dd class="text-[var(--text-strong,currentColor)]">${t.details.quantidadeSubtarefas}</dd>
-              <dt class="text-[var(--text-muted,currentColor)]">${m.descricao}</dt>
-              <dd class="text-[var(--text-default,currentColor)]">${t.details.descricao || m.noDescricao}</dd>
-              ${t.details.motivoDevolucao
-                ? html`<dt class="text-[var(--text-muted,currentColor)]">${m.motivoDevolucao}</dt><dd class="text-[var(--text-default,currentColor)]">${t.details.motivoDevolucao}</dd>`
+            <div class="flex flex-col gap-4">
+              ${t.details.descricao
+                ? html`<p class="text-sm text-[var(--text-default,currentColor)]">${t.details.descricao}</p>`
                 : nothing}
-            </dl>
+              ${t.details.motivoDevolucao
+                ? html`<div class="rounded-md bg-[var(--status-warning-bg,transparent)] p-3 text-sm text-[var(--status-warning-text,currentColor)]">
+                    <span class="font-medium">${this.msg['motivoDevolucao']}:</span> ${t.details.motivoDevolucao}
+                  </div>`
+                : nothing}
+              <dl class="grid grid-cols-2 gap-3">
+                ${this.dt(this.msg['prazo'], formatDate(t.prazo))}
+                ${this.dt(this.msg['prioridade'], this.label('prio_', t.prioridade))}
+                ${this.dt(this.msg['responsavel'], t.responsavel.details.identification.name)}
+                ${this.dt(this.msg['criadaPor'], t.criador.details.identification.name)}
+                ${this.dt(this.msg['subtarefas'], t.details.quantidadeSubtarefas)}
+                ${this.dt(this.msg['checklist'], t.details.progressoChecklist)}
+              </dl>
+              <groupviewdata--ml-vertical-record-list>
+                <Columns>
+                  <Column field="feito" header=${this.msg['colFeito']} width="56px"></Column>
+                  <Column field="descricao" header=${this.msg['colItem']}></Column>
+                </Columns>
+                <Rows>
+                  ${t.itensChecklist.map(
+                    (i) => html`<Row>
+                      <Cell><span aria-hidden="true">${i.feito ? '✓' : '○'}</span><span class="sr-only">${i.feito ? this.msg['itemFeito'] : this.msg['itemPendente']}</span></Cell>
+                      <Cell><span class=${i.feito ? 'text-[var(--text-muted,currentColor)] line-through' : ''}>${i.details.descricao}</span></Cell>
+                    </Row>`,
+                  )}
+                </Rows>
+                <Empty><div class="py-4 text-center text-sm text-[var(--text-muted,currentColor)]">${this.msg['checklistVazia']}</div></Empty>
+              </groupviewdata--ml-vertical-record-list>
+            </div>
           </CardContent>
+          <CardFooter>
+            <span class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['criadaEm']} ${formatDateTime(t.criadaEm)}</span>
+          </CardFooter>
         </groupviewcard--ml-vertical-card>
-        <div class="flex flex-col gap-2">
-          <div class="flex items-baseline justify-between">
-            <h3 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${m.checklist}</h3>
-            <span class="text-sm text-[var(--text-muted,currentColor)]">${t.details.progressoChecklist}</span>
-          </div>
-          <groupviewdata--ml-vertical-record-list>
-            <Columns>
-              <Column field="feito" header=${m.checkDone} width="56px" align="center" />
-              <Column field="descricao" header=${m.checkItem} />
-            </Columns>
-            <Rows>
-              ${t.itensChecklist.map((i) => html`
-                <Row>
-                  <Cell><span role="img" aria-label=${i.feito ? m.checkDone : m.checkPending}>${i.feito ? '✓' : '○'}</span></Cell>
-                  <Cell>${i.details.descricao}</Cell>
-                </Row>`)}
-            </Rows>
-            <Empty><div class="py-4 text-center text-sm text-[var(--text-muted,currentColor)]">${m.emptyChecklist}</div></Empty>
-          </groupviewdata--ml-vertical-record-list>
-        </div>
       </section>
     `;
   }
 
-  private renderAcoes() {
-    const m = this.msg;
-    const t = this.tarefa;
-    if (!t || this.obterTarefaStatus === 'loading') return html`<section data-organism-id="acoesGestor"></section>`;
-    const erro = this.reatribuirTarefaError ?? this.cancelarTarefaError;
+  private renderAcoes(t: TarefaDetalhe) {
+    const draft = this.reatribuirTarefaDraft;
+    const reatribuindo = this.reatribuirTarefaStatus === 'loading';
+    const cancelando = this.cancelarTarefaStatus === 'loading';
     return html`
-      <section data-organism-id="acoesGestor" class="flex flex-col gap-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-3">
-        <h3 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${m.acoesTitle}</h3>
+      <section data-organism-id="acoesGestor" class="flex flex-col gap-4 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
+        <h2 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg['acoes']}</h2>
         ${t.details.aberta
           ? html`
-            <groupselectone--ml-select-one-autocomplete
-              .value=${this.reatribuirTarefaDraft.responsavelId}
-              placeholder=${m.novoRespPlaceholder}
-              @change=${(e: CustomEvent<{ value: string | null }>) => this.setReatribuirTarefaDraft({ responsavelId: e.detail.value })}
-            >
-              <Label>${m.novoResp}</Label>
-              <Helper>${m.novoRespHelper}</Helper>
-              ${this.membros.map((x) => html`<Item value=${x.id} ?disabled=${x.details.identification.status !== 'Active'}>${x.details.identification.name}</Item>`)}
-            </groupselectone--ml-select-one-autocomplete>
-            ${erro
-              ? html`<p role="alert" aria-live="polite" class="rounded-md bg-[var(--status-error-bg,transparent)] text-[var(--status-error-text,currentColor)] p-2 text-sm">${erro.message}</p>`
-              : nothing}
-            <grouptriggeraction--ml-button-standard data-variant="primary" size="lg" data-class="w-full"
-              ?disabled=${!this.reatribuirTarefaDraft.responsavelId}
-              ?loading=${this.reatribuirTarefaStatus === 'loading'}
-              @action=${() => this.reatribuirTarefa()}>
-              <Label>${m.btnReatribuir}</Label>
-            </grouptriggeraction--ml-button-standard>
-            <grouptriggeraction--ml-button-standard data-variant="danger" size="lg" data-class="w-full"
-              ?loading=${this.cancelarTarefaStatus === 'loading'}
-              @action=${() => this.setScenario('cancelar')}>
-              <Label>${m.btnCancelar}</Label>
+              <div class="flex flex-col gap-3">
+                <groupselectone--ml-select-one-autocomplete
+                  .value=${draft.responsavelId}
+                  placeholder=${this.msg['escolherPessoa']}
+                  .loading=${reatribuindo}
+                  @change=${(e: CustomEvent<{ value: string | null }>) =>
+                    this.setReatribuirTarefaDraft({ ...draft, responsavelId: e.detail.value })}
+                >
+                  <Label>${this.msg['novoResponsavel']}</Label>
+                  ${this.membros.map(
+                    (m) => html`<Item value=${m.id} ?disabled=${m.details.identification.status !== 'Active'}>${m.details.identification.name}${m.details.identification.status !== 'Active' ? ` ${this.msg['indisponivel']}` : ''}</Item>`,
+                  )}
+                  <Empty>${this.msg['semPessoa']}</Empty>
+                </groupselectone--ml-select-one-autocomplete>
+                ${this.reatribuirTarefaStatus === 'error'
+                  ? html`<p role="alert" class="text-sm text-[var(--text-default,currentColor)]">${this.msg['erroReatribuir']}</p>`
+                  : nothing}
+                <grouptriggeraction--ml-button-standard
+                  size="lg"
+                  data-class="w-full"
+                  .disabled=${draft.responsavelId === null || draft.responsavelId === t.responsavelId}
+                  .loading=${reatribuindo}
+                  @action=${() => this.reatribuirTarefa()}
+                >
+                  <Label>${this.msg['trocarResponsavel']}</Label>
+                </grouptriggeraction--ml-button-standard>
+              </div>
+              <hr class="border-[var(--border-subtle,currentColor)]" />
+              <div class="flex flex-col gap-3">
+                ${this.cancelarTarefaStatus === 'error'
+                  ? html`<p role="alert" class="text-sm text-[var(--text-default,currentColor)]">${this.msg['erroCancelar']}</p>`
+                  : nothing}
+                <grouptriggeraction--ml-button-standard
+                  data-variant="danger"
+                  size="lg"
+                  data-class="w-full"
+                  .loading=${cancelando}
+                  @action=${(e: Event) => setModal(e, true)}
+                >
+                  <Label>${this.msg['cancelarTarefa']}</Label>
+                </grouptriggeraction--ml-button-standard>
+              </div>
+              <groupnotifyuser--ml-alert-modal type="danger" .dismissible=${false}>
+                <Title>${this.msg['confirmaTitulo']}</Title>
+                <Message>${this.msg['confirmaMsg'].replace('{titulo}', t.titulo)}</Message>
+                <Action>
+                  <div class="flex w-full flex-col gap-2">
+                    <grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${(e: Event) => setModal(e, false)}>
+                      <Label>${this.msg['confirmaNao']}</Label>
+                    </grouptriggeraction--ml-button-standard>
+                    <grouptriggeraction--ml-button-standard
+                      data-variant="danger"
+                      size="lg"
+                      data-class="w-full"
+                      @action=${(e: Event) => {
+                        setModal(e, false);
+                        this.cancelarTarefa();
+                      }}
+                    >
+                      <Label>${this.msg['confirmaSim']}</Label>
+                    </grouptriggeraction--ml-button-standard>
+                  </div>
+                </Action>
+              </groupnotifyuser--ml-alert-modal>
+            `
+          : html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['encerrada']}</p>`}
+        <groupnotifyuser--ml-toast-notification type="success" position="bottom" .duration=${4000} .visible=${this.reatribuirTarefaStatus === 'success'}>
+          <Message>${this.msg['toastReatribuida']}</Message>
+        </groupnotifyuser--ml-toast-notification>
+        <groupnotifyuser--ml-toast-notification type="success" position="bottom" .duration=${4000} .visible=${this.cancelarTarefaStatus === 'success'}>
+          <Message>${this.msg['toastCancelada']}</Message>
+        </groupnotifyuser--ml-toast-notification>
+      </section>
+    `;
+  }
+
+  private renderHistorico(t: TarefaDetalhe) {
+    return html`
+      <section data-organism-id="historicoTarefa">
+        <details class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
+          <summary class="flex min-h-[44px] cursor-pointer items-center px-4 font-semibold text-[var(--text-strong,currentColor)] focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]">${this.msg['historico']}</summary>
+          <div class="border-t border-[var(--border-subtle,currentColor)] p-4">
+            <groupviewdata--ml-timeline-view>
+              <Columns>
+                <Column field="quando" header=${this.msg['colQuando']}></Column>
+                <Column field="evento" header=${this.msg['colEvento']}></Column>
+              </Columns>
+              <Rows>
+                <Row>
+                  <Cell>${formatDateTime(t.criadaEm)}</Cell>
+                  <Cell>${this.msg['evCriada']}</Cell>
+                </Row>
+                ${t.details.devolvidaEm
+                  ? html`<Row>
+                      <Cell>${formatDateTime(t.details.devolvidaEm)}</Cell>
+                      <Cell>${this.msg['evDevolvida']}${t.details.motivoDevolucao ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${t.details.motivoDevolucao}</div>` : nothing}</Cell>
+                    </Row>`
+                  : nothing}
+                ${t.details.concluidaEm
+                  ? html`<Row>
+                      <Cell>${formatDateTime(t.details.concluidaEm)}</Cell>
+                      <Cell>${this.msg['evConcluida']}</Cell>
+                    </Row>`
+                  : nothing}
+                ${t.details.canceladaEm
+                  ? html`<Row>
+                      <Cell>${formatDateTime(t.details.canceladaEm)}</Cell>
+                      <Cell>${this.msg['evCancelada']}</Cell>
+                    </Row>`
+                  : nothing}
+              </Rows>
+            </groupviewdata--ml-timeline-view>
+          </div>
+        </details>
+      </section>
+    `;
+  }
+
+  private renderTarefa() {
+    const t = this.tarefa;
+    if (this.obterTarefaStatus === 'loading' && t === null) {
+      return html`<p class="py-8 text-center text-[var(--text-muted,currentColor)]" aria-live="polite" aria-busy="true">${this.msg['carregandoDetalhe']}</p>`;
+    }
+    if (this.obterTarefaStatus === 'error' || t === null) {
+      return html`<div role="alert" class="flex flex-col gap-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
+        <p>${this.msg['erroDetalhe']}</p>
+        ${this.selectedTarefa !== null
+          ? html`<grouptriggeraction--ml-button-standard size="lg" data-class="w-full" @action=${() => this.obterTarefa(this.selectedTarefa)}>
+              <Label>${this.msg['tentarNovamente']}</Label>
             </grouptriggeraction--ml-button-standard>`
-          : html`<p class="text-sm text-[var(--text-muted,currentColor)]">${m.closedNote}</p>`}
-        <groupnotifyuser--ml-toast-notification type="success" position="bottom" duration="4000"
-          ?visible=${this.reatribuirTarefaStatus === 'success'}
-          @dismiss=${() => this.setScenario('tarefa')}>
-          <Message>${m.toastReatribuida}</Message>
-        </groupnotifyuser--ml-toast-notification>
-        <groupnotifyuser--ml-toast-notification type="success" position="bottom" duration="4000"
-          ?visible=${this.cancelarTarefaStatus === 'success'}
-          @dismiss=${() => this.setScenario('tarefa')}>
-          <Message>${m.toastCancelada}</Message>
-        </groupnotifyuser--ml-toast-notification>
-      </section>
-    `;
-  }
-
-  private renderHistorico() {
-    const m = this.msg;
-    const t = this.tarefa;
-    if (!t || this.obterTarefaStatus === 'loading') return html`<section data-organism-id="historicoTarefa"></section>`;
-    const eventos: { quando: string; texto: string; extra: string }[] = [
-      { quando: t.criadaEm, texto: `${m.hCriada} ${t.criador.details.identification.name}`, extra: '' },
-    ];
-    if (t.details.devolvidaEm) eventos.push({ quando: t.details.devolvidaEm, texto: m.hDevolvida, extra: t.details.motivoDevolucao ?? '' });
-    if (t.details.concluidaEm) eventos.push({ quando: t.details.concluidaEm, texto: m.hConcluida, extra: '' });
-    if (t.details.canceladaEm) eventos.push({ quando: t.details.canceladaEm, texto: m.hCancelada, extra: '' });
+          : nothing}
+      </div>`;
+    }
     return html`
-      <section data-organism-id="historicoTarefa" class="flex flex-col gap-2">
-        <h3 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${m.historico}</h3>
-        <groupviewdata--ml-timeline-view>
-          <Columns>
-            <Column field="quando" header=${m.hQuando} />
-            <Column field="evento" header=${m.hEvento} />
-          </Columns>
-          <Rows>
-            ${eventos.map((ev) => html`
-              <Row>
-                <Cell><span class="text-xs text-[var(--text-muted,currentColor)]">${fmtDateTime(ev.quando)}</span></Cell>
-                <Cell>
-                  <div class="text-sm text-[var(--text-strong,currentColor)]">${ev.texto}</div>
-                  ${ev.extra ? html`<div class="text-xs text-[var(--text-muted,currentColor)]">${ev.extra}</div>` : nothing}
-                </Cell>
-              </Row>`)}
-          </Rows>
-        </groupviewdata--ml-timeline-view>
-      </section>
-    `;
-  }
-
-  private renderConfirmar() {
-    const m = this.msg;
-    const t = this.tarefa;
-    return html`
-      <div class="flex flex-col gap-4 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
-        <p class="text-sm text-[var(--text-default,currentColor)]">${m.confirmMessage}</p>
-        <p class="text-base font-semibold text-[var(--text-strong,currentColor)]">${t ? t.titulo : m.semDados}</p>
-        <grouptriggeraction--ml-button-standard data-variant="secondary" size="lg" data-class="w-full" @action=${() => this.setScenario('tarefa')}>
-          <Label>${m.btnKeep}</Label>
-        </grouptriggeraction--ml-button-standard>
-        <grouptriggeraction--ml-button-standard data-variant="danger" size="lg" data-class="w-full"
-          ?disabled=${!t}
-          @action=${() => { this.setScenario('tarefa'); this.cancelarTarefa(); }}>
-          <Label>${m.btnConfirmCancel}</Label>
-        </grouptriggeraction--ml-button-standard>
+      <div class="flex flex-col gap-4">
+        ${this.renderDetalhe(t)} ${this.renderAcoes(t)} ${this.renderHistorico(t)}
       </div>
     `;
   }
 
   render() {
     this.msg = pageMessages[this.getMessageKey(pageMessages)];
-    const m = this.msg;
     return html`
-      <div class="min-h-full bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-3 max-w-[430px] mx-auto">
+      <div class="min-h-screen bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)]">
         <molecules--ml-scenary-102020
           mode="scenary"
-          backLabel=${m.back}
-          .value=${this.scenary || 'quadro'}
-          @change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}
+          .value=${this.scenary || (this.selectedTarefa !== null ? 'tarefa' : 'quadro')}
+          .backLabel=${this.msg['back']}
+          @change=${(e: CustomEvent<{ value: string }>) => {
+            if (e.target === e.currentTarget) {
+              this.setScenario(e.detail.value);
+              if (e.detail.value === 'quadro') this.obterTarefa(null);
+            }
+          }}
         >
-          <Scene value="quadro" title=${m.pageTitle}>
-            ${this.renderQuadro()}
+          <Scene value="quadro" title=${this.msg['sceneQuadro']}>
+            <div class="mx-auto flex w-full max-w-[430px] flex-col gap-3 px-4 pb-8 pt-2">${this.renderQuadro()}</div>
           </Scene>
-          <Scene value="tarefa" title=${m.sceneDetail} nav="back" backTo="quadro">
-            <div class="flex flex-col gap-5">
-              ${this.renderDetalhe()}
-              ${this.renderAcoes()}
-              ${this.renderHistorico()}
-            </div>
-          </Scene>
-          <Scene value="cancelar" title=${m.sceneConfirm} nav="back" backTo="tarefa">
-            ${this.renderConfirmar()}
+          <Scene value="tarefa" title=${this.msg['sceneTarefa']} nav="back" backTo="quadro">
+            <div class="mx-auto flex w-full max-w-[430px] flex-col gap-3 px-4 pb-8 pt-2">${this.renderTarefa()}</div>
           </Scene>
         </molecules--ml-scenary-102020>
       </div>
