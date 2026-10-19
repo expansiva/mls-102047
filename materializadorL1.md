@@ -365,18 +365,23 @@ Inscricao.participanteId }`. Nenhuma chave nova: o passo é inverso quando o pre
     chamadas, cada uma com o `asUserId`;
   - **limites:** a porta é **só em memória** (volátil por processo; não usar em produção). A porta cm espera o acerto do contrato no cm. Ações
     disponíveis, prazos e entrada cm→app ficam fora.
-  - **Toda ocorrência é uma Task** (direção aprovada). No processo agendado, a ocorrência é o registro que ele cria (no `avisoDiario`, o
-    `AvisoVencimento` de cada responsável e dia), e a Task abre depois do registro, com o dono = a pessoa do registro;
-  - **o dono de cada etapa decide o que o L1 faz ao entrar nela** (`ownerOf(kind)`, §7 do doc do What):
-    - pessoa (`human`, `alert`): aviso a quem age, como mensagem do cm na thread do módulo da pessoa (`ensureModuleThread` pelo e-mail de login +
-      `addMessage`, cliente da rt79), e na sala da Task quando houver a porta cm;
-    - módulo (`mechanical`): a função do L1;
-    - relógio (`wait`): a espera;
-    - agente (`llm`) e canal: erro explícito até haver caso.
-
-    Quem avisa é o código do motor gerado (`engine.ts`), uma vez só; a função não avisa "quem age agora" por conta própria. O resultado do aviso
-    volta para a função, que aplica a transição de sistema do L4 (ex.: `concluirAviso`/`falharAviso` com `motivoFalha`), nunca `completed` sem envio
-    (`l1_d1_89`);
+  - **O plano revisado de 18/10 manda** (`todo/coordenacao/agents/ideias/execucao/workflows-modulos-direcao-aprovada.md`). O contrato do How é a
+    tabela C1–C13 em `todo/gerarApp/how/docs/l1/workflow_servico_no_l1_20261016.md`, "Contrato vigente…". O que muda para o código gerado:
+    - **a Task nasce quando o início é aceito** (tela, canal, agendamento, evento), sem esperar etapa humana. A origem (quem solicitou, ou o
+      agendamento) fica separada do dono e de quem age agora;
+    - **o plano de etapas vai para a Task na abertura**, e o L1 decide com o plano da Task, não com o da release atual. Etapa do plano que a
+      função nova não conhece é incompatibilidade explícita;
+    - **o dono de cada etapa decide a ação ao entrar nela** (`ownerOf(kind)`):
+      - pessoa: aviso a quem age, pelo cm (thread do módulo; a sala da Task quando houver);
+      - módulo: a função;
+      - relógio: pedido de despertar na Task. O cm chama a rotina do processo, e ela decide;
+      - agente ou canal: erro explícito até haver caso. Tarefas não usa LLM, e o erro não é entrega de LLM;
+    - **o `onTick` do módulo fica só para agendamento que inicia Task nova** (ex.: o aviso diário). Espera de uma Task aberta é despertar pelo cm;
+    - **as pendências** ("o que depende de mim") são uma projeção da plataforma, mantida pelo motor e lida pelas telas. O responsável fixo do
+      registro não é "quem age agora". Transferir é um comando da execução;
+    - **o histórico distingue pessoa de rotina**: rotina nunca aparece como ato do dono;
+    - **o resultado do aviso** vai para a transição de sistema do L4 (ex.: `concluirAviso`/`falharAviso` com `motivoFalha`), nunca `completed`
+      sem envio (`l1_d1_89`);
   - **a porta em memória é volátil e vale só para processo isolado** (testes). O app roda em cluster com mais de um worker, na lima e na VM
     remota, e a topologia do pm2 não muda (Wagner, 18/10). Por isso a porta em memória **recusa** mais de um worker de forma explícita
     (`WORKFLOW_MEMORY_REQUIRES_SINGLE_WORKER`, rt90 s1), e o ciclo do processo só roda de verdade com a porta cm.
