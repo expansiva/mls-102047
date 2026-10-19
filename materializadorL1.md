@@ -358,7 +358,7 @@ Inscricao.participanteId }`. Nenhuma chave nova: o passo é inverso quando o pre
 - **O módulo gera só as decisões e a tabela de etapas.**
 - **Disponível desde 17/10 (rt78 e rt79, aceitas pelo supervisor do runtime; 102034 sem push):**
   - **motor:** `/_102034_/l1/workflow/index.js` → `createMemoryOccurrencePort()`, `createWorkflowEngine(port)` (`engine.open(ctx, table, key, …)` →
-    `created|existing`; `engine.advance(ctx, table, key, { from, to | 'end', actorNow, done? })` → `advanced|unchanged|conflict` com o snapshot
+    `created|existing`; `engine.advance(ctx, table, key, { from, to | 'end', actorNow, done? })` → `advanced|unchanged|conflict` (no cm, o `'end'` vira `done: true` com `to = from`, e a repetição é o mesmo `commandId`; contrato do cm §10) com o snapshot
     atual; `engine.find`), `ownerOf(kind)`, `occurrenceRecordId(ctx, processId, seed?)` e `createOccurrenceContext(ctx, recordId)`. O id do registro
     é o primeiro `newId` do contexto filho: conferir que o usecase de criação usa o primeiro `newId` para o registro (o `createTarefa.ts:157` usa);
   - **cliente servidor→cm:** `/_102034_/l1/server/layer_1_external/collabMessages/client.js` → `createServerMessagesClient()`, com as seis
@@ -404,7 +404,7 @@ Inscricao.participanteId }`. Nenhuma chave nova: o passo é inverso quando o pre
    - lê o registro. Se ele **já está no status de destino** e a Task ainda está na etapa de origem (o registro foi gravado e a Task não), pula
      o usecase e só chama `advance`;
    - senão, chama o usecase. A guarda de status e o `authorize` dizem se pode;
-   - decide a próxima etapa (`to` ou `'end'`) e quem age agora;
+   - decide a próxima etapa (`to`, ou encerrar) e quem age agora;
    - chama `advance` da biblioteca. Ela recusa etapa desconhecida e grava condicionado à etapa atual: quem segura "não adiantar etapa" é a
      guarda do usecase mais essa gravação condicional, não o grafo.
    - trocar só quem age (reatribuir) é `advance` com `to` igual a `from`. Repetir a mesma chamada não grava de novo; outra pessoa grava.
