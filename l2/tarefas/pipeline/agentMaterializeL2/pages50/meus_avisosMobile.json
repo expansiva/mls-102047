@@ -4,23 +4,36 @@
   "module": "tarefas",
   "pageId": "meus_avisos",
   "device": "mobile",
-  "contextHash": "sha256:8aef42f497aa66686a9a7c21b39fd72ff7b46b52578971d147ccc6d211c8f196",
+  "contextHash": "sha256:d5992486e23070ecfa0e5f617e632cbe6add59c7edf58f77767606d466fc364b",
   "sourcePath": "l2/tarefas/web/mobile/page11/meus_avisos.ts",
-  "sourceHash": "sha256:4388414fea56ef871c9d33d63f6ae9d5587162ef76bfdd2937a06c0a33a54f9a",
+  "sourceHash": "sha256:2b65c7b56918da3e89a000a94f7ed2224051ae01570a5fa30e1a1f428eba7ad9",
   "attempt": 1,
   "design": {
-    "concept": "Uma caixa de entrada de avisos em duas telas de celular: primeiro a lista de avisos por data (com atalho para o aviso mais recente e um filtro de período discreto), depois o aviso aberto com totais grandes, as tarefas que vencem hoje ou estão atrasadas e, abaixo, o registro de geração e finalização. Uma coisa por vez, com voltar nativo da cena.",
+    "concept": "Um balcão de triagem de uma coluna só para o celular: a primeira cena é a lista de avisos diários (mais recentes primeiro) com um atalho para o aviso já aberto e um filtro de período recolhido. Tocar em um aviso leva à cena de leitura, com os totais em destaque, as tarefas que vencem hoje ou estão atrasadas e, abaixo, o registro de geração e finalização do envio das 8h.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Escolher um aviso: atalho para o mais recente, filtro de período recolhido e lista de avisos empilhados com quantidades e situação do envio."
+        "purpose": "Escolher o aviso: filtro de período recolhido, atalho para o aviso aberto e lista empilhada por data de referência com quantidades e situação do envio."
       },
       {
         "id": "aviso",
-        "purpose": "Ler o aviso aberto: totais de tarefas e atrasadas, tarefas com prazo e situação, e abaixo o registro de envio dos avisos."
+        "purpose": "Ler o aviso escolhido (totais e tarefas com prazo e situação) e, abaixo, o registro de envio. Tem botão de voltar para a lista."
       }
     ],
-    "decisions": "Segui o inboxSplit adaptado ao celular: em vez de lista e painel lado a lado, usei duas cenas em modo scenary (lista e aviso) com botão de voltar do host; tocar numa linha seleciona o aviso pelo shared e abre a cena. O título da página aparece uma vez no cabeçalho; os títulos das cenas e das regiões são todos diferentes. O filtro de período fica num bloco recolhido (details) para não competir com a lista e sempre recarrega a página 1 após alterar. O histórico (timeline) fica na cena do aviso, abaixo do conteúdo, como pede a seção secundária. Totais vêm prontos do backend (quantidadeTarefas, quantidadeAtrasadas) e nada é calculado na página. Estados de carregamento, vazio, erro e a pré-condição ausente (com botão de voltar) são tratados dentro da cena da lista; a cena do aviso trata carregando, erro e sem aviso. Não há contadores de não lidos nem ações de marcar como lido, pois o contrato não os fornece. Paginação não é exibida: o contrato não expõe total de páginas, e a profundidade fica quieta."
+    "decisions": "Segui o inboxSplit adaptado ao celular: lista e painel não cabem lado a lado, então viraram duas cenas do host ml-scenary (mode scenary com voltar), sem perder o lugar, já que a linha escolhida continua marcada na lista. A lista leva a prioridade primária e abre a página; o aviso é a cena seguinte; o registro de envio (secundário) fica abaixo do conteúdo, como pede a seção. O título da cena da lista funciona como título da página e o da cena do aviso nomeia a leitura, sem repetir cabeçalhos. O filtro por período fica em um bloco recolhível, discreto, e aplica ao confirmar as duas datas; 'limpar período' reaplica a lista inteira. Totais usam metric-big-number lado a lado; as tarefas usam responsive-table, que vira cartões rotulados em tela estreita. Nada é calculado na página: mostram-se os campos entregues (quantidades, situação do prazo, status). Estados de carregando, vazio, erro com tentar de novo e falta de pré-condição (com botão de voltar) são tratados. Não há intents mapeadas, então não há ação de resolução; o destaque é a leitura. O paginar é discreto: um único botão 'Carregar mais avisos' quando há mais."
   },
-  "advisories": []
+  "advisories": [
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section avisosRecebidos needs an element with data-section-id=\"avisosRecebidos\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section conteudoAviso needs an element with data-section-id=\"conteudoAviso\"."
+    },
+    {
+      "code": "M4_PAGE_SECTION",
+      "message": "Section registroEnvio needs an element with data-section-id=\"registroEnvio\"."
+    }
+  ]
 }

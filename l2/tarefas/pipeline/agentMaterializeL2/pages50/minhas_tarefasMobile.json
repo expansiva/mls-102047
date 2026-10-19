@@ -4,35 +4,35 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "mobile",
-  "contextHash": "sha256:4b1f4d9b0c8076d3c30bb3b913740ddcb3688754bfab036fd66f77c602e8ebb4",
+  "contextHash": "sha256:8f1ffc461951f10622e27b7dbfffd45811b19280fea433a6b2f756fd560c6689",
   "sourcePath": "l2/tarefas/web/mobile/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:3571e1c300f98cc5898fc6dfbf52235e60057a6146443af313997f7faa9be420",
+  "sourceHash": "sha256:276dd6c46f21ce35c5ece1c87ace1822e56ac4311339d284f62081e0c60b5974",
   "attempt": 1,
   "design": {
-    "concept": "Mobile \"fila de compromissos\": a single narrow column that opens on my tasks (quick-filter pills, stacked rows with deadline and status, a thumb-reachable \"Nova tarefa\" bar). Tapping a task moves to a focused view of that task with its data, checklist, collapsed history and a sticky action bar for the one action that matters for my role. Creating, editing and adjusting the checklist are separate steps, so one thing at a time.",
+    "concept": "Uma lista de tarefas empilhada para o polegar, ordenada como o backend entrega, com filtros rápidos em pílulas rolando na horizontal. Tocar numa tarefa leva ao detalhe (dados, checklist marcável, histórico recolhido) com a ação de ciclo do meu papel numa barra fixa embaixo. Criar, editar e as ações secundárias (devolver, cancelar) são telas próprias, com voltar, para que haja uma coisa por vez entre 360px e 430px.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Primary view: my tasks, filter pills, load more, and the Nova tarefa button at the thumb."
+        "purpose": "Minhas tarefas com filtros rápidos, estados de carregando, vazio, erro e pré-condição ausente, carregar mais e o botão fixo 'Nova tarefa'."
       },
       {
         "id": "detalhe",
-        "purpose": "The open task: returned-reason note, data card, read-only checklist, collapsed history, and a sticky action bar (main lifecycle action plus a 'Mais ações' menu with return-with-reason and cancel-with-confirmation)."
+        "purpose": "Tarefa aberta: motivo da devolução em destaque, cartão com os dados, checklist que se marca com um toque, histórico recolhido e barra fixa com a ação principal do meu papel e o menu 'Mais ações'."
+      },
+      {
+        "id": "acoes",
+        "purpose": "Ações secundárias do criador: devolver com motivo (obrigatório) e cancelar a tarefa, com confirmação que cita o título."
       },
       {
         "id": "criar",
-        "purpose": "Create a task with stacked fields and an initial checklist; success stays local with a link to the created task."
+        "purpose": "Formulário de criação com campos empilhados e checklist inicial."
       },
       {
         "id": "editar",
-        "purpose": "Edit the task fields, including swapping the assignee; save is disabled until valid and changed."
-      },
-      {
-        "id": "checklist",
-        "purpose": "Mark, reword or add checklist items and save them without changing the task status."
+        "purpose": "Edição dos dados (com troca de responsável só para o criador) e, em seção própria com save próprio, ajuste e marcação da checklist."
       }
     ],
-    "decisions": "Views use the scene host in scenary mode with back; the host's change handler reloads the list when coming back from creation and discards unsaved edits when leaving edit/checklist. The list uses the responsive data table with three columns (task identity, deadline, status), so no column is hidden at 360px; overdue deadlines are the only text in alarm color, with a plain-word label beside it. No client-side search (the contract has no term query) and no progress bar molecule: the checklist progress arrives as a ready string and is displayed as-is. The page holds no state, so 'Mais ações' and the history are native details disclosures, and cancel is a nested disclosure that names the task before the single danger button. Command feedback is local, inside the sticky bar/panel above the button (success in status colors, failure with the backend message). The returned-reason note is plain markup, not a banner molecule, because the banner reads its slot HTML once and could show stale text. The assignee uses the combobox (alternative) because its keystroke event lets the page call the member search. The deadline uses the date picker, not the shortcut picker, because the shortcuts point to the past. Text inputs listen to input and change with a guard on the custom event detail."
+    "decisions": "Usei o host de cenas em mode=scenary com cinco cenas, porque a página é uma sequência (lista → detalhe → ação/edição) e no celular uma coisa por vez vence espremer. O título de cada cena é o único título da vista; nenhum título repete o rótulo de um botão próximo (cena 'Dados da nova tarefa' vs. botão 'Criar tarefa').\n\nLista: escolhi ml-responsive-table (alternativa) em vez do data-table, porque o data-table esconde colunas e rola na horizontal, o que é ruim no celular. A primeira célula carrega título, lista, responsável, prioridade, subtarefas e progresso da checklist (texto vindo pronto do backend, sem calcular porcentagem). Só a data de prazo atrasada recebe a cor de alarme; 'vence hoje' é só texto. A seleção é marcada pelo índice. Não incluí busca por título porque a consulta não tem termo. Os valores do filtro rápido (criadas, atribuidas, emRevisao, devolvidas) são uma suposição, pois o tipo vem do contrato que não recebi; a conversão fica num único helper.\n\nAções: a ação principal depende de papel e situação (iniciar, enviar/reenviar, aceitar) e fica numa barra fixa embaixo. As demais ficam no kebab, que abre a cena 'Outras ações'. Como a página não guarda estado, essa cena substitui um menu suspenso. Cancelar é o único controle perigoso e exige a confirmação com o título. A confirmação de sucesso é local (a situação do cartão muda); erros aparecem em feedback contextual perto da ação, sem toast.\n\nChecklist: marcar um item no detalhe monta o rascunho a partir da própria tarefa e salva na hora, para cobrir 'marcar à medida que avança' com um toque. O formulário de edição também permite editar, adicionar e marcar, com save próprio.\n\nFormulários: título e descrição atualizam o rascunho a cada digitação, para o botão habilitar sem depender do blur. O responsável usa combobox, que dispara a busca por nome. Salvar fica desabilitado até os campos obrigatórios estarem preenchidos. Voltar não perde nada, porque os rascunhos vivem no shared; por isso não há confirmação de descarte. Alguns organismos (formTarefa, acoesTarefa) aparecem em duas cenas, cada uma com seu data-organism-id."
   },
   "advisories": [
     {
@@ -61,19 +61,7 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism detalheTarefa (motivo da devolução) renders neither <groupnotifyuser--ml-notify-banner> nor <groupnotifyuser--ml-contextual-feedback>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesTarefa (ações secundárias) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism acoesTarefa (confirmação da ação) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-alert-modal>."
-    },
-    {
-      "code": "M4_PAGE_SCENARY",
-      "message": "[contract] The host @change must call this.setScenario(e.detail.value)."
     }
   ]
 }

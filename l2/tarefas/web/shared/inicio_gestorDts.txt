@@ -9,21 +9,21 @@ export type ErrorState = {
 type Output<R extends keyof Inicio_gestorContracts> = Inicio_gestorContracts[R]['output'];
 export type TarefasPage = Output<'tarefas.inicio_gestor.listarTarefasParaAcao'>['tarefas'];
 export declare class TarefasInicio_gestorShared extends StateLitElement {
-    /** state listas — the list of Lista (projeto ou área) with the count of open tasks each one has; source obterPanoramaEquipe.listas; organism destaquesEquipe */
+    /** state listas — the lists (project or area) with the quantity of open tasks each one has; source obterPanoramaEquipe.listas; organism destaquesEquipe */
     listas: ListaResumo[];
-    /** state totalAbertas — total of open tasks of the team; source obterPanoramaEquipe.totalAbertas; organism destaquesEquipe */
+    /** state totalAbertas — total of open team tasks; source obterPanoramaEquipe.totalAbertas; organism destaquesEquipe */
     totalAbertas: number;
-    /** state totalVenceHoje — total of open tasks of the team due today; source obterPanoramaEquipe.totalVenceHoje; organism destaquesEquipe */
+    /** state totalVenceHoje — total of open team tasks due today; source obterPanoramaEquipe.totalVenceHoje; organism destaquesEquipe */
     totalVenceHoje: number;
-    /** state totalAtrasadas — total of overdue open tasks of the team; source obterPanoramaEquipe.totalAtrasadas; organism destaquesEquipe */
+    /** state totalAtrasadas — total of overdue open team tasks; source obterPanoramaEquipe.totalAtrasadas; organism destaquesEquipe */
     totalAtrasadas: number;
-    /** state progressoChecklist — overall checklist progress of the open tasks, text 'done/total'; source obterPanoramaEquipe.progressoChecklist; organism destaquesEquipe */
+    /** state progressoChecklist — overall checklist progress of open tasks as 'done/total' text; source obterPanoramaEquipe.progressoChecklist; organism destaquesEquipe */
     progressoChecklist: string;
-    /** state tarefas — page { items, page, pageSize, hasMore } of team tasks that may ask for a manager decision (overdue first, then due today), with list name and assignee name; source listarTarefasParaAcao.tarefas; organism tarefasParaAcao */
-    tarefas: TarefasPage | null;
-    /** state selectedTarefa — the id of the Tarefa selected in destaquesEquipe and tarefasParaAcao; the selected record is the getter tarefasParaAcao; source entry.params.tarefaId; organisms destaquesEquipe, tarefasParaAcao */
+    /** state tarefas — page { items, page, pageSize, hasMore } of team tasks that may need the manager's action (overdue first, then due today), with list name, assignee name and deadline and checklist indicators; source listarTarefasParaAcao.tarefas; organism tarefasParaAcao */
+    tarefas: TarefasPage;
+    /** state selectedTarefa — the id of the Tarefa selected in destaquesEquipe and tarefasParaAcao (the record is the getter tarefasParaAcao); source entry.params.tarefaId; organism destaquesEquipe, tarefasParaAcao; lives in the URL */
     selectedTarefa: string | null;
-    /** state pageStatus — overall status of the page: idle, loading, empty (nothing loaded), success or error */
+    /** state pageStatus — overall status of the page: loading while a load runs, error if one failed, empty when every list is empty, success otherwise */
     pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
     /** state obterPanoramaEquipeStatus — status of the request obterPanoramaEquipe */
     obterPanoramaEquipeStatus: 'idle' | 'loading' | 'success' | 'error';
@@ -31,11 +31,10 @@ export declare class TarefasInicio_gestorShared extends StateLitElement {
     obterPanoramaEquipeError: ErrorState;
     /** state listarTarefasParaAcaoStatus — status of the request listarTarefasParaAcao */
     listarTarefasParaAcaoStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state listarTarefasParaAcaoError — error of the request listarTarefasParaAcao (also client.selectionInvalid and client.preconditionMissing of the selection and navigation), null when none */
+    /** state listarTarefasParaAcaoError — error of the request listarTarefasParaAcao (also client.selectionInvalid and navigation refusals), null when none */
     listarTarefasParaAcaoError: ErrorState;
     /** state scenary — the visible scene of the page; '' until the page shows its first scene */
     scenary: string;
-    private subscribed;
     private publish;
     private assignState;
     connectedCallback(): void;
@@ -43,22 +42,21 @@ export declare class TarefasInicio_gestorShared extends StateLitElement {
     handleIcaStateChange(key: string, value: any): void;
     private hydrateData;
     private resetVisit;
-    private readParam;
     private applyEntryParams;
-    private unexpectedError;
-    private findTarefa;
-    /** getter — the selected Tarefa record of tarefasParaAcao: the loaded row whose id is selectedTarefa, or null when nothing is selected or the row is not loaded */
-    get tarefasParaAcao(): TarefaAcao | null;
+    private loadPage;
     private refreshPageStatus;
-    private initialLoad;
-    /** setScenario — publishes the visible scene of the page; scene id as string */
+    private unexpectedError;
+    /** The row of the loaded list of tasks selected by selectedTarefa (the selected record), or null when none or not loaded */
+    get tarefasParaAcao(): TarefaAcao | null;
+    private checkSelection;
+    /** select — selects a task by its id (null clears the selection); the record is read from the getter tarefasParaAcao; an id no loaded row resolves publishes client.selectionInvalid in listarTarefasParaAcaoError; argument id: the task id or null */
+    setSelectedTarefa(id: string | null): void;
+    /** Publishes the visible scene of the page; argument value: the scene name, '' for none */
     setScenario(value: string): void;
-    /** select — selects the Tarefa of tarefasParaAcao by id (null clears); the selected record is the getter tarefasParaAcao; an id that is not among the loaded rows publishes client.selectionInvalid in listarTarefasParaAcaoError and keeps the selection empty */
-    selectTarefasParaAcao(id: string | null): void;
-    /** request obterPanoramaEquipe — delivers the team overview at once (open, due today and overdue totals, overall checklist progress, open tasks per list); redraws listas, totalAbertas, totalVenceHoje, totalAtrasadas and progressoChecklist (replace); no arguments, also the method to reload the overview */
+    /** request obterPanoramaEquipe — delivers the team overview at once (open, due today and overdue totals, overall checklist progress and open tasks per list); redraws listas, totalAbertas, totalVenceHoje, totalAtrasadas and progressoChecklist (replace); no arguments, also the method to reload the overview */
     obterPanoramaEquipe(): Promise<void>;
-    /** request listarTarefasParaAcao — lists the team tasks that may ask for a manager decision (overdue first, then due today), in pages; redraws tarefas (replace, or append of items when append is true, keeping page and hasMore of the loaded page); arguments: page = page number to load starting at 1 (default 1), append = true for a "load more" that adds the next page (does nothing when the list says there is no more); also the method to reload the list */
+    /** request listarTarefasParaAcao — lists the team tasks that may need a decision (overdue first, then due today) in pages; redraws tarefas (replace, or append items when append is true, keeping page and hasMore of the loaded page); arguments page: page to load starting at 1 (default 1), append: true for a "load more" that adds the next page (does nothing when tarefas.hasMore is false) */
     listarTarefasParaAcao(page?: number, append?: boolean): Promise<void>;
-    /** navigate — opens the page tarefas_equipe (reassign or cancel a task) from tarefasParaAcao, carrying the picked task id as its tarefaId param; argument: tarefaId = id of the task the person opens (null refuses with client.preconditionMissing in listarTarefasParaAcaoError) */
-    abrirTarefasEquipe(tarefaId: string | null): void;
+    /** navigate — opens Tarefas da equipe (tarefas_equipe) on the task the person picked, carrying its id as tarefaId; argument tarefaId: the id of the picked task (defaults to the selected task); without an id it publishes client.preconditionMissing in listarTarefasParaAcaoError and does not navigate */
+    abrirTarefasEquipe(tarefaId?: string | null): void;
 }

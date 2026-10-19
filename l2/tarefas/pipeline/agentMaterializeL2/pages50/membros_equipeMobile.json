@@ -4,25 +4,37 @@
   "module": "tarefas",
   "pageId": "membros_equipe",
   "device": "mobile",
-  "contextHash": "sha256:d41d09be92ece47e0fa63fe13b0fe0e22dbab929bdf9dbe97d6f47c96bd79676",
+  "contextHash": "sha256:a15b6de5e198f738e236330fd2c0d4dfa02352c345f2027c4f7db169455b58ed",
   "sourcePath": "l2/tarefas/web/mobile/page11/membros_equipe.ts",
-  "sourceHash": "sha256:6e3305b778853fdb09238df30de44741157cc3c8b6fa4df849026d3335eb00b7",
+  "sourceHash": "sha256:696187315d7755cf14314c8eb14f70fc302bdd23848922905677ab0873180f18",
   "attempt": 2,
   "design": {
-    "concept": "Uma coluna estreita com duas cenas: a lista da equipe (busca no topo, pessoas em linhas de 64px com nome grande e situação em destaque, botão de adicionar sempre ao alcance do polegar) e a ficha da pessoa, que abre ao tocar numa linha ou em adicionar. A ficha tem um campo por linha e o botão de salvar fixo no rodapé; ao salvar, volta para a lista no mesmo lugar, com a linha marcada.",
+    "concept": "A calm reference list for a manager on a phone. The team list opens first, with a quiet name search on top and a thumb-reachable \"Nova pessoa\" button at the foot. Tapping a person, or the new-person button, opens a single full-width record view with a back control, one field per line and the save button pinned at the bottom.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Consultar e buscar as pessoas da equipe, escolher uma para corrigir ou começar um cadastro novo."
+        "purpose": "Reading surface: search by name, list of people with name, status and country, load more, and the entry point to register someone new. Tapping a row opens that person's record."
       },
       {
         "id": "cadastro",
-        "purpose": "Ficha de uma pessoa: cadastrar uma nova ou corrigir nome e país da escolhida, com voltar no topo e salvar no rodapé."
+        "purpose": "One view for both tasks: empty for a new person (register) or filled for the selected person (correct name and country). It has back, read-only facts (status, roles, contacts), a failure message above the button and the save button at the thumb."
       }
     ],
-    "decisions": "Segui a seção On mobile do template: a lista e o formulário nunca ficam empilhados; o formulário é uma cena própria no ml-scenary (mode scenary, com voltar). O título da cena de edição é o nome da pessoa (identidade do registro), o da cena de criação é 'Nova pessoa'; os botões usam rótulos diferentes dos títulos ('Adicionar pessoa', 'Cadastrar pessoa', 'Salvar alterações'). A lista é uma <ul> de botões em vez de tabela molecular, porque o template pede identidade grande e no máximo dois fatos pequenos por linha, sem colunas escondidas nem rolagem horizontal; busca, campos, botão e feedback usam moléculas. Situação e contatos aparecem como leitura (nunca como campo). Inativos/bloqueados ficam na lista com chip neutro/aviso e texto atenuado, sem vermelho. Voltar com alterações pendentes pede uma confirmação em palavras simples, e descartar limpa o rascunho de cadastro. Salvar fica desabilitado até nome e país estarem preenchidos e algo ter mudado. Erro de comando aparece dentro da ficha, acima do botão, com contextual-feedback. Após salvar com sucesso volta para a lista; a linha salva fica marcada e com o chip 'Salvo'. A paginação molecular não foi usada: a lista cresce com 'Carregar mais', sem chrome de paginação. Se a abertura falhar com client.preconditionMissing, a página explica o que falta e oferece voltar. O host das cenas ignora eventos change que borbulham das moléculas internas (e.target === e.currentTarget)."
+    "decisions": "Both views live inside the ml-scenary host so back navigation and the visible scene are owned by the shared scenary state. One record view serves register and edit, chosen by whether a person is selected, to keep the phone flow short. Plain inputs and buttons are used with large touch targets; the save and new-person actions sit at the bottom of the screen for thumb reach."
   },
   "advisories": [
+    {
+      "code": "M4_PAGE_HEADER",
+      "message": "[contract] The first line must be exactly: /// <mls fileReference=\"_102047_/l2/tarefas/web/mobile/page11/membros_equipe.ts\" enhancement=\"_102020_/l2/enhancementAura\"/>"
+    },
+    {
+      "code": "M4_PAGE_FORBIDDEN",
+      "message": "[contract] The page must not contain a lifecycle method."
+    },
+    {
+      "code": "M4_PAGE_FORBIDDEN",
+      "message": "[contract] The page must not contain static styles."
+    },
     {
       "code": "M4_PAGE_SECTION",
       "message": "Section equipe needs an element with data-section-id=\"equipe\"."
@@ -32,12 +44,52 @@
       "message": "Section cadastro needs an element with data-section-id=\"cadastro\"."
     },
     {
+      "code": "M4_PAGE_ORGANISM",
+      "message": "[contract] Organism pessoasEquipe needs a wrapper with data-organism-id=\"pessoasEquipe\"."
+    },
+    {
+      "code": "M4_PAGE_ORGANISM",
+      "message": "[contract] Organism cadastroPessoa needs a wrapper with data-organism-id=\"cadastroPessoa\"."
+    },
+    {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism pessoasEquipe (lista de pessoas em tela estreita) renders neither <groupviewtable--ml-responsive-data-table> nor <groupviewtable--ml-responsive-table>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism pessoasEquipe (busca por nome) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism pessoasEquipe (paginação da lista) renders neither <grouptriggeraction--ml-pagination-control>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism cadastroPessoa (nome da pessoa) renders neither <groupentertext--ml-floating-text-input> nor <groupentertext--ml-enter-text>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism cadastroPessoa (país da pessoa) renders neither <groupentertext--ml-enter-text>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism cadastroPessoa (salvar cadastro) renders neither <grouptriggeraction--ml-button-standard>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism cadastroPessoa (confirmação ou erro ao salvar) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-contextual-feedback>."
+    },
+    {
+      "code": "M4_PAGE_I18N",
+      "message": "[contract] The catalogue must sit between /// **collab_i18n_start** and /// **collab_i18n_end**."
+    },
+    {
+      "code": "M4_PAGE_I18N",
+      "message": "[contract] The first statement of render() must be this.msg = pageMessages[this.getMessageKey(pageMessages)];"
+    },
+    {
+      "code": "M4_PAGE_STYLE",
+      "message": "[contract] No #hex colors; use var(--token, transparent|currentColor)."
     }
   ]
 }

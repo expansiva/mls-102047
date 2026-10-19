@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_membro",
   "device": "mobile",
-  "contextHash": "sha256:3094c7796905a90b06467ae8d6d1ee39e5b6dfb50118bb47ab9f0bc1fb8909bf",
+  "contextHash": "sha256:0353d9d7f955ceadccd0a682349bcffa54db249b0f1202f80a21adbc3b03fae1",
   "sourcePath": "l2/tarefas/web/mobile/page11/inicio_membro.ts",
-  "sourceHash": "sha256:a3640d315b6987e9b816553299892fed52c5f2bb8861497d2823016aeb7a30b0",
-  "attempt": 2,
+  "sourceHash": "sha256:d4aa6a20844b79c5cfc567e6d7f4924ed35bb3445119358bbc1b9784111a13da",
+  "attempt": 1,
   "design": {
-    "concept": "Início de triagem para o celular: uma coluna que responde primeiro \"o que precisa de mim agora?\". Uma frase de abertura traz atrasadas e vencendo hoje, depois o aviso das 8h e as faixas do que espera por mim (da pior para a mais leve), e só no fim uma faixa discreta com os números das minhas tarefas abertas.",
+    "concept": "Início de triagem para o celular: uma frase no topo diz quanto precisa de atenção, o aviso das 8h vem logo abaixo, depois as pilhas do que espera por mim (da mais urgente para a menos), e só no fim uma faixa discreta com os números das minhas tarefas. Cada item tem uma ação principal ao alcance do polegar.",
     "views": [],
-    "decisions": "Página de uma só vista, sem scene host. Segui a seção \"On mobile\" do template acima da ordem das seções do defs: frase de triagem, aviso das 8h (banner informativo em fluxo, toque abre o aviso), faixas de pendências e por último o resumo como faixa de pares valor+rótulo, sem cartões. A frase usa só os campos prontos do resumo (atrasadas e vencem hoje); o estado de boa notícia usa pageStatus 'empty' e mantém o aviso e o resumo visíveis. As pendências viram faixas empilhadas em vez de pills, porque um separador esconderia faixas com itens atrás de uma vazia: devolvidas para ajustar, entregas para revisar, prontas para enviar e prontas para iniciar. Faixas vazias não aparecem. Cada faixa mostra três linhas e o restante fica num <details> \"Mostrar mais\" (nativo, sem estado na página). Cada item tem o título como toque de drill-down (abrirTarefaParaAjustar) e o prazo à direita. A ação principal é um botão separado, de 44px ou mais: iniciar, enviar para revisão, aceitar ou reenviar. Devolver com motivo abre um <details> com textarea ligada ao rascunho do shared e confirmação desabilitada sem motivo. Cor de alarme só no prazo das tarefas que o backend marca como atrasadas ou vencendo hoje. Deixei de fora progresso linear, kebab e métricas grandes: o progresso da checklist é texto pronto (\"2/5\") e não dá para virar percentual sem calcular, e os cartões de métrica o template proíbe. Há esqueleto no carregamento, erro com tentar de novo, e uma mensagem em palavras para client.preconditionMissing, com caminho de volta para minhas tarefas. O resultado dos comandos aparece numa região aria-live. Correção: as tags das moléculas passam a seguir o caminho completo do módulo com o sufixo do projeto (molecules--grupo--nome-102040)."
+    "decisions": "Página de uma só vista, sem host de cenas: nada é um passo, tudo é triagem numa coluna. Segui a ordem do template mobile (manchete, pilhas, faixa, links) e não a ordem dos organismos: o resumo, que tem prioridade secondary, ficou por último e como faixa pequena, sem cartões nem números grandes. Por isso não usei metric-big-number. O aviso das 8h usa o notify-banner em fluxo, não dispensável. A manchete usa só os números prontos do resumo, sem somar nada. As pilhas vão da mais urgente à menos: devolvidas, entregas para revisar, em andamento, para iniciar. Cada pilha mostra 3 itens e o resto fica num <details> nativo, porque a página não guarda estado. A devolução com motivo usa o rascunho do shared: tocar em Devolver grava o id da tarefa no rascunho e o formulário abre embaixo do item. Confirmar chama o comando e cancelar zera o id. A cor de alarme só aparece em prazo atrasado (flag do contrato) e em erros. Fiz as linhas com HTML semântico, em vez de vertical-record-list e kebab, porque cada item precisa de texto, motivo e dois botões de 44px. A checklist aparece como o texto pronto do backend, sem calcular porcentagem, então não usei linear-progress. Tenho estado vazio festivo (pageStatus empty), esqueleto ao carregar e erro com tentar de novo. Quando falta o que a página precisa (client.preconditionMissing), o erro diz isso e leva às minhas tarefas."
   },
   "advisories": [
     {
@@ -36,19 +36,11 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism avisoDoDia (destaque do aviso de hoje) renders neither <groupnotifyuser--ml-notify-banner>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism esperaPorMim (separar iniciar, revisar e ajustar) renders neither <groupnavigatesection--ml-navigate-pills>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism esperaPorMim (itens pendentes) renders neither <groupviewdata--ml-vertical-record-list>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism esperaPorMim (ação principal do item) renders neither <grouptriggeraction--ml-button-standard>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",

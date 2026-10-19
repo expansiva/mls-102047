@@ -3,30 +3,30 @@
   "project": 102047,
   "module": "tarefas",
   "pageId": "listas",
-  "unitInputHash": "sha256:72c7fc2c2f3ba0d9d188ee67d621f835116899babe343d938c4dc2477bd92e64",
-  "promptHash": "sha256:285f13d9e093816ed7270af464b539a73e096344c3a45829abeaaec8c5ebc18c",
+  "unitInputHash": "sha256:3ad7d33c0686dc9afa46b66739f57cf70d7b27f709fbaa2b27d283252940e256",
+  "promptHash": "sha256:128edd0624b6bcb1af9d654c9db6ad5323430b5c7a72cd3a40a23ea1eef55f55",
   "rulesHash": "sha256:50215eff3d301abb00897a55630d65432a65d7c8f1e89f171dde84cc6ba8fbc2",
   "sourcePath": "l2/tarefas/web/shared/listas.ts",
-  "sourceHash": "sha256:8c41444c23bfe9d92d44d271189d7fe2ddf1dd4819ba92c0e506d9b1315dc415",
+  "sourceHash": "sha256:3d6471d0e9b4864d8774196221ea345f611c36d6c82855048ad42051ef488218",
   "declarationPath": "l2/tarefas/web/shared/listasDts.txt",
-  "declarationHash": "sha256:457aaeb660be40cfcab80b7f775cd190387fd689097e7cde191cb7c978e17ae0",
+  "declarationHash": "sha256:87063b107cde82d2ec3ae1af401195142be8e4c08e0fcf4b6439814cbc16ff09",
   "attempt": 1,
   "findings": [
     {
-      "code": "SELECT_SETTER_MISSING",
-      "message": "The param listaId selects formularioLista but no request fetches one record. Added public selectLista(id | null) and the getter formularioLista (row of the loaded listas by selectedLista); selecting also fills salvarListaDraft from the row; an unknown id publishes client.selectionInvalid in listarListasError."
-    },
-    {
       "code": "FILTER_STATE_MISSING",
-      "message": "buscarListas takes a name fragment but no state holds it. Added the public state busca (written by buscarListas(busca)); no separate setter is needed."
+      "message": "buscarListas takes a name fragment but no state holds it; added public state busca (default '', published by buscarListas, reset on every entry)."
     },
     {
-      "code": "FORM_DRAFT_MISSING",
-      "message": "The commands criarLista and salvarLista have no <command>.input state. Added criarListaDraft and salvarListaDraft (the latter carries id and version) with setCriarListaDraft and setSalvarListaDraft."
+      "code": "SELECT_SETTER_MISSING",
+      "message": "selectedLista holds only the id from entry.params.listaId and no request fetches one lista; added public selectLista(id|null) that resolves the row from the loaded listas, fills salvarListaDraft and reports client.selectionInvalid; added getter formularioLista returning the selected row."
+    },
+    {
+      "code": "DRAFT_STATE_MISSING",
+      "message": "criarLista and salvarLista have no <command>.input state; added criarListaDraft and salvarListaDraft with setCriarListaDraft and setSalvarListaDraft. The new-lista draft starts with ativa = true (a new list receives tasks by default) instead of null."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "After criarLista or salvarLista the returned list is upserted by id (a new one is appended at the end) into listas. The browser does not sort by nome nor re-apply the active busca filter, so the order or the filter may differ from the backend until listarListas or buscarListas is called again."
+      "message": "criarLista and salvarLista return lista but no state has it as source; applied as an upsert by id in listas (a new row is appended at the end, not sorted by name, and is not checked against the current busca filter). pageStatus is not rewritten after a command, so it stays 'empty' if the first lista is created on an empty page; the page should rely on listas.length or reload through listarListas."
     },
     {
       "code": "MEMBER_ADDED",

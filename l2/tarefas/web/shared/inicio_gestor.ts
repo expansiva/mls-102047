@@ -57,31 +57,35 @@ const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
 };
 const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
 
-const PAGE_SIZE = 20;
+const DEFAULT_PAGE_SIZE = 20;
+
+function emptyPage(): TarefasPage {
+  return { items: [], page: 1, pageSize: DEFAULT_PAGE_SIZE, hasMore: false };
+}
 
 export class TarefasInicio_gestorShared extends StateLitElement {
-  /** state listas — the list of Lista (projeto ou área) with the count of open tasks each one has; source obterPanoramaEquipe.listas; organism destaquesEquipe */
+  /** state listas — the lists (project or area) with the quantity of open tasks each one has; source obterPanoramaEquipe.listas; organism destaquesEquipe */
   @property({ attribute: false }) listas: ListaResumo[] = [];
 
-  /** state totalAbertas — total of open tasks of the team; source obterPanoramaEquipe.totalAbertas; organism destaquesEquipe */
+  /** state totalAbertas — total of open team tasks; source obterPanoramaEquipe.totalAbertas; organism destaquesEquipe */
   @property({ attribute: false }) totalAbertas: number = 0;
 
-  /** state totalVenceHoje — total of open tasks of the team due today; source obterPanoramaEquipe.totalVenceHoje; organism destaquesEquipe */
+  /** state totalVenceHoje — total of open team tasks due today; source obterPanoramaEquipe.totalVenceHoje; organism destaquesEquipe */
   @property({ attribute: false }) totalVenceHoje: number = 0;
 
-  /** state totalAtrasadas — total of overdue open tasks of the team; source obterPanoramaEquipe.totalAtrasadas; organism destaquesEquipe */
+  /** state totalAtrasadas — total of overdue open team tasks; source obterPanoramaEquipe.totalAtrasadas; organism destaquesEquipe */
   @property({ attribute: false }) totalAtrasadas: number = 0;
 
-  /** state progressoChecklist — overall checklist progress of the open tasks, text 'done/total'; source obterPanoramaEquipe.progressoChecklist; organism destaquesEquipe */
+  /** state progressoChecklist — overall checklist progress of open tasks as 'done/total' text; source obterPanoramaEquipe.progressoChecklist; organism destaquesEquipe */
   @property({ attribute: false }) progressoChecklist: string = '';
 
-  /** state tarefas — page { items, page, pageSize, hasMore } of team tasks that may ask for a manager decision (overdue first, then due today), with list name and assignee name; source listarTarefasParaAcao.tarefas; organism tarefasParaAcao */
-  @property({ attribute: false }) tarefas: TarefasPage | null = null;
+  /** state tarefas — page { items, page, pageSize, hasMore } of team tasks that may need the manager's action (overdue first, then due today), with list name, assignee name and deadline and checklist indicators; source listarTarefasParaAcao.tarefas; organism tarefasParaAcao */
+  @property({ attribute: false }) tarefas: TarefasPage = emptyPage();
 
-  /** state selectedTarefa — the id of the Tarefa selected in destaquesEquipe and tarefasParaAcao; the selected record is the getter tarefasParaAcao; source entry.params.tarefaId; organisms destaquesEquipe, tarefasParaAcao */
+  /** state selectedTarefa — the id of the Tarefa selected in destaquesEquipe and tarefasParaAcao (the record is the getter tarefasParaAcao); source entry.params.tarefaId; organism destaquesEquipe, tarefasParaAcao; lives in the URL */
   @property({ attribute: false }) selectedTarefa: string | null = null;
 
-  /** state pageStatus — overall status of the page: idle, loading, empty (nothing loaded), success or error */
+  /** state pageStatus — overall status of the page: loading while a load runs, error if one failed, empty when every list is empty, success otherwise */
   @property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
 
   /** state obterPanoramaEquipeStatus — status of the request obterPanoramaEquipe */
@@ -93,17 +97,28 @@ export class TarefasInicio_gestorShared extends StateLitElement {
   /** state listarTarefasParaAcaoStatus — status of the request listarTarefasParaAcao */
   @property({ attribute: false }) listarTarefasParaAcaoStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
 
-  /** state listarTarefasParaAcaoError — error of the request listarTarefasParaAcao (also client.selectionInvalid and client.preconditionMissing of the selection and navigation), null when none */
+  /** state listarTarefasParaAcaoError — error of the request listarTarefasParaAcao (also client.selectionInvalid and navigation refusals), null when none */
   @property({ attribute: false }) listarTarefasParaAcaoError: ErrorState = null;
 
   /** state scenary — the visible scene of the page; '' until the page shows its first scene */
   @property({ attribute: false }) scenary = '';
 
-  private subscribed = false;
-
   private publish<M extends StateMember>(member: M, value: this[M]): void {
     (this as unknown as Record<string, unknown>)[member] = value;
     setState(`ui.tarefas.inicio_gestor.${member}`, value);
+    if (member === 'selectedTarefa') {
+      try {
+        const url = new URL(window.location.href);
+        if (value === null || value === undefined || value === '') {
+          url.searchParams.delete('tarefaId');
+        } else {
+          url.searchParams.set('tarefaId', String(value));
+        }
+        history.replaceState(history.state, '', url.toString());
+      } catch {
+        // URL not writable: the state still holds the value
+      }
+    }
   }
 
   private assignState(key: string, value: unknown): void {
@@ -115,17 +130,13 @@ export class TarefasInicio_gestorShared extends StateLitElement {
     super.connectedCallback();
     this.hydrateData();
     this.resetVisit();
-    if (!this.subscribed) {
-      subscribe([...STATE_KEYS], this);
-      this.subscribed = true;
-    }
+    subscribe([...STATE_KEYS], this);
     this.applyEntryParams();
-    void this.initialLoad();
+    void this.loadPage();
   }
 
   public disconnectedCallback(): void {
     unsubscribe([...STATE_KEYS], this);
-    this.subscribed = false;
     super.disconnectedCallback();
   }
 
@@ -164,109 +175,88 @@ export class TarefasInicio_gestorShared extends StateLitElement {
     this.publish('selectedTarefa', null);
   }
 
-  private readParam(name: string): string | null {
-    const fromUrl = new URLSearchParams(window.location.search).get(name);
-    if (fromUrl !== null) return fromUrl;
-    try {
-      return localStorage.getItem(`tarefas.inicio_gestor.${name}`);
-    } catch {
-      return null;
+  private applyEntryParams(): void {
+    const raw = new URLSearchParams(window.location.search).get('tarefaId');
+    if (raw !== null && raw !== '') {
+      this.publish('selectedTarefa', raw);
     }
   }
 
-  private applyEntryParams(): void {
-    const tarefaId = this.readParam('tarefaId');
-    this.publish('selectedTarefa', tarefaId !== null && tarefaId !== '' ? tarefaId : null);
+  private async loadPage(): Promise<void> {
+    this.publish('pageStatus', 'loading');
+    await Promise.all([this.obterPanoramaEquipe(), this.listarTarefasParaAcao(1, false)]);
+    this.refreshPageStatus();
+  }
+
+  private refreshPageStatus(): void {
+    const a = this.obterPanoramaEquipeStatus;
+    const b = this.listarTarefasParaAcaoStatus;
+    if (a === 'loading' || b === 'loading') {
+      this.publish('pageStatus', 'loading');
+      return;
+    }
+    if (a === 'error' || b === 'error') {
+      this.publish('pageStatus', 'error');
+      return;
+    }
+    if (a === 'success' && b === 'success') {
+      const isEmpty = this.listas.length === 0 && this.tarefas.items.length === 0;
+      this.publish('pageStatus', isEmpty ? 'empty' : 'success');
+    }
   }
 
   private unexpectedError(error: unknown): ErrorState {
     return { code: 'client.unexpected', message: '', details: { name: error instanceof Error ? error.name : 'unknown' } };
   }
 
-  private findTarefa(id: string): TarefaAcao | null {
-    const rows = this.tarefas ? this.tarefas.items : [];
-    return rows.find((row) => row.id === id) ?? null;
-  }
-
-  /** getter — the selected Tarefa record of tarefasParaAcao: the loaded row whose id is selectedTarefa, or null when nothing is selected or the row is not loaded */
+  /** The row of the loaded list of tasks selected by selectedTarefa (the selected record), or null when none or not loaded */
   public get tarefasParaAcao(): TarefaAcao | null {
     if (this.selectedTarefa === null) return null;
-    return this.findTarefa(this.selectedTarefa);
+    const found = this.tarefas.items.find(item => item.id === this.selectedTarefa);
+    return found ?? null;
   }
 
-  private refreshPageStatus(): void {
-    if (this.obterPanoramaEquipeStatus === 'error' || this.listarTarefasParaAcaoStatus === 'error') {
-      this.publish('pageStatus', 'error');
-      return;
-    }
-    if (this.obterPanoramaEquipeStatus === 'loading' || this.listarTarefasParaAcaoStatus === 'loading') {
-      this.publish('pageStatus', 'loading');
-      return;
-    }
-    const noTarefas = this.tarefas === null || this.tarefas.items.length === 0;
-    if (this.listas.length === 0 && noTarefas) {
-      this.publish('pageStatus', 'empty');
-      return;
-    }
-    this.publish('pageStatus', 'success');
+  private checkSelection(): void {
+    if (this.selectedTarefa === null) return;
+    if (this.listarTarefasParaAcaoStatus !== 'success') return;
+    if (this.tarefasParaAcao !== null) return;
+    this.publish('listarTarefasParaAcaoError', { code: 'client.selectionInvalid', message: '', details: { tarefaId: this.selectedTarefa } });
   }
 
-  private async initialLoad(): Promise<void> {
-    this.publish('pageStatus', 'loading');
-    await Promise.all([this.obterPanoramaEquipe(), this.listarTarefasParaAcao(1, false)]);
-    if (
-      this.listarTarefasParaAcaoStatus === 'success' &&
-      this.selectedTarefa !== null &&
-      this.findTarefa(this.selectedTarefa) === null
-    ) {
-      this.publish('selectedTarefa', null);
-      this.publish('listarTarefasParaAcaoError', { code: 'client.selectionInvalid', message: '', details: { stateKeys: ['selectedTarefa'] } });
+  /** select — selects a task by its id (null clears the selection); the record is read from the getter tarefasParaAcao; an id no loaded row resolves publishes client.selectionInvalid in listarTarefasParaAcaoError; argument id: the task id or null */
+  public setSelectedTarefa(id: string | null): void {
+    const value = id === '' ? null : id;
+    if (this.listarTarefasParaAcaoError !== null && this.listarTarefasParaAcaoError.code === 'client.selectionInvalid') {
+      this.publish('listarTarefasParaAcaoError', null);
     }
-    this.refreshPageStatus();
+    this.publish('selectedTarefa', value);
+    this.checkSelection();
   }
 
-  /** setScenario — publishes the visible scene of the page; scene id as string */
+  /** Publishes the visible scene of the page; argument value: the scene name, '' for none */
   public setScenario(value: string): void {
     this.publish('scenary', value);
   }
 
-  /** select — selects the Tarefa of tarefasParaAcao by id (null clears); the selected record is the getter tarefasParaAcao; an id that is not among the loaded rows publishes client.selectionInvalid in listarTarefasParaAcaoError and keeps the selection empty */
-  public selectTarefasParaAcao(id: string | null): void {
-    if (id === null || id === '') {
-      this.publish('selectedTarefa', null);
-      this.publish('listarTarefasParaAcaoError', null);
-      return;
-    }
-    if (this.findTarefa(id) === null) {
-      this.publish('selectedTarefa', null);
-      this.publish('listarTarefasParaAcaoError', { code: 'client.selectionInvalid', message: '', details: { stateKeys: ['selectedTarefa'] } });
-      return;
-    }
-    this.publish('selectedTarefa', id);
-    this.publish('listarTarefasParaAcaoError', null);
-  }
-
-  /** request obterPanoramaEquipe — delivers the team overview at once (open, due today and overdue totals, overall checklist progress, open tasks per list); redraws listas, totalAbertas, totalVenceHoje, totalAtrasadas and progressoChecklist (replace); no arguments, also the method to reload the overview */
+  /** request obterPanoramaEquipe — delivers the team overview at once (open, due today and overdue totals, overall checklist progress and open tasks per list); redraws listas, totalAbertas, totalVenceHoje, totalAtrasadas and progressoChecklist (replace); no arguments, also the method to reload the overview */
   public async obterPanoramaEquipe(): Promise<void> {
     if (this.obterPanoramaEquipeStatus === 'loading') return;
     this.publish('obterPanoramaEquipeStatus', 'loading');
     this.publish('obterPanoramaEquipeError', null);
-    this.publish('pageStatus', 'loading');
     const input: Input<'tarefas.inicio_gestor.obterPanoramaEquipe'> = {};
     try {
       const response = await execBff<Output<'tarefas.inicio_gestor.obterPanoramaEquipe'>>('tarefas.inicio_gestor.obterPanoramaEquipe', input, { mode: 'silent' });
       if (!response.ok || !response.data) {
-        this.publish('obterPanoramaEquipeError', response.error);
+        this.publish('obterPanoramaEquipeError', response.error ?? this.unexpectedError(null));
         this.publish('obterPanoramaEquipeStatus', 'error');
         this.refreshPageStatus();
         return;
       }
-      const output = response.data;
-      this.publish('listas', [...output.listas]);
-      this.publish('totalAbertas', output.totalAbertas);
-      this.publish('totalVenceHoje', output.totalVenceHoje);
-      this.publish('totalAtrasadas', output.totalAtrasadas);
-      this.publish('progressoChecklist', output.progressoChecklist);
+      this.publish('listas', [...response.data.listas]);
+      this.publish('totalAbertas', response.data.totalAbertas);
+      this.publish('totalVenceHoje', response.data.totalVenceHoje);
+      this.publish('totalAtrasadas', response.data.totalAtrasadas);
+      this.publish('progressoChecklist', response.data.progressoChecklist);
       this.publish('obterPanoramaEquipeStatus', 'success');
     } catch (error) {
       this.publish('obterPanoramaEquipeError', this.unexpectedError(error));
@@ -275,37 +265,32 @@ export class TarefasInicio_gestorShared extends StateLitElement {
     this.refreshPageStatus();
   }
 
-  /** request listarTarefasParaAcao — lists the team tasks that may ask for a manager decision (overdue first, then due today), in pages; redraws tarefas (replace, or append of items when append is true, keeping page and hasMore of the loaded page); arguments: page = page number to load starting at 1 (default 1), append = true for a "load more" that adds the next page (does nothing when the list says there is no more); also the method to reload the list */
+  /** request listarTarefasParaAcao — lists the team tasks that may need a decision (overdue first, then due today) in pages; redraws tarefas (replace, or append items when append is true, keeping page and hasMore of the loaded page); arguments page: page to load starting at 1 (default 1), append: true for a "load more" that adds the next page (does nothing when tarefas.hasMore is false) */
   public async listarTarefasParaAcao(page: number = 1, append: boolean = false): Promise<void> {
     if (this.listarTarefasParaAcaoStatus === 'loading') return;
-    if (append && (this.tarefas === null || !this.tarefas.hasMore)) return;
+    if (append && !this.tarefas.hasMore) return;
     this.publish('listarTarefasParaAcaoStatus', 'loading');
     this.publish('listarTarefasParaAcaoError', null);
-    this.publish('pageStatus', 'loading');
     const input: Input<'tarefas.inicio_gestor.listarTarefasParaAcao'> = {
-      page: Number.isFinite(page) && page >= 1 ? page : 1,
-      pageSize: this.tarefas !== null && this.tarefas.pageSize > 0 ? this.tarefas.pageSize : PAGE_SIZE,
+      page: page >= 1 ? page : 1,
+      pageSize: this.tarefas.pageSize > 0 ? this.tarefas.pageSize : DEFAULT_PAGE_SIZE,
     };
     try {
       const response = await execBff<Output<'tarefas.inicio_gestor.listarTarefasParaAcao'>>('tarefas.inicio_gestor.listarTarefasParaAcao', input, { mode: 'silent' });
       if (!response.ok || !response.data) {
-        this.publish('listarTarefasParaAcaoError', response.error);
+        this.publish('listarTarefasParaAcaoError', response.error ?? this.unexpectedError(null));
         this.publish('listarTarefasParaAcaoStatus', 'error');
         this.refreshPageStatus();
         return;
       }
       const loaded = response.data.tarefas;
-      if (append && this.tarefas !== null) {
-        this.publish('tarefas', {
-          items: [...this.tarefas.items, ...loaded.items],
-          page: loaded.page,
-          pageSize: loaded.pageSize,
-          hasMore: loaded.hasMore,
-        });
+      if (append) {
+        this.publish('tarefas', { items: [...this.tarefas.items, ...loaded.items], page: loaded.page, pageSize: loaded.pageSize, hasMore: loaded.hasMore });
       } else {
         this.publish('tarefas', { items: [...loaded.items], page: loaded.page, pageSize: loaded.pageSize, hasMore: loaded.hasMore });
       }
       this.publish('listarTarefasParaAcaoStatus', 'success');
+      this.checkSelection();
     } catch (error) {
       this.publish('listarTarefasParaAcaoError', this.unexpectedError(error));
       this.publish('listarTarefasParaAcaoStatus', 'error');
@@ -313,12 +298,13 @@ export class TarefasInicio_gestorShared extends StateLitElement {
     this.refreshPageStatus();
   }
 
-  /** navigate — opens the page tarefas_equipe (reassign or cancel a task) from tarefasParaAcao, carrying the picked task id as its tarefaId param; argument: tarefaId = id of the task the person opens (null refuses with client.preconditionMissing in listarTarefasParaAcaoError) */
-  public abrirTarefasEquipe(tarefaId: string | null): void {
-    if (tarefaId === null || tarefaId === '') {
+  /** navigate — opens Tarefas da equipe (tarefas_equipe) on the task the person picked, carrying its id as tarefaId; argument tarefaId: the id of the picked task (defaults to the selected task); without an id it publishes client.preconditionMissing in listarTarefasParaAcaoError and does not navigate */
+  public abrirTarefasEquipe(tarefaId: string | null = null): void {
+    const id = tarefaId ?? this.selectedTarefa;
+    if (id === null || id === '') {
       this.publish('listarTarefasParaAcaoError', { code: 'client.preconditionMissing', message: '', details: { params: ['tarefaId'] } });
       return;
     }
-    auraNavigate(`/tarefas/tarefas_equipe?tarefaId=${encodeURIComponent(tarefaId)}`, { basePath: '/tarefas' });
+    auraNavigate(`/tarefas/tarefas_equipe?tarefaId=${encodeURIComponent(id)}`, { basePath: '/tarefas' });
   }
 }

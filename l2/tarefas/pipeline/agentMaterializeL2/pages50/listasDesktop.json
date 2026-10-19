@@ -4,27 +4,27 @@
   "module": "tarefas",
   "pageId": "listas",
   "device": "desktop",
-  "contextHash": "sha256:376b460b7f57de75cc3e09185c48a52ec5bb9243db083bef9fe7454adb35c01c",
+  "contextHash": "sha256:446c029ffa345c786d5812799bcc1a406f92b44b94e0176ae1bb8dc40e0f9b27",
   "sourcePath": "l2/tarefas/web/desktop/page11/listas.ts",
-  "sourceHash": "sha256:5665aadea5ca598b31666966fc2b0287ab87577811e15b8d682c3c1ef3e317bd",
+  "sourceHash": "sha256:e6f22a4802011f6795d795ef8d17b7def128b423764963c4410409e6e10a2071",
   "attempt": 2,
   "design": {
-    "concept": "Superfície calma de referência: à esquerda a tabela das listas (nome, tipo, situação, tarefas abertas) com uma busca discreta acima; à direita um painel lateral que abre ao lado da tabela, sem cobri-la, para criar uma lista nova ou alterar a escolhida. A tabela ancora, o painel edita.",
+    "concept": "Uma superfície calma de consulta: a tabela de listas é o centro da página e fica sempre visível; ao lado dela, um painel de manutenção abre vazio para cadastrar ou preenchido para alterar a lista escolhida. A tabela ancora, o painel edita.",
     "views": [
       {
-        "id": "inicio",
-        "purpose": "Painel em repouso: orienta (escolha uma lista ou crie uma) e mostra o resultado local da última gravação bem-sucedida."
+        "id": "fechado",
+        "purpose": "Estado de repouso do painel: orienta o gestor a escolher uma lista na tabela ou cadastrar uma nova."
       },
       {
         "id": "criar",
-        "purpose": "Painel vazio para cadastrar uma nova lista (nome, tipo, descrição, ativa), aberto pelo botão 'Nova lista'."
+        "purpose": "Painel com o formulário vazio para cadastrar uma nova lista (criarLista)."
       },
       {
         "id": "editar",
-        "purpose": "Painel preenchido com a lista escolhida na tabela; o título é o nome da própria lista."
+        "purpose": "Painel preenchido com a lista selecionada, intitulado pelo nome dela, para alterar nome, tipo, descrição e situação (salvarLista)."
       }
     ],
-    "decisions": "Segui o template compactCrudTable: a tabela lidera, a busca é um campo único acima dela, o botão de criar fica no cabeçalho e o painel só ocupa a coluna lateral. As três cenas do painel ficam num scene host que cobre apenas a região lateral (mode=scenary), então a tabela permanece visível e a linha escolhida segue marcada pelo índice. O host recebe .value=${this.scenary || 'inicio'} e muda de cena apenas pelo evento change e pelos botões que chamam setScenario. Escolhi data-table sem colunas ordenáveis e sem paginação interna. Listas inativas continuam na tabela com texto atenuado e selo neutro. O botão de gravar fica desabilitado até nome, tipo e situação estarem preenchidos; o erro de comando aparece dentro do painel. Ao gravar com sucesso o painel volta ao repouso e mostra uma confirmação local. Ao abrir 'Nova lista' a situação já vem marcada como ativa. Erros do carregamento inicial aparecem em palavras no lugar da tabela, com nova tentativa."
+    "decisions": "Segui o template compactCrudTable: tabela primeiro (nome, tipo, situação, tarefas abertas), busca discreta acima dela, botão 'Nova lista' no cabeçalho e painel lateral à direita que nunca cobre a tabela. A região do painel é um host ml-scenary (mode=scenary) com três cenas, com value ligado a this.scenary || 'fechado'; a tabela fica fora do host para continuar visível. A confirmação de descarte não lê this.scenary: usa o estado sujo dos rascunhos. Busca com ml-search-bar. Sem ordenação nem paginação na tabela. O botão de salvar só habilita com nome e tipo preenchidos e algo alterado; erros de comando aparecem no painel (contextual-feedback). Após salvar/criar o painel permanece aberto com confirmação de sucesso local; o fechamento é um botão explícito que pede confirmação quando há alterações não salvas."
   },
   "advisories": [
     {

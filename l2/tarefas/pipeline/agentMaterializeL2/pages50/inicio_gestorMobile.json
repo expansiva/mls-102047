@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_gestor",
   "device": "mobile",
-  "contextHash": "sha256:e214b1c380e60d13543e2104c02382fe791521db9ade87ea0cd10ee9c7bf2802",
+  "contextHash": "sha256:ad0ec360d549ced1574f5994c286adeb8fa7410f08b5daefa5fa873f007393f7",
   "sourcePath": "l2/tarefas/web/mobile/page11/inicio_gestor.ts",
-  "sourceHash": "sha256:59eceeb9defb286b6ffa4440364e6143dfa5f3d8ef7c23788f368abeb73a4008",
+  "sourceHash": "sha256:bbe2234c4201c0b498700758494f104e9cb68c7421057b6daeaa56dffc5792bf",
   "attempt": 1,
   "design": {
-    "concept": "Uma tela de triagem para o celular: a primeira coisa que o gestor lê é uma frase (quantas tarefas estão atrasadas e quantas vencem hoje), logo abaixo vem a fila das tarefas que pedem ação, com a pior primeiro, e só depois uma faixa discreta com os totais da equipe. Cada linha da fila é um toque que leva a Tarefas da equipe para trocar o responsável ou cancelar.",
+    "concept": "A phone triage screen for the manager. It opens with one sentence that says how much needs them (overdue and due-today counts, straight from the backend). Right below is the queue of tasks that may need action, overdue first. Each row shows the task, the deadline and a status badge, and one tap opens it in Tarefas da equipe. The team overview (totals, checklist progress, open tasks per list) is a quiet strip at the bottom.",
     "views": [],
-    "decisions": "Página de uma só vista, sem host de cenas. O template mobile vence o texto das definições: as definições pedem os totais primeiro, mas o template proíbe agregados e gráficos acima da fila. Por isso a ordem é manchete, fila, faixa de saúde, e por último as tarefas abertas por lista, recolhidas. A manchete usa só os totais prontos do backend (atrasadas e vencem hoje) e não calcula nada. Quando a lista de tarefas chega vazia, a manchete vira a frase de boas notícias 'Nada precisa de atenção agora' e a faixa continua visível. A fila é um único vertical-record-list, porque o backend já entrega atrasadas primeiro e a página não filtra por faixa. Cada linha tem identidade à esquerda (título, responsável, lista) e o fato decisivo à direita, sem truncar: prazo mais a marca 'Atrasada' ou 'Vence hoje'. Cor de alarme só aparece nessa marca. Mostro as primeiras 5 linhas e as demais ficam num details nativo ('Ver as demais tarefas'), que expande no lugar sem estado na página. 'Carregar mais' usa a paginação do shared e não aparece como campo. Toda a linha é o alvo de toque e chama abrirTarefasEquipe, sem botão duplicado. A faixa mostra abertas, vencem hoje e atrasadas como pares pequenos de valor e rótulo, mais o progresso das checklists numa barra fina. As tarefas por lista ficam no bar-chart dentro de um details recolhido. Carregamento mostra esqueletos, e cada região trata o próprio erro com nova tentativa. Se a página abriu sem o que precisa (client.preconditionMissing), diz isso em palavras."
+    "decisions": "The page has one view, so there is no scene host.\n\nOrder: the defs mark panoramaEquipe as primary, but the template's mobile section wins on behavior and forbids any aggregate above the lanes. So the order is headline, the tarefasParaAcao queue, then the destaquesEquipe strip.\n\nHeadline: it only shows the backend totals totalAtrasadas and totalVenceHoje in a sentence. It does no counting. The good-news sentence is driven by pageStatus 'empty'. The strip stays visible below it.\n\nQueue: the contract delivers one list already ordered by urgency. I did not split it into lanes, because that would mean filtering by flag on the page. Each row is identity on the left (title, then list, assignee, status and checklist as muted text). The decisive fact sits on the right: the deadline plus a badge from the backend flags atrasada or venceHoje. Alarm color appears only on that badge.\n\nRows: the whole row is the tap target and calls abrirTarefasEquipe(id). There is no nested button, so a tap cannot fire twice. The vertical-record-list rows are at least 44px high.\n\nPaging: there is no 'see all N' control, because the page cannot count and holds no expand state. 'Ver mais tarefas' loads the next page through the shared method when hasMore is true.\n\nStrip: small value+label pairs that wrap, with no cards. I left out the bar chart and the progress molecule on purpose. The template forbids charts and tiles, and the progress bar would need a number parsed from the 'done/total' text, which is a derivation. Checklist progress is shown as text. Open tasks per list sit in a collapsed native details block.\n\nStates: skeletons for the headline and the queue while loading. Errors are reported inside each region with a retry. When the page was opened without what it needs (client.preconditionMissing), it says so in words and offers 'Voltar'."
   },
   "advisories": [
     {
@@ -25,6 +25,14 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism destaquesEquipe (Totais de tarefas abertas, das que vencem hoje e das atrasadas) renders neither <groupviewmetric--ml-metric-big-number> nor <groupviewmetric--ml-metric-card>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism destaquesEquipe (Tarefas abertas por lista) renders neither <groupviewchart--ml-bar-chart>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism destaquesEquipe (Progresso das checklists) renders neither <groupshowprogress--ml-linear-progress>."
     }
   ]
 }

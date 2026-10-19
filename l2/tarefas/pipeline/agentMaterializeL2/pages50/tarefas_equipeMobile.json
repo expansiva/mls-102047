@@ -4,23 +4,27 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "mobile",
-  "contextHash": "sha256:6472ce57606ad0a983c58bceb9ac81bc2c20a8daf1dcf61ef56302abd55036d5",
+  "contextHash": "sha256:c86557524fbb357f335e599b151fd1ff0a9617b42e371bf94995f9e9e55cd4c6",
   "sourcePath": "l2/tarefas/web/mobile/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:825e23f1582858cbd85d18b6a2235dc4307f229bffafe95ece2214ab8a337bfd",
+  "sourceHash": "sha256:26b320dfb225f86f7261677e4dc7f335ea2a8a03d2355508e991fb9822af0d4c",
   "attempt": 1,
   "design": {
-    "concept": "Um fluxo de duas telas para o gestor no celular: primeiro a fila de tarefas da equipe, em cartões compactos, com filtros recolhidos num painel e os sinais de atrasada e vence hoje à vista. Tocar numa tarefa abre a tela da tarefa, em coluna única: resumo, checklist, ações do gestor (trocar responsável, cancelar) e, por último, o histórico.",
+    "concept": "Uma coluna fluida em duas etapas: o gestor percorre a lista de tarefas da equipe (com atalhos para atrasadas e as que vencem hoje e filtros recolhíveis), toca numa tarefa e vê o detalhe empilhado, com as ações do gestor logo abaixo e o histórico no fim. Cancelar passa por uma etapa própria de confirmação que nomeia a tarefa.",
     "views": [
       {
         "id": "quadro",
-        "purpose": "Fila da equipe: filtros recolhíveis, lista de cartões responsiva e botão para carregar mais. Tocar numa tarefa a abre."
+        "purpose": "Lista compacta das tarefas da equipe, filtros recolhíveis e atalhos de atrasadas e vencem hoje. É a vista principal."
       },
       {
         "id": "tarefa",
-        "purpose": "Tarefa aberta, com botão de voltar à lista: detalhe e checklist, ações do gestor e histórico ao final."
+        "purpose": "Detalhe da tarefa tocada, ações do gestor (reatribuir e cancelar) e histórico ao final; tem botão de voltar para o quadro."
+      },
+      {
+        "id": "cancelar",
+        "purpose": "Confirmação do cancelamento, com o título da tarefa e a escolha entre manter ou cancelar; volta para o detalhe."
       }
     ],
-    "decisions": "Usei o host de cenas em modo scenary, com duas telas e voltar, porque o celular mostra uma coisa de cada vez. O título de cada tela vem do host, então não repeti cabeçalhos. Escolhi a alternativa responsive-table em vez da data-table: nas telas estreitas ela vira cartões rotulados e não corta colunas nem rola na horizontal. Os filtros ficam num <details> nativo, que recolhe sem estado na página. Cada filtro chama listarTarefasEquipe com uma mudança de filtro. O alarme de cor vai só na data das atrasadas. Vence hoje é uma etiqueta discreta. A página não ordena nem filtra nada, só mostra os campos que o backend entrega. Como a página não guarda estado, o alerta de confirmação do cancelamento é aberto e fechado por uma propriedade `visible` do próprio elemento, sem estado na página. O alerta nomeia a tarefa e o botão destrutivo é o único em danger. O retorno de sucesso é um toast ligado ao status do comando. Erros e validação aparecem junto aos botões, em texto. O novo responsável vem de um autocomplete pelo nome, e quem não está ativo fica desabilitado. A ação só aparece quando a tarefa está aberta. O histórico usa os marcos que a tarefa traz: criação, devolução, conclusão e cancelamento. Não havia busca por título no compartilhado, então a busca ficou de fora. A paginação é um botão discreto, 'Mostrar mais tarefas', sem campos de página."
+    "decisions": "Usei o host de cenas em modo scenary com três cenas, porque a página não guarda estado e o host é o único jeito de trocar de vista. A confirmação de cancelamento virou uma cena em vez de modal, pois um modal precisaria de estado local de visibilidade. A lista usa ml-responsive-table (alternativa), que vira cartões em tela estreita e rotula cada campo. A data só ganha a cor de alarme quando a tarefa está atrasada (flag do backend); vence hoje aparece como etiqueta de aviso. Os filtros ficam em um <details> nativo, que recolhe sem estado. Atrasadas e Vencem hoje ficam sempre visíveis como atalhos de um toque. Nada é calculado na página: sinais, progresso da checklist e se a tarefa está aberta vêm do contrato. As ações só aparecem para tarefa aberta; reatribuir só habilita com uma pessoa escolhida (as inativas ficam desabilitadas na lista). O retorno de sucesso é um toast local, e os erros aparecem dentro da região da ação. O histórico mostra só os marcos que o contrato traz (criação, devolução, conclusão, cancelamento). A busca por título não foi incluída, porque o filtro do contrato não tem busca textual. O período do prazo usa o seletor de intervalo, sem atalhos prontos, pois a página não deve calcular datas."
   },
   "advisories": [
     {
@@ -38,6 +42,10 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism tarefasEquipe (Busca pelo título da tarefa) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism acoesGestor (Confirmação antes de cancelar) renders neither <groupnotifyuser--ml-alert-modal>."
     }
   ]
 }

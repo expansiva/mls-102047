@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "listas",
   "device": "mobile",
-  "contextHash": "sha256:635347f881e3c504249fb8cc1f8fecb90138fa23b5e170887f68582d92f08ace",
+  "contextHash": "sha256:cd3b21d09638dbe247880519ef6d362227cb106c4659ee0fb206021bd3bc9e81",
   "sourcePath": "l2/tarefas/web/mobile/page11/listas.ts",
-  "sourceHash": "sha256:3e9e650f3862042a48499aa833f71e94a3945dce1e61f5c1be329f2169f1279d",
+  "sourceHash": "sha256:1f2bcd9ffc78c4e5af2080ba19cb5faca23523247b4b8c6ada4365496f80ae29",
   "attempt": 1,
   "design": {
-    "concept": "Duas telas em coluna única, ligadas pelo host de cenas: a lista de listas (busca no topo, linhas grandes com nome, tipo, situação e tarefas abertas, botão de nova lista fixo no rodapé) e a ficha da lista, que abre ao tocar numa linha ou no botão de criar. Salvar leva de volta à lista, com a linha marcada e um aviso curto de sucesso.",
+    "concept": "Uma coluna fluida de duas cenas. A primeira é a leitura: busca no topo, listas empilhadas com nome grande, tipo, situação e tarefas abertas, e o botão de cadastrar sempre ao alcance do polegar. A segunda é o registro: uma tela própria, com voltar, um campo por linha e o botão de salvar no pé.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Consultar as listas, buscar pelo nome, tocar numa para alterar ou iniciar o cadastro de uma nova."
+        "purpose": "Consultar as listas, buscar pelo nome, tocar numa lista para alterá-la ou abrir o cadastro de uma nova."
       },
       {
-        "id": "registro",
-        "purpose": "Formulário de uma lista por vez (vazio para criar, preenchido para alterar), com voltar no topo e o botão de salvar fixo no pé, ao alcance do polegar."
+        "id": "formulario",
+        "purpose": "Cadastrar uma lista nova (vazia) ou alterar a lista tocada (preenchida), com voltar para a lista."
       }
     ],
-    "decisions": "Segui a seção On mobile do template: a tabela virou lista vertical de registros, e o painel lateral virou uma cena própria com voltar, de modo que lista e formulário nunca ficam empilhados. O título da cena de edição é o nome da lista; o da criação descreve o cadastro, sem repetir o rótulo do botão. Tipo e Ativa são grupos de opções (radio) em linhas de 48px, em vez de um select, para o polegar. Salvar fica desabilitado até nome, tipo e situação estarem preenchidos; a falha aparece dentro da ficha, acima do botão, e o botão serve de nova tentativa. Depois do sucesso, a página volta à lista chamando setScenario na conclusão do comando. Listas inativas ficam na lista, só atenuadas, com o rótulo 'Inativa'. A confirmação ao voltar com alterações não salvas e o 'algo mudou' não foram feitos: exigiriam comparar o rascunho com o registro ou guardar estado na página, o que o contrato proíbe. O erro de pré-condição ausente explica em palavras e oferece 'Voltar' (histórico) e 'Tentar novamente'."
+    "decisions": "Segui a seção On mobile do template: o painel lateral virou uma cena própria no host ml-scenary (mode scenary, com voltar), então lista e formulário nunca ficam empilhados. O título da cena do formulário é a identidade do registro (nome da lista, ou 'Nova lista'), e o botão de ação tem outro texto, para não repetir rótulos. A lista usa ml-vertical-record-list com a seleção marcada pela página (?selected pela lista aberta), sem selectable. Listas inativas continuam na lista, em tom apagado e com selo neutro, nunca vermelho. A busca usa ml-search-bar chamando buscarListas (debounce do molecule e clear volta ao todo). Criar abre o formulário vazio com 'Ativa' já marcada; tocar numa linha seleciona e abre preenchido. Ao salvar com sucesso a página volta para a lista; a linha editada continua marcada como selecionada. O Tipo é um par de botões de escolha (44px) e Ativa um interruptor com a regra de negócio em palavras. O botão de salvar fica desabilitado até nome e tipo estarem preenchidos; erros do comando aparecem acima do botão, em palavras simples (nome repetido, campos obrigatórios), sem toast. Estados de carregando, vazio, vazio de busca e erro de carga com 'Tentar novamente' foram desenhados."
   },
   "advisories": [
     {

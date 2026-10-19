@@ -5,8 +5,13 @@ M4_PAGE_SCENARY_CUSTOM: The page switches views by hand (this.scenary is read ou
 
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
-import { TarefasListasShared } from '/_102047_/l2/tarefas/web/shared/listas.js';
-import type { CriarListaDraft, SalvarListaDraft, ListaCadastrada, ErrorState } from '/_102047_/l2/tarefas/web/shared/listas.js';
+import {
+  TarefasListasShared,
+  type CriarListaDraft,
+  type ListaCadastrada,
+  type ListaTipo,
+  type SalvarListaDraft,
+} from '/_102047_/l2/tarefas/web/shared/listas.js';
 import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
 import '/_102040_/l2/molecules/groupentertext/ml-multiline-text.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
@@ -17,60 +22,87 @@ import '/_102020_/l2/molecules/ml-scenary.js';
 
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
-  pageTitle: 'Listas de tarefas',
-  pageSubtitle: 'Projetos e áreas que agrupam as tarefas da equipe.',
-  newList: 'Nova lista',
-  searchLabel: 'Buscar pelo nome',
-  searchPlaceholder: 'Digite parte do nome da lista',
-  searchHint: 'Os resultados aparecem na tabela',
-  tableCaption: 'Listas cadastradas',
-  colName: 'Nome',
-  colType: 'Tipo',
-  colStatus: 'Situação',
-  colOpen: 'Tarefas abertas',
-  typeProject: 'Projeto',
-  typeArea: 'Área',
-  statusActive: 'Ativa',
-  statusInactive: 'Inativa',
-  emptyAll: 'Nenhuma lista cadastrada ainda. Use “Nova lista” para começar.',
-  emptySearch: 'Nenhuma lista com esse nome.',
-  loadErrorTitle: 'Não foi possível mostrar as listas',
-  loadErrorMissing: 'A página foi aberta sem uma informação de que precisa. Volte à página de onde você veio, ou ao início do módulo, e abra as listas novamente.',
-  loadErrorGeneric: 'Algo impediu o carregamento. Tente de novo.',
-  retry: 'Tentar novamente',
-  panelIdle: 'Dados da lista',
-  panelIdleHint: 'Escolha uma lista na tabela para alterar seus dados, ou cadastre uma nova.',
-  panelCreate: 'Dados da nova lista',
-  savedOk: 'Alterações salvas. A tabela já mostra a lista atualizada.',
-  createdOk: 'Lista criada. Ela já aparece na tabela.',
-  fieldName: 'Nome',
-  fieldNameHelper: 'Não pode haver duas listas com o mesmo nome.',
-  fieldType: 'Tipo',
-  fieldTypeChoose: 'Escolha o tipo',
-  fieldDescription: 'Descrição',
-  fieldDescriptionHelper: 'Explique o objetivo da lista (opcional).',
-  fieldActive: 'Lista ativa',
-  fieldActiveHelper: 'Listas inativas deixam de aparecer na escolha ao criar tarefa.',
-  openTasks: 'Tarefas abertas',
-  createAction: 'Criar lista',
-  saveAction: 'Salvar alterações',
-  closePanel: 'Fechar painel',
-  genericCommandError: 'Não foi possível gravar. Confira os dados e tente de novo.',
+  tituloPagina: 'Listas de tarefas',
+  subtituloPagina: 'As listas agrupam as tarefas da equipe por projeto ou área.',
+  novaLista: 'Nova lista',
+  buscaRotulo: 'Buscar pelo nome',
+  buscaPlaceholder: 'Digite parte do nome da lista',
+  colNome: 'Nome',
+  colTipo: 'Tipo',
+  colSituacao: 'Situação',
+  colTarefas: 'Tarefas abertas',
+  tipoProjeto: 'Projeto',
+  tipoArea: 'Área',
+  ativa: 'Ativa',
+  inativa: 'Inativa',
+  nenhumaLista: 'Nenhuma lista cadastrada ainda. Use “Nova lista” para começar.',
+  nadaEncontrado: 'Nenhuma lista tem esse nome. Tente outro trecho.',
+  erroCarregar: 'Não foi possível carregar as listas.',
+  erroSelecao: 'A lista indicada no endereço não foi encontrada entre as listas cadastradas.',
+  erroBusca: 'Não foi possível buscar as listas agora. Tente de novo.',
+  tentarNovamente: 'Tentar novamente',
+  painelRepousoTitulo: 'Manutenção das listas',
+  painelRepousoTexto: 'Escolha uma lista na tabela para alterar seus dados ou cadastre uma nova.',
+  criarTitulo: 'Dados da nova lista',
+  editarFallback: 'Lista selecionada',
+  listaNaoEncontrada: 'Esta lista não está entre as listas carregadas. Escolha outra na tabela.',
+  campoNome: 'Nome da lista',
+  campoNomeAjuda: 'Não pode haver duas listas com o mesmo nome.',
+  campoTipo: 'Tipo',
+  tipoEscolha: 'Escolha o tipo',
+  campoDescricao: 'Descrição',
+  campoDescricaoAjuda: 'Explique o objetivo da lista (opcional).',
+  campoAtiva: 'Lista ativa',
+  campoAtivaAjuda: 'Listas inativas deixam de aparecer na escolha ao criar tarefa.',
+  tarefasAbertasNota: 'Tarefas abertas nesta lista',
+  cadastrar: 'Cadastrar lista',
+  salvar: 'Salvar alterações',
+  fecharPainel: 'Fechar painel',
+  confirmarDescartar: 'Há alterações que ainda não foram salvas. Descartar e continuar?',
+  sucessoCriar: 'Lista cadastrada. Você já pode cadastrar outra.',
+  sucessoSalvar: 'Alterações salvas.',
+  erroObrigatorios: 'Informe o nome e o tipo da lista para continuar.',
+  erroNomeObrigatorio: 'Informe o nome da lista.',
+  erroNomeRepetido: 'Já existe uma lista com esse nome. Escolha outro nome.',
+  erroSelecionar: 'Escolha uma lista na tabela antes de salvar.',
+  erroGenerico: 'Não foi possível salvar. Confira os dados e tente de novo; se persistir, recarregue as listas.',
+  voltarLista: 'Fechar',
 };
 /// **collab_i18n_end**
 
 type PageMessageType = typeof pageMessage_pt_br;
 const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
 
-const detailValue = (e: Event): string | null => {
-  const d = (e as CustomEvent<{ value?: string }>).detail;
-  return d && typeof d.value === 'string' ? d.value : null;
-};
+type FormShape = CriarListaDraft;
 
-const fmtInt = (n: number) => new Intl.NumberFormat(document.documentElement.lang || undefined).format(n);
+function formatNumber(n: number) {
+  return new Intl.NumberFormat(document.documentElement.lang || undefined).format(n);
+}
 
-const fieldBox =
-  'w-full h-10 px-3 rounded-md border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] text-[var(--text-default,currentColor)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]';
+function norm(v: string | null | undefined) {
+  return (v ?? '').trim();
+}
+
+function criarSujo(d: CriarListaDraft) {
+  return norm(d.nome) !== '' || norm(d.details.descricao) !== '' || d.details.tipo !== null;
+}
+
+function editarSujo(d: SalvarListaDraft, l: ListaCadastrada | null) {
+  if (!l) return false;
+  return (
+    norm(d.nome) !== norm(l.nome) ||
+    (d.details.tipo ?? '') !== l.details.tipo ||
+    norm(d.details.descricao) !== norm(l.details.descricao) ||
+    (d.ativa ?? l.ativa) !== l.ativa
+  );
+}
+
+function erroTexto(msg: PageMessageType, code: string | undefined) {
+  if (!code) return '';
+  if (code === 'client.requiredMissing') return msg.erroObrigatorios;
+  if (code === 'listaNomeUnico') return msg.erroNomeRepetido;
+  return msg.erroGenerico;
+}
 
 @customElement('tarefas--web--desktop--page11--listas-102047')
 export class TarefasDesktopPage11ListasPage extends TarefasListasShared {
@@ -79,283 +111,314 @@ export class TarefasDesktopPage11ListasPage extends TarefasListasShared {
   render() {
     this.msg = pageMessages[this.getMessageKey(pageMessages)];
     return html`
-      <div class="min-h-full p-6 bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)]">
+      <div class="min-h-full bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-6">
         <header class="flex items-start justify-between gap-4 mb-5">
           <div>
-            <h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg['pageTitle']}</h1>
-            <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['pageSubtitle']}</p>
+            <h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg['tituloPagina']}</h1>
+            <p class="text-sm text-[var(--text-muted,currentColor)] mt-1">${this.msg['subtituloPagina']}</p>
           </div>
-          <grouptriggeraction--ml-button-standard size="md" @action=${() => this.onNew()}>
-            <Label>${this.msg['newList']}</Label>
+          <grouptriggeraction--ml-button-standard
+            data-variant="primary"
+            size="md"
+            @action=${() => this.abrirCriar()}
+          >
+            <Label>${this.msg['novaLista']}</Label>
           </grouptriggeraction--ml-button-standard>
         </header>
-        <div class="grid gap-6 items-start" style="grid-template-columns: minmax(0, 1fr) 24rem;">
-          ${this.renderCadastro()} ${this.renderPainel()}
+        <div class="grid gap-6 items-start grid-cols-[minmax(0,1fr)_400px]">
+          ${this.renderListas()} ${this.renderPainel()}
         </div>
       </div>
     `;
   }
 
-  private onNew() {
+  private abrirCriar() {
+    if (!this.podeSair()) return;
     this.selectLista(null);
-    this.setCriarListaDraft({ ...this.criarListaDraft, ativa: this.criarListaDraft.ativa ?? true });
     this.setScenario('criar');
   }
 
-  private onRow(index: number) {
-    const row = this.listas[index];
-    if (!row) return;
-    this.selectLista(row.id);
-    this.setScenario('editar');
+  private podeSair() {
+    const sujo =
+      (this.scenary === 'criar' && criarSujo(this.criarListaDraft)) ||
+      (this.scenary === 'editar' && editarSujo(this.salvarListaDraft, this.formularioLista));
+    return !sujo || window.confirm(this.msg['confirmarDescartar']);
   }
 
-  private onClose() {
-    this.selectLista(null);
-    this.setScenario('inicio');
-  }
-
-  private onCriar() {
-    this.criarLista().then(() => {
-      if (this.criarListaStatus === 'success') this.setScenario('inicio');
-    });
-  }
-
-  private onSalvar() {
-    this.salvarLista().then(() => {
-      if (this.salvarListaStatus === 'success') this.setScenario('inicio');
-    });
-  }
-
-  private tipoLabel(tipo: 'project' | 'area') {
-    return tipo === 'project' ? this.msg['typeProject'] : this.msg['typeArea'];
-  }
-
-  private renderCadastro() {
-    const loading =
-      this.pageStatus === 'loading' || this.listarListasStatus === 'loading' || this.buscarListasStatus === 'loading';
-    const selIndex = this.listas.findIndex((l) => l.id === this.selectedLista);
+  private renderListas() {
+    const loading = this.pageStatus === 'loading' || this.buscarListasStatus === 'loading';
+    const selIdx = this.selectedLista ? this.listas.findIndex((l) => l.id === this.selectedLista) : -1;
+    const erroCarga = this.pageStatus === 'error' && this.listarListasError?.code !== 'client.selectionInvalid';
     return html`
-      <section data-organism-id="listasCadastradas" class="flex flex-col gap-4 min-w-0">
+      <section data-organism-id="listasCadastradas" class="flex flex-col gap-3 min-w-0">
         <groupsearchcontent--ml-search-bar
-          .value=${this.busca || null}
-          .loading=${this.buscarListasStatus === 'loading'}
-          placeholder=${this.msg['searchPlaceholder']}
-          @search=${(e: CustomEvent<{ query: string }>) => { this.buscarListas(e.detail.query); }}
-          @change=${(e: CustomEvent<{ value: string | null }>) => { this.buscarListas(e.detail.value ?? ''); }}
-          @clear=${() => { this.buscarListas(''); }}
+          .value=${this.busca}
+          placeholder=${this.msg['buscaPlaceholder']}
+          debounce="350"
+          ?loading=${this.buscarListasStatus === 'loading'}
+          @search=${(e: CustomEvent<{ query: string }>) => this.buscarListas(e.detail.query)}
+          @change=${(e: CustomEvent<{ value: string | null }>) => this.buscarListas(e.detail.value ?? '')}
+          @clear=${() => this.buscarListas('')}
         >
-          <Label>${this.msg['searchLabel']}</Label>
-          <Empty>${this.msg['searchHint']}</Empty>
+          <Label>${this.msg['buscaRotulo']}</Label>
         </groupsearchcontent--ml-search-bar>
-        ${this.listarListasError && this.pageStatus === 'error' ? this.renderLoadError(this.listarListasError) : this.renderTable(loading, selIndex)}
+
+        ${this.listarListasError?.code === 'client.selectionInvalid'
+          ? html`<p aria-live="polite" class="text-sm text-[var(--text-default,currentColor)]">${this.msg['erroSelecao']}</p>`
+          : nothing}
+        ${this.buscarListasError
+          ? html`<p aria-live="polite" class="text-sm text-[var(--text-default,currentColor)]">${this.msg['erroBusca']}</p>`
+          : nothing}
+
+        ${erroCarga
+          ? html`
+              <div
+                aria-live="polite"
+                class="flex items-center justify-between gap-3 rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4"
+              >
+                <span>${this.msg['erroCarregar']}</span>
+                <grouptriggeraction--ml-button-standard
+                  data-variant="secondary"
+                  size="sm"
+                  @action=${() => this.listarListas()}
+                >
+                  <Label>${this.msg['tentarNovamente']}</Label>
+                </grouptriggeraction--ml-button-standard>
+              </div>
+            `
+          : html`
+              <div class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)]">
+                <groupviewtable--ml-data-table
+                  .value=${selIdx >= 0 ? String(selIdx) : ''}
+                  ?loading=${loading}
+                  @rowClick=${(e: CustomEvent<{ index: number }>) => {
+                    const l = this.listas[e.detail.index];
+                    if (!l || l.id === this.selectedLista) {
+                      if (l) this.setScenario('editar');
+                      return;
+                    }
+                    if (!this.podeSair()) return;
+                    this.selectLista(l.id);
+                    this.setScenario('editar');
+                  }}
+                >
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead key="nome">${this.msg['colNome']}</TableHead>
+                      <TableHead key="tipo">${this.msg['colTipo']}</TableHead>
+                      <TableHead key="situacao">${this.msg['colSituacao']}</TableHead>
+                      <TableHead key="tarefas">${this.msg['colTarefas']}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>${this.listas.map((l) => this.renderLinha(l))}</TableBody>
+                  <Empty>${this.busca ? this.msg['nadaEncontrado'] : this.msg['nenhumaLista']}</Empty>
+                </groupviewtable--ml-data-table>
+              </div>
+            `}
       </section>
     `;
   }
 
-  private renderLoadError(err: ErrorState) {
-    const missing = err?.code === 'client.preconditionMissing';
-    return html`
-      <div role="alert" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5 flex flex-col gap-3">
-        <h2 class="text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg['loadErrorTitle']}</h2>
-        <p class="text-sm text-[var(--text-default,currentColor)]">${missing ? this.msg['loadErrorMissing'] : this.msg['loadErrorGeneric']}</p>
-        <div>
-          <grouptriggeraction--ml-button-standard data-variant="secondary" size="sm" @action=${() => { this.listarListas(); }}>
-            <Label>${this.msg['retry']}</Label>
-          </grouptriggeraction--ml-button-standard>
-        </div>
-      </div>
-    `;
-  }
-
-  private renderRow(l: ListaCadastrada) {
-    const tone = l.ativa ? 'text-[var(--text-strong,currentColor)]' : 'text-[var(--text-muted,currentColor)]';
+  private renderLinha(l: ListaCadastrada) {
+    const muted = l.ativa ? 'text-[var(--text-strong,currentColor)]' : 'text-[var(--text-muted,currentColor)]';
     const badge = l.ativa
       ? 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]'
       : 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
     return html`
-      <TableRow>
-        <TableCell><span class="font-medium ${tone}">${l.nome}</span></TableCell>
-        <TableCell><span class=${l.ativa ? 'text-[var(--text-default,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}>${this.tipoLabel(l.details.tipo)}</span></TableCell>
-        <TableCell><span class="inline-block rounded-full px-2 py-0.5 text-xs ${badge}">${l.ativa ? this.msg['statusActive'] : this.msg['statusInactive']}</span></TableCell>
-        <TableCell><span class=${l.ativa ? 'text-[var(--text-default,currentColor)]' : 'text-[var(--text-muted,currentColor)]'}>${fmtInt(l.details.quantidadeTarefasAbertas)}</span></TableCell>
+      <TableRow key=${l.id}>
+        <TableCell><span class="font-medium ${muted}">${l.nome}</span></TableCell>
+        <TableCell>
+          <span class=${l.ativa ? '' : 'text-[var(--text-muted,currentColor)]'}>
+            ${l.details.tipo === 'project' ? this.msg['tipoProjeto'] : this.msg['tipoArea']}
+          </span>
+        </TableCell>
+        <TableCell>
+          <span class="inline-block rounded-full px-2 py-0.5 text-xs ${badge}">
+            ${l.ativa ? this.msg['ativa'] : this.msg['inativa']}
+          </span>
+        </TableCell>
+        <TableCell sort-value=${String(l.details.quantidadeTarefasAbertas)}>
+          <span class=${l.ativa ? '' : 'text-[var(--text-muted,currentColor)]'}>
+            ${formatNumber(l.details.quantidadeTarefasAbertas)}
+          </span>
+        </TableCell>
       </TableRow>
     `;
   }
 
-  private renderTable(loading: boolean, selIndex: number) {
-    return html`
-      <groupviewtable--ml-data-table
-        .value=${selIndex >= 0 ? String(selIndex) : ''}
-        .loading=${loading}
-        @rowClick=${(e: CustomEvent<{ index: number }>) => this.onRow(e.detail.index)}
-      >
-        <TableCaption>${this.msg['tableCaption']}</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead key="nome">${this.msg['colName']}</TableHead>
-            <TableHead key="tipo">${this.msg['colType']}</TableHead>
-            <TableHead key="ativa">${this.msg['colStatus']}</TableHead>
-            <TableHead key="abertas">${this.msg['colOpen']}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>${this.listas.map((l) => this.renderRow(l))}</TableBody>
-        <Empty>${this.busca ? this.msg['emptySearch'] : this.msg['emptyAll']}</Empty>
-      </groupviewtable--ml-data-table>
-    `;
-  }
-
   private renderPainel() {
-    const sel = this.formularioLista;
-    const initial = this.scenary || (sel ? 'editar' : 'inicio');
+    const lista = this.formularioLista;
+    const inicial = this.scenary || (this.selectedLista ? 'editar' : 'fechado');
     return html`
-      <aside data-organism-id="formularioLista" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5">
+      <aside
+        data-organism-id="formularioLista"
+        class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 sticky top-4"
+      >
         <molecules--ml-scenary-102020
           mode="scenary"
-          .value=${initial}
-          @change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}
+          .value=${inicial}
+          @change=${(e: CustomEvent<{ value: string }>) => {
+            if (e.target === e.currentTarget) this.setScenario(e.detail.value);
+          }}
         >
-          <Scene value="inicio" title=${this.msg['panelIdle']}>
-            <div class="flex flex-col gap-3">
-              <p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['panelIdleHint']}</p>
-              <groupnotifyuser--ml-contextual-feedback type="success" .visible=${this.salvarListaStatus === 'success'} .dismissible=${false}>
-                <Message>${this.msg['savedOk']}</Message>
-              </groupnotifyuser--ml-contextual-feedback>
-              <groupnotifyuser--ml-contextual-feedback type="success" .visible=${this.criarListaStatus === 'success'} .dismissible=${false}>
-                <Message>${this.msg['createdOk']}</Message>
-              </groupnotifyuser--ml-contextual-feedback>
-            </div>
+          <Scene value="fechado" title=${this.msg['painelRepousoTitulo']}>
+            <p class="text-sm text-[var(--text-muted,currentColor)] py-2">${this.msg['painelRepousoTexto']}</p>
           </Scene>
-          <Scene value="criar" title=${this.msg['panelCreate']}>
-            ${this.renderForm(
-              'c',
-              this.criarListaDraft,
-              (d) => this.setCriarListaDraft(d),
-              this.criarListaStatus === 'loading',
-              this.criarListaError,
-              this.msg['createAction'],
-              () => this.onCriar(),
-              null,
-            )}
-          </Scene>
-          <Scene value="editar" title=${sel ? sel.nome : this.msg['panelIdle']}>
-            ${this.renderForm(
-              's',
-              this.salvarListaDraft,
-              (d) => this.setSalvarListaDraft(d),
-              this.salvarListaStatus === 'loading',
-              this.salvarListaError,
-              this.msg['saveAction'],
-              () => this.onSalvar(),
-              sel,
-            )}
+          <Scene value="criar" title=${this.msg['criarTitulo']}>${this.renderCriar()}</Scene>
+          <Scene value="editar" title=${lista ? lista.nome : this.msg['editarFallback']}>
+            ${this.renderEditar(lista)}
           </Scene>
         </molecules--ml-scenary-102020>
       </aside>
     `;
   }
 
-  private renderForm<T extends CriarListaDraft | SalvarListaDraft>(
-    p: string,
-    draft: T,
-    set: (d: T) => void,
-    busy: boolean,
-    error: ErrorState,
-    submitLabel: string,
-    submit: () => void,
-    record: ListaCadastrada | null,
-  ) {
-    const ready = !!draft.nome && draft.nome.trim() !== '' && draft.details.tipo !== null && draft.ativa !== null;
-    const setNome = (e: Event) => {
-      const v = detailValue(e);
-      if (v !== null) set({ ...draft, nome: v });
-    };
-    const setDesc = (e: Event) => {
-      const v = detailValue(e);
-      if (v !== null) set({ ...draft, details: { ...draft.details, descricao: v } });
-    };
+  private renderCriar() {
+    const d = this.criarListaDraft;
+    const loading = this.criarListaStatus === 'loading';
+    const pronto = norm(d.nome) !== '' && d.details.tipo !== null;
+    const code = this.criarListaError?.code;
     return html`
-      <form class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
-        <groupentertext--ml-enter-text
-          .value=${draft.nome ?? ''}
-          required
-          @input=${setNome}
-          @change=${setNome}
-        >
-          <Label>${this.msg['fieldName']}</Label>
-          <Helper>${this.msg['fieldNameHelper']}</Helper>
-        </groupentertext--ml-enter-text>
-
-        <div class="flex flex-col gap-1">
-          <label for="${p}-tipo" class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['fieldType']}</label>
-          <select
-            id="${p}-tipo"
-            class=${fieldBox}
-            required
-            .value=${draft.details.tipo ?? ''}
-            @change=${(e: Event) => {
-              const v = (e.target as HTMLSelectElement).value;
-              set({ ...draft, details: { ...draft.details, tipo: v === 'project' || v === 'area' ? v : null } });
-            }}
-          >
-            <option value="" ?selected=${draft.details.tipo === null}>${this.msg['fieldTypeChoose']}</option>
-            <option value="project" ?selected=${draft.details.tipo === 'project'}>${this.msg['typeProject']}</option>
-            <option value="area" ?selected=${draft.details.tipo === 'area'}>${this.msg['typeArea']}</option>
-          </select>
-        </div>
-
-        <groupentertext--ml-multiline-text
-          .value=${draft.details.descricao ?? ''}
-          .rows=${4}
-          @input=${setDesc}
-          @change=${setDesc}
-        >
-          <Label>${this.msg['fieldDescription']}</Label>
-          <Helper>${this.msg['fieldDescriptionHelper']}</Helper>
-        </groupentertext--ml-multiline-text>
-
-        <div class="flex items-start gap-3">
-          <input
-            id="${p}-ativa"
-            type="checkbox"
-            class="mt-1 h-5 w-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
-            .checked=${draft.ativa === true}
-            @change=${(e: Event) => set({ ...draft, ativa: (e.target as HTMLInputElement).checked })}
-          />
-          <label for="${p}-ativa" class="flex flex-col">
-            <span class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['fieldActive']}</span>
-            <span class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['fieldActiveHelper']}</span>
-          </label>
-        </div>
-
-        ${record
-          ? html`<dl class="flex items-baseline justify-between rounded-md bg-[var(--surface-alt-bg,transparent)] px-3 py-2 text-sm">
-              <dt class="text-[var(--text-muted,currentColor)]">${this.msg['openTasks']}</dt>
-              <dd class="font-semibold text-[var(--text-strong,currentColor)]">${fmtInt(record.details.quantidadeTarefasAbertas)}</dd>
-            </dl>`
-          : nothing}
-
-        <div aria-live="polite">
-          ${error
-            ? html`<div role="alert" class="rounded-md border border-[var(--status-error-text,currentColor)] bg-[var(--status-error-bg,transparent)] px-3 py-2 text-sm text-[var(--text-default,currentColor)]">
-                ${error.message || this.msg['genericCommandError']}
-              </div>`
-            : nothing}
-        </div>
-
-        <div class="flex items-center gap-3">
+      <form class="flex flex-col gap-4 pt-2" @submit=${(e: Event) => e.preventDefault()}>
+        ${this.renderCampos(d, (v) => this.setCriarListaDraft(v), 'criar', code)}
+        ${this.renderFeedback(code, this.criarListaStatus === 'success', this.msg['sucessoCriar'])}
+        <div class="flex items-center gap-2">
           <grouptriggeraction--ml-button-standard
+            data-variant="primary"
             size="md"
-            .disabled=${!ready || busy}
-            .loading=${busy}
-            @action=${() => submit()}
+            ?disabled=${!pronto}
+            ?loading=${loading}
+            @action=${() => this.criarLista()}
           >
-            <Label>${submitLabel}</Label>
+            <Label>${this.msg['cadastrar']}</Label>
           </grouptriggeraction--ml-button-standard>
-          <grouptriggeraction--ml-button-standard data-variant="ghost" size="md" .disabled=${busy} @action=${() => this.onClose()}>
-            <Label>${this.msg['closePanel']}</Label>
-          </grouptriggeraction--ml-button-standard>
+          ${this.renderFechar()}
         </div>
       </form>
+    `;
+  }
+
+  private renderEditar(lista: ListaCadastrada | null) {
+    if (!lista) {
+      return html`<p aria-live="polite" class="text-sm text-[var(--text-muted,currentColor)] py-2">${this.msg['listaNaoEncontrada']}</p>`;
+    }
+    const d = this.salvarListaDraft;
+    const loading = this.salvarListaStatus === 'loading';
+    const pronto = norm(d.nome) !== '' && d.details.tipo !== null && editarSujo(d, lista);
+    const code = this.salvarListaError?.code;
+    return html`
+      <form class="flex flex-col gap-4 pt-2" @submit=${(e: Event) => e.preventDefault()}>
+        <p class="text-sm text-[var(--text-muted,currentColor)]">
+          ${this.msg['tarefasAbertasNota']}:
+          <span class="font-medium text-[var(--text-strong,currentColor)]">${formatNumber(lista.details.quantidadeTarefasAbertas)}</span>
+        </p>
+        ${this.renderCampos(d, (v) => this.setSalvarListaDraft({ ...d, ...v }), 'editar', code)}
+        ${this.renderFeedback(code, this.salvarListaStatus === 'success', this.msg['sucessoSalvar'])}
+        <div class="flex items-center gap-2">
+          <grouptriggeraction--ml-button-standard
+            data-variant="primary"
+            size="md"
+            ?disabled=${!pronto}
+            ?loading=${loading}
+            @action=${() => this.salvarLista()}
+          >
+            <Label>${this.msg['salvar']}</Label>
+          </grouptriggeraction--ml-button-standard>
+          ${this.renderFechar()}
+        </div>
+      </form>
+    `;
+  }
+
+  private renderFechar() {
+    return html`
+      <grouptriggeraction--ml-button-standard
+        data-variant="secondary"
+        size="md"
+        @action=${() => {
+          if (!this.podeSair()) return;
+          this.selectLista(null);
+          this.setScenario('fechado');
+        }}
+      >
+        <Label>${this.msg['fecharPainel']}</Label>
+      </grouptriggeraction--ml-button-standard>
+    `;
+  }
+
+  private renderFeedback(code: string | undefined, sucesso: boolean, textoSucesso: string) {
+    if (code) {
+      return html`
+        <groupnotifyuser--ml-contextual-feedback type="error" visible dismissible="false">
+          <Message>${erroTexto(this.msg, code)}</Message>
+        </groupnotifyuser--ml-contextual-feedback>
+      `;
+    }
+    if (sucesso) {
+      return html`
+        <groupnotifyuser--ml-contextual-feedback type="success" visible dismissible="false">
+          <Message>${textoSucesso}</Message>
+        </groupnotifyuser--ml-contextual-feedback>
+      `;
+    }
+    return nothing;
+  }
+
+  private renderCampos(d: FormShape, onChange: (v: FormShape) => void, prefix: string, code: string | undefined) {
+    const nomeErro = code === 'client.requiredMissing' && norm(d.nome) === '' ? this.msg['erroNomeObrigatorio'] : '';
+    const selectId = `${prefix}-tipo`;
+    return html`
+      <groupentertext--ml-enter-text
+        .value=${d.nome ?? ''}
+        .error=${nomeErro}
+        maxLength="120"
+        required
+        @input=${(e: CustomEvent<{ value: string }>) => onChange({ ...d, nome: e.detail.value })}
+      >
+        <Label>${this.msg['campoNome']}</Label>
+        <Helper>${this.msg['campoNomeAjuda']}</Helper>
+      </groupentertext--ml-enter-text>
+
+      <div class="flex flex-col gap-1">
+        <label for=${selectId} class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['campoTipo']}</label>
+        <select
+          id=${selectId}
+          class="h-10 rounded-md border border-[var(--border-default,currentColor)] bg-[var(--input-bg,transparent)] text-[var(--text-default,currentColor)] px-2 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)] outline-none"
+          @change=${(e: Event) => {
+            const v = (e.target as HTMLSelectElement).value;
+            const tipo: ListaTipo | null = v === 'project' || v === 'area' ? v : null;
+            onChange({ ...d, details: { ...d.details, tipo } });
+          }}
+        >
+          <option value="" ?selected=${d.details.tipo === null}>${this.msg['tipoEscolha']}</option>
+          <option value="project" ?selected=${d.details.tipo === 'project'}>${this.msg['tipoProjeto']}</option>
+          <option value="area" ?selected=${d.details.tipo === 'area'}>${this.msg['tipoArea']}</option>
+        </select>
+      </div>
+
+      <groupentertext--ml-multiline-text
+        .value=${d.details.descricao ?? ''}
+        rows="4"
+        maxLength="500"
+        @input=${(e: CustomEvent<{ value: string }>) =>
+          onChange({ ...d, details: { ...d.details, descricao: e.detail.value } })}
+      >
+        <Label>${this.msg['campoDescricao']}</Label>
+        <Helper>${this.msg['campoDescricaoAjuda']}</Helper>
+      </groupentertext--ml-multiline-text>
+
+      <label class="flex items-start gap-3 min-h-[44px] cursor-pointer">
+        <input
+          type="checkbox"
+          class="mt-1 h-4 w-4 focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]"
+          .checked=${d.ativa ?? true}
+          @change=${(e: Event) => onChange({ ...d, ativa: (e.target as HTMLInputElement).checked })}
+        />
+        <span class="flex flex-col">
+          <span class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg['campoAtiva']}</span>
+          <span class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['campoAtivaAjuda']}</span>
+        </span>
+      </label>
     `;
   }
 }

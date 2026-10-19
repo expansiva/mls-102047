@@ -4,23 +4,14 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "desktop",
-  "contextHash": "sha256:0cdaecc40d0c37131a7b8a8838c8398ca8879ea00501dedd5bd4e17cf3db534a",
+  "contextHash": "sha256:d9698afc10480a04dc2361cedd03ed87c8d7170d973411ace815374c52d7001e",
   "sourcePath": "l2/tarefas/web/desktop/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:05f9934cc155b518e29bd71b0c80ea80426d2fcd87d86fb238c8558e58ff4f22",
+  "sourceHash": "sha256:18c425078a03a18598392751226720e1fa94e06c670e9268fa7ae82e162d1170",
   "attempt": 1,
   "design": {
-    "concept": "Uma mesa de trabalho do gestor: filtros compactos no topo, o quadro de tarefas da equipe à esquerda como fila lida por prazo (atrasadas só com a data em cor de alarme) e, à direita, um painel que acompanha a tarefa escolhida com detalhe, checklist, histórico e as duas ações do gestor. A lista nunca sai da tela: escolher uma linha abre o painel ao lado e a linha fica marcada.",
-    "views": [
-      {
-        "id": "detalhe",
-        "purpose": "Painel lateral com a tarefa escolhida: resumo, checklist, histórico em linha do tempo e rodapé fixo de ações (trocar responsável, cancelar tarefa). Sem seleção, mostra um convite para escolher uma tarefa."
-      },
-      {
-        "id": "confirmar",
-        "purpose": "Passo de confirmação do cancelamento: alerta modal que nomeia a tarefa e pede escolha explícita entre manter e cancelar. É uma cena do host, então o painel não guarda estado próprio."
-      }
-    ],
-    "decisions": "Segui o template timelineList em desktop: lista ordenada por prazo (a ordem vem do backend e a tabela permite reordenar), data atrasada em cor de erro e mais nada em alarme; 'vence hoje' é um selo neutro/aviso. Master-detail com o painel ao lado, em vez de empilhar as três seções. O host de cenas cobre só o painel (modo scenary): 'detalhe' e 'confirmar'; a confirmação do cancelamento usa o alert-modal dentro da cena 'confirmar' porque a página não pode guardar um estado de modal aberto. A confirmação nomeia a tarefa e o botão destrutivo é o único perigo da superfície. Filtros: selects para lista, responsável, prioridade e situação, calendário duplo para prazo, e dois botões de atalho (vencem hoje / atrasadas) que mostram o estado ativo; 'Limpar filtros' zera tudo. A busca por título não foi incluída porque o shared não tem estado nem método para ela. O novo responsável usa autocomplete por nome; membros não ativos aparecem desabilitados. Retornos de reatribuir e cancelar são locais, com feedback contextual no painel (nunca toast de página). Os eventos do histórico vêm só dos campos do contrato (criação, devolução com motivo, conclusão, cancelamento); nada é somado ou derivado na página. Estados de carregamento, vazio, erro e pré-condição ausente (com botão Voltar) têm texto próprio. A paginação é um botão 'Carregar mais tarefas' que usa o append do shared."
+    "concept": "Uma mesa de trabalho do gestor em duas colunas: à esquerda o quadro de todas as tarefas da equipe na ordem de prazo que o backend entrega, com filtros no topo; à direita um painel fixo que mostra a tarefa escolhida (resumo, checklist), as ações do gestor e o histórico. A lista nunca sai da tela: escolher, trocar o responsável ou cancelar acontecem sem navegar.",
+    "views": [],
+    "decisions": "Página de uma só vista, sem scene host: o painel lateral é o mesmo lugar o tempo todo e só muda de conteúdo conforme os dados (vazio, abrindo, erro, tarefa), então não há troca de vistas escondida por estado. Seguiu-se o template timelineList: ordem de prazo do backend preservada (nenhuma coluna é ordenável para não quebrar a ordem), somente a data atrasada recebe a cor de alarme, e vence-hoje aparece como texto discreto. Os filtros (lista, responsável, prioridade, situação, período, vencem hoje, atrasadas) ficam numa barra acima do quadro, com 'Limpar filtros' só quando há filtro ativo. A reatribuição é a ação principal do painel (autocomplete de pessoas, inativas desabilitadas); cancelar é secundário e passa por um modal que nomeia a tarefa, sendo o único elemento de estilo perigo. Como a página não guarda estado, o modal é aberto e fechado pelo próprio elemento no handler do evento. Sucesso aparece em toast e o próprio painel/linha se atualiza; falha aparece dentro do painel, acima dos botões, que continuam servindo de nova tentativa. O histórico mostra apenas os marcos que o contrato traz (criação, devolução com motivo, conclusão, cancelamento). Há estados desenhados para carregamento, vazio, erro com nova tentativa e precondição ausente com botão Voltar."
   },
   "advisories": [
     {

@@ -3,30 +3,30 @@
   "project": 102047,
   "module": "tarefas",
   "pageId": "tarefas_equipe",
-  "unitInputHash": "sha256:681656df4b5ec822878c6c70df8999b6d10fb3d3def847a8a7e362774e4a4acb",
-  "promptHash": "sha256:285f13d9e093816ed7270af464b539a73e096344c3a45829abeaaec8c5ebc18c",
+  "unitInputHash": "sha256:a826e6d8b152c94890aced85530a33f78442112acd72c2f71fcc9c787c631834",
+  "promptHash": "sha256:128edd0624b6bcb1af9d654c9db6ad5323430b5c7a72cd3a40a23ea1eef55f55",
   "rulesHash": "sha256:949fb2b49678e5b865db22fb4ca08daaece960d5ff9e5471b6581caaff240fe9",
   "sourcePath": "l2/tarefas/web/shared/tarefas_equipe.ts",
-  "sourceHash": "sha256:2c92eff1ce2d1efb5ed84ba9c7dd5e8b83ca78e23cfbefc3dbfcd6bc6dbd3e14",
+  "sourceHash": "sha256:89afc987640ca66cfc97b46e04d801b758847b6a6202ad7142b8fc4bf5b8efff",
   "declarationPath": "l2/tarefas/web/shared/tarefas_equipeDts.txt",
-  "declarationHash": "sha256:808e6e3f3b3f671bdd36f5451b093f4af765619ff26e40baeef8b4aab0f8897e",
+  "declarationHash": "sha256:7ce7660c095653160478a7be62e1eef183fac30127308f539d21fca4011af84b",
   "attempt": 1,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "The entry params listaId, responsavelId, prioridade, status, prazoDe, prazoAte, venceHoje and atrasada have effect filter:tarefasEquipe but no state holds them. Added one persisted public state per param (same id as the param), applied from URL/localStorage, sent in the listarTarefasEquipe input, and changed through listarTarefasEquipe(change)."
+      "message": "The eight filter params (listaId, responsavelId, prioridade, status, prazoDe, prazoAte, venceHoje, atrasada) have effect filter:tarefasEquipe but no state holds them. Added one public persisted state per param, and listarTarefasEquipe(filters, page, append) takes a TarefasEquipeFilterChange that publishes them and reloads from the first page."
     },
     {
-      "code": "DRAFT_STATE_MISSING",
-      "message": "reatribuirTarefa needs the new responsible typed/chosen by the person but the defs have no <command>.input state. Added the reatribuirTarefaDraft state with its setter setReatribuirTarefaDraft; id and version come from the open task."
-    },
-    {
-      "code": "SELECT_SETTER_MISSING",
-      "message": "selectedTarefa (entry.params.tarefaId) has no setter; selecting is served by the request method obterTarefa(tarefaId | null), which publishes selectedTarefa and fetches the record into tarefa (null clears both)."
+      "code": "FORM_DRAFT_MISSING",
+      "message": "reatribuirTarefa needs the member the person chooses, but no state has reatribuirTarefa.input as its source. Added the reatribuirTarefaDraft state (ReatribuirTarefaDraft) and its setter setReatribuirTarefaDraft; id and version come from the selected tarefa."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "reatribuirTarefa and cancelarTarefa return a TarefaDetalhe while the board rows are TarefaEquipeItem. Only the fields both share (titulo, status, prioridade, prazo, responsavelId, responsavel) are copied into the row; the row's computed indicators (details.venceHoje, details.atrasada, progressoChecklist) stay as loaded until the next listarTarefasEquipe, e.g. a cancelled task may keep its overdue signal. Rows that no longer match the status/responsavelId/due-signal filters are removed."
+      "message": "reatribuirTarefa and cancelarTarefa return a TarefaDetalhe, but the board rows (TarefaEquipeItem) have extra fields (lista, details.venceHoje, details.atrasada, details.progressoChecklist) that the output does not carry. The shared patches only the shared fields of the row (title, responsible, priority, due date, status) and removes the row when it no longer matches the active filters; the row indicators stay stale until the list is reloaded."
+    },
+    {
+      "code": "STATE_LEFT_STALE",
+      "message": "The returned tarefa (output of both commands) has no state whose source is the command output; it is applied to the state tarefa (obterTarefa.tarefa) and to the matching row of tarefas."
     },
     {
       "code": "MEMBER_ADDED",

@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_gestor",
   "device": "desktop",
-  "contextHash": "sha256:61c280afe1a13197f7245f8001157420c145e9f397a8b1667367d991bb014875",
+  "contextHash": "sha256:6ce9e10539b640043a44e0c79f36c9d978cb744d428584b31e6d5595908f2150",
   "sourcePath": "l2/tarefas/web/desktop/page11/inicio_gestor.ts",
-  "sourceHash": "sha256:a1e2d3ffe95df39ff7d7ec396336f98dd167b6493da0125c27aa67ae0b056bc7",
+  "sourceHash": "sha256:60b1cfe3c78a5751ea0359d9e4aa715abd62890d660b8ba3fefa699dce4c2417",
   "attempt": 1,
   "design": {
-    "concept": "Uma superfície de triagem para o gestor: a primeira coisa que ele lê é uma frase dizendo quanto está atrasado ou vence hoje, logo abaixo vem a fila de tarefas que podem pedir decisão (atrasadas primeiro), cada linha levando até Tarefas da equipe. O panorama da equipe (abertas, vencem hoje, atrasadas, checklists e abertas por lista) fica como uma faixa discreta de pares valor+rótulo abaixo da fila.",
+    "concept": "Uma tela de triagem para o gestor: a primeira frase diz quantas tarefas da equipe estão atrasadas e quantas vencem hoje, logo abaixo vem a fila de tarefas que pedem decisão (atrasadas primeiro), e só depois uma faixa quieta com os totais da equipe, o progresso das checklists e, recolhido, o gráfico de tarefas abertas por lista. Cada linha da fila leva direto a Tarefas da equipe, onde o gestor troca o responsável ou cancela.",
     "views": [],
-    "decisions": "Página de uma só visão, sem scene host. Segui o template exceptionTriage, que vence o defs no comportamento: a seção 'primary' (panorama) foi rebaixada para uma faixa quieta abaixo da fila, sem cards nem gráficos; por isso não usei metric-card, bar-chart nem linear-progress (o progresso da checklist vem como texto 'feitos/total' e calcular percentual seria derivar dado). A fila usa vertical-record-list: a linha inteira é o drill-down (row-click → abrirTarefasEquipe), sem botão por linha para não misturar navegação com ação; um 'Abrir ›' mudo indica a affordance. A cor de alarme aparece só no fato decisivo (prazo + selo Atrasada / Vence hoje), lido das flags do backend, sem filtrar nem somar. A manchete usa os totais prontos do backend. Estado de boa notícia calmo quando não há atrasadas nem vencendo hoje. Em vez de paginação, um botão 'Ver mais tarefas' (listarTarefasParaAcao com append) aparece só se hasMore. Erros ficam dentro da própria região com nova tentativa; a recusa de navegação (client.preconditionMissing) aparece em palavras na fila."
+    "decisions": "Página de uma única vista, sem scene host. Segui o template exceptionTriage e não a ordem das seções do defs: destaquesEquipe é a seção primary, mas o template proíbe KPIs e gráficos no topo, então a fila (tarefasParaAcao) vem logo após a manchete e destaquesEquipe vira uma faixa discreta de pares valor+rótulo, sem cartões, em tom neutro. As listas com quantidade de tarefas abertas ficam num bloco recolhido com o gráfico de barras. Nada é calculado na página: a manchete usa totalAtrasadas e totalVenceHoje do backend. A fila mantém a ordem do backend (atrasadas, depois vencem hoje) e a cor de alarme aparece só no prazo das tarefas com details.atrasada ou details.venceHoje. A linha inteira navega (row-click chama abrirTarefasEquipe com o id). O botão da linha também navega e interrompe a propagação do clique para não navegar duas vezes. Não usei ml-pagination-control, porque o contrato não traz o total de páginas e o template proíbe paginação na primeira tela: no lugar há 'Ver mais tarefas', que carrega a próxima página com append. Estado de boas notícias, esqueletos de carregamento e erro com tentar novamente em cada região (fila e faixa) separadamente. Progresso das checklists aparece como texto feitos/total, porque converter em percentual seria cálculo."
   },
   "advisories": [
     {
@@ -25,10 +25,6 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism destaquesEquipe (Totais de tarefas abertas, das que vencem hoje e das atrasadas) renders neither <groupviewmetric--ml-metric-card> nor <groupviewmetric--ml-metric-big-number>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism destaquesEquipe (Tarefas abertas por lista) renders neither <groupviewchart--ml-bar-chart> nor <groupviewchart--ml-pie-chart>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",

@@ -4,27 +4,31 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "desktop",
-  "contextHash": "sha256:62615d3a5372b4750a819c8b5849c5441bad6c10fe2db3d1495de901097330c5",
+  "contextHash": "sha256:da00c3d61fd9dddf4c138d8020cc05a6daa411feac29bc226b7e0a5c8ffdc62b",
   "sourcePath": "l2/tarefas/web/desktop/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:654803cd811eb54cabc6699bc2eb6447720a13f318341e411a31924cf056844c",
+  "sourceHash": "sha256:e98bf128c2dd0894d99b70bda6800e7fb8181ee0f8ef52fb63f3a153f494a37e",
   "attempt": 1,
   "design": {
-    "concept": "Uma fila de trabalho em mestre-detalhe: à esquerda, as tarefas do usuário em ordem de prazo com filtros rápidos em pílulas; à direita, um painel de trabalho que mostra a tarefa aberta (dados, ações do meu papel, histórico) e, sob demanda, os formulários de criar e ajustar. A lista nunca sai da tela e a linha aberta fica marcada.",
+    "concept": "Uma fila de trabalho em mestre-detalhe: à esquerda a lista de tarefas por prazo, com filtros rápidos em pílulas, as atrasadas com a data em cor de alarme; à direita um painel de trabalho que muda de modo (tarefa aberta, ajustar, criar, confirmar cancelamento) sem tirar a lista da tela. A pessoa escaneia, escolhe uma linha, age conforme seu papel (iniciar, enviar, aceitar, devolver) e ajusta dados e checklist no mesmo painel.",
     "views": [
       {
         "id": "detalhe",
-        "purpose": "Cena inicial do painel: tarefa aberta com motivo da devolução, dados, checklist, ações de ciclo conforme meu papel e histórico. Sem tarefa escolhida, orienta a escolher uma na lista."
-      },
-      {
-        "id": "criar",
-        "purpose": "Formulário de nova tarefa (lista, título, descrição, prioridade, prazo, responsável e checklist inicial), aberto pelo botão Nova tarefa; volta ao detalhe ao registrar."
+        "purpose": "Tarefa aberta: ações de ciclo conforme meu papel, dados, motivo da devolução, checklist e histórico em linha do tempo."
       },
       {
         "id": "editar",
-        "purpose": "Ajustar a tarefa aberta: campos (incluindo troca de responsável, só para o criador) e checklist (marcar, editar, reordenar, incluir), cada bloco com seu próprio botão de salvar."
+        "purpose": "Ajustar os campos da tarefa (incluindo trocar o responsável, só para o criador) e, em bloco separado, marcar e ajustar a checklist."
+      },
+      {
+        "id": "criar",
+        "purpose": "Painel de criação de tarefa com campos, responsável buscado pelo nome e checklist inicial."
+      },
+      {
+        "id": "cancelar",
+        "purpose": "Confirmação que nomeia a tarefa antes do único gesto destrutivo (cancelar)."
       }
     ],
-    "decisions": "Segui o template timelineList: lista ordenada pelo prazo vindo do backend (colunas sem ordenação para não quebrar a ordem nem o índice da linha), só a data atrasada recebe a cor de alarme, botão único 'Nova tarefa' no cabeçalho e painel lateral. O host de cenas cobre só o painel direito (mode scenary com voltar), então a lista continua visível. Filtros usam navigate-pills sem conteúdo (a lista fica fora delas) e chamam qryMinhasTarefas. Ações destrutivas ou com motivo usam <details> nativo como confirmação (a página não guarda estado): devolver pede o motivo, cancelar nomeia a tarefa e é o único botão de perigo. Botões de ciclo aparecem conforme souResponsavel/souCriador e situação, sem calcular nada. Após criar, a página recarrega a lista (o shared não insere a nova linha) e volta ao detalhe. Busca por título e inline-assign foram omitidos: o contrato não oferece parâmetro de busca e todo responsável já vem preenchido. O histórico usa só os marcos que o contrato entrega (criação, devolução, conclusão, cancelamento). Conteúdo com eventos (botões, motivo) fica fora do cartão de detalhe, por segurança de projeção de slots."
+    "decisions": "Usei dois hosts de cena de forma coerente: apenas um host (modo scenary) cobre o painel direito, e a lista fica sempre visível, como pede o template timelineList. O botão 'Nova tarefa' fica no cabeçalho e abre o painel de criação; ao salvar, a tarefa criada fica selecionada e o painel volta ao detalhe (sucesso local, sem banner). A confirmação de cancelamento é uma cena com voltar (não um modal) porque a página não guarda estado e o template proíbe modal substituindo painéis; o botão de perigo aparece só ali. A atribuição inline na linha não foi feita: o contrato exige responsável em toda tarefa, então não há lacuna de responsável para preencher; a troca fica no painel de edição, habilitada só para quem criou. A lista não é ordenável pela tabela (a ordem vem do backend e o índice da linha selecionada precisa bater com os itens). Totais, progresso da checklist e alertas de prazo vêm prontos do backend e são só exibidos. Botão salvar fica desabilitado até válido e alterado; erros de comando aparecem acima do botão. Estado de contexto ausente mostra o que falta e um voltar. Os valores do filtro rápido são mapeados por cast porque a declaração não os lista."
   },
   "advisories": [
     {
@@ -53,7 +57,7 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesTarefa (ações principais) renders neither <grouptriggeraction--ml-button-group> nor <grouptriggeraction--ml-split-button>."
+      "message": "Organism detalheTarefa (cartão da tarefa) renders neither <groupviewcard--ml-view-card-horizontal> nor <groupviewcard--ml-vertical-card>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
