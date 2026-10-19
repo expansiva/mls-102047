@@ -16,8 +16,7 @@ export const definition = {
       "membroEquipeId": {
         "type": "string",
         "sources": [
-          "url",
-          "localStorage"
+          "url"
         ],
         "effect": "select:cadastroPessoa",
         "persist": false,

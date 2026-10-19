@@ -6,8 +6,7 @@ export const definition = {
       "avisoVencimentoId": {
         "type": "string",
         "sources": [
-          "url",
-          "localStorage"
+          "url"
         ],
         "effect": "select:avisoDoDia",
         "persist": false,

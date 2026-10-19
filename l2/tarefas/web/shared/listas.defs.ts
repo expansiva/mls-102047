@@ -6,8 +6,7 @@ export const definition = {
       "listaId": {
         "type": "string",
         "sources": [
-          "url",
-          "localStorage"
+          "url"
         ],
         "effect": "select:formularioLista",
         "persist": false,

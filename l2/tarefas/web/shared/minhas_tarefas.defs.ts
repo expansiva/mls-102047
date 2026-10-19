@@ -16,8 +16,7 @@ export const definition = {
       "tarefaId": {
         "type": "string",
         "sources": [
-          "url",
-          "localStorage"
+          "url"
         ],
         "effect": "select:detalheTarefa",
         "persist": false,

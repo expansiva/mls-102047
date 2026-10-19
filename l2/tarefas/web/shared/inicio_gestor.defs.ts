@@ -6,8 +6,7 @@ export const definition = {
       "tarefaId": {
         "type": "string",
         "sources": [
-          "url",
-          "localStorage"
+          "url"
         ],
         "effect": "select:tarefasParaAcao",
         "persist": false,
