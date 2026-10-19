@@ -1,5 +1,8 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_2_application/requests/minhas_tarefas.ts" enhancement="_blank"/>
 
+import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
+import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
 import type {
   Minhas_tarefasContracts,
   TarefaDetalhe,
@@ -7,19 +10,15 @@ import type {
   ItemChecklistLinha,
   ListaOpcao,
   MembroOpcao,
-  MembroRef,
 } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
-import { AppError } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import type { RequestContext } from '/_102034_/l1/server/layer_2_controllers/contracts.js';
-import { resolveRepository } from '/_102034_/l1/server/layer_2_application/repositoryRegistry.js';
 import { getTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.js';
 import { listTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
+import type { ListTarefaInput } from '/_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.js';
 import { updateTarefa } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.js';
+import type { UpdateTarefaInput } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.js';
 import { getLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/getLista.js';
-import type { GetListaOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/getLista.js';
 import { listLista } from '/_102047_/l1/tarefas/layer_2_application/usecases/listLista.js';
 import { getMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.js';
-import type { GetMembroEquipeOutput } from '/_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.js';
 import { listMembroEquipe } from '/_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.js';
 import { listItemChecklist } from '/_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.js';
 import { updateItemChecklist } from '/_102047_/l1/tarefas/layer_2_application/usecases/updateItemChecklist.js';
@@ -29,13 +28,16 @@ import {
   avancarEtapaTarefa,
   reatribuirQuemAge,
 } from '/_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.js';
-import type { TransicaoTarefa } from '/_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.js';
+import type {
+  AbrirOcorrenciaTarefaInput,
+  AvancarEtapaTarefaInput,
+  TransicaoTarefa,
+} from '/_102047_/l1/tarefas/layer_2_application/workflows/cicloTarefa.js';
 
-type C = Minhas_tarefasContracts;
-type NovoItemChecklist = Parameters<ItemChecklistRepository['create']>[0];
+type Contracts = Minhas_tarefasContracts;
+type ItemChecklistRegistro = Awaited<ReturnType<ItemChecklistRepository['list']>>[number];
 
-/** Campos da tarefa que este serviço lê; qualquer registro de Tarefa devolvido pelos usecases o satisfaz. */
-interface TarefaBase {
+interface TarefaFonte {
   id: string;
   version: number;
   titulo: string;
@@ -45,8 +47,6 @@ interface TarefaBase {
   listaId: string;
   responsavelId: string;
   criadorId: string;
-  tarefaPaiId?: string;
-  chaveCriacao: string;
   criadaEm: string;
   details: {
     descricao?: string;
@@ -57,133 +57,156 @@ interface TarefaBase {
   };
 }
 
-interface ChecklistRegistro {
-  id: string;
-  version: number;
-  ordem: number;
-  feito: boolean;
-  details: { descricao: string; marcadoEm?: string };
-}
+const TAMANHO_LOTE = 200;
+const LIMITE_BUSCA_MEMBROS = 20;
 
-type Status = TarefaResumo['status'];
-type Prioridade = TarefaResumo['prioridade'];
+// ---------------------------------------------------------------- helpers
 
-const STATUS_ENCERRADOS: string[] = ['concluida', 'cancelada'];
-
-function sessao(ctx: RequestContext): string {
-  const id = ctx.sessionContext.actorId;
+function pessoaDaSessao(ctx: RequestContext): string {
+  const id = ctx.sessionContext.actorId ?? ctx.sessionContext.person?.mdmId;
   if (id == null || id === '') {
-    throw new AppError('UNAUTHENTICATED', 'Sessão sem pessoa identificada', 401);
+    throw new AppError('UNAUTHENTICATED', 'A sessão não identifica o membro da equipe', 401);
   }
   return id;
 }
 
 function hoje(ctx: RequestContext): string {
-  return ctx.clock.nowIso().slice(0, 10);
+  const agora = ctx.clock.nowIso();
+  const tz = ctx.organization.timezone;
+  if (tz != null && tz !== '') {
+    return new Date(agora).toLocaleDateString('en-CA', { timeZone: tz });
+  }
+  return agora.slice(0, 10);
 }
 
 function normalizar(texto: string): string {
   return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-async function lerTodos<T>(buscar: (page: number) => Promise<{ items: T[]; hasMore: boolean }>): Promise<T[]> {
+function toStatus(v: string): TarefaResumo['status'] {
+  if (v === 'aFazer' || v === 'emAndamento' || v === 'emRevisao' || v === 'concluida' || v === 'cancelada') return v;
+  throw new AppError('DADO_INVALIDO', `Situação de tarefa desconhecida: ${v}`, 500, { valor: v });
+}
+
+function toPrioridade(v: string): TarefaResumo['prioridade'] {
+  if (v === 'low' || v === 'medium' || v === 'high') return v;
+  throw new AppError('DADO_INVALIDO', `Prioridade de tarefa desconhecida: ${v}`, 500, { valor: v });
+}
+
+function toTipoLista(v: string): ListaOpcao['details']['tipo'] {
+  if (v === 'project' || v === 'area') return v;
+  throw new AppError('DADO_INVALIDO', `Tipo de lista desconhecido: ${v}`, 500, { valor: v });
+}
+
+function toStatusMembro(v: string): MembroOpcao['details']['identification']['status'] {
+  if (v === 'Active' || v === 'Inactive' || v === 'Merged' || v === 'Blocked') return v;
+  throw new AppError('DADO_INVALIDO', `Situação de membro desconhecida: ${v}`, 500, { valor: v });
+}
+
+async function listarTudo<T>(
+  buscar: (page: number, pageSize: number) => Promise<{ items: T[]; hasMore: boolean }>,
+): Promise<T[]> {
   const todos: T[] = [];
   let page = 1;
   for (;;) {
-    const r = await buscar(page);
+    const r = await buscar(page, TAMANHO_LOTE);
     todos.push(...r.items);
-    if (!r.hasMore || r.items.length === 0) break;
+    if (!r.hasMore) return todos;
     page += 1;
   }
-  return todos;
 }
 
-async function lerChecklist(tarefaId: string, ctx: RequestContext): Promise<ChecklistRegistro[]> {
-  const itens = await lerTodos((page) => listItemChecklist({ tarefaId, page, pageSize: 200 }, ctx));
+async function listarChecklist(tarefaId: string, ctx: RequestContext): Promise<ItemChecklistRegistro[]> {
+  const itens = await listarTudo((page, pageSize) => listItemChecklist({ tarefaId, page, pageSize }, ctx));
   return [...itens].sort((a, b) => a.ordem - b.ordem);
 }
 
-interface Busca {
-  lista(id: string): Promise<GetListaOutput>;
-  membro(id: string): Promise<GetMembroEquipeOutput>;
-}
-
-function criarBusca(ctx: RequestContext): Busca {
-  const listas = new Map<string, Promise<GetListaOutput>>();
-  const membros = new Map<string, Promise<GetMembroEquipeOutput>>();
-  return {
-    lista(id: string): Promise<GetListaOutput> {
-      let p = listas.get(id);
-      if (p === undefined) {
-        p = getLista({ id }, ctx);
-        listas.set(id, p);
-      }
-      return p;
-    },
-    membro(id: string): Promise<GetMembroEquipeOutput> {
-      let p = membros.get(id);
-      if (p === undefined) {
-        p = getMembroEquipe({ id }, ctx);
-        membros.set(id, p);
-      }
-      return p;
-    },
-  };
-}
-
-function membroRef(m: GetMembroEquipeOutput): MembroRef {
-  return { details: { identification: { name: m.details.identification.name } } };
-}
-
-function linhaChecklist(i: ChecklistRegistro): ItemChecklistLinha {
+function linhaChecklist(i: ItemChecklistRegistro): ItemChecklistLinha {
   const details: ItemChecklistLinha['details'] = { descricao: i.details.descricao };
   if (i.details.marcadoEm != null) details.marcadoEm = i.details.marcadoEm;
   return { id: i.id, version: i.version, ordem: i.ordem, feito: i.feito, details };
 }
 
-function estaAberta(status: string): boolean {
-  return !STATUS_ENCERRADOS.includes(status);
+async function nomesDeMembros(ids: string[], ctx: RequestContext): Promise<Map<string, string>> {
+  const unicos = Array.from(new Set(ids));
+  const pares = await Promise.all(
+    unicos.map(async (id) => {
+      const m = await getMembroEquipe({ id }, ctx);
+      return [id, m.details.identification.name] as [string, string];
+    }),
+  );
+  return new Map(pares);
 }
 
-function garantirVisivel(t: TarefaBase, ator: string): void {
-  // editarSomenteTarefaVisivel: o membro só vê tarefas que criou ou pelas quais responde.
-  if (t.criadorId !== ator && t.responsavelId !== ator) {
-    throw new AppError('FORBIDDEN', 'A tarefa não é visível para o membro da sessão', 403, {
+async function nomesDeListas(ids: string[], ctx: RequestContext): Promise<Map<string, string>> {
+  const unicos = Array.from(new Set(ids));
+  const pares = await Promise.all(
+    unicos.map(async (id) => {
+      const l = await getLista({ id }, ctx);
+      return [id, l.nome] as [string, string];
+    }),
+  );
+  return new Map(pares);
+}
+
+function nomeOuErro(mapa: Map<string, string>, id: string, o: string): string {
+  const nome = mapa.get(id);
+  if (nome == null) throw new AppError('NOT_FOUND', `${o} não encontrado(a)`, 404, { id });
+  return nome;
+}
+
+function exigirVisivel(t: TarefaFonte, me: string): void {
+  // editarSomenteTarefaVisivel
+  if (t.criadorId !== me && t.responsavelId !== me) {
+    throw new AppError('FORBIDDEN', `Você não pode ver nem editar a tarefa "${t.titulo}"`, 403, {
       ruleId: 'editarSomenteTarefaVisivel',
+      tarefaId: t.id,
     });
   }
 }
 
-function garantirVersao(t: TarefaBase, version: number): void {
-  if (t.version !== Number(version)) {
-    throw new AppError('VERSION_CONFLICT', 'A tarefa foi alterada: a versão lida não é mais a atual', 409);
-  }
-}
-
-function garantirListaAtiva(lista: GetListaOutput): void {
+async function exigirListaAtiva(listaId: string, ctx: RequestContext): Promise<void> {
+  const lista = await getLista({ id: listaId }, ctx);
+  // listaInativaNaoRecebeTarefa
   if (!lista.ativa) {
-    throw new AppError('LISTA_INATIVA', 'Uma lista inativa não pode receber tarefas', 422, {
+    throw new AppError('LISTA_INATIVA', `A lista "${lista.nome}" está inativa e não recebe novas tarefas`, 422, {
       ruleId: 'listaInativaNaoRecebeTarefa',
+      listaId,
     });
   }
 }
 
-function garantirMembroAtivo(membro: GetMembroEquipeOutput): void {
-  if (membro.details.identification.status !== 'Active') {
-    throw new AppError('RESPONSAVEL_INATIVO', 'O responsável deve ser um membro da equipe ativo', 422, {
-      ruleId: 'responsavelDeveSerMembroAtivo',
-    });
+async function exigirMembroAtivo(membroId: string, ctx: RequestContext): Promise<void> {
+  const m = await getMembroEquipe({ id: membroId }, ctx);
+  // responsavelDeveSerMembroAtivo
+  if (m.details.identification.status !== 'Active') {
+    throw new AppError(
+      'RESPONSAVEL_INATIVO',
+      `O membro "${m.details.identification.name}" não está ativo e não pode ser responsável`,
+      422,
+      { ruleId: 'responsavelDeveSerMembroAtivo', responsavelId: membroId },
+    );
   }
 }
 
-async function montarDetalhe(t: TarefaBase, ctx: RequestContext): Promise<TarefaDetalhe> {
-  const ator = sessao(ctx);
-  const busca = criarBusca(ctx);
+function exigirVersao(t: TarefaFonte, version: number): void {
+  if (t.version !== version) {
+    throw new AppError(
+      'VERSION_CONFLICT',
+      `A tarefa "${t.titulo}" foi alterada por outra pessoa; recarregue e tente de novo`,
+      409,
+      { tarefaId: t.id, versaoLida: version, versaoAtual: t.version },
+    );
+  }
+}
+
+async function montarDetalhe(t: TarefaFonte, ctx: RequestContext): Promise<TarefaDetalhe> {
+  const me = pessoaDaSessao(ctx);
   const [lista, criador, responsavel, checklist] = await Promise.all([
-    busca.lista(t.listaId),
-    busca.membro(t.criadorId),
-    busca.membro(t.responsavelId),
-    lerChecklist(t.id, ctx),
+    getLista({ id: t.listaId }, ctx),
+    getMembroEquipe({ id: t.criadorId }, ctx),
+    getMembroEquipe({ id: t.responsavelId }, ctx),
+    listarChecklist(t.id, ctx),
   ]);
   const details: TarefaDetalhe['details'] = {};
   if (t.details.descricao != null) details.descricao = t.details.descricao;
@@ -199,254 +222,264 @@ async function montarDetalhe(t: TarefaBase, ctx: RequestContext): Promise<Tarefa
     listaId: t.listaId,
     lista: { nome: lista.nome },
     criadorId: t.criadorId,
-    criador: membroRef(criador),
+    criador: { details: { identification: { name: criador.details.identification.name } } },
     responsavelId: t.responsavelId,
-    responsavel: membroRef(responsavel),
+    responsavel: { details: { identification: { name: responsavel.details.identification.name } } },
     prazo: t.prazo,
-    prioridade: t.prioridade as Prioridade,
-    status: t.status as Status,
+    prioridade: toPrioridade(t.prioridade),
+    status: toStatus(t.status),
     criadaEm: t.criadaEm,
-    souCriador: t.criadorId === ator, // calculado: criadorId = pessoa da sessão
-    souResponsavel: t.responsavelId === ator, // calculado: responsavelId = pessoa da sessão
+    souCriador: t.criadorId === me,
+    souResponsavel: t.responsavelId === me,
     checklist: checklist.map(linhaChecklist),
   };
 }
 
-interface ConfigTransicao {
-  transicao: TransicaoTarefa;
-  papel: 'responsavel' | 'criador';
-  regraPapel: string;
-  estados: string[];
-  motivoDevolucao?: string;
-}
-
-async function transicionar(
-  input: { id: string; version: number },
+async function tarefasDe(
+  campo: 'criadorId' | 'responsavelId',
+  me: string,
+  status: string | undefined,
   ctx: RequestContext,
-  cfg: ConfigTransicao,
-): Promise<{ tarefa: TarefaDetalhe }> {
-  return ctx.data.moduleData.runInTransaction(async (tx) => {
-    const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-    const ator = sessao(bound);
-    const t = await getTarefa({ id: String(input.id) }, bound);
-    garantirVersao(t, input.version);
-    const donoEsperado = cfg.papel === 'responsavel' ? t.responsavelId : t.criadorId;
-    if (donoEsperado !== ator) {
-      throw new AppError(
-        'FORBIDDEN',
-        cfg.papel === 'responsavel'
-          ? 'Somente o responsável da tarefa pode executar esta transição'
-          : 'Somente quem criou a tarefa pode executar esta transição',
-        403,
-        { ruleId: cfg.regraPapel },
-      );
-    }
-    if (STATUS_ENCERRADOS.includes(t.status)) {
-      throw new AppError('TAREFA_ENCERRADA', 'Uma tarefa concluída ou cancelada não muda mais de situação', 409, {
-        ruleId: 'tarefaEncerradaNaoTransiciona',
-      });
-    }
-    if (!cfg.estados.includes(t.status)) {
-      throw new AppError(
-        'INVALID_STATE',
-        `A transição ${cfg.transicao} não é permitida a partir da situação ${t.status}`,
-        409,
-      );
-    }
-    const resultado = cfg.motivoDevolucao !== undefined
-      ? await avancarEtapaTarefa(
-          { id: t.id, transicao: cfg.transicao, motivoDevolucao: cfg.motivoDevolucao },
-          bound,
-        )
-      : await avancarEtapaTarefa({ id: t.id, transicao: cfg.transicao }, bound);
-    return { tarefa: await montarDetalhe(resultado.tarefa, bound) };
+): Promise<TarefaFonte[]> {
+  return listarTudo((page, pageSize) => {
+    const filtro: ListTarefaInput = { page, pageSize };
+    filtro[campo] = me;
+    if (status != null) filtro.status = status;
+    return listTarefa(filtro, ctx);
   });
 }
 
-export const requests: {
-  [K in keyof Minhas_tarefasContracts]: (
-    input: Minhas_tarefasContracts[K]['input'],
-    ctx: RequestContext,
-  ) => Promise<Minhas_tarefasContracts[K]['output']>;
-} = {
-  'tarefas.minhas_tarefas.qryMinhasTarefas': async function (input, ctx) {
-    const ator = sessao(ctx);
-    const page = input.page >= 1 ? Math.floor(input.page) : 1;
-    const pageSize = input.pageSize >= 1 ? Math.min(Math.floor(input.pageSize), 200) : 20;
-    const filtro = input.filtro;
-
-    const filtroStatus: { status?: string } = {};
-    if (filtro === 'emRevisao') filtroStatus.status = 'emRevisao';
-    if (filtro === 'devolvidas') filtroStatus.status = 'emAndamento';
-
-    // editarSomenteTarefaVisivel: só tarefas em que a pessoa da sessão é criadora ou responsável.
-    const visiveis = new Map<string, TarefaBase>();
-    if (filtro !== 'atribuidasAMim') {
-      const criadas = await lerTodos((p) =>
-        listTarefa({ criadorId: ator, ...filtroStatus, page: p, pageSize: 200 }, ctx),
-      );
-      for (const t of criadas) visiveis.set(t.id, t);
-    }
-    if (filtro !== 'criadasPorMim') {
-      const atribuidas = await lerTodos((p) =>
-        listTarefa({ responsavelId: ator, ...filtroStatus, page: p, pageSize: 200 }, ctx),
-      );
-      for (const t of atribuidas) visiveis.set(t.id, t);
-    }
-
-    let todas = Array.from(visiveis.values());
-    if (filtro === 'devolvidas') {
-      todas = todas.filter((t) => t.details.devolvidaEm != null && t.status === 'emAndamento');
-    }
-    todas.sort((a, b) => (a.prazo < b.prazo ? -1 : a.prazo > b.prazo ? 1 : a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-
-    const inicio = (page - 1) * pageSize;
-    const fim = inicio + pageSize;
-    const pagina = todas.slice(inicio, fim);
-    const hasMore = todas.length > fim;
-
-    const busca = criarBusca(ctx);
-    const dia = hoje(ctx);
-    const items: TarefaResumo[] = [];
-    for (const t of pagina) {
-      const [lista, responsavel, criador, subtarefas, checklist] = await Promise.all([
-        busca.lista(t.listaId),
-        busca.membro(t.responsavelId),
-        busca.membro(t.criadorId),
-        lerTodos((p) => listTarefa({ tarefaPaiId: t.id, page: p, pageSize: 200 }, ctx)),
-        lerChecklist(t.id, ctx),
-      ]);
-      const aberta = estaAberta(t.status);
-      const prazoDia = t.prazo.slice(0, 10);
-      const feitos = checklist.filter((i) => i.feito).length;
-      const details: TarefaResumo['details'] = {
-        quantidadeSubtarefas: subtarefas.length,
-        progressoChecklist: `${feitos}/${checklist.length}`,
-        venceHoje: aberta && prazoDia === dia,
-        atrasada: aberta && prazoDia < dia,
-      };
-      if (t.details.devolvidaEm != null) details.devolvidaEm = t.details.devolvidaEm;
-      items.push({
-        id: t.id,
-        version: t.version,
-        titulo: t.titulo,
-        listaId: t.listaId,
-        lista: { nome: lista.nome },
-        responsavelId: t.responsavelId,
-        responsavel: membroRef(responsavel),
-        criadorId: t.criadorId,
-        criador: membroRef(criador),
-        prioridade: t.prioridade as Prioridade,
-        prazo: t.prazo,
-        status: t.status as Status,
-        details,
+async function transicionar(
+  ctx: RequestContext,
+  id: string,
+  version: number,
+  cfg: {
+    transicao: TransicaoTarefa;
+    papel: 'responsavel' | 'criador';
+    ruleId: string;
+    statusPermitidos: string[];
+    verbo: string;
+    exigeMotivo?: boolean;
+    motivoDevolucao?: string;
+  },
+): Promise<{ tarefa: TarefaDetalhe }> {
+  return ctx.data.moduleData.runInTransaction(async (tx) => {
+    const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
+    const me = pessoaDaSessao(bound);
+    const tarefa = await getTarefa({ id }, bound);
+    const esperado = cfg.papel === 'responsavel' ? tarefa.responsavelId : tarefa.criadorId;
+    // regra do papel (somenteResponsavelExecuta / somenteCriadorRevisa / cancelamentoPorCriadorOuGestor)
+    if (me !== esperado) {
+      const quem = cfg.papel === 'responsavel' ? 'o responsável' : 'quem criou a tarefa';
+      throw new AppError('FORBIDDEN', `Somente ${quem} "${tarefa.titulo}" pode ${cfg.verbo}`, 403, {
+        ruleId: cfg.ruleId,
+        tarefaId: id,
       });
     }
+    // tarefaEncerradaNaoTransiciona
+    if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
+      throw new AppError('TAREFA_ENCERRADA', `A tarefa "${tarefa.titulo}" está encerrada e não muda mais de situação`, 409, {
+        ruleId: 'tarefaEncerradaNaoTransiciona',
+        tarefaId: id,
+        status: tarefa.status,
+      });
+    }
+    if (!cfg.statusPermitidos.includes(tarefa.status)) {
+      throw new AppError(
+        'STATUS_INVALIDO',
+        `A tarefa "${tarefa.titulo}" está em ${tarefa.status} e não pode ${cfg.verbo}`,
+        409,
+        { tarefaId: id, status: tarefa.status, permitidos: cfg.statusPermitidos },
+      );
+    }
+    if (cfg.exigeMotivo === true) {
+      const motivo = cfg.motivoDevolucao;
+      // devolucaoExigeMotivo
+      if (motivo == null || motivo.trim() === '') {
+        throw new AppError('MOTIVO_OBRIGATORIO', `Informe o motivo para devolver a tarefa "${tarefa.titulo}"`, 422, {
+          ruleId: 'devolucaoExigeMotivo',
+          tarefaId: id,
+        });
+      }
+    }
+    exigirVersao(tarefa, version);
+    const entrada: AvancarEtapaTarefaInput = { id, transicao: cfg.transicao };
+    if (cfg.exigeMotivo === true && cfg.motivoDevolucao != null) {
+      entrada.motivoDevolucao = cfg.motivoDevolucao.trim();
+    }
+    const r = await avancarEtapaTarefa(entrada, bound);
+    return { tarefa: await montarDetalhe(r.tarefa, bound) };
+  });
+}
+
+// ---------------------------------------------------------------- requests
+
+export const requests: {
+  [K in keyof Contracts]: (input: Contracts[K]['input'], ctx: RequestContext) => Promise<Contracts[K]['output']>;
+} = {
+  'tarefas.minhas_tarefas.qryMinhasTarefas': async function (input, ctx) {
+    const me = pessoaDaSessao(ctx);
+    const page = Math.max(1, Math.floor(input.page || 1));
+    const pageSize = Math.min(200, Math.max(1, Math.floor(input.pageSize || 20)));
+    const statusFiltro =
+      input.filtro === 'emRevisao' ? 'emRevisao' : input.filtro === 'devolvidas' ? 'emAndamento' : undefined;
+
+    // editarSomenteTarefaVisivel: só as tarefas que o membro criou ou pelas quais é responsável
+    const visiveis = new Map<string, TarefaFonte>();
+    if (input.filtro !== 'atribuidasAMim') {
+      for (const t of await tarefasDe('criadorId', me, statusFiltro, ctx)) visiveis.set(t.id, t);
+    }
+    if (input.filtro !== 'criadasPorMim') {
+      for (const t of await tarefasDe('responsavelId', me, statusFiltro, ctx)) visiveis.set(t.id, t);
+    }
+    let selecionadas = Array.from(visiveis.values());
+    if (input.filtro === 'devolvidas') {
+      selecionadas = selecionadas.filter((t) => t.details.devolvidaEm != null);
+    }
+    selecionadas.sort((a, b) => {
+      if (a.prazo !== b.prazo) return a.prazo < b.prazo ? -1 : 1;
+      return a.titulo.localeCompare(b.titulo);
+    });
+
+    const inicio = (page - 1) * pageSize;
+    const pagina = selecionadas.slice(inicio, inicio + pageSize);
+    const hasMore = inicio + pageSize < selecionadas.length;
+
+    const [nomesListas, nomesMembros] = await Promise.all([
+      nomesDeListas(pagina.map((t) => t.listaId), ctx),
+      nomesDeMembros(pagina.flatMap((t) => [t.responsavelId, t.criadorId]), ctx),
+    ]);
+    const dataHoje = hoje(ctx);
+
+    const items: TarefaResumo[] = await Promise.all(
+      pagina.map(async (t) => {
+        const [filhas, checklist] = await Promise.all([
+          listarTudo((p, s) => listTarefa({ tarefaPaiId: t.id, page: p, pageSize: s }, ctx)),
+          listarChecklist(t.id, ctx),
+        ]);
+        const aberta = t.status !== 'concluida' && t.status !== 'cancelada';
+        const prazo = t.prazo.slice(0, 10);
+        const details: TarefaResumo['details'] = {
+          // derivados: calculados aqui, nunca lidos do armazenamento
+          quantidadeSubtarefas: filhas.length,
+          progressoChecklist: `${checklist.filter((i) => i.feito).length}/${checklist.length}`,
+          venceHoje: aberta && prazo === dataHoje,
+          atrasada: aberta && prazo < dataHoje,
+        };
+        if (t.details.devolvidaEm != null) details.devolvidaEm = t.details.devolvidaEm;
+        return {
+          id: t.id,
+          version: t.version,
+          titulo: t.titulo,
+          listaId: t.listaId,
+          lista: { nome: nomeOuErro(nomesListas, t.listaId, 'Lista') },
+          responsavelId: t.responsavelId,
+          responsavel: {
+            details: { identification: { name: nomeOuErro(nomesMembros, t.responsavelId, 'Responsável') } },
+          },
+          criadorId: t.criadorId,
+          criador: { details: { identification: { name: nomeOuErro(nomesMembros, t.criadorId, 'Criador') } } },
+          prioridade: toPrioridade(t.prioridade),
+          prazo: t.prazo,
+          status: toStatus(t.status),
+          details,
+        };
+      }),
+    );
+
     return { tarefas: { items, page, pageSize, hasMore } };
   },
 
   'tarefas.minhas_tarefas.qryTarefa': async function (input, ctx) {
-    const ator = sessao(ctx);
-    const t = await getTarefa({ id: String(input.tarefaId) }, ctx);
-    garantirVisivel(t, ator);
-    return { tarefa: await montarDetalhe(t, ctx) };
+    const me = pessoaDaSessao(ctx);
+    const tarefa = await getTarefa({ id: input.tarefaId }, ctx);
+    exigirVisivel(tarefa, me);
+    return { tarefa: await montarDetalhe(tarefa, ctx) };
   },
 
   'tarefas.minhas_tarefas.qryListasAtivas': async function (_input, ctx) {
-    // listaInativaNaoRecebeTarefa: só listas com ativa = true.
-    const listas = await lerTodos((page) => listLista({ ativa: true, page, pageSize: 200 }, ctx));
-    const ordenadas = [...listas].sort((a, b) => a.nome.localeCompare(b.nome));
-    const resultado: ListaOpcao[] = ordenadas.map((l) => ({
+    // listaInativaNaoRecebeTarefa: só listas com ativa = true
+    const listas = await listarTudo((page, pageSize) => listLista({ ativa: true, page, pageSize }, ctx));
+    const ordenadas = listas.filter((l) => l.ativa).sort((a, b) => a.nome.localeCompare(b.nome));
+    const out: ListaOpcao[] = ordenadas.map((l) => ({
       id: l.id,
       nome: l.nome,
       ativa: l.ativa,
-      details: { tipo: l.details.tipo as ListaOpcao['details']['tipo'] },
+      details: { tipo: toTipoLista(l.details.tipo) },
     }));
-    return { listas: resultado };
+    return { listas: out };
   },
 
   'tarefas.minhas_tarefas.qryBuscarMembros': async function (input, ctx) {
-    const termo = normalizar(String(input.termo ?? '').trim());
-    const membros = await lerTodos((page) => listMembroEquipe({ page, pageSize: 200 }, ctx));
-    // responsavelDeveSerMembroAtivo: somente situação Active.
+    const termo = normalizar(input.termo.trim());
+    const membros = await listarTudo((page, pageSize) => listMembroEquipe({ page, pageSize }, ctx));
     const encontrados = membros
+      // responsavelDeveSerMembroAtivo: somente situação Active
       .filter((m) => m.details.identification.status === 'Active')
       .filter((m) => normalizar(m.details.identification.name).includes(termo))
       .sort((a, b) => a.details.identification.name.localeCompare(b.details.identification.name))
-      .slice(0, 20);
-    const resultado: MembroOpcao[] = encontrados.map((m) => ({
+      .slice(0, LIMITE_BUSCA_MEMBROS);
+    const out: MembroOpcao[] = encontrados.map((m) => ({
       id: m.id,
       details: {
         identification: {
           name: m.details.identification.name,
-          status: m.details.identification.status as MembroOpcao['details']['identification']['status'],
+          status: toStatusMembro(m.details.identification.status),
         },
       },
     }));
-    return { membros: resultado };
+    return { membros: out };
   },
 
   'tarefas.minhas_tarefas.cmdCriarTarefa': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const ator = sessao(bound);
-      if (input.criadorId != null && input.criadorId !== ator) {
-        throw new AppError('FORBIDDEN', 'O criador da tarefa deve ser a pessoa da sessão', 403);
+      const me = pessoaDaSessao(bound);
+      if (input.criadorId != null && input.criadorId !== me) {
+        throw new AppError(
+          'CRIADOR_DIFERENTE_DA_SESSAO',
+          'O criador da tarefa deve ser a pessoa da sessão',
+          403,
+          { criadorId: input.criadorId },
+        );
       }
 
-      const lista = await getLista({ id: String(input.listaId) }, bound);
-      garantirListaAtiva(lista); // listaInativaNaoRecebeTarefa
-      const responsavel = await getMembroEquipe({ id: String(input.responsavelId) }, bound);
-      garantirMembroAtivo(responsavel); // responsavelDeveSerMembroAtivo
-
-      // criacaoIdempotente: a mesma chaveCriacao devolve a tarefa já criada.
+      // criacaoIdempotente: a mesma chaveCriacao devolve a tarefa já criada, sem criar outra
       const existentes = await listTarefa({ chaveCriacao: input.chaveCriacao, page: 1, pageSize: 1 }, bound);
-      if (existentes.items.length > 0) {
-        return { tarefa: await montarDetalhe(existentes.items[0], bound) };
+      const jaCriada = existentes.items[0];
+      if (jaCriada != null) {
+        return { tarefa: await montarDetalhe(jaCriada, bound) };
       }
 
-      const aberta = input.details.descricao != null
-        ? await abrirOcorrenciaTarefa(
-            {
-              chaveCriacao: input.chaveCriacao,
-              titulo: input.titulo,
-              prioridade: input.prioridade,
-              prazo: input.prazo,
-              listaId: input.listaId,
-              responsavelId: input.responsavelId,
-              descricao: input.details.descricao,
-            },
-            bound,
-          )
-        : await abrirOcorrenciaTarefa(
-            {
-              chaveCriacao: input.chaveCriacao,
-              titulo: input.titulo,
-              prioridade: input.prioridade,
-              prazo: input.prazo,
-              listaId: input.listaId,
-              responsavelId: input.responsavelId,
-            },
-            bound,
-          );
+      await exigirListaAtiva(input.listaId, bound);
+      await exigirMembroAtivo(input.responsavelId, bound);
 
-      const itens = input.checklist ?? [];
-      if (itens.length > 0) {
-        const repo = resolveRepository<ItemChecklistRepository>(bound, 'ItemChecklistRepository');
-        for (const item of itens) {
-          const novo: NovoItemChecklist = {
-            id: bound.idGenerator.newId(),
-            version: 1,
-            tarefaId: aberta.tarefa.id,
-            ordem: item.ordem,
-            feito: item.feito,
-            details: item.feito
-              ? { descricao: item.details.descricao, marcadoEm: bound.clock.nowIso() }
-              : { descricao: item.details.descricao },
-          };
-          await repo.create(novo);
-        }
+      const abrir: AbrirOcorrenciaTarefaInput = {
+        chaveCriacao: input.chaveCriacao,
+        titulo: input.titulo,
+        prioridade: input.prioridade,
+        prazo: input.prazo,
+        listaId: input.listaId,
+        responsavelId: input.responsavelId,
+      };
+      if (input.details.descricao != null) abrir.descricao = input.details.descricao;
+      const aberta = await abrirOcorrenciaTarefa(abrir, bound);
+
+      const repo = resolveRepository<ItemChecklistRepository>(bound, 'ItemChecklistRepository');
+      for (const item of input.checklist ?? []) {
+        const details: ItemChecklistRegistro['details'] = { descricao: item.details.descricao };
+        if (item.feito) details.marcadoEm = bound.clock.nowIso();
+        const novo: ItemChecklistRegistro = {
+          id: bound.idGenerator.newId(),
+          version: 1,
+          tarefaId: aberta.tarefa.id,
+          ordem: item.ordem,
+          feito: item.feito,
+          details,
+        };
+        await repo.create(novo);
       }
+
       return { tarefa: await montarDetalhe(aberta.tarefa, bound) };
     });
   },
@@ -454,196 +487,190 @@ export const requests: {
   'tarefas.minhas_tarefas.cmdSalvarEdicao': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const ator = sessao(bound);
-      const t = await getTarefa({ id: String(input.id) }, bound);
-      garantirVisivel(t, ator); // editarSomenteTarefaVisivel
-      garantirVersao(t, input.version);
+      const me = pessoaDaSessao(bound);
+      const tarefa = await getTarefa({ id: input.id }, bound);
+      exigirVisivel(tarefa, me);
+      exigirVersao(tarefa, input.version);
 
-      if (input.listaId !== t.listaId) {
-        const lista = await getLista({ id: String(input.listaId) }, bound);
-        garantirListaAtiva(lista); // listaInativaNaoRecebeTarefa
+      if (input.listaId !== tarefa.listaId) {
+        await exigirListaAtiva(input.listaId, bound);
       }
-
-      const trocouResponsavel = input.responsavelId !== t.responsavelId;
+      const trocouResponsavel = input.responsavelId !== tarefa.responsavelId;
       if (trocouResponsavel) {
-        if (t.criadorId !== ator) {
-          throw new AppError('FORBIDDEN', 'Somente quem criou a tarefa pode trocar o responsável', 403, {
-            ruleId: 'reatribuicaoPorCriadorOuGestor',
-          });
-        }
-        const novo = await getMembroEquipe({ id: String(input.responsavelId) }, bound);
-        garantirMembroAtivo(novo); // responsavelDeveSerMembroAtivo
-      }
-
-      const details: { descricao?: string; motivoDevolucao?: string; devolvidaEm?: string; concluidaEm?: string; canceladaEm?: string } = {};
-      if (input.details.descricao != null) details.descricao = input.details.descricao;
-      if (t.details.motivoDevolucao != null) details.motivoDevolucao = t.details.motivoDevolucao;
-      if (t.details.devolvidaEm != null) details.devolvidaEm = t.details.devolvidaEm;
-      if (t.details.concluidaEm != null) details.concluidaEm = t.details.concluidaEm;
-      if (t.details.canceladaEm != null) details.canceladaEm = t.details.canceladaEm;
-
-      // edicaoNaoMudaSituacao: a situação gravada é sempre a atual; o responsável só muda pela reatribuição abaixo.
-      const atualizada = t.tarefaPaiId != null
-        ? await updateTarefa(
-            {
-              id: t.id,
-              version: Number(input.version),
-              titulo: input.titulo,
-              status: t.status,
-              prioridade: input.prioridade,
-              prazo: input.prazo,
-              listaId: input.listaId,
-              responsavelId: t.responsavelId,
-              criadorId: t.criadorId,
-              tarefaPaiId: t.tarefaPaiId,
-              chaveCriacao: t.chaveCriacao,
-              details,
-            },
-            bound,
-          )
-        : await updateTarefa(
-            {
-              id: t.id,
-              version: Number(input.version),
-              titulo: input.titulo,
-              status: t.status,
-              prioridade: input.prioridade,
-              prazo: input.prazo,
-              listaId: input.listaId,
-              responsavelId: t.responsavelId,
-              criadorId: t.criadorId,
-              chaveCriacao: t.chaveCriacao,
-              details,
-            },
-            bound,
+        // reatribuicaoPorCriadorOuGestor
+        if (tarefa.criadorId !== me) {
+          throw new AppError(
+            'FORBIDDEN',
+            `Somente quem criou a tarefa "${tarefa.titulo}" pode trocar o responsável`,
+            403,
+            { ruleId: 'reatribuicaoPorCriadorOuGestor', tarefaId: tarefa.id },
           );
+        }
+        await exigirMembroAtivo(input.responsavelId, bound);
+      }
+
+      const details: UpdateTarefaInput['details'] = {};
+      if (input.details.descricao != null) details.descricao = input.details.descricao;
+      if (tarefa.details.motivoDevolucao != null) details.motivoDevolucao = tarefa.details.motivoDevolucao;
+      if (tarefa.details.devolvidaEm != null) details.devolvidaEm = tarefa.details.devolvidaEm;
+      if (tarefa.details.concluidaEm != null) details.concluidaEm = tarefa.details.concluidaEm;
+      if (tarefa.details.canceladaEm != null) details.canceladaEm = tarefa.details.canceladaEm;
+
+      const dados: UpdateTarefaInput = {
+        id: tarefa.id,
+        version: input.version,
+        titulo: input.titulo,
+        // edicaoNaoMudaSituacao: a situação segue a gravada
+        status: tarefa.status,
+        prioridade: input.prioridade,
+        prazo: input.prazo,
+        listaId: input.listaId,
+        // a troca de responsável passa por reatribuirQuemAge, abaixo
+        responsavelId: tarefa.responsavelId,
+        criadorId: tarefa.criadorId,
+        chaveCriacao: tarefa.chaveCriacao,
+        details,
+      };
+      if (tarefa.tarefaPaiId != null) dados.tarefaPaiId = tarefa.tarefaPaiId;
+      await updateTarefa(dados, bound);
 
       if (trocouResponsavel) {
-        const reatribuida = await reatribuirQuemAge(
-          { id: atualizada.id, novoResponsavelId: String(input.responsavelId) },
-          bound,
-        );
-        return { tarefa: await montarDetalhe(reatribuida.tarefa, bound) };
+        await reatribuirQuemAge({ id: tarefa.id, novoResponsavelId: input.responsavelId }, bound);
       }
-      return { tarefa: await montarDetalhe(atualizada, bound) };
+
+      const atual = await getTarefa({ id: tarefa.id }, bound);
+      return { tarefa: await montarDetalhe(atual, bound) };
     });
   },
 
   'tarefas.minhas_tarefas.cmdSalvarChecklist': async function (input, ctx) {
     return ctx.data.moduleData.runInTransaction(async (tx) => {
       const bound: RequestContext = { ...ctx, data: { ...ctx.data, moduleData: tx } };
-      const ator = sessao(bound);
-      const t = await getTarefa({ id: String(input.tarefaId) }, bound);
-      garantirVisivel(t, ator); // editarSomenteTarefaVisivel
+      const me = pessoaDaSessao(bound);
+      const tarefa = await getTarefa({ id: input.tarefaId }, bound);
+      exigirVisivel(tarefa, me);
 
-      const existentes = await lerChecklist(t.id, bound);
+      const existentes = await listarChecklist(tarefa.id, bound);
+      const porId = new Map<string, ItemChecklistRegistro>();
+      for (const e of existentes) porId.set(e.id, e);
 
-      // Valida todos os itens antes de gravar: a versão de cada item existente deve ser a atual.
+      // valida tudo antes de gravar: item existente e versão lida
       for (const item of input.itens) {
         if (item.id == null) continue;
-        const atual = existentes.find((e) => e.id === item.id);
-        if (atual === undefined) {
-          throw new AppError('NOT_FOUND', `Item da checklist ${item.id} não encontrado na tarefa`, 404);
+        const atual = porId.get(item.id);
+        if (atual == null) {
+          throw new AppError('NOT_FOUND', `Item da checklist "${item.details.descricao}" não encontrado`, 404, {
+            itemId: item.id,
+            tarefaId: tarefa.id,
+          });
         }
         if (item.version == null) {
-          throw new AppError('VALIDATION_ERROR', `O item ${item.id} da checklist exige a versão lida`, 422);
+          throw new AppError(
+            'VALIDATION_ERROR',
+            `Informe a versão do item da checklist "${atual.details.descricao}"`,
+            400,
+            { itemId: item.id },
+          );
         }
-        if (Number(item.version) !== atual.version) {
-          throw new AppError('VERSION_CONFLICT', `O item ${item.id} da checklist foi alterado: versão desatualizada`, 409);
+        if (item.version !== atual.version) {
+          throw new AppError(
+            'VERSION_CONFLICT',
+            `O item da checklist "${atual.details.descricao}" foi alterado por outra pessoa; recarregue e tente de novo`,
+            409,
+            { itemId: item.id, versaoLida: item.version, versaoAtual: atual.version },
+          );
         }
       }
 
+      // checklistNaoMudaSituacao: a situação da tarefa não é tocada aqui
       const repo = resolveRepository<ItemChecklistRepository>(bound, 'ItemChecklistRepository');
-      const agora = bound.clock.nowIso();
-      // checklistNaoMudaSituacao: só itens são gravados; a tarefa não é tocada.
       for (const item of input.itens) {
-        if (item.id != null) {
-          const atual = existentes.find((e) => e.id === item.id);
-          if (atual === undefined || item.version == null) continue;
-          let marcadoEm: string | undefined;
+        const details: ItemChecklistRegistro['details'] = { descricao: item.details.descricao };
+        if (item.id != null && item.version != null) {
+          const atual = porId.get(item.id);
+          if (atual == null) continue;
           if (item.feito) {
-            marcadoEm = atual.feito && atual.details.marcadoEm != null ? atual.details.marcadoEm : agora;
+            details.marcadoEm = atual.feito && atual.details.marcadoEm != null ? atual.details.marcadoEm : bound.clock.nowIso();
           }
           await updateItemChecklist(
             {
               id: item.id,
-              version: Number(item.version),
-              tarefaId: t.id,
+              version: item.version,
+              tarefaId: tarefa.id,
               ordem: item.ordem,
               feito: item.feito,
-              details: marcadoEm !== undefined
-                ? { descricao: item.details.descricao, marcadoEm }
-                : { descricao: item.details.descricao },
+              details,
             },
             bound,
           );
         } else {
-          const novo: NovoItemChecklist = {
+          if (item.feito) details.marcadoEm = bound.clock.nowIso();
+          const novo: ItemChecklistRegistro = {
             id: bound.idGenerator.newId(),
             version: 1,
-            tarefaId: t.id,
+            tarefaId: tarefa.id,
             ordem: item.ordem,
             feito: item.feito,
-            details: item.feito
-              ? { descricao: item.details.descricao, marcadoEm: agora }
-              : { descricao: item.details.descricao },
+            details,
           };
           await repo.create(novo);
         }
       }
-      return { tarefa: await montarDetalhe(t, bound) };
+
+      const atualTarefa = await getTarefa({ id: tarefa.id }, bound);
+      return { tarefa: await montarDetalhe(atualTarefa, bound) };
     });
   },
 
   'tarefas.minhas_tarefas.cmdIniciar': async function (input, ctx) {
-    return transicionar(input, ctx, {
+    return transicionar(ctx, input.id, input.version, {
       transicao: 'iniciar',
       papel: 'responsavel',
-      regraPapel: 'somenteResponsavelExecuta',
-      estados: ['aFazer'],
+      ruleId: 'somenteResponsavelExecuta',
+      statusPermitidos: ['aFazer'],
+      verbo: 'iniciá-la',
     });
   },
 
   'tarefas.minhas_tarefas.cmdEnviarRevisao': async function (input, ctx) {
-    return transicionar(input, ctx, {
+    return transicionar(ctx, input.id, input.version, {
       transicao: 'enviarParaRevisao',
       papel: 'responsavel',
-      regraPapel: 'somenteResponsavelExecuta',
-      estados: ['emAndamento'],
+      ruleId: 'somenteResponsavelExecuta',
+      statusPermitidos: ['emAndamento'],
+      verbo: 'enviá-la para revisão',
     });
   },
 
   'tarefas.minhas_tarefas.cmdAceitar': async function (input, ctx) {
-    return transicionar(input, ctx, {
+    return transicionar(ctx, input.id, input.version, {
       transicao: 'aceitar',
       papel: 'criador',
-      regraPapel: 'somenteCriadorRevisa',
-      estados: ['emRevisao'],
+      ruleId: 'somenteCriadorRevisa',
+      statusPermitidos: ['emRevisao'],
+      verbo: 'aceitá-la',
     });
   },
 
   'tarefas.minhas_tarefas.cmdDevolver': async function (input, ctx) {
-    const motivo = input.details.motivoDevolucao;
-    if (motivo == null || String(motivo).trim() === '') {
-      throw new AppError('VALIDATION_ERROR', 'Devolver uma tarefa exige informar o motivo', 422, {
-        ruleId: 'devolucaoExigeMotivo',
-      });
-    }
-    return transicionar(input, ctx, {
+    return transicionar(ctx, input.id, input.version, {
       transicao: 'devolver',
       papel: 'criador',
-      regraPapel: 'somenteCriadorRevisa',
-      estados: ['emRevisao'],
-      motivoDevolucao: String(motivo).trim(),
+      ruleId: 'somenteCriadorRevisa',
+      statusPermitidos: ['emRevisao'],
+      verbo: 'devolvê-la para ajuste',
+      exigeMotivo: true,
+      motivoDevolucao: input.details.motivoDevolucao,
     });
   },
 
   'tarefas.minhas_tarefas.cmdCancelar': async function (input, ctx) {
-    return transicionar(input, ctx, {
+    return transicionar(ctx, input.id, input.version, {
       transicao: 'cancelar',
       papel: 'criador',
-      regraPapel: 'cancelamentoPorCriadorOuGestor',
-      estados: ['aFazer', 'emAndamento', 'emRevisao'],
+      ruleId: 'cancelamentoPorCriadorOuGestor',
+      statusPermitidos: ['aFazer', 'emAndamento', 'emRevisao'],
+      verbo: 'cancelá-la',
     });
   },
 };
