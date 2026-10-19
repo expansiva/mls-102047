@@ -1,204 +1,191 @@
 import { StateLitElement } from '/_102029_/l2/stateLitElement.js';
 import type { Minhas_tarefasContracts, TarefaDetalhe, ListaOpcao, MembroOpcao } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
-export type { Minhas_tarefasContracts, ListaRef, MembroRef, TarefaResumo, ItemChecklistLinha, TarefaDetalhe, ListaOpcao, MembroOpcao, ItemChecklistEntrada, } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
-type Input<R extends keyof Minhas_tarefasContracts> = Minhas_tarefasContracts[R]['input'];
+export type { Minhas_tarefasContracts, ListaRef, MembroRef, TarefaResumo, ItemChecklistLinha, TarefaDetalhe, ListaOpcao, MembroOpcao, ItemChecklistEntrada } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
 type Output<R extends keyof Minhas_tarefasContracts> = Minhas_tarefasContracts[R]['output'];
 export type ErrorState = {
     code: string;
     message: string;
     details?: unknown;
 } | null;
-/** Quick filter of the task list. */
-export type TarefaFiltro = NonNullable<Input<'tarefas.minhas_tarefas.qryMinhasTarefas'>['filtro']>;
-/** One page of tasks: { items, page, pageSize, hasMore }. */
+export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
+export type Filtro = 'criadasPorMim' | 'atribuidasAMim' | 'emRevisao' | 'devolvidas';
+export type Prioridade = 'low' | 'medium' | 'high';
 export type TarefasPage = Output<'tarefas.minhas_tarefas.qryMinhasTarefas'>['tarefas'];
-type Prioridade = TarefaDetalhe['prioridade'];
-/** Checklist item being typed; no id means a new item. */
+/** One checklist item being typed; every leaf is null until filled. A null id means a new item. */
 export type ItemChecklistDraft = {
     id: string | null;
     version: number | null;
-    details: {
-        descricao: string | null;
-    };
+    descricao: string | null;
     ordem: number | null;
     feito: boolean | null;
 };
-/** Draft of cmdCriarTarefa; chaveCriacao is generated when the draft starts and kept until success or clear. */
-export type CmdCriarTarefaDraft = {
-    chaveCriacao: string | null;
+/** Draft of cmdCriarTarefa: the new task, with the creation key generated when the draft starts. */
+export type CriarTarefaDraft = {
+    chaveCriacao: string;
     listaId: string | null;
     titulo: string | null;
-    details: {
-        descricao: string | null;
-    };
+    descricao: string | null;
     prioridade: Prioridade | null;
     prazo: string | null;
     responsavelId: string | null;
     checklist: ItemChecklistDraft[];
 };
-/** Draft of cmdSalvarEdicao; filled from the opened task. */
-export type CmdSalvarEdicaoDraft = {
-    id: string | null;
-    version: number | null;
+/** Draft of cmdSalvarEdicao: the editable fields of the open task (id and version come from the task). */
+export type SalvarEdicaoDraft = {
     listaId: string | null;
     titulo: string | null;
-    details: {
-        descricao: string | null;
-    };
+    descricao: string | null;
     prioridade: Prioridade | null;
     prazo: string | null;
     responsavelId: string | null;
 };
-/** Draft of cmdSalvarChecklist; filled from the checklist of the opened task. */
-export type CmdSalvarChecklistDraft = {
-    tarefaId: string | null;
+/** Draft of cmdSalvarChecklist: the checklist items of the open task. */
+export type SalvarChecklistDraft = {
     itens: ItemChecklistDraft[];
 };
 /** Draft of cmdDevolver: the reason the delivery goes back for adjustment. */
-export type CmdDevolverDraft = {
-    details: {
-        motivoDevolucao: string | null;
-    };
+export type DevolverDraft = {
+    motivoDevolucao: string | null;
 };
 export declare class TarefasMinhas_tarefasShared extends StateLitElement {
-    /** state tarefas — the page of my tasks (created by me or assigned to me) with list, assignee, creator, deadline, status and indicators; source qryMinhasTarefas.tarefas; organism listaTarefas */
+    /** state tarefas — the page of my tasks (items, page, pageSize, hasMore) in summary form with list, people, deadline, status and indicators; source qryMinhasTarefas.tarefas; organism listaTarefas */
     tarefas: TarefasPage | null;
-    /** state tarefa — the opened task in full: list, creator, assignee, status, cycle milestones, return reason, my role and ordered checklist; source qryTarefa.tarefa; organisms acoesTarefa, detalheTarefa, formTarefa, historicoTarefa */
+    /** state tarefa — the open task in full (fields, cycle milestones, return reason, my role, ordered checklist); source qryTarefa.tarefa; organisms acoesTarefa, detalheTarefa, formTarefa, historicoTarefa */
     tarefa: TarefaDetalhe | null;
-    /** state listas — active lists (projects or areas) that can receive tasks; source qryListasAtivas.listas; organism formTarefa */
+    /** state listas — the active lists that can receive tasks, with name and type; source qryListasAtivas.listas; organism formTarefa */
     listas: ListaOpcao[];
-    /** state membros — active team members found by name, to choose or change the assignee; source qryBuscarMembros.membros; organism formTarefa */
+    /** state membros — the active team members found by name to choose or change the assignee; source qryBuscarMembros.membros; organism formTarefa */
     membros: MembroOpcao[];
-    /** state selectedTarefa — the id of the task selected in listaTarefas (the record itself is in tarefa); source entry.params.tarefaId; organisms detalheTarefa, listaTarefas; persisted */
+    /** state selectedTarefa — the id of the task selected in listaTarefas (the record itself is in tarefa); source entry.params.tarefaId; organisms detalheTarefa, listaTarefas */
     selectedTarefa: string | null;
-    /** state filtro — the quick filter of the task list, null for all my tasks; source entry.params.filtro; organism listaTarefas; persisted */
-    filtro: TarefaFiltro | null;
-    /** state cmdCriarTarefaDraft — form draft to create a task (list, title, description, priority, deadline, assignee, initial checklist) with the idempotency key; source cmdCriarTarefa.input; organism formTarefa */
-    cmdCriarTarefaDraft: CmdCriarTarefaDraft;
-    /** state cmdSalvarEdicaoDraft — form draft to edit the fields of the opened task, filled from it; source cmdSalvarEdicao.input; organism formTarefa */
-    cmdSalvarEdicaoDraft: CmdSalvarEdicaoDraft;
-    /** state cmdSalvarChecklistDraft — form draft of the checklist of the opened task (edit, reorder, mark, add items), filled from it; source cmdSalvarChecklist.input; organism formTarefa */
-    cmdSalvarChecklistDraft: CmdSalvarChecklistDraft;
-    /** state cmdDevolverDraft — draft with the reason to return the task in review for adjustment; source cmdDevolver.input; organism acoesTarefa */
-    cmdDevolverDraft: CmdDevolverDraft;
-    /** state pageStatus — overall status of the page initial load: idle, loading, empty (every loaded list empty), success or error */
-    pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error';
-    /** state qryMinhasTarefasStatus — status of the request qryMinhasTarefas */
-    qryMinhasTarefasStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state qryMinhasTarefasError — error of the request qryMinhasTarefas, null when none */
-    qryMinhasTarefasError: ErrorState;
-    /** state qryTarefaStatus — status of the request qryTarefa */
-    qryTarefaStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state qryTarefaError — error of the request qryTarefa, null when none */
-    qryTarefaError: ErrorState;
-    /** state qryListasAtivasStatus — status of the request qryListasAtivas */
-    qryListasAtivasStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state qryListasAtivasError — error of the request qryListasAtivas, null when none */
-    qryListasAtivasError: ErrorState;
-    /** state qryBuscarMembrosStatus — status of the request qryBuscarMembros */
-    qryBuscarMembrosStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state qryBuscarMembrosError — error of the request qryBuscarMembros, null when none */
-    qryBuscarMembrosError: ErrorState;
-    /** state cmdCriarTarefaStatus — status of the command cmdCriarTarefa */
-    cmdCriarTarefaStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdCriarTarefaError — error of the command cmdCriarTarefa, null when none */
-    cmdCriarTarefaError: ErrorState;
-    /** state cmdSalvarEdicaoStatus — status of the command cmdSalvarEdicao */
-    cmdSalvarEdicaoStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdSalvarEdicaoError — error of the command cmdSalvarEdicao, null when none */
-    cmdSalvarEdicaoError: ErrorState;
-    /** state cmdSalvarChecklistStatus — status of the command cmdSalvarChecklist */
-    cmdSalvarChecklistStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdSalvarChecklistError — error of the command cmdSalvarChecklist, null when none */
-    cmdSalvarChecklistError: ErrorState;
-    /** state cmdIniciarStatus — status of the command cmdIniciar */
-    cmdIniciarStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdIniciarError — error of the command cmdIniciar, null when none */
-    cmdIniciarError: ErrorState;
-    /** state cmdEnviarRevisaoStatus — status of the command cmdEnviarRevisao */
-    cmdEnviarRevisaoStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdEnviarRevisaoError — error of the command cmdEnviarRevisao, null when none */
-    cmdEnviarRevisaoError: ErrorState;
-    /** state cmdAceitarStatus — status of the command cmdAceitar */
-    cmdAceitarStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdAceitarError — error of the command cmdAceitar, null when none */
-    cmdAceitarError: ErrorState;
-    /** state cmdDevolverStatus — status of the command cmdDevolver */
-    cmdDevolverStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdDevolverError — error of the command cmdDevolver, null when none */
-    cmdDevolverError: ErrorState;
-    /** state cmdCancelarStatus — status of the command cmdCancelar */
-    cmdCancelarStatus: 'idle' | 'loading' | 'success' | 'error';
-    /** state cmdCancelarError — error of the command cmdCancelar, null when none */
-    cmdCancelarError: ErrorState;
+    /** state filtro — the quick filter of the list (criadasPorMim, atribuidasAMim, emRevisao, devolvidas); null brings all my tasks; source entry.params.filtro; organism listaTarefas; persisted */
+    filtro: Filtro | null;
+    /** state cmdCriarTarefaDraft — the form draft of the new task (carries the creation key generated when the draft starts, prefilled by listaId and responsavelId params); source cmdCriarTarefa.input; organism formTarefa */
+    cmdCriarTarefaDraft: CriarTarefaDraft;
+    /** state cmdSalvarEdicaoDraft — the form draft that edits the fields of the open task, filled from it; source cmdSalvarEdicao.input; organism formTarefa */
+    cmdSalvarEdicaoDraft: SalvarEdicaoDraft;
+    /** state cmdSalvarChecklistDraft — the form draft of the checklist items of the open task, filled from it; source cmdSalvarChecklist.input; organism formTarefa */
+    cmdSalvarChecklistDraft: SalvarChecklistDraft;
+    /** state cmdDevolverDraft — the form draft with the reason to return the task for adjustment; source cmdDevolver.input; organism acoesTarefa */
+    cmdDevolverDraft: DevolverDraft;
+    /** state pageStatus — overall status of the page load (idle, loading, empty, success, error); source none (added by the shared) */
+    pageStatus: PageStatus;
     /** state scenary — the visible scene of the page; '' until the page shows its first scene */
     scenary: string;
+    /** state qryMinhasTarefasStatus — status of the request qryMinhasTarefas; source none (added by the shared) */
+    qryMinhasTarefasStatus: RequestStatus;
+    /** state qryMinhasTarefasError — error of the last qryMinhasTarefas, null when none; source none (added by the shared) */
+    qryMinhasTarefasError: ErrorState;
+    /** state qryTarefaStatus — status of the request qryTarefa; source none (added by the shared) */
+    qryTarefaStatus: RequestStatus;
+    /** state qryTarefaError — error of the last qryTarefa, null when none; source none (added by the shared) */
+    qryTarefaError: ErrorState;
+    /** state qryListasAtivasStatus — status of the request qryListasAtivas; source none (added by the shared) */
+    qryListasAtivasStatus: RequestStatus;
+    /** state qryListasAtivasError — error of the last qryListasAtivas, null when none; source none (added by the shared) */
+    qryListasAtivasError: ErrorState;
+    /** state qryBuscarMembrosStatus — status of the request qryBuscarMembros; source none (added by the shared) */
+    qryBuscarMembrosStatus: RequestStatus;
+    /** state qryBuscarMembrosError — error of the last qryBuscarMembros, null when none; source none (added by the shared) */
+    qryBuscarMembrosError: ErrorState;
+    /** state cmdCriarTarefaStatus — status of the command cmdCriarTarefa; source none (added by the shared) */
+    cmdCriarTarefaStatus: RequestStatus;
+    /** state cmdCriarTarefaError — error of the last cmdCriarTarefa, null when none; source none (added by the shared) */
+    cmdCriarTarefaError: ErrorState;
+    /** state cmdSalvarEdicaoStatus — status of the command cmdSalvarEdicao; source none (added by the shared) */
+    cmdSalvarEdicaoStatus: RequestStatus;
+    /** state cmdSalvarEdicaoError — error of the last cmdSalvarEdicao, null when none; source none (added by the shared) */
+    cmdSalvarEdicaoError: ErrorState;
+    /** state cmdSalvarChecklistStatus — status of the command cmdSalvarChecklist; source none (added by the shared) */
+    cmdSalvarChecklistStatus: RequestStatus;
+    /** state cmdSalvarChecklistError — error of the last cmdSalvarChecklist, null when none; source none (added by the shared) */
+    cmdSalvarChecklistError: ErrorState;
+    /** state cmdIniciarStatus — status of the command cmdIniciar; source none (added by the shared) */
+    cmdIniciarStatus: RequestStatus;
+    /** state cmdIniciarError — error of the last cmdIniciar, null when none; source none (added by the shared) */
+    cmdIniciarError: ErrorState;
+    /** state cmdEnviarRevisaoStatus — status of the command cmdEnviarRevisao; source none (added by the shared) */
+    cmdEnviarRevisaoStatus: RequestStatus;
+    /** state cmdEnviarRevisaoError — error of the last cmdEnviarRevisao, null when none; source none (added by the shared) */
+    cmdEnviarRevisaoError: ErrorState;
+    /** state cmdAceitarStatus — status of the command cmdAceitar; source none (added by the shared) */
+    cmdAceitarStatus: RequestStatus;
+    /** state cmdAceitarError — error of the last cmdAceitar, null when none; source none (added by the shared) */
+    cmdAceitarError: ErrorState;
+    /** state cmdDevolverStatus — status of the command cmdDevolver; source none (added by the shared) */
+    cmdDevolverStatus: RequestStatus;
+    /** state cmdDevolverError — error of the last cmdDevolver, null when none; source none (added by the shared) */
+    cmdDevolverError: ErrorState;
+    /** state cmdCancelarStatus — status of the command cmdCancelar; source none (added by the shared) */
+    cmdCancelarStatus: RequestStatus;
+    /** state cmdCancelarError — error of the last cmdCancelar, null when none; source none (added by the shared) */
+    cmdCancelarError: ErrorState;
     private subscribed;
+    private busyCommands;
     private publish;
     private assignState;
-    private persistParam;
     connectedCallback(): void;
     disconnectedCallback(): void;
     handleIcaStateChange(key: string, value: any): void;
-    private hydrateData;
-    /** Transient members start every visit from their initial value. */
+    private hydrate;
+    /** Fresh visit: every transient member goes back to its initial value. */
     private resetVisit;
-    private resetCommandResults;
     private readParam;
+    /** Applies the entry params; returns the id to select, when there is one. */
     private applyEntryParams;
-    private startVisit;
+    private loadInitial;
     private refreshPageStatus;
-    private unexpectedError;
-    /** Options of a blocking command; the abort signal is sent only when the runtime provides one. */
-    private blockingOptions;
-    private runQuery;
+    private resetCommandResults;
+    private publishCommand;
+    private failCommand;
+    /** Runs a command inside the blocking action; returns its output, or null after publishing the error. */
     private runCommand;
-    private failRequired;
-    private missingKeys;
-    private buildItens;
-    private fillEditDraft;
-    private fillChecklistDraft;
-    private syncEditVersion;
-    private belongsToFilter;
-    /** Updates the row of the list that shows this task (or removes it when it no longer belongs to the filter); indicators stay as loaded. */
-    private upsertRow;
-    /** Applies the record a command returned: redraws the opened task, the selection, the list row and the edit version. */
-    private applyTarefa;
+    /** Runs a silent query; output is null when it failed and error then holds the reason. */
+    private callQuery;
     private requireTarefa;
-    /** scene — publishes the visible scene of the page; clears the results of earlier commands. */
+    /** Whether the record still belongs to the list under the current filter. */
+    private belongsToFilter;
+    /** Updates the loaded row of the task by id, or removes it when it no longer belongs to the list. */
+    private syncListRow;
+    /** Redraws the open task and its row in the list from a command output. */
+    private applyTarefaResult;
+    /** scene — publishes the visible scene of the page (a name chosen by the page); clears old command results. */
     setScenario(value: string): void;
-    /** draft — replaces the creation form draft (keeps the generated key when the value carries none); clears earlier command results. */
-    setCmdCriarTarefaDraft(value: CmdCriarTarefaDraft): void;
-    /** draft — clears the creation form draft and generates a new creation key (use when the person discards or reopens the form). */
+    /** draft — replaces the draft of the new task (keep chaveCriacao from the current draft when editing it); clears old command results. */
+    setCmdCriarTarefaDraft(value: CriarTarefaDraft): void;
+    /** draft — clears the draft of the new task and generates a new creation key (use it when the person discards the form). */
     clearCmdCriarTarefaDraft(): void;
-    /** draft — replaces the edit form draft of the opened task; clears earlier command results. */
-    setCmdSalvarEdicaoDraft(value: CmdSalvarEdicaoDraft): void;
-    /** draft — replaces the checklist draft of the opened task; clears earlier command results. */
-    setCmdSalvarChecklistDraft(value: CmdSalvarChecklistDraft): void;
-    /** draft — replaces the return-reason draft; clears earlier command results. */
-    setCmdDevolverDraft(value: CmdDevolverDraft): void;
-    /** request qryMinhasTarefas — lists, paged, the tasks I created or am responsible for, with the quick filter; redraws tarefas (replace, or append the next page when append is true) and filtro; arguments: filtro the quick filter (omit to keep the current one, null for all my tasks; a new value loads from the first page), page the page to load (default 1), append true to add the next page to the items for a "load more" (pass tarefas.page + 1; does nothing unless tarefas.hasMore) */
-    qryMinhasTarefas(filtro?: TarefaFiltro | null, page?: number, append?: boolean): Promise<void>;
-    /** request qryTarefa — opens (selects) a task with its data, checklist and cycle milestones; redraws selectedTarefa and tarefa (replace) and fills the edit and checklist drafts from it; argument: tarefaId the id of the task to open, or null to clear the selection */
+    /** draft — replaces the draft that edits the fields of the open task; clears old command results. */
+    setCmdSalvarEdicaoDraft(value: SalvarEdicaoDraft): void;
+    /** draft — replaces the draft of the checklist items of the open task (an item with a null id is new); clears old command results. */
+    setCmdSalvarChecklistDraft(value: SalvarChecklistDraft): void;
+    /** draft — replaces the draft with the reason to return the task; clears old command results. */
+    setCmdDevolverDraft(value: DevolverDraft): void;
+    /** draft — discards unsaved edits: fills the edit and checklist drafts again from the open task (empty when none is open). */
+    resetEdicaoDrafts(): void;
+    /** request qryMinhasTarefas — lists, paged, the tasks I created or am responsible for, with the quick filter; redraws tarefas (replace, or append the next page when append is true) and filtro (when a filter is passed); filtro: omit to keep the current filter, a value picks that filter, null brings all my tasks (a passed filter loads from the first page); page: page to load (default first, or the next one when appending); append: true adds the page to the loaded items (a "load more"), does nothing when hasMore is false. Also the method to reload the list. */
+    qryMinhasTarefas(filtro?: Filtro | null, page?: number, append?: boolean): Promise<void>;
+    /** request qryTarefa — opens (selects) a task with its data, checklist and cycle milestones; redraws selectedTarefa and tarefa (replace) and fills the edit and checklist drafts from the record; tarefaId: the id of the task to open, or null to clear the selection. */
     qryTarefa(tarefaId: string | null): Promise<void>;
-    /** request qryListasAtivas — brings the active lists where a task can be placed; redraws listas (replace); no arguments, also the method to reload the lists */
+    /** request qryListasAtivas — brings the active lists that can receive a task, ordered by name; redraws listas (replace); no arguments. Runs on load and can be called to reload. */
     qryListasAtivas(): Promise<void>;
-    /** request qryBuscarMembros — searches active team members by name to choose or change the assignee; redraws membros (replace; an empty term clears it without calling); argument: termo the typed part of the name (debounce it in the page) */
+    /** request qryBuscarMembros — searches active team members by name to choose or change the assignee; redraws membros (replace; an empty term clears it without calling); termo: the part of the name typed. */
     qryBuscarMembros(termo: string): Promise<void>;
-    /** request cmdCriarTarefa — creates a task with its initial checklist from cmdCriarTarefaDraft (the same creation key is sent on every retry); redraws tarefa and selectedTarefa with the created task, fills the edit and checklist drafts from it, and resets the creation draft with a new key; no arguments */
+    /** request cmdCriarTarefa — creates a new task with its initial checklist from cmdCriarTarefaDraft (the same creation key is sent on every retry); redraws tarefa and selectedTarefa with the created task, fills the edit and checklist drafts from it and resets the creation draft with a new key; the new task is not inserted in tarefas (reload the list to see it); no arguments. */
     cmdCriarTarefa(): Promise<void>;
-    /** request cmdSalvarEdicao — saves the edited fields of the task (including the assignee change) from cmdSalvarEdicaoDraft, never changing its status; redraws tarefa and the list row, and fills the edit draft again from the saved record; no arguments */
+    /** request cmdSalvarEdicao — saves the edited fields of the open task (including the assignee) from cmdSalvarEdicaoDraft without changing its status; redraws tarefa (replace), updates or removes its row in tarefas by id and fills the edit draft again from the saved record; no arguments, id and version come from the open task. */
     cmdSalvarEdicao(): Promise<void>;
-    /** request cmdSalvarChecklist — saves the checklist of the opened task (edit description and order, mark or unmark items, add new ones) from cmdSalvarChecklistDraft, never changing the task status; redraws tarefa and the list row, and fills the checklist draft again from the saved record; no arguments */
+    /** request cmdSalvarChecklist — saves the checklist of the open task from cmdSalvarChecklistDraft (edit, reorder, mark or unmark, add items) without changing its status; redraws tarefa (replace), updates its row in tarefas by id and fills the checklist draft again from the saved record; no arguments. */
     cmdSalvarChecklist(): Promise<void>;
-    /** request cmdIniciar — the assignee starts the opened task (to do → in progress); redraws tarefa and the list row with the returned record; no arguments (id and version come from tarefa) */
+    /** request cmdIniciar — the assignee starts the open task (a fazer to em andamento); redraws tarefa (replace) and updates or removes its row in tarefas by id; no arguments, id and version come from the open task. */
     cmdIniciar(): Promise<void>;
-    /** request cmdEnviarRevisao — the assignee sends or resends the opened task to the creator's review; redraws tarefa and the list row with the returned record; no arguments (id and version come from tarefa) */
+    /** request cmdEnviarRevisao — the assignee sends or resends the open task to the creator's review (em andamento to em revisao); redraws tarefa (replace) and updates or removes its row in tarefas by id; no arguments, id and version come from the open task. */
     cmdEnviarRevisao(): Promise<void>;
-    /** request cmdAceitar — the creator accepts the delivery and concludes the opened task; redraws tarefa and the list row (removed from the list when the filter no longer matches); no arguments (id and version come from tarefa) */
+    /** request cmdAceitar — the creator accepts the delivery and concludes the open task (em revisao to concluida); redraws tarefa (replace) and updates or removes its row in tarefas by id; no arguments, id and version come from the open task. */
     cmdAceitar(): Promise<void>;
-    /** request cmdDevolver — the creator returns the task in review for adjustment with the reason typed in cmdDevolverDraft; redraws tarefa and the list row (removed when the filter no longer matches) and clears the reason draft; no arguments (id and version come from tarefa) */
+    /** request cmdDevolver — the creator returns the open task in review for adjustment with the reason typed in cmdDevolverDraft (back to em andamento); redraws tarefa (replace), updates or removes its row in tarefas by id and clears the reason draft; no arguments. */
     cmdDevolver(): Promise<void>;
-    /** request cmdCancelar — the creator cancels the opened task; redraws tarefa and the list row (removed when the filter no longer matches); no arguments (id and version come from tarefa) */
+    /** request cmdCancelar — the creator cancels the open task (a fazer, em andamento or em revisao to cancelada); redraws tarefa (replace) and updates or removes its row in tarefas by id; no arguments, id and version come from the open task. */
     cmdCancelar(): Promise<void>;
 }

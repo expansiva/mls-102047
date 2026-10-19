@@ -4,23 +4,27 @@
   "module": "tarefas",
   "pageId": "membros_equipe",
   "device": "desktop",
-  "contextHash": "sha256:8174cbd093f5d29df14a9b69c1a82fc9219a58cf7c8994b881d0fe8ccf10bcbe",
+  "contextHash": "sha256:06417d1b38cdd92288d224123d2d9f05cf335ab8ad73898ee5dda2dda6b63484",
   "sourcePath": "l2/tarefas/web/desktop/page11/membros_equipe.ts",
-  "sourceHash": "sha256:e44bbdb5b56f0ab0d076ff237a2cee884986cd77ad81bfbf46b6e52e5a1948ff",
+  "sourceHash": "sha256:14883b32c987cc0b404498e0c33ab58f5b0fffb4e5266270b01969ef47e9bd8e",
   "attempt": 2,
   "design": {
-    "concept": "Uma superfície de referência calma: a tabela de pessoas da equipe domina a esquerda e um painel lateral fixo ao lado edita ou cadastra, sem nunca cobrir a tabela. Clicar numa linha abre o painel preenchido com a pessoa; \"Nova pessoa\" abre o mesmo painel vazio. A tabela nunca é editável.",
+    "concept": "Uma superfície de referência calma: a tabela de pessoas da equipe lidera a tela, com uma busca discreta por nome e um botão para adicionar pessoa. Um painel lateral fixo ao lado da tabela abre vazio (adicionar) ou preenchido (editar a pessoa escolhida), sem nunca cobrir a tabela, que mantém a linha selecionada marcada.",
     "views": [
       {
-        "id": "novo",
-        "purpose": "Painel lateral em modo cadastro: nome e país da nova pessoa, com o botão que nomeia o resultado."
+        "id": "fechado",
+        "purpose": "Painel em repouso: dica discreta convidando a escolher uma pessoa ou adicionar uma nova."
+      },
+      {
+        "id": "cadastrar",
+        "purpose": "Formulário vazio com nome e país para cadastrar uma nova pessoa."
       },
       {
         "id": "editar",
-        "purpose": "Painel lateral em modo edição da pessoa selecionada: o título é o nome dela, mostra situação, papéis e contatos só para leitura e deixa corrigir nome e país."
+        "purpose": "Formulário preenchido da pessoa selecionada (título é o nome dela) com situação, papéis e contatos somente para leitura."
       }
     ],
-    "decisions": "O host de cenas cobre só a região do painel (mode=scenary) enquanto a tabela fica sempre visível e marca a linha selecionada por índice. Botão \"Fechar painel\" próprio para pedir confirmação quando há alterações não salvas. Busca com ml-search-bar; \"Carregar mais\" quando há mais páginas. Salvar fica desabilitado até nome e país preenchidos e algo mudar. Erro de comando aparece no painel; sucesso em toast breve. Situação vira selo discreto. Se a página abre sem o que precisa, mostra explicação e botão Voltar. Correção: o rótulo de voltar do host de cenas passa como atributo backLabel, como o contrato da molécula."
+    "decisions": "Seguimos o template compactCrudTable: tabela em primeiro lugar, busca, botão de criar e painel lateral. O painel é uma região controlada pelo host de cenas (mode=scenary) com três cenas, enquanto a tabela fica fora do host e sempre visível. Como o contrato de paginação da tabela é conhecido, usei a paginação embutida da ml-data-table em modo externo (pageChange chama a consulta) em vez de um controle separado, para manter a superfície pequena. A tabela não é editável; clicar na linha seleciona e abre o painel. Salvar fica desabilitado até os campos obrigatórios estarem preenchidos e algo mudar; a validação é no campo; falha do comando aparece dentro do painel acima do botão; sucesso fecha o painel e mostra um aviso rápido. Fechar ou trocar de pessoa com alterações não salvas pede uma confirmação simples. A página não lê this.scenary fora do host de cenas: o modo do painel é deduzido da seleção (pessoa selecionada = edição). Situação inativa aparece em tom neutro, não em vermelho. Erro de pré-condição ou de carga tem estado próprio com tentar novamente e voltar."
   },
   "advisories": [
     {

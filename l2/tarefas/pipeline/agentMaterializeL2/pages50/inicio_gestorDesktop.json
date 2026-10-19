@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_gestor",
   "device": "desktop",
-  "contextHash": "sha256:80eda94653f78ac058d00b99b67b54640fecf0c382cb48aa8f762e04c3ac91cb",
+  "contextHash": "sha256:61c280afe1a13197f7245f8001157420c145e9f397a8b1667367d991bb014875",
   "sourcePath": "l2/tarefas/web/desktop/page11/inicio_gestor.ts",
-  "sourceHash": "sha256:580d7e9aa34cd7587429726b7bba0d316a1478e0ed1c00cebc87d7f4bda4cdb1",
-  "attempt": 2,
+  "sourceHash": "sha256:a1e2d3ffe95df39ff7d7ec396336f98dd167b6493da0125c27aa67ae0b056bc7",
+  "attempt": 1,
   "design": {
-    "concept": "Uma tela de triagem para o gestor: a primeira coisa que ele lê é uma frase com o que precisa dele agora (quantas tarefas estão atrasadas e quantas vencem hoje). Logo abaixo vem a fila de tarefas, da mais urgente para a menos urgente. Cada linha leva a Tarefas da equipe. O panorama de totais, checklists e listas fica embaixo, numa faixa discreta.",
+    "concept": "Uma superfície de triagem para o gestor: a primeira coisa que ele lê é uma frase dizendo quanto está atrasado ou vence hoje, logo abaixo vem a fila de tarefas que podem pedir decisão (atrasadas primeiro), cada linha levando até Tarefas da equipe. O panorama da equipe (abertas, vencem hoje, atrasadas, checklists e abertas por lista) fica como uma faixa discreta de pares valor+rótulo abaixo da fila.",
     "views": [],
-    "decisions": "Segui o template exceptionTriage em vez da ordem das seções do defs. A fila (tarefasParaAcao) vem antes e destaquesEquipe vira uma faixa discreta embaixo, sem cards nem gráficos.\n\nA página tem uma só vista, então não usei o scene host.\n\nA frase de triagem usa os totais prontos do backend (totalAtrasadas e totalVenceHoje). Não somo nem filtro nada na página.\n\nA fila é uma única lista de linhas, sem faixas separadas por tipo. O backend já a entrega ordenada. Cada linha mostra a identidade (título, lista e responsável), prioridade, situação e checklist. O fato decisivo é o prazo, alinhado à direita, em vermelho se atrasada e de aviso se vence hoje. A linha inteira leva a Tarefas da equipe.\n\nA linha não tem botão interno, para não disparar a navegação duas vezes.\n\nA fila usa o ml-vertical-record-list. O ml-button-standard serve para \"Mostrar mais tarefas\" e para tentar de novo em caso de erro. Os elementos das moléculas usam a tag completa com o prefixo molecules-- e o sufixo do projeto.\n\nO estado de boa notícia é uma frase calma, com a faixa de panorama ainda visível. Erros aparecem na própria região, cada um com sua ação de tentar de novo.\n\nO texto da checklist ('feitos/total') é exibido como o backend entrega."
+    "decisions": "Página de uma só visão, sem scene host. Segui o template exceptionTriage, que vence o defs no comportamento: a seção 'primary' (panorama) foi rebaixada para uma faixa quieta abaixo da fila, sem cards nem gráficos; por isso não usei metric-card, bar-chart nem linear-progress (o progresso da checklist vem como texto 'feitos/total' e calcular percentual seria derivar dado). A fila usa vertical-record-list: a linha inteira é o drill-down (row-click → abrirTarefasEquipe), sem botão por linha para não misturar navegação com ação; um 'Abrir ›' mudo indica a affordance. A cor de alarme aparece só no fato decisivo (prazo + selo Atrasada / Vence hoje), lido das flags do backend, sem filtrar nem somar. A manchete usa os totais prontos do backend. Estado de boa notícia calmo quando não há atrasadas nem vencendo hoje. Em vez de paginação, um botão 'Ver mais tarefas' (listarTarefasParaAcao com append) aparece só se hasMore. Erros ficam dentro da própria região com nova tentativa; a recusa de navegação (client.preconditionMissing) aparece em palavras na fila."
   },
   "advisories": [
     {
@@ -33,14 +33,6 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism destaquesEquipe (Progresso das checklists) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasParaAcao (Fila de tarefas que pedem ação) renders neither <groupviewdata--ml-vertical-record-list> nor <groupviewdata--ml-card-grid>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasParaAcao (Abrir a tarefa em Tarefas da equipe) renders neither <grouptriggeraction--ml-button-standard> nor <grouptriggeraction--ml-icon-button>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",

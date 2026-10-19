@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "meus_avisos",
   "device": "desktop",
-  "contextHash": "sha256:c1794aa9a3196f91344bb863d2246de3bc3067753c0883cb571357d08aadb6ae",
+  "contextHash": "sha256:52e1f2b92af578e7a73d32930eced0c2e2462fd031a182461ce204186b7da840",
   "sourcePath": "l2/tarefas/web/desktop/page11/meus_avisos.ts",
-  "sourceHash": "sha256:e87f3a741ba6c1beb231ba5e34e25d647691ed6226f1cd743d291dc7eba43a93",
+  "sourceHash": "sha256:35f73ea2c9c7b21bcf1bb491efa5e9ad4a179c3617e94800c81e3a1969a894a1",
   "attempt": 2,
   "design": {
-    "concept": "Uma mesa de triagem em duas colunas: à esquerda os avisos diários por data de referência (com filtro de período discreto), à direita o aviso escolhido com totais em destaque e a relação de tarefas. O registro de geração e finalização dos avisos fica numa segunda aba do painel direito, como assunto secundário.",
+    "concept": "Uma mesa de triagem dividida em duas partes: à esquerda, a lista dos meus avisos diários por data de referência, com o filtro de período discreto no topo; à direita, o painel do aviso escolhido, com os totais em destaque e as tarefas que vencem no dia ou já estavam atrasadas. O registro de geração e finalização do aviso fica numa segunda aba do painel, como apoio de confiança.",
     "views": [
       {
-        "id": "aviso",
-        "purpose": "Conteúdo do aviso escolhido: cabeçalho com a data, totais de tarefas e atrasadas e tabela das tarefas com prazo e situação."
+        "id": "conteudo",
+        "purpose": "Conteúdo do aviso escolhido: totais de tarefas e atrasadas e a relação das tarefas com prazo e situação. É a aba aberta por padrão."
       },
       {
-        "id": "envio",
-        "purpose": "Registro de envio: linha do tempo de quando cada aviso foi gerado e finalizado, com sucesso ou falha."
+        "id": "registro",
+        "purpose": "Linha do tempo de quando cada aviso foi gerado e finalizado e se o envio terminou bem ou falhou. É uma consulta secundária, em aba paralela."
       }
     ],
-    "decisions": "Segui o inboxSplit: lista à esquerda sempre visível, painel à direita que preenche ao selecionar uma linha; a seleção é marcada na linha (selected) e a primeira abertura já mostra o aviso mais recente. O histórico de envio (secundário) vai numa aba do host de cenas em mode=tabs dentro do painel, para não competir com o conteúdo e sem perder a lista. Linhas da lista mostram só identidade (data, totais, situação do envio); o detalhe fica no painel. Filtro de período é uma linha quieta acima da lista (calendário duplo), paginação é só um botão discreto 'avisos mais antigos'. Nenhum valor é calculado na página: totais e situações vêm do contrato. Estados de carregamento, vazio, erro com nova tentativa e pré-condição ausente (com botão Voltar) são desenhados. Sem alarme de cor: atrasada usa o token de status discreto apenas no rótulo da tarefa."
+    "decisions": "Segui o inboxSplit: lista à esquerda (primária), painel à direita (principal). O aviso mais recente já vem aberto, então o painel nunca nasce vazio. A lista usa ml-vertical-record-list (alternativa) em vez de tabela: cada linha mostra só a data, o resumo curto e a situação do envio, e a linha aberta fica marcada com ?selected controlado pela página. O filtro de período usa o calendário duplo (compacto), aplica ao confirmar o intervalo e tem um atalho para limpar. O registro de envio é secundário, então vai numa aba (scene host em mode=tabs) dentro do painel e não compete com a lista. Cada aba tem um único título, o da própria aba; as regiões internas usam um subtítulo só onde nada mais nomeia a região. Selecionar um aviso antigo mostra a ação silenciosa «Voltar ao aviso mais recente». Carregamento, vazio e erro têm desenho próprio. Quando a abertura da página falta de contexto (client.preconditionMissing), a página diz o que falta e oferece voltar. Não calculo nada: totais, situações e datas vêm prontos do contrato e a página só formata. Não há intents."
   },
   "advisories": [
     {

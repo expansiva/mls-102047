@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "desktop",
-  "contextHash": "sha256:1c75a32f0f99a462f6281f39925b115dc48653a15d595fb0277b6b408e3d905a",
+  "contextHash": "sha256:0cdaecc40d0c37131a7b8a8838c8398ca8879ea00501dedd5bd4e17cf3db534a",
   "sourcePath": "l2/tarefas/web/desktop/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:db70bdbec8d88b1aed9572debfc6c302915bd5b126effcc596359aedf811eff9",
-  "attempt": 2,
+  "sourceHash": "sha256:05f9934cc155b518e29bd71b0c80ea80426d2fcd87d86fb238c8558e58ff4f22",
+  "attempt": 1,
   "design": {
-    "concept": "Uma fila de acompanhamento do gestor: o quadro de tarefas da equipe ocupa a esquerda, em ordem de prazo como vem do contrato, com filtros compactos acima. Ao escolher uma linha, o painel à direita mostra o detalhe, a checklist, as ações do gestor e o histórico, sem tirar o quadro da tela.",
+    "concept": "Uma mesa de trabalho do gestor: filtros compactos no topo, o quadro de tarefas da equipe à esquerda como fila lida por prazo (atrasadas só com a data em cor de alarme) e, à direita, um painel que acompanha a tarefa escolhida com detalhe, checklist, histórico e as duas ações do gestor. A lista nunca sai da tela: escolher uma linha abre o painel ao lado e a linha fica marcada.",
     "views": [
       {
         "id": "detalhe",
-        "purpose": "Painel lateral da tarefa escolhida: resumo, checklist, ações do gestor (trocar responsável) e histórico. Sem tarefa escolhida, mostra um convite para escolher uma linha."
+        "purpose": "Painel lateral com a tarefa escolhida: resumo, checklist, histórico em linha do tempo e rodapé fixo de ações (trocar responsável, cancelar tarefa). Sem seleção, mostra um convite para escolher uma tarefa."
       },
       {
         "id": "confirmar",
-        "purpose": "Passo de confirmação do cancelamento dentro do painel: nomeia a tarefa, explica o efeito e só então executa o cancelamento. O quadro continua visível ao lado."
+        "purpose": "Passo de confirmação do cancelamento: alerta modal que nomeia a tarefa e pede escolha explícita entre manter e cancelar. É uma cena do host, então o painel não guarda estado próprio."
       }
     ],
-    "decisions": "Seguiu o template timelineList: quadro em ordem de prazo (a ordem vem do backend, a tabela não ordena nem pagina sozinha) com a data de prazo alinhada à direita e em cor de alarme só quando atrasada; 'vence hoje' ganha um selo discreto de aviso. O detalhe abre ao lado (master-detail), nunca em outra página nem em modal. Um scene host em modo scenary só dentro do painel alterna 'detalhe' e 'confirmar' (com backLabel e nav=back na segunda cena): como a página não guarda estado, a confirmação do cancelamento foi feita como cena do painel, com botão de perigo só no passo final e o nome da tarefa no texto. Reatribuir fica no painel com autocomplete de membros (inativos aparecem desabilitados), retorno em contextual-feedback inline. Filtros: dropdowns de lista, responsável, prioridade e situação, intervalo de prazo, e marcadores 'vence hoje' e 'atrasadas'. O histórico usa a timeline com os marcos que o contrato entrega. Mais tarefas entram por 'Carregar mais'. Erro de pré-condição (client.preconditionMissing) mostra mensagem em palavras e botão para voltar."
+    "decisions": "Segui o template timelineList em desktop: lista ordenada por prazo (a ordem vem do backend e a tabela permite reordenar), data atrasada em cor de erro e mais nada em alarme; 'vence hoje' é um selo neutro/aviso. Master-detail com o painel ao lado, em vez de empilhar as três seções. O host de cenas cobre só o painel (modo scenary): 'detalhe' e 'confirmar'; a confirmação do cancelamento usa o alert-modal dentro da cena 'confirmar' porque a página não pode guardar um estado de modal aberto. A confirmação nomeia a tarefa e o botão destrutivo é o único perigo da superfície. Filtros: selects para lista, responsável, prioridade e situação, calendário duplo para prazo, e dois botões de atalho (vencem hoje / atrasadas) que mostram o estado ativo; 'Limpar filtros' zera tudo. A busca por título não foi incluída porque o shared não tem estado nem método para ela. O novo responsável usa autocomplete por nome; membros não ativos aparecem desabilitados. Retornos de reatribuir e cancelar são locais, com feedback contextual no painel (nunca toast de página). Os eventos do histórico vêm só dos campos do contrato (criação, devolução com motivo, conclusão, cancelamento); nada é somado ou derivado na página. Estados de carregamento, vazio, erro e pré-condição ausente (com botão Voltar) têm texto próprio. A paginação é um botão 'Carregar mais tarefas' que usa o append do shared."
   },
   "advisories": [
     {
@@ -38,10 +38,6 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism tarefasEquipe (Busca pelo título da tarefa) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesGestor (Confirmação antes de cancelar) renders neither <groupnotifyuser--ml-alert-modal>."
     }
   ]
 }

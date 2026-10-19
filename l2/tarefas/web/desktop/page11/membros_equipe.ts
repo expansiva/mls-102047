@@ -2,7 +2,7 @@
 import { html, nothing } from 'lit';
 import { customElement } from 'lit/decorators.js';
 import { TarefasMembros_equipeShared } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
-import type { PessoaEquipe, SalvarAlteracoesDraft } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
+import type { PessoaEquipe, CadastrarPessoaDraft } from '/_102047_/l2/tarefas/web/shared/membros_equipe.js';
 import '/_102040_/l2/molecules/groupentertext/ml-enter-text.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-contextual-feedback.js';
 import '/_102040_/l2/molecules/groupnotifyuser/ml-toast-notification.js';
@@ -12,358 +12,358 @@ import '/_102040_/l2/molecules/groupviewtable/ml-data-table.js';
 import '/_102020_/l2/molecules/ml-scenary.js';
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
-pageTitle: 'Pessoas da equipe',
-newPerson: 'Nova pessoa',
-searchPlaceholder: 'Buscar pelo nome',
-searchLabel: 'Buscar pessoa',
+pageTitle: 'Equipe',
+pageLead: 'Pessoas que podem criar tarefas e ser responsáveis por elas.',
+searchLabel: 'Buscar pela pessoa',
+searchPlaceholder: 'Digite parte do nome',
+searchEmpty: 'Filtrando a lista pelo nome',
+addPerson: 'Adicionar pessoa',
+tableCaption: 'Pessoas da equipe',
 colName: 'Nome',
 colCountry: 'País',
-colStatus: 'Situação',
+colStatus: 'Situação no cadastro',
 colContacts: 'Contatos',
-noValue: '—',
-emptyAll: 'Ainda não há pessoas na equipe. Cadastre a primeira no painel ao lado.',
-emptySearch: 'Nenhuma pessoa encontrada com esse nome.',
-loadMore: 'Carregar mais pessoas',
+colRoles: 'Papéis',
 statusActive: 'Ativo',
 statusInactive: 'Inativo',
-statusMerged: 'Mesclado',
+statusMerged: 'Unificado',
 statusBlocked: 'Bloqueado',
-newSceneTitle: 'Dados de quem entra na equipe',
-editSceneFallback: 'Dados da pessoa',
-hostBack: 'Voltar',
+noValue: '—',
+emptyList: 'Ainda não há pessoas na equipe. Adicione a primeira.',
+emptyFiltered: 'Nenhuma pessoa encontrada com esse nome.',
+loadErrorTitle: 'Não foi possível carregar a equipe',
+loadErrorBody: 'Tente novamente em instantes.',
+retry: 'Tentar novamente',
+preTitle: 'Falta de onde partir',
+preBody: 'Esta tela foi aberta sem as informações de que precisa. Volte à tela anterior e abra a equipe de novo.',
+goBack: 'Voltar à tela anterior',
+panelIdleTitle: 'Detalhes da pessoa',
+panelIdleHint: 'Escolha uma pessoa na lista para corrigir o nome e o país, ou adicione uma nova pessoa à equipe.',
+panelNewTitle: 'Dados da nova pessoa',
 fieldName: 'Nome',
 fieldNameHelper: 'É o nome que aparece como responsável e criador nas tarefas.',
+fieldNameError: 'Informe o nome da pessoa.',
 fieldCountry: 'País',
 fieldCountryHelper: 'Sigla do país, por exemplo BR. Define as regras de privacidade aplicáveis.',
-namePlaceholder: 'Nome completo',
-countryPlaceholder: 'BR',
+fieldCountryError: 'Informe o país da pessoa.',
+namePlaceholder: 'Ex.: Ana Souza',
+countryPlaceholder: 'Ex.: BR',
 registerPerson: 'Cadastrar pessoa',
 saveChanges: 'Salvar alterações',
 closePanel: 'Fechar painel',
-detailStatus: 'Situação no cadastro',
-detailRoles: 'Papéis',
-detailContacts: 'Contatos',
-detailStatusHint: 'Pessoa ativa pode receber tarefas.',
-noSelection: 'Escolha uma pessoa na tabela para corrigir os dados dela.',
-discardConfirm: 'Há alterações não salvas nesta pessoa. Fechar agora descarta o que você mudou. Deseja continuar?',
-registerError: 'Não foi possível cadastrar a pessoa. Confira os dados e tente de novo.',
-saveError: 'Não foi possível salvar as alterações. Confira os dados e tente de novo.',
-registerOk: 'Pessoa cadastrada na equipe.',
-saveOk: 'Alterações salvas.',
-loadErrorTitle: 'Não foi possível carregar a equipe.',
-retry: 'Tentar de novo',
-missingTitle: 'Esta tela foi aberta sem o que ela precisa para listar a equipe.',
-missingBody: 'Volte para a tela de onde você veio e abra as pessoas da equipe novamente.',
-back: 'Voltar',
-loading: 'Carregando pessoas…',
+readOnlyNote: 'Informações do cadastro, somente leitura',
+discardConfirm: 'Há alterações não salvas. Descartar e continuar?',
+registerFailed: 'Não foi possível cadastrar a pessoa.',
+saveFailed: 'Não foi possível salvar as alterações.',
+registerDone: 'Pessoa cadastrada na equipe.',
+saveDone: 'Alterações salvas.'
 };
 type PageMessageType = typeof pageMessage_pt_br;
 const pageMessages: Record<string, PageMessageType> = { 'pt-br': pageMessage_pt_br };
 /// **collab_i18n_end**
-function isDirty(draft: SalvarAlteracoesDraft, pessoa: PessoaEquipe): boolean {
-const id = draft.details.identification;
-return (id.name ?? '') !== pessoa.details.identification.name
-|| (id.countryCode ?? '') !== pessoa.details.identification.countryCode;
+type PageShape = { items?: PessoaEquipe[]; rows?: PessoaEquipe[]; page?: number; pageSize?: number; total?: number; totalItems?: number };
+function pageShape(p: unknown): PageShape {
+if (Array.isArray(p)) return { items: p as PessoaEquipe[] };
+return (p ?? {}) as PageShape;
 }
-function filled(v: string | null): boolean {
-return (v ?? '').trim().length > 0;
+function itemsOf(p: unknown): PessoaEquipe[] {
+const s = pageShape(p);
+return s.items ?? s.rows ?? [];
 }
-function statusTone(status: string): string {
-switch (status) {
-case 'Active':
-return 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]';
-case 'Blocked':
-return 'bg-[var(--status-warning-bg,transparent)] text-[var(--status-warning-text,currentColor)]';
-default:
-return 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
-}
-}
+const EMPTY_DRAFT: CadastrarPessoaDraft = { details: { identification: { name: null, countryCode: null } } };
 @customElement('tarefas--web--desktop--page11--membros_equipe-102047')
 export class TarefasDesktopPage11Membros_equipePage extends TarefasMembros_equipeShared {
 private msg: PageMessageType = pageMessage_pt_br;
-private statusLabel(status: string) {
-switch (status) {
-case 'Active': return this.msg['statusActive'];
-case 'Inactive': return this.msg['statusInactive'];
-case 'Merged': return this.msg['statusMerged'];
-default: return this.msg['statusBlocked'];
+private statusLabel(s: string) {
+if (s === 'Active') return this.msg.statusActive;
+if (s === 'Inactive') return this.msg.statusInactive;
+if (s === 'Merged') return this.msg.statusMerged;
+return this.msg.statusBlocked;
 }
+private statusBadge(s: string) {
+const tone = s === 'Active'
+? 'bg-[var(--status-success-bg,transparent)] text-[var(--status-success-text,currentColor)]'
+: 'bg-[var(--status-neutral-bg,transparent)] text-[var(--status-neutral-text,currentColor)]';
+return html`<span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${tone}">${this.statusLabel(s)}</span>`;
 }
-private confirmDiscard(): boolean {
-const p = this.cadastroPessoa;
-if (!p) return true;
-if (!isDirty(this.cmdSalvarAlteracoesDraft, p)) return true;
-return window.confirm(this.msg['discardConfirm']);
+private editDirty() {
+const rec = this.cadastroPessoa;
+if (!rec) return false;
+const d = this.cmdSalvarAlteracoesDraft.details.identification;
+const r = rec.details.identification;
+return (d.name ?? '') !== r.name || (d.countryCode ?? '') !== r.countryCode;
 }
-private openNew() {
-if (!this.confirmDiscard()) return;
-this.selectCadastroPessoa(null);
-this.setScenario('novo');
+private createDirty() {
+const d = this.cmdCadastrarPessoaDraft.details.identification;
+return !!(d.name || d.countryCode);
+}
+private panelDirty() {
+if (this.selectedMembroEquipe) return this.editDirty();
+return this.createDirty();
+}
+private confirmDiscard() {
+return !this.panelDirty() || window.confirm(this.msg.discardConfirm);
 }
 private closePanel() {
-if (!this.confirmDiscard()) return;
-this.selectCadastroPessoa(null);
-this.setScenario('novo');
+this.selectMembroEquipe(null);
+this.setCmdCadastrarPessoaDraft(EMPTY_DRAFT);
+this.setScenario('fechado');
 }
-private openRow(index: number) {
-const item = this.pessoas?.items[index];
-if (!item || item.id === this.selectedMembroEquipe) return;
+private onClosePanel() {
 if (!this.confirmDiscard()) return;
-this.selectCadastroPessoa(item.id);
+this.closePanel();
+}
+private onAdd() {
+if (!this.confirmDiscard()) return;
+this.selectMembroEquipe(null);
+this.setCmdCadastrarPessoaDraft(EMPTY_DRAFT);
+this.setScenario('cadastrar');
+}
+private onRowClick(index: number) {
+const item = itemsOf(this.pessoas)[index];
+if (!item) return;
+if (item.id === this.selectedMembroEquipe) return;
+if (!this.confirmDiscard()) return;
+this.selectMembroEquipe(item.id);
 this.setScenario('editar');
 }
-private saveEdit() {
-void this.cmdSalvarAlteracoes().then(() => {
-if (this.cmdSalvarAlteracoesStatus === 'success') {
-this.selectCadastroPessoa(null);
-this.setScenario('novo');
-}
+private onRegister() {
+this.cmdCadastrarPessoa().then(() => {
+if (this.cmdCadastrarPessoaStatus === 'success') this.closePanel();
 });
 }
-private setNewField(patch: { name?: string | null; countryCode?: string | null }) {
+private onSave() {
+this.cmdSalvarAlteracoes().then(() => {
+if (this.cmdSalvarAlteracoesStatus === 'success') this.closePanel();
+});
+}
+private renderField(opts: {
+label: string; helper: string; error: string; placeholder: string;
+value: string; touchedEmpty: boolean; onInput: (v: string) => void;
+}) {
+return html`
+<groupentertext--ml-enter-text
+.value=${opts.value}
+.error=${opts.touchedEmpty ? opts.error : ''}
+placeholder=${opts.placeholder}
+required
+@input=${(e: CustomEvent<{ value: string }>) => opts.onInput(e.detail.value)}
+@change=${(e: CustomEvent<{ value: string }>) => opts.onInput(e.detail.value)}
+>
+<Label>${opts.label}</Label>
+<Helper>${opts.helper}</Helper>
+</groupentertext--ml-enter-text>
+`;
+}
+private renderCreateForm() {
 const d = this.cmdCadastrarPessoaDraft;
-this.setCmdCadastrarPessoaDraft({
-...d,
-details: { identification: { ...d.details.identification, ...patch } },
-});
+const id = d.details.identification;
+const busy = this.cmdCadastrarPessoaStatus === 'loading';
+const ready = !!id.name && !!id.countryCode;
+return html`
+<form class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
+${this.renderField({
+label: this.msg.fieldName, helper: this.msg.fieldNameHelper, error: this.msg.fieldNameError,
+placeholder: this.msg.namePlaceholder, value: id.name ?? '', touchedEmpty: id.name === '',
+onInput: (v) => this.setCmdCadastrarPessoaDraft({ details: { identification: { ...id, name: v } } })
+})}
+${this.renderField({
+label: this.msg.fieldCountry, helper: this.msg.fieldCountryHelper, error: this.msg.fieldCountryError,
+placeholder: this.msg.countryPlaceholder, value: id.countryCode ?? '', touchedEmpty: id.countryCode === '',
+onInput: (v) => this.setCmdCadastrarPessoaDraft({ details: { identification: { ...id, countryCode: v } } })
+})}
+<div aria-live="polite">
+<groupnotifyuser--ml-contextual-feedback type="error" .visible=${this.cmdCadastrarPessoaStatus === 'error'} .dismissible=${false}>
+<Message>${this.cmdCadastrarPessoaError?.message || this.msg.registerFailed}</Message>
+</groupnotifyuser--ml-contextual-feedback>
+</div>
+<div class="flex justify-end">
+<grouptriggeraction--ml-button-standard
+data-variant="primary" size="md"
+.disabled=${!ready || busy} .loading=${busy}
+@action=${() => this.onRegister()}
+><Label>${this.msg.registerPerson}</Label></grouptriggeraction--ml-button-standard>
+</div>
+</form>
+`;
 }
-private setEditField(patch: { name?: string | null; countryCode?: string | null }) {
+private renderEditForm() {
+const rec = this.cadastroPessoa;
 const d = this.cmdSalvarAlteracoesDraft;
-this.setCmdSalvarAlteracoesDraft({
-...d,
-details: { identification: { ...d.details.identification, ...patch } },
-});
+const id = d.details.identification;
+const busy = this.cmdSalvarAlteracoesStatus === 'loading';
+const ready = !!id.name && !!id.countryCode && this.editDirty();
+return html`
+<form class="flex flex-col gap-4" @submit=${(e: Event) => e.preventDefault()}>
+${this.renderField({
+label: this.msg.fieldName, helper: this.msg.fieldNameHelper, error: this.msg.fieldNameError,
+placeholder: this.msg.namePlaceholder, value: id.name ?? '', touchedEmpty: id.name === '',
+onInput: (v) => this.setCmdSalvarAlteracoesDraft({ ...d, details: { identification: { ...id, name: v } } })
+})}
+${this.renderField({
+label: this.msg.fieldCountry, helper: this.msg.fieldCountryHelper, error: this.msg.fieldCountryError,
+placeholder: this.msg.countryPlaceholder, value: id.countryCode ?? '', touchedEmpty: id.countryCode === '',
+onInput: (v) => this.setCmdSalvarAlteracoesDraft({ ...d, details: { identification: { ...id, countryCode: v } } })
+})}
+${rec ? html`
+<dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-md border border-[var(--border-subtle,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-3 text-sm" aria-label=${this.msg.readOnlyNote}>
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg.colStatus}</dt>
+<dd>${this.statusBadge(rec.details.identification.status)}</dd>
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg.colRoles}</dt>
+<dd class="text-[var(--text-default,currentColor)] break-words">${rec.details.identification.tags || this.msg.noValue}</dd>
+<dt class="text-[var(--text-muted,currentColor)]">${this.msg.colContacts}</dt>
+<dd class="text-[var(--text-default,currentColor)] break-words">${rec.details.base.contacts || this.msg.noValue}</dd>
+</dl>` : nothing}
+<div aria-live="polite">
+<groupnotifyuser--ml-contextual-feedback type="error" .visible=${this.cmdSalvarAlteracoesStatus === 'error'} .dismissible=${false}>
+<Message>${this.cmdSalvarAlteracoesError?.message || this.msg.saveFailed}</Message>
+</groupnotifyuser--ml-contextual-feedback>
+</div>
+<div class="flex justify-end">
+<grouptriggeraction--ml-button-standard
+data-variant="primary" size="md"
+.disabled=${!ready || busy} .loading=${busy}
+@action=${() => this.onSave()}
+><Label>${this.msg.saveChanges}</Label></grouptriggeraction--ml-button-standard>
+</div>
+</form>
+`;
+}
+private renderPanelClose() {
+return html`
+<div class="flex justify-end">
+<grouptriggeraction--ml-button-standard data-variant="ghost" size="sm" @action=${() => this.onClosePanel()}>
+<Label>${this.msg.closePanel}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+`;
+}
+private renderPanel() {
+const rec = this.cadastroPessoa;
+const editTitle = rec ? rec.details.identification.name : this.msg.panelIdleTitle;
+return html`
+<div data-organism-id="cadastroPessoa" class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 text-[var(--text-default,currentColor)]">
+<molecules--ml-scenary-102020
+mode="scenary"
+.value=${this.scenary || 'fechado'}
+@change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}
+>
+<Scene value="fechado" title=${this.msg.panelIdleTitle}>
+<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.panelIdleHint}</p>
+</Scene>
+<Scene value="cadastrar" title=${this.msg.panelNewTitle}>
+<div class="flex flex-col gap-3">
+${this.renderCreateForm()}
+${this.renderPanelClose()}
+</div>
+</Scene>
+<Scene value="editar" title=${editTitle}>
+<div class="flex flex-col gap-3">
+${this.renderEditForm()}
+${this.renderPanelClose()}
+</div>
+</Scene>
+</molecules--ml-scenary-102020>
+<groupnotifyuser--ml-toast-notification type="success" position="top-right" .duration=${4000} .visible=${this.cmdCadastrarPessoaStatus === 'success'}>
+<Message>${this.msg.registerDone}</Message>
+</groupnotifyuser--ml-toast-notification>
+<groupnotifyuser--ml-toast-notification type="success" position="top-right" .duration=${4000} .visible=${this.cmdSalvarAlteracoesStatus === 'success'}>
+<Message>${this.msg.saveDone}</Message>
+</groupnotifyuser--ml-toast-notification>
+</div>
+`;
 }
 private renderTable() {
-const items = this.pessoas?.items ?? [];
-const selIndex = items.findIndex((p) => p.id === this.selectedMembroEquipe);
-const busy = this.pageStatus === 'loading' || this.pageStatus === 'idle';
+const items = itemsOf(this.pessoas);
+const shape = pageShape(this.pessoas);
+const selIdx = items.findIndex((p) => p.id === this.selectedMembroEquipe);
+const total = shape.total ?? shape.totalItems ?? 0;
+const pageSize = total > 0 ? (shape.pageSize ?? 0) : 0;
 return html`
 <groupviewtable--ml-data-table
-.value=${selIndex >= 0 ? String(selIndex) : ''}
-.loading=${busy}
-@rowClick=${(e: CustomEvent<{ index: number }>) => this.openRow(e.detail.index)}
+.value=${selIdx >= 0 ? String(selIdx) : ''}
+.loading=${this.qryPessoasEquipeStatus === 'loading'}
+.page=${shape.page ?? 1}
+.pageSize=${pageSize}
+.totalItems=${pageSize > 0 ? total : 0}
+@rowClick=${(e: CustomEvent<{ index: number }>) => this.onRowClick(e.detail.index)}
+@pageChange=${(e: CustomEvent<{ page: number }>) => { this.qryPessoasEquipe(undefined, e.detail.page); }}
 >
+<TableCaption>${this.msg.tableCaption}</TableCaption>
 <TableHeader>
 <TableRow>
-<TableHead key="name">${this.msg['colName']}</TableHead>
-<TableHead key="country">${this.msg['colCountry']}</TableHead>
-<TableHead key="status">${this.msg['colStatus']}</TableHead>
-<TableHead key="contacts">${this.msg['colContacts']}</TableHead>
+<TableHead key="name">${this.msg.colName}</TableHead>
+<TableHead key="country">${this.msg.colCountry}</TableHead>
+<TableHead key="status">${this.msg.colStatus}</TableHead>
+<TableHead key="contacts">${this.msg.colContacts}</TableHead>
 </TableRow>
 </TableHeader>
 <TableBody>
 ${items.map((p) => {
-const id = p.details.identification;
-const muted = id.status !== 'Active';
+const idn = p.details.identification;
+const muted = idn.status !== 'Active';
 return html`
 <TableRow key=${p.id}>
-<TableCell><span class=${muted ? 'text-[var(--text-muted,currentColor)]' : 'font-medium text-[var(--text-strong,currentColor)]'}>${id.name}</span></TableCell>
-<TableCell><span class="text-[var(--text-default,currentColor)]">${id.countryCode}</span></TableCell>
-<TableCell><span class="inline-block rounded-full px-2 py-0.5 text-xs ${statusTone(id.status)}">${this.statusLabel(id.status)}</span></TableCell>
-<TableCell><span class="text-[var(--text-muted,currentColor)]">${p.details.base.contacts || this.msg['noValue']}</span></TableCell>
-</TableRow>
-`;
+<TableCell><span class="font-medium ${muted ? 'text-[var(--text-muted,currentColor)]' : 'text-[var(--text-strong,currentColor)]'}">${idn.name}</span></TableCell>
+<TableCell><span class="${muted ? 'text-[var(--text-muted,currentColor)]' : 'text-[var(--text-default,currentColor)]'}">${idn.countryCode || this.msg.noValue}</span></TableCell>
+<TableCell>${this.statusBadge(idn.status)}</TableCell>
+<TableCell><span class="text-[var(--text-muted,currentColor)]">${p.details.base.contacts || this.msg.noValue}</span></TableCell>
+</TableRow>`;
 })}
 </TableBody>
-<Empty>${this.busca ? this.msg['emptySearch'] : this.msg['emptyAll']}</Empty>
-<Loading>${this.msg['loading']}</Loading>
+<Empty>${this.busca ? this.msg.emptyFiltered : this.msg.emptyList}</Empty>
 </groupviewtable--ml-data-table>
 `;
 }
-private renderList() {
-if (this.qryPessoasEquipeError?.code === 'client.preconditionMissing') {
+private renderLoadError() {
+const pre = this.qryPessoasEquipeError?.code === 'client.preconditionMissing';
 return html`
-<div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 flex flex-col gap-3 items-start" aria-live="polite">
-<p class="font-medium text-[var(--text-strong,currentColor)]">${this.msg['missingTitle']}</p>
-<p class="text-[var(--text-default,currentColor)]">${this.msg['missingBody']}</p>
-<grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => window.history.back()}>
-<Label>${this.msg['back']}</Label>
-</grouptriggeraction--ml-button-standard>
-</div>
-`;
-}
-return html`
-<div class="flex flex-col gap-3">
-<groupsearchcontent--ml-search-bar
-.value=${this.busca}
-.loading=${this.qryPessoasEquipeStatus === 'loading'}
-placeholder=${this.msg['searchPlaceholder']}
-@search=${(e: CustomEvent<{ query: string }>) => { void this.qryPessoasEquipe(e.detail.query); }}
-@clear=${() => { void this.qryPessoasEquipe(''); }}
->
-<Label>${this.msg['searchLabel']}</Label>
-</groupsearchcontent--ml-search-bar>
-${this.pageStatus === 'error' && this.qryPessoasEquipeError
-? html`
-<div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4 flex items-center justify-between gap-3" aria-live="polite">
-<p class="text-[var(--text-default,currentColor)]">${this.msg['loadErrorTitle']}</p>
-<grouptriggeraction--ml-button-standard data-variant="secondary" size="sm" @action=${() => { void this.qryPessoasEquipe(); }}>
-<Label>${this.msg['retry']}</Label>
-</grouptriggeraction--ml-button-standard>
-</div>`
-: this.renderTable()}
-${this.pessoas?.hasMore
-? html`
-<div class="flex justify-center">
-<grouptriggeraction--ml-button-standard
-data-variant="ghost"
-size="sm"
-.loading=${this.qryPessoasEquipeStatus === 'loading'}
-@action=${() => { void this.qryPessoasEquipe(undefined, (this.pessoas?.page ?? 1) + 1, true); }}
->
-<Label>${this.msg['loadMore']}</Label>
-</grouptriggeraction--ml-button-standard>
-</div>`
-: nothing}
-</div>
-`;
-}
-private renderNewScene() {
-const id = this.cmdCadastrarPessoaDraft.details.identification;
-const loading = this.cmdCadastrarPessoaStatus === 'loading';
-const ready = filled(id.name) && filled(id.countryCode);
-return html`
-<div class="flex flex-col gap-4">
-<groupentertext--ml-enter-text
-.value=${id.name ?? ''}
-placeholder=${this.msg['namePlaceholder']}
-required
-@input=${(e: CustomEvent<{ value: string }>) => this.setNewField({ name: e.detail.value })}
->
-<Label>${this.msg['fieldName']}</Label>
-<Helper>${this.msg['fieldNameHelper']}</Helper>
-</groupentertext--ml-enter-text>
-<groupentertext--ml-enter-text
-.value=${id.countryCode ?? ''}
-placeholder=${this.msg['countryPlaceholder']}
-required
-@input=${(e: CustomEvent<{ value: string }>) => this.setNewField({ countryCode: e.detail.value })}
->
-<Label>${this.msg['fieldCountry']}</Label>
-<Helper>${this.msg['fieldCountryHelper']}</Helper>
-</groupentertext--ml-enter-text>
-<groupnotifyuser--ml-contextual-feedback type="error" .visible=${this.cmdCadastrarPessoaStatus === 'error'} .dismissible=${false}>
-<Message>${this.msg['registerError']}</Message>
-</groupnotifyuser--ml-contextual-feedback>
-<div>
-<grouptriggeraction--ml-button-standard
-.disabled=${!ready}
-.loading=${loading}
-@action=${() => { void this.cmdCadastrarPessoa(); }}
->
-<Label>${this.msg['registerPerson']}</Label>
-</grouptriggeraction--ml-button-standard>
-</div>
-</div>
-`;
-}
-private renderEditScene() {
-const p = this.cadastroPessoa;
-if (!p) {
-return html`<p class="text-[var(--text-muted,currentColor)]">${this.msg['noSelection']}</p>`;
-}
-const d = this.cmdSalvarAlteracoesDraft.details.identification;
-const loading = this.cmdSalvarAlteracoesStatus === 'loading';
-const ready = filled(d.name) && filled(d.countryCode) && isDirty(this.cmdSalvarAlteracoesDraft, p);
-const info = p.details.identification;
-return html`
-<div class="flex flex-col gap-4">
-<dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm rounded-md bg-[var(--surface-alt-bg,transparent)] p-3">
-<dt class="text-[var(--text-muted,currentColor)]">${this.msg['detailStatus']}</dt>
-<dd class="text-[var(--text-default,currentColor)]">
-<span class="inline-block rounded-full px-2 py-0.5 text-xs ${statusTone(info.status)}">${this.statusLabel(info.status)}</span>
-</dd>
-<dt class="text-[var(--text-muted,currentColor)]">${this.msg['detailRoles']}</dt>
-<dd class="text-[var(--text-default,currentColor)]">${info.tags || this.msg['noValue']}</dd>
-<dt class="text-[var(--text-muted,currentColor)]">${this.msg['detailContacts']}</dt>
-<dd class="text-[var(--text-default,currentColor)]">${p.details.base.contacts || this.msg['noValue']}</dd>
-</dl>
-<p class="text-xs text-[var(--text-muted,currentColor)]">${this.msg['detailStatusHint']}</p>
-<groupentertext--ml-enter-text
-.value=${d.name ?? ''}
-placeholder=${this.msg['namePlaceholder']}
-required
-@input=${(e: CustomEvent<{ value: string }>) => this.setEditField({ name: e.detail.value })}
->
-<Label>${this.msg['fieldName']}</Label>
-<Helper>${this.msg['fieldNameHelper']}</Helper>
-</groupentertext--ml-enter-text>
-<groupentertext--ml-enter-text
-.value=${d.countryCode ?? ''}
-placeholder=${this.msg['countryPlaceholder']}
-required
-@input=${(e: CustomEvent<{ value: string }>) => this.setEditField({ countryCode: e.detail.value })}
->
-<Label>${this.msg['fieldCountry']}</Label>
-<Helper>${this.msg['fieldCountryHelper']}</Helper>
-</groupentertext--ml-enter-text>
-<groupnotifyuser--ml-contextual-feedback type="error" .visible=${this.cmdSalvarAlteracoesStatus === 'error'} .dismissible=${false}>
-<Message>${this.msg['saveError']}</Message>
-</groupnotifyuser--ml-contextual-feedback>
-<div class="flex items-center gap-3">
-<grouptriggeraction--ml-button-standard
-.disabled=${!ready}
-.loading=${loading}
-@action=${() => this.saveEdit()}
->
-<Label>${this.msg['saveChanges']}</Label>
-</grouptriggeraction--ml-button-standard>
-<grouptriggeraction--ml-button-standard data-variant="ghost" @action=${() => this.closePanel()}>
-<Label>${this.msg['closePanel']}</Label>
-</grouptriggeraction--ml-button-standard>
+<div role="alert" class="mx-auto max-w-xl rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 text-[var(--text-default,currentColor)]">
+<h2 class="text-lg font-semibold text-[var(--text-strong,currentColor)]">${pre ? this.msg.preTitle : this.msg.loadErrorTitle}</h2>
+<p class="mt-2 text-sm">${pre ? this.msg.preBody : (this.qryPessoasEquipeError?.message || this.msg.loadErrorBody)}</p>
+<div class="mt-4">
+${pre
+? html`<grouptriggeraction--ml-button-standard data-variant="secondary" @action=${() => window.history.back()}><Label>${this.msg.goBack}</Label></grouptriggeraction--ml-button-standard>`
+: html`<grouptriggeraction--ml-button-standard data-variant="primary" @action=${() => { this.qryPessoasEquipe(); }}><Label>${this.msg.retry}</Label></grouptriggeraction--ml-button-standard>`}
 </div>
 </div>
 `;
 }
 render() {
 this.msg = pageMessages[this.getMessageKey(pageMessages)];
-const current = this.cadastroPessoa;
-const editTitle = current ? current.details.identification.name : this.msg['editSceneFallback'];
+const failed = this.pageStatus === 'error';
 return html`
-<div class="min-h-full bg-[var(--page-bg,transparent)] text-[var(--text-default,currentColor)] p-6 flex flex-col gap-5">
-<header class="flex items-center justify-between gap-4">
-<h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg['pageTitle']}</h1>
-<grouptriggeraction--ml-button-standard @action=${() => this.openNew()}>
-<Label>${this.msg['newPerson']}</Label>
-</grouptriggeraction--ml-button-standard>
+<div class="min-h-full bg-[var(--page-bg,transparent)] p-6 text-[var(--text-default,currentColor)]">
+<header class="mb-5">
+<h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+<p class="mt-1 text-sm text-[var(--text-muted,currentColor)]">${this.msg.pageLead}</p>
 </header>
-<div class="grid grid-cols-[minmax(0,1fr)_380px] gap-6 items-start">
-<section data-organism-id="pessoasEquipe" class="min-w-0">
-${this.renderList()}
-</section>
-<aside data-organism-id="cadastroPessoa" class="sticky top-6 rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] p-5">
-<molecules--ml-scenary-102020
-mode="scenary"
-.value=${this.scenary || (current ? 'editar' : 'novo')}
-backLabel=${this.msg['hostBack']}
-@change=${(e: CustomEvent<{ value: string }>) => { if (e.target === e.currentTarget) this.setScenario(e.detail.value); }}
+${failed ? this.renderLoadError() : html`
+<div class="grid grid-cols-[minmax(0,1fr)_360px] items-start gap-6">
+<section data-organism-id="pessoasEquipe" class="flex min-w-0 flex-col gap-3">
+<div class="flex items-end justify-between gap-4">
+<div class="w-full max-w-sm">
+<groupsearchcontent--ml-search-bar
+.value=${this.busca}
+placeholder=${this.msg.searchPlaceholder}
+.loading=${this.qryPessoasEquipeStatus === 'loading'}
+@search=${(e: CustomEvent<{ query: string }>) => { this.qryPessoasEquipe(e.detail.query || null); }}
+@clear=${() => { this.qryPessoasEquipe(null); }}
 >
-<Scene value="novo" title=${this.msg['newSceneTitle']}>
-${this.renderNewScene()}
-</Scene>
-<Scene value="editar" title=${editTitle}>
-${this.renderEditScene()}
-</Scene>
-</molecules--ml-scenary-102020>
-<groupnotifyuser--ml-toast-notification
-type="success"
-position="top-right"
-.duration=${3500}
-.visible=${this.cmdCadastrarPessoaStatus === 'success'}
->
-<Message>${this.msg['registerOk']}</Message>
-</groupnotifyuser--ml-toast-notification>
-<groupnotifyuser--ml-toast-notification
-type="success"
-position="top-right"
-.duration=${3500}
-.visible=${this.cmdSalvarAlteracoesStatus === 'success'}
->
-<Message>${this.msg['saveOk']}</Message>
-</groupnotifyuser--ml-toast-notification>
-</aside>
+<Label>${this.msg.searchLabel}</Label>
+<Empty>${this.msg.searchEmpty}</Empty>
+</groupsearchcontent--ml-search-bar>
 </div>
+<grouptriggeraction--ml-button-standard data-variant="primary" size="md" @action=${() => this.onAdd()}>
+<Label>${this.msg.addPerson}</Label>
+</grouptriggeraction--ml-button-standard>
+</div>
+<div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
+${this.renderTable()}
+</div>
+</section>
+<aside class="sticky top-6">${this.renderPanel()}</aside>
+</div>`}
 </div>
 `;
 }

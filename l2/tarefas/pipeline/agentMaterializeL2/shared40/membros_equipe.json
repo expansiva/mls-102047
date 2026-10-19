@@ -3,30 +3,30 @@
   "project": 102047,
   "module": "tarefas",
   "pageId": "membros_equipe",
-  "unitInputHash": "sha256:598b00cb821c634a01a7efce79ff7ed292d317454a82b669a45aff74d57c361c",
+  "unitInputHash": "sha256:8f7a4b199d05d2ef84c0d64d02a836dc34c839eff0a3a2dda965cbb553d415ff",
   "promptHash": "sha256:285f13d9e093816ed7270af464b539a73e096344c3a45829abeaaec8c5ebc18c",
   "rulesHash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
   "sourcePath": "l2/tarefas/web/shared/membros_equipe.ts",
-  "sourceHash": "sha256:80f7bc64a5a6b6e36b63a58337cfd7223a4426683f273726a064e122f38965e2",
+  "sourceHash": "sha256:0986a7f7b74bd64bb3eb23ae7957c95a61b98e99c0fc21a39f41da6fbe99bb93",
   "declarationPath": "l2/tarefas/web/shared/membros_equipeDts.txt",
-  "declarationHash": "sha256:18e82010e7fd9e85f3c28f56f8a569d7dbb191290336c93ebc9b0c98d0f21439",
-  "attempt": 2,
+  "declarationHash": "sha256:1ed102970a2eace4438967d6be5c7d745f205ee771e587d1d150793a6a5d2d57",
+  "attempt": 1,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "Param busca has effect filter:pessoasEquipe but no state holds it. Added public state 'busca' (string | null, persisted, loaded from URL/localStorage); qryPessoasEquipe(busca?, page, append) publishes it and sends it in the query input."
+      "message": "Entry param busca (filter:pessoasEquipe, persisted) has no state in the definition. Added public state busca (string | null, persisted in localStorage) that qryPessoasEquipe publishes and sends as the optional busca input."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "State selectedMembroEquipe (select:cadastroPessoa) has no setter and no request fetching the record. Added public selectCadastroPessoa(id|null), which also fills the edit draft, and a getter cadastroPessoa returning the row of the loaded list."
+      "message": "selectedMembroEquipe has no query that fetches the record, and no setter. Added public selectMembroEquipe(id | null), the getter cadastroPessoa (row of the loaded list) and client.selectionInvalid handling."
     },
     {
-      "code": "FILTER_STATE_MISSING",
-      "message": "The commands have no '<command>.input' state. Added drafts cmdCadastrarPessoaDraft and cmdSalvarAlteracoesDraft (the latter prefilled from the selected row and refilled from the saved record) with setters setCmdCadastrarPessoaDraft and setCmdSalvarAlteracoesDraft."
+      "code": "FORM_DRAFT_MISSING",
+      "message": "cmdCadastrarPessoa and cmdSalvarAlteracoes have typed inputs but no <command>.input state. Added cmdCadastrarPessoaDraft (setCmdCadastrarPessoaDraft) and cmdSalvarAlteracoesDraft (setCmdSalvarAlteracoesDraft; prefilled from the selected row, carries id and version)."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "cmdCadastrarPessoa returns a person that is upserted into pessoas.items (appended at the end when new), but the list is ordered by name and filtered by busca on the backend, so the new row may be out of order or not match the current search; pageStatus stays 'empty' if the list was empty before the first registration. Reload with qryPessoasEquipe() to realign."
+      "message": "cmdCadastrarPessoa returns a person that is upserted at the end of the loaded list; the shared does not sort or check the busca filter, so order and filter membership may differ until the list is reloaded. pageStatus stays 'empty' if the list was empty before the first registration, because only the list load writes pageStatus."
     },
     {
       "code": "MEMBER_ADDED",
@@ -46,7 +46,7 @@
     },
     {
       "code": "MEMBER_ADDED",
-      "message": "public selectCadastroPessoa is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+      "message": "public selectMembroEquipe is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     },
     {
       "code": "MEMBER_ADDED",

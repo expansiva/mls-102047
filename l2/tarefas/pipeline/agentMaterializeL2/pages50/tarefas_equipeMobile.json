@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "mobile",
-  "contextHash": "sha256:19f27379a501835666ef7012bcf7211e62016197633539c34f268edb9a63421e",
+  "contextHash": "sha256:6472ce57606ad0a983c58bceb9ac81bc2c20a8daf1dcf61ef56302abd55036d5",
   "sourcePath": "l2/tarefas/web/mobile/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:a7de4dafaad03cd2d334649b7e771a486abddc8f31d4bd809f46565b87fda01d",
-  "attempt": 2,
+  "sourceHash": "sha256:825e23f1582858cbd85d18b6a2235dc4307f229bffafe95ece2214ab8a337bfd",
+  "attempt": 1,
   "design": {
-    "concept": "Uma coluna fluida para o gestor no celular: primeiro a lista de tarefas da equipe com filtros recolhidos e sinais de atraso, depois, ao tocar numa tarefa, uma segunda visão empilhada com o detalhe, as ações do gestor (trocar responsável, cancelar) e o histórico ao final. Uma coisa de cada vez, sem perder o lugar na lista.",
+    "concept": "Um fluxo de duas telas para o gestor no celular: primeiro a fila de tarefas da equipe, em cartões compactos, com filtros recolhidos num painel e os sinais de atrasada e vence hoje à vista. Tocar numa tarefa abre a tela da tarefa, em coluna única: resumo, checklist, ações do gestor (trocar responsável, cancelar) e, por último, o histórico.",
     "views": [
       {
         "id": "quadro",
-        "purpose": "Lista compacta das tarefas da equipe (cards por tarefa), filtros recolhíveis, destaque de atrasadas e que vencem hoje, carregar mais."
+        "purpose": "Fila da equipe: filtros recolhíveis, lista de cartões responsiva e botão para carregar mais. Tocar numa tarefa a abre."
       },
       {
         "id": "tarefa",
-        "purpose": "Tarefa tocada: detalhe e checklist, ações do gestor com confirmação de cancelamento e, por último, o histórico. Tem botão de voltar para a lista."
+        "purpose": "Tarefa aberta, com botão de voltar à lista: detalhe e checklist, ações do gestor e histórico ao final."
       }
     ],
-    "decisions": "Duas cenas no host ml-scenary em mode=scenary (lista → tarefa) em vez de painel lateral, porque no celular o master-detail do template vira navegação empilhada com voltar; a lista mantém filtros e posição porque a cena fica no DOM. Os filtros ficam num <details> nativo (recolhível sem estado na página), com selects para lista, responsável, prioridade e situação, o intervalo de prazo e dois botões de alternância (só atrasadas, vencem hoje); busca por título foi omitida porque o shared não tem filtro de texto. Usei ml-responsive-table (alternativa) porque vira cards rotulados em tela estreita e mantém todas as colunas; o data-table esconderia a situação. A cor de alarme fica só na data das atrasadas; vence hoje é um chip de aviso. Reatribuir usa o autocomplete de membros (inativos aparecem desabilitados, sem filtrar na página) e só aparece se a tarefa está aberta; cancelar é o único botão danger e passa por um alert-modal que nomeia a tarefa, aberto/fechado direto no elemento (a página não guarda estado). O retorno de sucesso vem por toast; falhas aparecem dentro da área de ações com nova tentativa pelo próprio botão. Erros de carga mostram texto e Tentar novamente; na falta de pré-condição, texto explicando e botão de voltar à página anterior. O histórico usa timeline-view apenas com marcos que o contrato traz (criação, devolução, conclusão, cancelamento), na ordem natural."
+    "decisions": "Usei o host de cenas em modo scenary, com duas telas e voltar, porque o celular mostra uma coisa de cada vez. O título de cada tela vem do host, então não repeti cabeçalhos. Escolhi a alternativa responsive-table em vez da data-table: nas telas estreitas ela vira cartões rotulados e não corta colunas nem rola na horizontal. Os filtros ficam num <details> nativo, que recolhe sem estado na página. Cada filtro chama listarTarefasEquipe com uma mudança de filtro. O alarme de cor vai só na data das atrasadas. Vence hoje é uma etiqueta discreta. A página não ordena nem filtra nada, só mostra os campos que o backend entrega. Como a página não guarda estado, o alerta de confirmação do cancelamento é aberto e fechado por uma propriedade `visible` do próprio elemento, sem estado na página. O alerta nomeia a tarefa e o botão destrutivo é o único em danger. O retorno de sucesso é um toast ligado ao status do comando. Erros e validação aparecem junto aos botões, em texto. O novo responsável vem de um autocomplete pelo nome, e quem não está ativo fica desabilitado. A ação só aparece quando a tarefa está aberta. O histórico usa os marcos que a tarefa traz: criação, devolução, conclusão e cancelamento. Não havia busca por título no compartilhado, então a busca ficou de fora. A paginação é um botão discreto, 'Mostrar mais tarefas', sem campos de página."
   },
   "advisories": [
     {

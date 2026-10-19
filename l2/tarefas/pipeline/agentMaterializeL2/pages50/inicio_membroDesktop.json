@@ -6,12 +6,12 @@
   "device": "desktop",
   "contextHash": "sha256:e552a1b4cace822f0447e2b054dec90f0e19d404cb84dc45887d6e8e6e141617",
   "sourcePath": "l2/tarefas/web/desktop/page11/inicio_membro.ts",
-  "sourceHash": "sha256:b8fb9e18400332c28b612fd73857fba8c95f075a6cba8000eab55d7f0a3b6674",
-  "attempt": 2,
+  "sourceHash": "sha256:1fe59b4799455bfeec77bc18982a00cc339ccb0b76b01425adad9451b34e8516",
+  "attempt": 1,
   "design": {
-    "concept": "Início do membro como uma superfície de triagem: a pergunta é \"o que precisa de mim agora?\". As pendências aparecem em faixas de ação, da mais urgente (devolvidas para ajuste) à menos urgente (para iniciar). A carga de trabalho fica numa linha discreta logo abaixo, as tarefas em destaque ficam recolhidas, e o aviso das 8h fica numa coluna lateral.",
+    "concept": "Um painel de triagem para o começo do dia: logo abaixo do título vem uma frase que diz quanto está em atraso e quanto vence hoje. À esquerda ficam as faixas do que espera pelo membro, com a pior primeiro: devolvidas, entregas para revisar, envios e inícios. Cada linha tem uma ação direta. À direita ficam as tarefas mais urgentes, uma faixa discreta com os totais e o aviso das 8h.",
     "views": [],
-    "decisions": "A página tem uma única view e por isso não usa o scene host. As faixas aparecem empilhadas e sempre visíveis, em ordem de urgência, porque o template pede triagem e não abas. Por isso não usei as pills. O cabeçalho mostra a frase de triagem. Quando o backend informa pageStatus 'empty', ela vira a frase calma de boa notícia, com a linha de carga ainda visível. A carga (abertas, vencem hoje, atrasadas) é uma linha pequena de pares valor+rótulo, sem cartões. Só a quantidade de atrasadas tem cor de alarme. Todo número vem pronto do backend, e a página não soma nem conta nada. A linha da faixa tem identidade, prazo à direita e a ação do item. O título da tarefa leva a minhas_tarefas (abrirTarefaParaAjustar). As ações (iniciar, enviar, aceitar, devolver) são botões do item, porque as intents do defs exigem. A devolução com motivo abre um formulário dentro da própria linha. A linha aberta é a que tem o id em devolverComMotivoDraft.id, então a página não guarda estado próprio. Os botões ficam desabilitados enquanto qualquer comando roda. Erros e sucessos aparecem numa região aria-live. Erro de carga aparece dentro da região das faixas, com 'tentar novamente'. O erro client.preconditionMissing tem texto próprio e leva a Minhas tarefas. O aviso diário usa marcação própria e um botão-standard, porque o banner lê o slot como innerHTML e ficaria desatualizado com dados dinâmicos. Os títulos de faixa nunca repetem o texto dos botões. A tag do botão leva o sufixo do projeto da molécula (-102040), como as demais moléculas."
+    "decisions": "A página tem uma única vista, então não usa o scene host. As faixas aparecem empilhadas e as vazias são omitidas. Assim a pessoa vê tudo o que a espera sem trocar de aba e sem contagens calculadas na página. Se todas as faixas esvaziam, aparece uma frase calma de boa notícia.\n\nSeguindo o template de triagem, a ordem de atenção é: frase de triagem, faixas de exceção, faixa discreta de totais (sem cartões) e, por último, o aviso diário, que é secundário. Os totais vêm dos campos readonly do resumo, sem somar nada.\n\nCada linha traz identidade (o título é um link para abrir a tarefa), o fato decisivo (prazo, alinhado à direita e tabular) e as ações do item com botões ml-button-standard. A cor de alarme aparece só no rótulo 'Atrasada' das tarefas urgentes, a partir do flag do backend.\n\nDevolver com motivo abre um formulário embutido na própria linha. A linha em edição é marcada por devolverComMotivoDraft.id, então a página não guarda estado próprio.\n\nO progresso do checklist vem como texto pronto do backend ('2/5'). Por isso não uso a barra de progresso, que exigiria calcular uma porcentagem.\n\nDesenhei estados de carregando, de erro (incluindo client.preconditionMissing, com caminho de volta) e de sucesso ou erro dos comandos em região aria-live. Nenhum dos 'pills' ou 'tabs' entra, porque eles reconstroem o conteúdo por innerHTML e perderiam os handlers."
   },
   "advisories": [
     {
@@ -40,10 +40,6 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism avisoDoDia (destaque do aviso de hoje) renders neither <groupnotifyuser--ml-notify-banner> nor <groupnotifyuser--ml-contextual-feedback>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism esperaPorMim (separar iniciar, revisar e ajustar) renders neither <groupnavigatesection--ml-navigate-pills> nor <groupnavigatesection--ml-tabs>."
     },
     {
@@ -53,10 +49,6 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism esperaPorMim (ações secundárias do item) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <grouptriggeraction--ml-button-standard-102040> is not in this page's list."
     }
   ]
 }

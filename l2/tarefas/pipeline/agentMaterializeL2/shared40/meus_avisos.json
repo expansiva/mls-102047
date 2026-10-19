@@ -3,26 +3,26 @@
   "project": 102047,
   "module": "tarefas",
   "pageId": "meus_avisos",
-  "unitInputHash": "sha256:02c7925d2061c7869730ea35bb785546169d3dff3c7cf2877d0ef0dc6ea47862",
+  "unitInputHash": "sha256:fe385e2831bcfaeb59340804259c806092d878c4afe0832ba75832006bfe6361",
   "promptHash": "sha256:285f13d9e093816ed7270af464b539a73e096344c3a45829abeaaec8c5ebc18c",
   "rulesHash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
   "sourcePath": "l2/tarefas/web/shared/meus_avisos.ts",
-  "sourceHash": "sha256:32ed62190d78e732de675d210a786b69edb705dbec0cc3013b1a131d0fb7787f",
+  "sourceHash": "sha256:a33ff1ad3d3baa1e3e188d1ceb39ddf8d98d8381e8082cdb83091a0833b2c3ad",
   "declarationPath": "l2/tarefas/web/shared/meus_avisosDts.txt",
-  "declarationHash": "sha256:7cfb062ff00336b0ed9f062c715e55f00ae378e9a525ff2cb653f5f9ac79150e",
-  "attempt": 2,
+  "declarationHash": "sha256:fa044cdc2a55e58c06223f1c5399e66f840b6593324fe3fad3a21574dd5c4b46",
+  "attempt": 1,
   "findings": [
     {
       "code": "FILTER_STATE_MISSING",
-      "message": "The period filter of listaAvisos (dataInicio/dataFim of qryListarMeusAvisos) has no state in the defs; added public states filtroDataInicio and filtroDataFim, published by qryListarMeusAvisos itself (arguments dataInicio, dataFim)."
+      "message": "qryListarMeusAvisos filters by period (dataInicio, dataFim) but no state holds the filter. Added public states filtroDataInicio and filtroDataFim with setters setFiltroDataInicio and setFiltroDataFim; qryListarMeusAvisos(page, append) reads them."
     },
     {
       "code": "SELECT_SETTER_MISSING",
-      "message": "qryAvisoPorId returns aviso but no state has it as source; its output is written into avisoAtual (the state of organism avisoDoDia) and selectedAvisoVencimento, and selectAvisoVencimento(id|null) was added as the public selection method."
+      "message": "entry param avisoVencimentoId selects an aviso, but no method selects and no state holds the selected record (qryAvisoPorId.aviso has no state). Added selectAvisoVencimento(id|null), which publishes the id and writes the fetched notice into avisoAtual (the state that feeds avisoDoDia); null restores the most recent notice."
     },
     {
       "code": "STATE_LEFT_STALE",
-      "message": "Clearing the selection (null) cannot restore the latest notice without reloading the page request, so avisoAtual keeps the notice last shown; the page may call qryPaginaMeusAvisos to reset it."
+      "message": "avisoAtual is documented as the most recent notice but also receives the selected notice from qryAvisoPorId, since the defs declare no separate state for it."
     },
     {
       "code": "MEMBER_ADDED",
@@ -35,6 +35,14 @@
     {
       "code": "MEMBER_ADDED",
       "message": "public selectAvisoVencimento is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public setFiltroDataFim is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
+    },
+    {
+      "code": "MEMBER_ADDED",
+      "message": "public setFiltroDataInicio is not declared by the defs; the shared added it so the pages can drive the page (a draft, a setter, a selection or a filter state)."
     }
   ]
 }

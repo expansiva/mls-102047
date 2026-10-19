@@ -4,49 +4,37 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "mobile",
-  "contextHash": "sha256:d7adf8c73adff8268d2f8abf71f87f58d3ef43f753bb39d4d757f4861c92bcf9",
+  "contextHash": "sha256:4b1f4d9b0c8076d3c30bb3b913740ddcb3688754bfab036fd66f77c602e8ebb4",
   "sourcePath": "l2/tarefas/web/mobile/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:4166eee71b590112039c76c0dbf1130374e7ebe9648a3d2f54b2d916cb4b8264",
-  "attempt": 2,
+  "sourceHash": "sha256:3571e1c300f98cc5898fc6dfbf52235e60057a6146443af313997f7faa9be420",
+  "attempt": 1,
   "design": {
-    "concept": "Uma pilha de telas de um polegar só: a lista de tarefas (com filtros rápidos em pílulas e o botão \"Nova tarefa\" sempre à mão) leva à tarefa aberta, onde dados, checklist e a ação de ciclo do meu papel ficam juntos e ao alcance do polegar. Criar, editar, marcar checklist, devolver e cancelar são passos próprios, cada um com voltar, para nunca competir com a lista.",
+    "concept": "Mobile \"fila de compromissos\": a single narrow column that opens on my tasks (quick-filter pills, stacked rows with deadline and status, a thumb-reachable \"Nova tarefa\" bar). Tapping a task moves to a focused view of that task with its data, checklist, collapsed history and a sticky action bar for the one action that matters for my role. Creating, editing and adjusting the checklist are separate steps, so one thing at a time.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Ver de relance minhas tarefas, filtrar rapidamente, destacar atrasadas e as que vencem hoje, abrir uma tarefa ou iniciar uma nova."
+        "purpose": "Primary view: my tasks, filter pills, load more, and the Nova tarefa button at the thumb."
       },
       {
         "id": "detalhe",
-        "purpose": "Tarefa aberta: dados, motivo da devolução em destaque, checklist, barra de ação do meu papel (principal em destaque + menu) e histórico recolhido."
+        "purpose": "The open task: returned-reason note, data card, read-only checklist, collapsed history, and a sticky action bar (main lifecycle action plus a 'Mais ações' menu with return-with-reason and cancel-with-confirmation)."
       },
       {
         "id": "criar",
-        "purpose": "Registrar nova tarefa: campos empilhados, responsável por busca de nome e checklist inicial."
+        "purpose": "Create a task with stacked fields and an initial checklist; success stays local with a link to the created task."
       },
       {
         "id": "editar",
-        "purpose": "Editar os campos e trocar o responsável sem mudar a situação."
+        "purpose": "Edit the task fields, including swapping the assignee; save is disabled until valid and changed."
       },
       {
         "id": "checklist",
-        "purpose": "Marcar, ajustar, reordenar e acrescentar itens da checklist, com salvamento próprio."
-      },
-      {
-        "id": "devolver",
-        "purpose": "Informar o motivo obrigatório para devolver a entrega para ajuste."
-      },
-      {
-        "id": "cancelar",
-        "purpose": "Confirmação que nomeia a tarefa antes de cancelá-la (única ação de perigo)."
+        "purpose": "Mark, reword or add checklist items and save them without changing the task status."
       }
     ],
-    "decisions": "Usei o scene host em modo scenary para todas as trocas de tela; o título de cada cena é o único título da vista (a lista não repete \"Minhas tarefas\"). A lista usa a tabela responsiva (vira cartões rotulados no celular), com prazo em cor de alarme só quando atrasada e aviso textual para \"vence hoje\". Os filtros são pílulas sem conteúdo nas abas, com a lista abaixo. A ação principal do papel fica numa barra fixa na base do detalhe, com menu em folha inferior (popover nativo) para devolver e cancelar; devolver e cancelar viram cenas porque exigem motivo e confirmação com o nome da tarefa. O responsável usa o combobox porque emite digitação, com busca com debounce. Após salvar/criar/devolver/cancelar com sucesso volto ao detalhe. Histórico fica em seção recolhida com a linha do tempo. Nada é calculado: flags e progresso vêm prontos. Correção: o host de cenas segue o contrato do ml-scenary (backLabel como atributo, cenas só com value, title e nav)."
+    "decisions": "Views use the scene host in scenary mode with back; the host's change handler reloads the list when coming back from creation and discards unsaved edits when leaving edit/checklist. The list uses the responsive data table with three columns (task identity, deadline, status), so no column is hidden at 360px; overdue deadlines are the only text in alarm color, with a plain-word label beside it. No client-side search (the contract has no term query) and no progress bar molecule: the checklist progress arrives as a ready string and is displayed as-is. The page holds no state, so 'Mais ações' and the history are native details disclosures, and cancel is a nested disclosure that names the task before the single danger button. Command feedback is local, inside the sticky bar/panel above the button (success in status colors, failure with the backend message). The returned-reason note is plain markup, not a banner molecule, because the banner reads its slot HTML once and could show stale text. The assignee uses the combobox (alternative) because its keystroke event lets the page call the member search. The deadline uses the date picker, not the shortcut picker, because the shortcuts point to the past. Text inputs listen to input and change with a guard on the custom event detail."
   },
   "advisories": [
-    {
-      "code": "M4_PAGE_IMPORT",
-      "message": "[contract] Import lit/directives/keyed.js is not allowed. Use only lit, lit/decorators.js, /_102047_/l2/tarefas/web/shared/minhas_tarefas.js and the molecule paths of this page."
-    },
     {
       "code": "M4_PAGE_SECTION",
       "message": "Section secTarefas needs an element with data-section-id=\"secTarefas\"."
@@ -73,7 +61,19 @@
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism detalheTarefa (motivo da devolução) renders neither <groupnotifyuser--ml-notify-banner> nor <groupnotifyuser--ml-contextual-feedback>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism acoesTarefa (ações secundárias) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism acoesTarefa (confirmação da ação) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-alert-modal>."
+    },
+    {
+      "code": "M4_PAGE_SCENARY",
+      "message": "[contract] The host @change must call this.setScenario(e.detail.value)."
     }
   ]
 }

@@ -4,27 +4,27 @@
   "module": "tarefas",
   "pageId": "listas",
   "device": "desktop",
-  "contextHash": "sha256:f89683cee572372fe839a6cb49ef1a2f4c205b7c2d12474f37c363143bcbce4f",
+  "contextHash": "sha256:376b460b7f57de75cc3e09185c48a52ec5bb9243db083bef9fe7454adb35c01c",
   "sourcePath": "l2/tarefas/web/desktop/page11/listas.ts",
-  "sourceHash": "sha256:c59f4dd1d7dda9039696654e082c752b1e8104894db8f4c3d07fe6d919a9e547",
-  "attempt": 4,
+  "sourceHash": "sha256:5665aadea5ca598b31666966fc2b0287ab87577811e15b8d682c3c1ef3e317bd",
+  "attempt": 2,
   "design": {
-    "concept": "Uma superfície de referência calma para o gestor: a tabela de listas ocupa a área principal e, ao lado dela, um painel de manutenção que abre vazio (nova lista) ou preenchido (lista escolhida). A tabela nunca é editável e nunca é coberta; o painel edita, a tabela ancora.",
+    "concept": "Superfície calma de referência: à esquerda a tabela das listas (nome, tipo, situação, tarefas abertas) com uma busca discreta acima; à direita um painel lateral que abre ao lado da tabela, sem cobri-la, para criar uma lista nova ou alterar a escolhida. A tabela ancora, o painel edita.",
     "views": [
       {
-        "id": "fechado",
-        "purpose": "Painel em repouso: uma dica curta convida a escolher uma lista na tabela ou cadastrar uma nova."
+        "id": "inicio",
+        "purpose": "Painel em repouso: orienta (escolha uma lista ou crie uma) e mostra o resultado local da última gravação bem-sucedida."
       },
       {
         "id": "criar",
-        "purpose": "Painel vazio para cadastrar uma nova lista (nome, tipo, descrição, ativa) com o botão que nomeia o resultado."
+        "purpose": "Painel vazio para cadastrar uma nova lista (nome, tipo, descrição, ativa), aberto pelo botão 'Nova lista'."
       },
       {
         "id": "editar",
-        "purpose": "Painel preenchido com a lista escolhida; o título é o nome da própria lista e mostra a quantidade de tarefas abertas como dado somente leitura."
+        "purpose": "Painel preenchido com a lista escolhida na tabela; o título é o nome da própria lista."
       }
     ],
-    "decisions": "Segui a hierarquia do template: tabela primeiro, busca discreta acima dela, botão 'Nova lista' ao lado da busca, painel só quando aberto. As três cenas do painel ficam num host ml-scenary só sobre a região do painel, então a tabela continua visível e a linha selecionada marcada (por índice, via value). O valor do host vem só de this.scenary com 'fechado' como primeira cena; a página não lê this.scenary em nenhum outro lugar (o estado sujo vem dos rascunhos). Linhas inativas ficam esmaecidas com selo neutro, não vermelho. Validação e falha ficam no painel, acima do botão; o botão fica desabilitado até nome e tipo estarem preenchidos e algo mudar. Fechar ou trocar de lista com alterações pergunta uma confirmação simples. Sucesso: o painel fecha, a linha é atualizada pelo shared e um toast discreto confirma. Paginação foi omitida: o shared não expõe página e a lista mestra é pequena. A ordenação da tabela está desligada porque o backend já ordena por nome e o índice do clique precisa coincidir com a lista. Tipo usa select nativo e Ativa um checkbox nativo, porque a página não tem molécula de seleção. As tags das moléculas levam o sufixo do projeto (-102040) para serem registradas. O helper de formatação numérica foi renomeado para numberLocale para não colidir com HTMLElement.lang."
+    "decisions": "Segui o template compactCrudTable: a tabela lidera, a busca é um campo único acima dela, o botão de criar fica no cabeçalho e o painel só ocupa a coluna lateral. As três cenas do painel ficam num scene host que cobre apenas a região lateral (mode=scenary), então a tabela permanece visível e a linha escolhida segue marcada pelo índice. O host recebe .value=${this.scenary || 'inicio'} e muda de cena apenas pelo evento change e pelos botões que chamam setScenario. Escolhi data-table sem colunas ordenáveis e sem paginação interna. Listas inativas continuam na tabela com texto atenuado e selo neutro. O botão de gravar fica desabilitado até nome, tipo e situação estarem preenchidos; o erro de comando aparece dentro do painel. Ao gravar com sucesso o painel volta ao repouso e mostra uma confirmação local. Ao abrir 'Nova lista' a situação já vem marcada como ativa. Erros do carregamento inicial aparecem em palavras no lugar da tabela, com nova tentativa."
   },
   "advisories": [
     {
@@ -38,34 +38,6 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism listasCadastradas (paginação das listas) renders neither <grouptriggeraction--ml-pagination-control>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupsearchcontent--ml-search-bar-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <grouptriggeraction--ml-button-standard-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupviewtable--ml-data-table-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupnotifyuser--ml-contextual-feedback-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupentertext--ml-enter-text-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupentertext--ml-multiline-text-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupnotifyuser--ml-toast-notification-102040> is not in this page's list."
     }
   ]
 }

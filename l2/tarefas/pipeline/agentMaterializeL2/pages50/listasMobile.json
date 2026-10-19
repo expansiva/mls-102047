@@ -4,23 +4,23 @@
   "module": "tarefas",
   "pageId": "listas",
   "device": "mobile",
-  "contextHash": "sha256:066bf713f8b8b482b0711f752a8059095a83512df4774fbe84bf903b29a88fbb",
+  "contextHash": "sha256:635347f881e3c504249fb8cc1f8fecb90138fa23b5e170887f68582d92f08ace",
   "sourcePath": "l2/tarefas/web/mobile/page11/listas.ts",
-  "sourceHash": "sha256:cc8b3cfc2892f9c63a57f41faf2917ce2a064a759701042d8d72888721663f46",
-  "attempt": 2,
+  "sourceHash": "sha256:3e9e650f3862042a48499aa833f71e94a3945dce1e61f5c1be329f2169f1279d",
+  "attempt": 1,
   "design": {
-    "concept": "Duas telas em coluna única no celular: a lista de listas (busca no topo, linhas grandes com tipo, tarefas abertas e situação, botão de cadastrar sempre ao alcance do polegar) e uma tela própria com voltar para cadastrar ou alterar uma lista, com um campo por linha e o botão de salvar no pé. Depois de salvar, volta à lista com a linha alterada marcada.",
+    "concept": "Duas telas em coluna única, ligadas pelo host de cenas: a lista de listas (busca no topo, linhas grandes com nome, tipo, situação e tarefas abertas, botão de nova lista fixo no rodapé) e a ficha da lista, que abre ao tocar numa linha ou no botão de criar. Salvar leva de volta à lista, com a linha marcada e um aviso curto de sucesso.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Ver e buscar as listas; tocar numa linha abre o registro preenchido, o botão fixo no rodapé abre o registro vazio."
+        "purpose": "Consultar as listas, buscar pelo nome, tocar numa para alterar ou iniciar o cadastro de uma nova."
       },
       {
         "id": "registro",
-        "purpose": "Formulário de uma lista (nova ou existente), com voltar, erro de comando acima do botão e salvar no pé."
+        "purpose": "Formulário de uma lista por vez (vazio para criar, preenchido para alterar), com voltar no topo e o botão de salvar fixo no pé, ao alcance do polegar."
       }
     ],
-    "decisions": "Segui a seção On mobile do template: a lista não divide a tela com o formulário; o painel virou uma cena com voltar (ml-scenary mode=scenary). O mesmo ambiente de cena serve para criar e editar: o que muda é qual rascunho (criarListaDraft ou salvarListaDraft) e qual comando o botão chama, decidido pela linha selecionada que o shared entrega (formularioLista), nunca pela cena. O título da cena de edição é o nome da lista (identidade do registro), o da cena de criação é 'Nova lista'; o botão da lista diz 'Cadastrar nova lista', então nenhum título repete rótulo de botão. Linhas inativas ficam na lista, esmaecidas, com selo neutro (não vermelho). A linha aberta fica marcada ao voltar (selected). Após salvar com sucesso a página volta à lista e um toast curto confirma. Tipo usa select nativo e Ativa um checkbox de 44px porque nenhuma molécula cobre esses campos. Salvar fica desabilitado sem nome ou sem tipo (obrigatórios) e durante o envio. Limitação: o voltar do host não permite interceptar para confirmar descarte; ao voltar, a seleção é limpa. Estados: carregando, vazio/sem resultado, erro com tentar novamente (inclusive client.preconditionMissing em palavras)."
+    "decisions": "Segui a seção On mobile do template: a tabela virou lista vertical de registros, e o painel lateral virou uma cena própria com voltar, de modo que lista e formulário nunca ficam empilhados. O título da cena de edição é o nome da lista; o da criação descreve o cadastro, sem repetir o rótulo do botão. Tipo e Ativa são grupos de opções (radio) em linhas de 48px, em vez de um select, para o polegar. Salvar fica desabilitado até nome, tipo e situação estarem preenchidos; a falha aparece dentro da ficha, acima do botão, e o botão serve de nova tentativa. Depois do sucesso, a página volta à lista chamando setScenario na conclusão do comando. Listas inativas ficam na lista, só atenuadas, com o rótulo 'Inativa'. A confirmação ao voltar com alterações não salvas e o 'algo mudou' não foram feitos: exigiriam comparar o rascunho com o registro ou guardar estado na página, o que o contrato proíbe. O erro de pré-condição ausente explica em palavras e oferece 'Voltar' (histórico) e 'Tentar novamente'."
   },
   "advisories": [
     {

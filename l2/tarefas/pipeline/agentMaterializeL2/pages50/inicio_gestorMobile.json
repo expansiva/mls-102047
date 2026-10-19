@@ -4,14 +4,14 @@
   "module": "tarefas",
   "pageId": "inicio_gestor",
   "device": "mobile",
-  "contextHash": "sha256:a611c7fb548d3f47ba8b9139a806c4990811c8777c37ccbeda7ae535aaa1f6c2",
+  "contextHash": "sha256:e214b1c380e60d13543e2104c02382fe791521db9ade87ea0cd10ee9c7bf2802",
   "sourcePath": "l2/tarefas/web/mobile/page11/inicio_gestor.ts",
-  "sourceHash": "sha256:39046ff5055512553fbc06423f68051b6a010c2bc4e6ef13d4dc3fdc3c5294d8",
-  "attempt": 2,
+  "sourceHash": "sha256:59eceeb9defb286b6ffa4440364e6143dfa5f3d8ef7c23788f368abeb73a4008",
+  "attempt": 1,
   "design": {
-    "concept": "Uma tela de triagem para o celular: a primeira frase diz quanto precisa do gestor agora (atrasadas e que vencem hoje), logo abaixo vem a fila de tarefas a decidir, e só depois uma faixa discreta com os totais da equipe, as tarefas por lista e o progresso das checklists. Cada tarefa é uma linha inteira tocável que abre Tarefas da equipe.",
+    "concept": "Uma tela de triagem para o celular: a primeira coisa que o gestor lê é uma frase (quantas tarefas estão atrasadas e quantas vencem hoje), logo abaixo vem a fila das tarefas que pedem ação, com a pior primeiro, e só depois uma faixa discreta com os totais da equipe. Cada linha da fila é um toque que leva a Tarefas da equipe para trocar o responsável ou cancelar.",
     "views": [],
-    "decisions": "Segui a seção 'On mobile' do template, que vence as seções do defs: o organismo tarefasParaAcao (prioridade 'main') vem ANTES de destaquesEquipe (prioridade 'primary'), porque agregados acima das filas são proibidos no celular. A manchete usa só os totais prontos do backend (totalAtrasadas, totalVenceHoje), sem somar nada. Há uma única fila na ordem em que o backend entrega (atrasadas primeiro); o fato decisivo de cada linha (Atrasada / Vence hoje + prazo) vem dos flags readonly da linha e é o único lugar com cor de alarme. Como a página não guarda estado, não há 'ver todas' expansível: a fila mostra o que foi carregado e um botão 'Carregar mais' chama a próxima página. A faixa de saúde é uma lista de pares valor+rótulo sem cartões; o progresso das checklists aparece como texto 'feitos/total' porque a barra exigiria calcular um percentual. As tarefas por lista ficam num bloco recolhido (details) com o gráfico de barras, rebaixado ao fim. Sem cena: é uma só vista. Estados: esqueleto na fila, erro por região com 'Tentar de novo', estado de boas notícias calmo quando pageStatus é 'empty', e aviso em palavras quando falta escolher uma tarefa (client.preconditionMissing). Linhas e botões com no mínimo 44px. Correção: as tags das moléculas levam o sufixo do projeto (-102040) e os elementos filhos (Column, Point) são fechados explicitamente."
+    "decisions": "Página de uma só vista, sem host de cenas. O template mobile vence o texto das definições: as definições pedem os totais primeiro, mas o template proíbe agregados e gráficos acima da fila. Por isso a ordem é manchete, fila, faixa de saúde, e por último as tarefas abertas por lista, recolhidas. A manchete usa só os totais prontos do backend (atrasadas e vencem hoje) e não calcula nada. Quando a lista de tarefas chega vazia, a manchete vira a frase de boas notícias 'Nada precisa de atenção agora' e a faixa continua visível. A fila é um único vertical-record-list, porque o backend já entrega atrasadas primeiro e a página não filtra por faixa. Cada linha tem identidade à esquerda (título, responsável, lista) e o fato decisivo à direita, sem truncar: prazo mais a marca 'Atrasada' ou 'Vence hoje'. Cor de alarme só aparece nessa marca. Mostro as primeiras 5 linhas e as demais ficam num details nativo ('Ver as demais tarefas'), que expande no lugar sem estado na página. 'Carregar mais' usa a paginação do shared e não aparece como campo. Toda a linha é o alvo de toque e chama abrirTarefasEquipe, sem botão duplicado. A faixa mostra abertas, vencem hoje e atrasadas como pares pequenos de valor e rótulo, mais o progresso das checklists numa barra fina. As tarefas por lista ficam no bar-chart dentro de um details recolhido. Carregamento mostra esqueletos, e cada região trata o próprio erro com nova tentativa. Se a página abriu sem o que precisa (client.preconditionMissing), diz isso em palavras."
   },
   "advisories": [
     {
@@ -25,26 +25,6 @@
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
       "message": "Organism destaquesEquipe (Totais de tarefas abertas, das que vencem hoje e das atrasadas) renders neither <groupviewmetric--ml-metric-big-number> nor <groupviewmetric--ml-metric-card>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism destaquesEquipe (Progresso das checklists) renders neither <groupshowprogress--ml-linear-progress>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <grouptriggeraction--ml-button-standard-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupviewdata--ml-vertical-record-list-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE",
-      "message": "[contract] Molecule <groupviewchart--ml-bar-chart-102040> is not in this page's list."
-    },
-    {
-      "code": "M4_PAGE_I18N",
-      "message": "[contract] Never as const on a catalogue."
     }
   ]
 }
