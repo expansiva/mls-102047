@@ -268,7 +268,7 @@ const items = this.tarefas?.items ?? [];
 const idx = items.findIndex((t) => t.id === this.selectedTarefa);
 const carregando = this.pageStatus === 'loading' || this.qryMinhasTarefasStatus === 'loading';
 return html`<section data-organism-id="listaTarefas" class="${CARD} min-w-0 p-4" aria-busy=${carregando ? 'true' : 'false'}>
-<groupnavigatesection--ml-navigate-pills-102040
+<groupnavigatesection--ml-navigate-pills
 .value=${this.filtro ?? 'todas'}
 @change=${(e: Event) => {
 const v = valorDe(e);
@@ -276,7 +276,7 @@ if (typeof v === 'string') this.qryMinhasTarefas(v === 'todas' ? null : (v as Ta
 }}
 >
 ${FILTROS.map((f) => html`<Tab value=${f.value} title=${this.msg[f.key]}></Tab>`)}
-</groupnavigatesection--ml-navigate-pills-102040>
+</groupnavigatesection--ml-navigate-pills>
 ${this.qryMinhasTarefasStatus === 'error'
 ? html`<div class="my-3 flex items-center gap-3" role="alert">
 <p class="text-sm font-medium text-[var(--text-strong,currentColor)]">${this.msg.erroLista}</p>
@@ -284,7 +284,7 @@ ${this.botao(this.msg.tentarNovamente, 'secondary', false, () => this.qryMinhasT
 </div>`
 : nothing}
 <div class="mt-3">
-<groupviewtable--ml-data-table-102040
+<groupviewtable--ml-data-table
 .value=${idx >= 0 ? String(idx) : ''}
 .loading=${carregando}
 @rowClick=${(e: CustomEvent<{ index: number }>) => {
@@ -313,7 +313,7 @@ ${this.pageStatus === 'empty' ? this.msg.emptyTodas : this.msg.emptyFiltro}
 <Loading>
 <p class="py-8 text-center text-sm text-[var(--text-muted,currentColor)]">${this.msg.carregando}</p>
 </Loading>
-</groupviewtable--ml-data-table-102040>
+</groupviewtable--ml-data-table>
 </div>
 ${this.tarefas?.hasMore
 ? html`<div class="mt-3 flex justify-center">
@@ -406,12 +406,12 @@ return html`
 ${this.botao(this.msg.editarTarefa, 'secondary', false, () => this.setScenario('editar'))}
 </div>
 ${t.details.motivoDevolucao
-? html`<groupnotifyuser--ml-contextual-feedback-102040 type="warning" .visible=${true} .dismissible=${false}>
+? html`<groupnotifyuser--ml-contextual-feedback type="warning" .visible=${true} .dismissible=${false}>
 <Title>${this.msg.motivoDevolucao}</Title>
 <Message>
 ${t.details.motivoDevolucao}${t.details.devolvidaEm ? html` (${this.msg.devolvidaEm} ${fmtDataHora(t.details.devolvidaEm)})` : nothing}
 </Message>
-</groupnotifyuser--ml-contextual-feedback-102040>`
+</groupnotifyuser--ml-contextual-feedback>`
 : nothing}
 <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
 <div>
@@ -457,10 +457,10 @@ ${t.checklist.length === 0
 : html`<ul class="space-y-1">
 ${t.checklist.map(
 (i) => html`<li>
-<groupenterboolean--ml-checkbox-preference-102040 .value=${i.feito} .disabled=${true}>
+<groupenterboolean--ml-checkbox-preference .value=${i.feito} .disabled=${true}>
 <Label>${i.details.descricao}</Label>
 ${i.feito && i.details.marcadoEm ? html`<Helper>${this.msg.marcadoEm} ${fmtDataHora(i.details.marcadoEm)}</Helper>` : nothing}
-</groupenterboolean--ml-checkbox-preference-102040>
+</groupenterboolean--ml-checkbox-preference>
 </li>`,
 )}
 </ul>`}
@@ -501,7 +501,7 @@ ${podeRevisar ? this.botao(this.msg.aceitar, 'primary', this.cmdAceitarStatus ==
 </div>
 ${podeRevisar
 ? html`<div class="space-y-2">
-<groupentertext--ml-multiline-text-102040
+<groupentertext--ml-multiline-text
 .rows=${3}
 .value=${motivo}
 placeholder=${this.msg.motivoPlaceholder}
@@ -516,7 +516,7 @@ if (typeof v === 'string') this.setCmdDevolverDraft({ details: { motivoDevolucao
 >
 <Label>${this.msg.motivoLabel}</Label>
 <Helper>${this.msg.motivoHelper}</Helper>
-</groupentertext--ml-multiline-text-102040>
+</groupentertext--ml-multiline-text>
 ${this.botao(this.msg.devolver, 'secondary', this.cmdDevolverStatus === 'loading', () => this.cmdDevolver(), !motivo.trim())}
 </div>`
 : nothing}
@@ -552,7 +552,7 @@ if (t.details.concluidaEm) eventos.push({ quando: t.details.concluidaEm, texto: 
 if (t.details.canceladaEm) eventos.push({ quando: t.details.canceladaEm, texto: this.msg.evCancelada });
 return html`<section class="border-t border-[var(--border-subtle,currentColor)] pt-4">
 <h4 class="mb-2 text-sm font-semibold text-[var(--text-strong,currentColor)]">${this.msg.historico}</h4>
-<groupviewdata--ml-timeline-view-102040>
+<groupviewdata--ml-timeline-view>
 <Columns>
 <Column field="quando" header=${this.msg.colQuando} width="140px"></Column>
 <Column field="evento" header=${this.msg.colEvento}></Column>
@@ -565,7 +565,7 @@ ${eventos.map(
 </Row>`,
 )}
 </Rows>
-</groupviewdata--ml-timeline-view-102040>
+</groupviewdata--ml-timeline-view>
 </section>`;
 }
 // ---------- forms ----------
@@ -635,7 +635,7 @@ const membros: Opc[] = this.membros.map((m) => ({ id: m.id, nome: m.details.iden
 if (membroAtual && !membros.some((m) => m.id === membroAtual.id)) membros.unshift(membroAtual);
 const prazoMin = d.prazo ?? null;
 return html`
-<groupselectone--ml-select-one-autocomplete-102040
+<groupselectone--ml-select-one-autocomplete
 .value=${d.listaId ?? null}
 placeholder=${this.msg.phLista}
 .loading=${this.qryListasAtivasStatus === 'loading'}
@@ -647,8 +647,8 @@ if (v !== undefined) onPatch({ listaId: v });
 <Label>${this.msg.fieldLista}</Label>
 ${listas.map((l) => html`<Item value=${l.id}>${l.nome}</Item>`)}
 <Empty>${this.msg.emptyListas}</Empty>
-</groupselectone--ml-select-one-autocomplete-102040>
-<groupentertext--ml-enter-text-102040
+</groupselectone--ml-select-one-autocomplete>
+<groupentertext--ml-enter-text
 .value=${d.titulo ?? ''}
 @input=${(e: Event) => {
 const v = valorDe(e);
@@ -660,8 +660,8 @@ if (typeof v === 'string') onPatch({ titulo: v });
 }}
 >
 <Label>${this.msg.fieldTitulo}</Label>
-</groupentertext--ml-enter-text-102040>
-<groupentertext--ml-multiline-text-102040
+</groupentertext--ml-enter-text>
+<groupentertext--ml-multiline-text
 .rows=${4}
 .value=${d.details.descricao ?? ''}
 @input=${(e: Event) => {
@@ -674,9 +674,9 @@ if (typeof v === 'string') onPatch({ details: { descricao: v } });
 }}
 >
 <Label>${this.msg.fieldDescricao}</Label>
-</groupentertext--ml-multiline-text-102040>
+</groupentertext--ml-multiline-text>
 <div class="grid grid-cols-2 gap-4">
-<groupselectone--ml-segmented-control-102040
+<groupselectone--ml-segmented-control
 .value=${d.prioridade ?? null}
 @change=${(e: Event) => {
 const v = valorDe(e);
@@ -687,8 +687,8 @@ if (v !== undefined) onPatch({ prioridade: v as Campos['prioridade'] });
 <Item value="low">${this.msg.prio_low}</Item>
 <Item value="medium">${this.msg.prio_medium}</Item>
 <Item value="high">${this.msg.prio_high}</Item>
-</groupselectone--ml-segmented-control-102040>
-<groupenterdate--ml-date-picker-102040
+</groupselectone--ml-segmented-control>
+<groupenterdate--ml-date-picker
 .value=${prazoMin}
 locale=${document.documentElement.lang || 'pt-BR'}
 placeholder=${this.msg.phPrazo}
@@ -698,9 +698,9 @@ if (v !== undefined) onPatch({ prazo: v });
 }}
 >
 <Label>${this.msg.fieldPrazo}</Label>
-</groupenterdate--ml-date-picker-102040>
+</groupenterdate--ml-date-picker>
 </div>
-<groupselectone--ml-combobox-102040
+<groupselectone--ml-combobox
 .value=${d.responsavelId ?? null}
 placeholder=${this.msg.phResponsavel}
 .loading=${this.qryBuscarMembrosStatus === 'loading'}
@@ -717,7 +717,7 @@ if (v !== undefined) onPatch({ responsavelId: v });
 <Helper>${this.msg.helperResponsavel}</Helper>
 ${membros.map((m) => html`<Item value=${m.id}>${m.nome}</Item>`)}
 <Empty>${this.msg.emptyMembros}</Empty>
-</groupselectone--ml-combobox-102040>
+</groupselectone--ml-combobox>
 `;
 }
 private renderChecklistEditor(itens: ItemChecklistDraft[], onChange: (i: ItemChecklistDraft[]) => void, comMarcar: boolean) {
@@ -732,7 +732,7 @@ if (typeof v === 'string') onChange(itens.map((x, j) => (j === i ? { ...x, detai
 };
 return html`<li class="flex items-center gap-2">
 ${comMarcar
-? html`<groupenterboolean--ml-checkbox-preference-102040
+? html`<groupenterboolean--ml-checkbox-preference
 .value=${it.feito === true}
 @change=${(e: Event) => {
 const v = boolDe(e);
@@ -740,10 +740,10 @@ if (v !== undefined) onChange(itens.map((x, j) => (j === i ? { ...x, feito: v } 
 }}
 >
 <Label>${this.msg.feito}</Label>
-</groupenterboolean--ml-checkbox-preference-102040>`
+</groupenterboolean--ml-checkbox-preference>`
 : nothing}
 <div class="min-w-0 flex-1">
-<groupentertext--ml-enter-text-102040 .value=${it.details.descricao ?? ''} placeholder=${this.msg.itemDescricao} @input=${editar} @change=${editar}></groupentertext--ml-enter-text-102040>
+<groupentertext--ml-enter-text .value=${it.details.descricao ?? ''} placeholder=${this.msg.itemDescricao} @input=${editar} @change=${editar}></groupentertext--ml-enter-text>
 </div>
 <button type="button" class=${miniBtn} aria-label=${this.msg.subir} ?disabled=${i === 0} @click=${() => onChange(mover(itens, i, -1))}>↑</button>
 <button type="button" class=${miniBtn} aria-label=${this.msg.descer} ?disabled=${i === itens.length - 1} @click=${() => onChange(mover(itens, i, 1))}>↓</button>

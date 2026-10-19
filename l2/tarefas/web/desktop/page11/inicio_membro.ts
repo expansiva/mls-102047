@@ -105,8 +105,8 @@ return this.iniciarTarefaStatus === 'loading'
 || this.devolverComMotivoStatus === 'loading';
 }
 private act(label: string, variant: string, handler: () => void, disabled = false) {
-return html`<grouptriggeraction--ml-button-standard-102040 size="sm" data-variant=${variant}
-?disabled=${disabled || this.busy()} @action=${handler}><Label>${label}</Label></grouptriggeraction--ml-button-standard-102040>`;
+return html`<grouptriggeraction--ml-button-standard size="sm" data-variant=${variant}
+?disabled=${disabled || this.busy()} @action=${handler}><Label>${label}</Label></grouptriggeraction--ml-button-standard>`;
 }
 private renderFeedback() {
 const errors: Array<{ message: string } | null> = [
@@ -250,7 +250,7 @@ ${r.tarefas && r.tarefas.length > 0
 ? html`<ul class="border-t border-[var(--border-subtle,currentColor)]">${r.tarefas.map(t => this.renderResumoTarefa(t))}</ul>`
 : html`<p class="px-4 py-3 text-sm text-[var(--text-muted,currentColor)]">${this.msg.destaquesVazio}</p>`}
 <div class="px-4 py-3 border-t border-[var(--border-subtle,currentColor)]">
-<grouptriggeraction--ml-button-standard-102040 size="sm" data-variant="link" @action=${() => this.abrirMinhasTarefas()}><Label>${this.msg.verTodas}</Label></grouptriggeraction--ml-button-standard-102040>
+<grouptriggeraction--ml-button-standard size="sm" data-variant="link" @action=${() => this.abrirMinhasTarefas()}><Label>${this.msg.verTodas}</Label></grouptriggeraction--ml-button-standard>
 </div>
 </details>`;
 }
@@ -276,8 +276,8 @@ return html`<div class="min-h-full p-8 bg-[var(--page-bg,transparent)] text-[var
 <div class="mx-auto max-w-6xl flex flex-col gap-6">
 <header class="flex items-center justify-between gap-4">
 <h1 class="text-2xl font-semibold text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
-<grouptriggeraction--ml-button-standard-102040 size="sm" data-variant="ghost" ?loading=${loading} ?disabled=${loading}
-@action=${() => { void this.carregarInicio(); }}><Label>${this.msg.refresh}</Label></grouptriggeraction--ml-button-standard-102040>
+<grouptriggeraction--ml-button-standard size="sm" data-variant="ghost" ?loading=${loading} ?disabled=${loading}
+@action=${() => { void this.carregarInicio(); }}><Label>${this.msg.refresh}</Label></grouptriggeraction--ml-button-standard>
 </header>
 ${this.renderFeedback()}
 <div class="grid grid-cols-[minmax(0,1fr)_20rem] gap-8 items-start">

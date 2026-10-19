@@ -128,7 +128,7 @@ private renderToolbar() {
 return html`
 <div class="flex items-end gap-3">
 <div class="flex-1 max-w-md">
-<groupsearchcontent--ml-search-bar-102040
+<groupsearchcontent--ml-search-bar
 .value=${this.busca}
 placeholder=${this.msg['buscaPlaceholder']}
 ?loading=${this.buscarListasStatus === 'loading'}
@@ -136,11 +136,11 @@ placeholder=${this.msg['buscaPlaceholder']}
 @clear=${() => this.buscarListas('')}
 >
 <Label>${this.msg['buscaLabel']}</Label>
-</groupsearchcontent--ml-search-bar-102040>
+</groupsearchcontent--ml-search-bar>
 </div>
-<grouptriggeraction--ml-button-standard-102040 size="md" @action=${() => this.abrirNova()}>
+<grouptriggeraction--ml-button-standard size="md" @action=${() => this.abrirNova()}>
 <Label>${this.msg['novaLista']}</Label>
-</grouptriggeraction--ml-button-standard-102040>
+</grouptriggeraction--ml-button-standard>
 </div>
 `;
 }
@@ -155,12 +155,12 @@ return html`
 <div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 flex flex-col items-start gap-3" aria-live="polite">
 <p class="text-sm text-[var(--text-default,currentColor)]">${faltaContexto ? this.msg['faltaContexto'] : this.msg['erroCarga']}</p>
 ${faltaContexto
-? html`<grouptriggeraction--ml-button-standard-102040 data-variant="secondary" size="md" @action=${() => window.history.back()}>
+? html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => window.history.back()}>
 <Label>${this.msg['voltar']}</Label>
-</grouptriggeraction--ml-button-standard-102040>`
-: html`<grouptriggeraction--ml-button-standard-102040 data-variant="secondary" size="md" @action=${() => this.listarListas()}>
+</grouptriggeraction--ml-button-standard>`
+: html`<grouptriggeraction--ml-button-standard data-variant="secondary" size="md" @action=${() => this.listarListas()}>
 <Label>${this.msg['tentarNovamente']}</Label>
-</grouptriggeraction--ml-button-standard-102040>`}
+</grouptriggeraction--ml-button-standard>`}
 </div>
 `;
 }
@@ -171,7 +171,7 @@ const idx = indexOfSelected(this.listas, this.selectedLista);
 return html`
 ${this.pageStatus === 'error' ? this.renderLoadError() : nothing}
 <div class="rounded-lg border border-[var(--border-subtle,currentColor)] bg-[var(--surface-bg,transparent)] text-[var(--text-default,currentColor)]" aria-busy=${loading ? 'true' : 'false'}>
-<groupviewtable--ml-data-table-102040
+<groupviewtable--ml-data-table
 .value=${idx >= 0 ? String(idx) : ''}
 ?loading=${loading}
 @rowClick=${(e: CustomEvent<{ index: number }>) => this.abrirLista(e.detail.index)}
@@ -211,7 +211,7 @@ class=${l.ativa
 </TableBody>
 <Loading>${this.msg['carregando']}</Loading>
 <Empty>${this.busca ? this.msg['vazioBusca'] : this.msg['vazioGeral']}</Empty>
-</groupviewtable--ml-data-table-102040>
+</groupviewtable--ml-data-table>
 </div>
 `;
 }
@@ -256,19 +256,19 @@ class="mt-1 h-4 w-4 focus-visible:outline-none focus-visible:ring-2 focus-visibl
 private renderErro(err: { message: string } | null, titulo: string) {
 return html`
 <div aria-live="polite">
-<groupnotifyuser--ml-contextual-feedback-102040 type="error" .visible=${!!err} .dismissible=${false}>
+<groupnotifyuser--ml-contextual-feedback type="error" .visible=${!!err} .dismissible=${false}>
 <Title>${titulo}</Title>
 <Message>${err ? err.message : ''}</Message>
-</groupnotifyuser--ml-contextual-feedback-102040>
+</groupnotifyuser--ml-contextual-feedback>
 </div>
 `;
 }
 private renderFechar() {
 return html`
 <div class="flex justify-end">
-<grouptriggeraction--ml-button-standard-102040 data-variant="ghost" size="sm" @action=${() => this.fechar()}>
+<grouptriggeraction--ml-button-standard data-variant="ghost" size="sm" @action=${() => this.fechar()}>
 <Label>${this.msg['fechar']}</Label>
-</grouptriggeraction--ml-button-standard-102040>
+</grouptriggeraction--ml-button-standard>
 </div>
 `;
 }
@@ -278,7 +278,7 @@ const loading = this.criarListaStatus === 'loading';
 return html`
 <div class="flex flex-col gap-4 p-4">
 ${this.renderFechar()}
-<groupentertext--ml-enter-text-102040
+<groupentertext--ml-enter-text
 .value=${d.nome ?? ''}
 placeholder=${this.msg['campoNomePlaceholder']}
 maxLength="120"
@@ -290,7 +290,7 @@ if (v !== null) this.setCriarListaDraft({ ...this.criarListaDraft, nome: v });
 >
 <Label>${this.msg['campoNome']}</Label>
 <Helper>${this.msg['campoNomeAjuda']}</Helper>
-</groupentertext--ml-enter-text-102040>
+</groupentertext--ml-enter-text>
 ${this.renderCamposTipoAtiva(
 d.details.tipo,
 d.ativa,
@@ -298,7 +298,7 @@ d.ativa,
 (a) => this.setCriarListaDraft({ ...this.criarListaDraft, ativa: a }),
 'criar'
 )}
-<groupentertext--ml-multiline-text-102040
+<groupentertext--ml-multiline-text
 .value=${d.details.descricao ?? ''}
 rows="4"
 maxLength="500"
@@ -309,9 +309,9 @@ if (v !== null) this.setCriarListaDraft({ ...this.criarListaDraft, details: { ..
 >
 <Label>${this.msg['campoDescricao']}</Label>
 <Helper>${this.msg['campoDescricaoAjuda']}</Helper>
-</groupentertext--ml-multiline-text-102040>
+</groupentertext--ml-multiline-text>
 ${this.renderErro(this.criarListaError, this.msg['erroCriar'])}
-<grouptriggeraction--ml-button-standard-102040
+<grouptriggeraction--ml-button-standard
 size="md"
 ?disabled=${!criarPronto(d)}
 ?loading=${loading}
@@ -321,7 +321,7 @@ if (this.criarListaStatus === 'success') this.setScenario('fechado');
 })}
 >
 <Label>${this.msg['cadastrar']}</Label>
-</grouptriggeraction--ml-button-standard-102040>
+</grouptriggeraction--ml-button-standard>
 </div>
 `;
 }
@@ -338,7 +338,7 @@ ${this.renderFechar()}
 <dt class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['abertasInfo']}</dt>
 <dd class="text-lg font-semibold tabular-nums text-[var(--text-strong,currentColor)]">${nf.format(row.details.quantidadeTarefasAbertas)}</dd>
 </dl>
-<groupentertext--ml-enter-text-102040
+<groupentertext--ml-enter-text
 .value=${d.nome ?? ''}
 maxLength="120"
 required
@@ -349,7 +349,7 @@ if (v !== null) this.setSalvarListaDraft({ ...this.salvarListaDraft, nome: v });
 >
 <Label>${this.msg['campoNome']}</Label>
 <Helper>${this.msg['campoNomeAjuda']}</Helper>
-</groupentertext--ml-enter-text-102040>
+</groupentertext--ml-enter-text>
 ${this.renderCamposTipoAtiva(
 d.details.tipo,
 d.ativa,
@@ -357,7 +357,7 @@ d.ativa,
 (a) => this.setSalvarListaDraft({ ...this.salvarListaDraft, ativa: a }),
 'editar'
 )}
-<groupentertext--ml-multiline-text-102040
+<groupentertext--ml-multiline-text
 .value=${d.details.descricao ?? ''}
 rows="4"
 maxLength="500"
@@ -368,9 +368,9 @@ if (v !== null) this.setSalvarListaDraft({ ...this.salvarListaDraft, details: { 
 >
 <Label>${this.msg['campoDescricao']}</Label>
 <Helper>${this.msg['campoDescricaoAjuda']}</Helper>
-</groupentertext--ml-multiline-text-102040>
+</groupentertext--ml-multiline-text>
 ${this.renderErro(this.salvarListaError, this.msg['erroSalvar'])}
-<grouptriggeraction--ml-button-standard-102040
+<grouptriggeraction--ml-button-standard
 size="md"
 ?disabled=${!salvarPronto(d) || !salvarMudou(d, row)}
 ?loading=${loading}
@@ -383,7 +383,7 @@ this.setScenario('fechado');
 })}
 >
 <Label>${this.msg['salvar']}</Label>
-</grouptriggeraction--ml-button-standard-102040>
+</grouptriggeraction--ml-button-standard>
 </div>
 `;
 }
@@ -411,9 +411,9 @@ private renderToast() {
 const criada = this.criarListaStatus === 'success';
 const salva = this.salvarListaStatus === 'success';
 return html`
-<groupnotifyuser--ml-toast-notification-102040 type="success" position="top-right" .visible=${criada || salva} .duration=${3500}>
+<groupnotifyuser--ml-toast-notification type="success" position="top-right" .visible=${criada || salva} .duration=${3500}>
 <Message>${criada ? this.msg['toastCriada'] : this.msg['toastSalva']}</Message>
-</groupnotifyuser--ml-toast-notification-102040>
+</groupnotifyuser--ml-toast-notification>
 `;
 }
 render() {

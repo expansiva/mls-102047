@@ -146,9 +146,9 @@ const text = err.code === 'client.preconditionMissing'
 return html`
 <div role="alert" aria-live="polite" class="flex items-center justify-between gap-4 rounded-md border border-[var(--border-default,currentColor)] bg-[var(--status-error-bg,transparent)] px-4 py-3 text-sm text-[var(--status-error-text,currentColor)]">
 <span>${text}</span>
-<molecules--grouptriggeraction--ml-button-standard-102040 size="sm" data-variant="secondary" @action=${() => this.listarTarefasParaAcao()}>
+<molecules--grouptriggeraction--ml-button-standard size="sm" data-variant="secondary" @action=${() => this.listarTarefasParaAcao()}>
 <Label>${this.msg['reloadQueue']}</Label>
-</molecules--grouptriggeraction--ml-button-standard-102040>
+</molecules--grouptriggeraction--ml-button-standard>
 </div>`;
 }
 private renderTarefasParaAcao() {
@@ -166,7 +166,7 @@ ${this.renderErrorNote()}
 ${failedNoData && !this.listarTarefasParaAcaoError ? nothing : nothing}
 ${showList ? html`
 <div class="rounded-lg border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] overflow-hidden">
-<molecules--groupviewdata--ml-vertical-record-list-102040
+<molecules--groupviewdata--ml-vertical-record-list
 .hoverable=${true}
 .loading=${loading}
 @row-click=${(e: CustomEvent<{ index: number }>) => {
@@ -205,17 +205,17 @@ ${items.map(t => html`
 <Empty>
 <div class="py-8 text-center text-[var(--text-muted,currentColor)]">${this.msg['queueEmpty']}</div>
 </Empty>
-</molecules--groupviewdata--ml-vertical-record-list-102040>
+</molecules--groupviewdata--ml-vertical-record-list>
 </div>
 ${hasMore ? html`
 <div class="flex justify-center">
-<molecules--grouptriggeraction--ml-button-standard-102040
+<molecules--grouptriggeraction--ml-button-standard
 size="md"
 data-variant="secondary"
 ?loading=${this.listarTarefasParaAcaoStatus === 'loading'}
 @action=${() => this.listarTarefasParaAcao(page + 1, true)}>
 <Label>${this.msg['loadMore']}</Label>
-</molecules--grouptriggeraction--ml-button-standard-102040>
+</molecules--grouptriggeraction--ml-button-standard>
 </div>` : nothing}
 ` : nothing}
 </section>
@@ -235,9 +235,9 @@ if (status === 'error') {
 body = html`
 <div role="alert" aria-live="polite" class="flex items-center justify-between gap-4 text-sm text-[var(--status-error-text,currentColor)]">
 <span>${this.msg['panoramaErrorTitle']}</span>
-<molecules--grouptriggeraction--ml-button-standard-102040 size="sm" data-variant="secondary" @action=${() => this.obterPanoramaEquipe()}>
+<molecules--grouptriggeraction--ml-button-standard size="sm" data-variant="secondary" @action=${() => this.obterPanoramaEquipe()}>
 <Label>${this.msg['retry']}</Label>
-</molecules--grouptriggeraction--ml-button-standard-102040>
+</molecules--grouptriggeraction--ml-button-standard>
 </div>`;
 } else if (status !== 'success') {
 body = html`<p class="text-sm text-[var(--text-muted,currentColor)]">${this.msg['stripLoading']}</p>`;
