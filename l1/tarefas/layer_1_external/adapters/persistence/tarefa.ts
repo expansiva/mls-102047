@@ -56,10 +56,6 @@ export const tableDefinition = {
       "nullable": true
     },
     {
-      "name": "chaveCriacao",
-      "postgresType": "TEXT"
-    },
-    {
       "name": "criadaEm",
       "postgresType": "TIMESTAMPTZ",
       "nullable": true
@@ -74,13 +70,6 @@ export const tableDefinition = {
     "id"
   ],
   "indexes": [
-    {
-      "name": "tarefas_tarefa_chaveCriacao",
-      "columns": [
-        "chaveCriacao"
-      ],
-      "unique": true
-    },
     {
       "name": "tarefas_tarefa_titulo",
       "columns": [
@@ -147,11 +136,6 @@ export const migrationPlan = {
       "op": "createTable",
       "tableName": "tarefas_tarefa",
       "name": "tarefas_tarefa"
-    },
-    {
-      "op": "createIndex",
-      "tableName": "tarefas_tarefa",
-      "name": "tarefas_tarefa_chaveCriacao"
     },
     {
       "op": "createIndex",

@@ -13,31 +13,27 @@ export const definition = {
     "mapId": "authorityMap",
     "entries": [
       {
-        "grantId": "gestorAvisosProprios",
-        "actorRef": "gestor"
-      },
-      {
         "grantId": "gestorListas",
         "actorRef": "gestor"
       },
       {
-        "grantId": "gestorMembros",
+        "grantId": "gestorParticipantes",
         "actorRef": "gestor"
       },
       {
-        "grantId": "gestorTarefasEquipe",
+        "grantId": "gestorTodasTarefas",
         "actorRef": "gestor"
       },
       {
-        "grantId": "membroAvisosProprios",
+        "grantId": "membroChecklistPropria",
         "actorRef": "membroEquipe"
       },
       {
-        "grantId": "membroConsultaListas",
+        "grantId": "membroConsultarListas",
         "actorRef": "membroEquipe"
       },
       {
-        "grantId": "membroEscolheResponsavel",
+        "grantId": "membroEscolherResponsavel",
         "actorRef": "membroEquipe"
       },
       {

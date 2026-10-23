@@ -4,40 +4,60 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "mobile",
-  "contextHash": "sha256:c7148f5246a6736c5e169e945469dab82ead5ec303797fd256309f5ed4497844",
+  "contextHash": "sha256:a576400969560cf14cab974ddd67411953dd393053d937c60fa724eeeae0f6bd",
   "sourcePath": "l2/tarefas/web/mobile/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:e7b4bd4b12c945369e7e5f57bb3eea6ed2a6de9dd8d0e6801039fe78d0dcb84d",
-  "attempt": 1,
+  "sourceHash": "sha256:68a956d3943c8605a1bf3db29dcce05f2bbf10f9bd86d668069ebf1aae0c142f",
+  "attempt": 2,
   "design": {
-    "concept": "Uma coluna única em dois passos: o quadro de tarefas da equipe (lista compacta em cartões, atalhos Atrasadas/Vencem hoje e filtros recolhíveis) e, ao tocar numa tarefa, a tela da tarefa com o resumo, as ações do gestor logo abaixo e o histórico por último. Voltar devolve ao quadro e limpa a seleção.",
+    "concept": "Uma mesa de acompanhamento móvel que começa na fila compacta de tarefas e abre a tarefa em uma cena própria, mantendo filtros e posição da fila intactos. O gestor confere os fatos essenciais primeiro e encontra reatribuição e cancelamento no fim da leitura, com retorno imediato à fila.",
     "views": [
       {
-        "id": "quadro",
-        "purpose": "Percorrer, filtrar e escolher uma tarefa da equipe; atrasadas e as que vencem hoje saltam à vista."
+        "id": "fila",
+        "purpose": "Fila inicial de tarefas filtradas, filtros de contexto e seleção de uma tarefa."
       },
       {
-        "id": "tarefa",
-        "purpose": "Ver a tarefa tocada em detalhe, trocar o responsável ou cancelar, e consultar o histórico ao final."
+        "id": "quadro",
+        "purpose": "Leitura alternativa da mesma fila, enfatizando as quantidades por situação já entregues pelo serviço."
+      },
+      {
+        "id": "detalhe",
+        "purpose": "Leitura vertical da tarefa aberta, checklist, ações contextualizadas e histórico."
       }
     ],
-    "decisions": "Usei o host de cenas em mode=scenary com duas cenas; a cena da tarefa segue a seleção (default pelo selectedTarefa, para recarregar com o id na URL) e voltar chama obterTarefa(null). A lista usa ml-responsive-table (alternativa) porque vira cartões em tela estreita, sem rolagem horizontal. Filtros ficam em <details> nativo (recolhido, sem estado na página) e os dois sinais mais úteis (atrasadas, vencem hoje) viram chips de alternância sempre à mão. A cor de alarme é só da data atrasada; vence hoje é uma etiqueta de aviso. Reatribuir: autocomplete com membros não ativos desabilitados (sem filtrar na página); cancelar é o único botão de perigo, atrás de um alert-modal que cita a tarefa (aberto direto no elemento, sem estado). Retorno de sucesso por toast; falhas aparecem acima dos botões, com nova tentativa pelo próprio botão. Tarefa encerrada mostra uma nota no lugar das ações. O histórico mostra só os marcos que o contrato traz (criada, devolvida, concluída, cancelada). Se a abertura falhar por falta de contexto (client.preconditionMissing), a página explica e oferece voltar à tela anterior. Não há campo de busca por título porque o shared não tem esse filtro."
+    "decisions": "Segui a adaptação mobile do template: a fila é a cena inicial e o detalhe é uma cena com voltar, em vez de painel ou sobreposição. A lista usa a tabela responsiva, que se transforma em registros no espaço estreito, e o quadro não recalcula agrupamentos no cliente: mostra as contagens por situação fornecidas e preserva os registros retornados. Filtros de lista, responsável e prazo ficam antes da fila; prioridade e situação usam campos nativos para refletir os filtros singulares do contrato. As ações só aparecem para tarefa aberta; cancelar pede confirmação nativa porque a página não pode manter estado local de modal. A cena padrão fica no .value do host de cenas; o seletor de visualização recebe a cena corrente por parâmetro de cada cena."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section quadroEquipe needs an element with data-section-id=\"quadroEquipe\"."
+      "message": "Section filaTarefas needs an element with data-section-id=\"filaTarefas\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section tarefaSelecionada needs an element with data-section-id=\"tarefaSelecionada\"."
+      "message": "Section tarefaAberta needs an element with data-section-id=\"tarefaAberta\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section historico needs an element with data-section-id=\"historico\"."
+      "message": "Section historicoTarefa needs an element with data-section-id=\"historicoTarefa\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasEquipe (Busca pelo título da tarefa) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
+      "message": "Organism tarefasEquipe (busca por título com filtros) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasEquipe (filtro por situação e prioridade) renders neither <groupselectmany--ml-popover-multi-select> nor <groupselectmany--ml-multi-select-dropdown>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaDetalhe (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaAcoes (confirmação do cancelamento) renders neither <groupnotifyuser--ml-alert-modal>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaAcoes (retorno da ação concluída) renders neither <groupnotifyuser--ml-toast-notification>."
     }
   ]
 }

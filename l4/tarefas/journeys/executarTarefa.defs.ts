@@ -7,25 +7,25 @@ export const executarTarefaJourney = {
   "journeyId": "executarTarefa",
   "business": {
     "actorRef": "membroEquipe",
-    "title": "Executar tarefa atribuída",
-    "goal": "Iniciar a tarefa atribuída e enviá-la para revisão do criador.",
+    "title": "Executar tarefa e enviar para revisão",
+    "goal": "Iniciar a tarefa de que é responsável e enviá-la para revisão de quem criou.",
     "entry": {
       "mode": "fromNotification"
     },
     "steps": [
       {
-        "stepId": "abrirMinhaTarefa",
+        "stepId": "abrirTarefa",
         "kind": "locate",
         "entity": "Tarefa",
-        "title": "Abrir minha tarefa",
-        "description": "O responsável abre a tarefa pelo aviso ou entre as tarefas atribuídas a ele."
+        "title": "Abrir tarefa avisada",
+        "description": "O responsável abre a tarefa a partir do aviso ou das suas tarefas."
       },
       {
         "stepId": "verTarefa",
         "kind": "inspect",
         "entity": "Tarefa",
         "title": "Ver detalhes da tarefa",
-        "description": "Consulta descrição, prazo, checklist, anexos e a discussão da tarefa."
+        "description": "O responsável lê descrição, prazo, checklist e a conversa da tarefa."
       },
       {
         "stepId": "iniciarTarefa",
@@ -33,16 +33,16 @@ export const executarTarefaJourney = {
         "entity": "Tarefa",
         "effect": "transition",
         "transitionRef": "iniciar",
-        "title": "Iniciar a tarefa",
-        "description": "Passa a tarefa de a fazer para em andamento; a sala de discussão recebe a mensagem da mudança."
+        "title": "Iniciar tarefa",
+        "description": "O responsável passa a tarefa de a fazer para em andamento."
       },
       {
-        "stepId": "marcarChecklist",
+        "stepId": "marcarItem",
         "kind": "act",
         "entity": "ItemChecklist",
         "effect": "update",
-        "title": "Marcar itens da checklist",
-        "description": "Marca como feitos os itens da checklist à medida que avança."
+        "title": "Marcar item da checklist",
+        "description": "O responsável marca os itens concluídos da checklist."
       },
       {
         "stepId": "enviarRevisao",
@@ -51,27 +51,18 @@ export const executarTarefaJourney = {
         "effect": "transition",
         "transitionRef": "enviarParaRevisao",
         "title": "Enviar para revisão",
-        "description": "Passa a tarefa para em revisão; a sala recebe a mensagem e o criador passa a ser quem age agora."
-      },
-      {
-        "stepId": "passarCriador",
-        "kind": "handoff",
-        "entity": "Tarefa",
-        "title": "Avisar o criador",
-        "description": "O criador da tarefa é avisado para revisá-la.",
-        "handoffTo": "membroEquipe"
+        "description": "O responsável envia a tarefa para revisão e quem criou passa a ser quem age agora e é avisado."
       }
     ],
     "outcome": {
-      "statement": "A tarefa está em revisão e o criador foi avisado.",
+      "statement": "A tarefa está em revisão aguardando quem criou.",
       "evidence": [
-        "Situação da tarefa em revisão",
-        "Mensagem da mudança na sala de discussão",
-        "Criador recebeu o aviso de revisão"
+        "A situação da tarefa mostra em revisão",
+        "Quem criou recebe o aviso e vê a tarefa no que depende dele agora"
       ]
     }
   },
-  "businessHash": "sha256:83c53f576e34e235ae60707f2b27873c1e773dce88a5b31b429c1142e033f996"
+  "businessHash": "sha256:bf9a413baf95b6d695a9f2b0b07f1841cf44081103c9e2f7f60f9a6f72019462"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type ExecutarTarefaJourneyType = typeof executarTarefaJourney;

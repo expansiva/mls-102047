@@ -28,13 +28,6 @@ export const definition = {
         "returns": "Tarefa[]"
       },
       {
-        "name": "get",
-        "params": [
-          "id"
-        ],
-        "returns": "Tarefa"
-      },
-      {
         "name": "update",
         "params": [
           "Tarefa"

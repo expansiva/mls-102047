@@ -7,6 +7,16 @@ export const tarefasJourneyIndex = {
   "moduleName": "tarefas",
   "journeys": [
     {
+      "journeyId": "configurarParticipantes",
+      "actorRef": "gestor",
+      "title": "Configurar participantes"
+    },
+    {
+      "journeyId": "manterListas",
+      "actorRef": "gestor",
+      "title": "Manter listas de tarefas"
+    },
+    {
       "journeyId": "criarTarefa",
       "actorRef": "membroEquipe",
       "title": "Criar tarefa"
@@ -14,57 +24,57 @@ export const tarefasJourneyIndex = {
     {
       "journeyId": "executarTarefa",
       "actorRef": "membroEquipe",
-      "title": "Executar tarefa atribuída"
+      "title": "Executar tarefa e enviar para revisão"
     },
     {
       "journeyId": "revisarTarefa",
       "actorRef": "membroEquipe",
-      "title": "Revisar tarefa criada"
+      "title": "Revisar tarefa"
     },
     {
-      "journeyId": "retomarTarefaDevolvida",
+      "journeyId": "retomarTarefa",
       "actorRef": "membroEquipe",
       "title": "Retomar tarefa devolvida"
     },
     {
       "journeyId": "editarTarefa",
       "actorRef": "membroEquipe",
-      "title": "Editar tarefa"
+      "title": "Editar campos da tarefa"
     },
     {
-      "journeyId": "cancelarTarefaCriador",
-      "actorRef": "membroEquipe",
-      "title": "Cancelar tarefa criada"
-    },
-    {
-      "journeyId": "reatribuirTarefaCriador",
-      "actorRef": "membroEquipe",
-      "title": "Reatribuir tarefa criada"
-    },
-    {
-      "journeyId": "avisoDiarioVencimentos",
-      "actorRef": "membroEquipe",
-      "title": "Consultar aviso diário"
-    },
-    {
-      "journeyId": "manterListas",
-      "actorRef": "gestor",
-      "title": "Manter listas"
-    },
-    {
-      "journeyId": "acompanharTarefasEquipe",
-      "actorRef": "gestor",
-      "title": "Acompanhar tarefas da equipe"
-    },
-    {
-      "journeyId": "reatribuirTarefaGestor",
+      "journeyId": "reatribuirTarefa",
       "actorRef": "gestor",
       "title": "Reatribuir tarefa"
     },
     {
-      "journeyId": "cancelarTarefaGestor",
+      "journeyId": "reatribuirTarefaCriada",
+      "actorRef": "membroEquipe",
+      "title": "Reatribuir tarefa que criei"
+    },
+    {
+      "journeyId": "cancelarTarefa",
       "actorRef": "gestor",
-      "title": "Cancelar tarefa da equipe"
+      "title": "Cancelar tarefa"
+    },
+    {
+      "journeyId": "cancelarTarefaCriada",
+      "actorRef": "membroEquipe",
+      "title": "Cancelar tarefa que criei"
+    },
+    {
+      "journeyId": "minhasTarefas",
+      "actorRef": "membroEquipe",
+      "title": "Ver minhas tarefas"
+    },
+    {
+      "journeyId": "resumoDiario",
+      "actorRef": "membroEquipe",
+      "title": "Receber resumo das 8h"
+    },
+    {
+      "journeyId": "acompanharTarefas",
+      "actorRef": "gestor",
+      "title": "Acompanhar todas as tarefas"
     }
   ],
   "systemDecisions": []

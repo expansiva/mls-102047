@@ -7,7 +7,7 @@ import type { ItemChecklistRepository, ItemChecklistFilter } from '/_102047_/l1/
 const REPOSITORY = "itemChecklist";
 const PRIMARY_KEY = ["id"] as const;
 const UNIQUE_KEYS: readonly (readonly string[])[] = [];
-const BINDINGS = [{"field":"id","column":"id","placement":"column"},{"field":"version","column":"json:version","placement":"json"},{"field":"tarefaId","column":"tarefaId","placement":"column"},{"field":"ordem","column":"ordem","placement":"column"},{"field":"feito","column":"feito","placement":"column"},{"field":"details.descricao","column":"json:details.descricao","placement":"json"},{"field":"details.marcadoEm","column":"json:details.marcadoEm","placement":"json"}] as const;
+const BINDINGS = [{"field":"id","column":"id","placement":"column"},{"field":"version","column":"json:version","placement":"json"},{"field":"tarefaId","column":"tarefaId","placement":"column"},{"field":"ordem","column":"ordem","placement":"column"},{"field":"details.descricao","column":"json:details.descricao","placement":"json"},{"field":"details.concluido","column":"json:details.concluido","placement":"json"},{"field":"details.concluidoEm","column":"json:details.concluidoEm","placement":"json"}] as const;
 const JSON_COLUMN = "details";
 const VERSION_FIELD = "version";
 
@@ -114,6 +114,14 @@ function withVersion(record: Row, current: unknown): Row {
 
 export function bind(runtime: IModuleDataRuntime): ItemChecklistRepository {
   return {
+    async create(record: ItemChecklist): Promise<ItemChecklist> {
+      const body = withVersion(record as unknown as Row, undefined);
+      const table = await runtime.getTable<Row>(REPOSITORY);
+      rejectDuplicate(await table.findMany(), body);
+      const row = toRow(body);
+      await table.insert({ record: row });
+      return fromRow(row) as unknown as ItemChecklist;
+    },
     async list(filter: ItemChecklistFilter): Promise<ItemChecklist[]> {
       const where: Row = {};
       for (const binding of BINDINGS) {
@@ -137,14 +145,6 @@ export function bind(runtime: IModuleDataRuntime): ItemChecklistRepository {
       rejectDuplicate(await table.findMany(), body);
       const row = toRow(body);
       await table.update({ where, patch: row });
-      return fromRow(row) as unknown as ItemChecklist;
-    },
-    async create(record: ItemChecklist): Promise<ItemChecklist> {
-      const body = withVersion(record as unknown as Row, undefined);
-      const table = await runtime.getTable<Row>(REPOSITORY);
-      rejectDuplicate(await table.findMany(), body);
-      const row = toRow(body);
-      await table.insert({ record: row });
       return fromRow(row) as unknown as ItemChecklist;
     },
   };

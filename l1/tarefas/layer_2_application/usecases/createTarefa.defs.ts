@@ -16,11 +16,16 @@ export const definition = {
     "entityId": "Tarefa",
     "operation": "create",
     "rulesApplied": [
-      "criacaoIdempotente",
+      "avisoNaoSobrepostoPorPessoa",
       "edicaoNaoMudaSituacao",
-      "reatribuicaoPorCriadorOuGestor",
-      "tarefaEncerradaNaoTransiciona",
-      "tarefaPaiNaoPodeSerElaMesma"
+      "escolhaResponsavelPeloNome",
+      "membroVeResponsavelOuCriador",
+      "podeCriarTarefasExigido",
+      "quemAgeAgoraPorSituacao",
+      "reatribuirApenasCriadorOuGestor",
+      "responsavelAceitaTarefas",
+      "resumoDiarioOitoHoras",
+      "tarefaPaiDiferenteDaPropria"
     ],
     "effects": []
   }

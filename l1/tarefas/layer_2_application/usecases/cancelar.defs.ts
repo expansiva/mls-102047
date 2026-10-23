@@ -18,7 +18,8 @@ export const definition = {
     "entityId": "Tarefa",
     "operation": "transition",
     "rulesApplied": [
-      "cancelamentoPorCriadorOuGestor"
+      "avisarQuemAgeAgora",
+      "cancelarApenasCriadorOuGestor"
     ],
     "effects": [
       {

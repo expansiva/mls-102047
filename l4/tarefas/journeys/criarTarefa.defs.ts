@@ -8,45 +8,37 @@ export const criarTarefaJourney = {
   "business": {
     "actorRef": "membroEquipe",
     "title": "Criar tarefa",
-    "goal": "Registrar uma nova tarefa e atribuí-la a um responsável.",
+    "goal": "Registrar uma tarefa com responsável, prazo e prioridade para que seja executada.",
     "entry": {
       "mode": "coldStart"
     },
     "steps": [
       {
-        "stepId": "localizarLista",
-        "kind": "locate",
-        "entity": "Lista",
-        "title": "Escolher a lista",
-        "description": "O membro escolhe a lista (projeto ou área) onde a tarefa ficará."
-      },
-      {
         "stepId": "preencherTarefa",
         "kind": "act",
         "entity": "Tarefa",
         "effect": "create",
-        "title": "Criar a tarefa",
-        "description": "Informa título, descrição, prioridade, prazo, responsável, tarefa pai opcional, checklist, etiquetas e anexos; reenviar após erro de rede não duplica a tarefa, e nascem a mensagem de origem e o acompanhamento com sua sala de discussão."
+        "title": "Nova tarefa",
+        "description": "O membro que pode criar tarefas informa título, descrição, prioridade, prazo, lista, tarefa pai opcional, etiquetas e escolhe o responsável pelo nome numa lista com busca entre quem aceita tarefas; o responsável é avisado."
       },
       {
-        "stepId": "avisarResponsavel",
-        "kind": "handoff",
-        "entity": "Tarefa",
-        "title": "Avisar o responsável",
-        "description": "O responsável é avisado de que recebeu a tarefa em situação a fazer.",
-        "handoffTo": "membroEquipe"
+        "stepId": "adicionarChecklist",
+        "kind": "act",
+        "entity": "ItemChecklist",
+        "effect": "create",
+        "title": "Adicionar itens da checklist",
+        "description": "O membro adiciona itens marcáveis à checklist da tarefa."
       }
     ],
     "outcome": {
       "statement": "A tarefa existe na situação a fazer e o responsável foi avisado.",
       "evidence": [
-        "Tarefa listada com situação a fazer na lista escolhida",
-        "Responsável recebeu o aviso da nova tarefa",
-        "Sala de discussão da tarefa aberta com a mensagem de origem"
+        "A tarefa aparece em a fazer nas tarefas criadas pelo membro",
+        "O responsável recebe o aviso da nova tarefa"
       ]
     }
   },
-  "businessHash": "sha256:7a84aba0e1e9c14142571af592a48ecce670e24ac166593b7f6747be522119cb"
+  "businessHash": "sha256:a48a45820c70b44c615adc0d80a9d2ee7ec1a85d963aa064d317380a2b2222bb"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type CriarTarefaJourneyType = typeof criarTarefaJourney;

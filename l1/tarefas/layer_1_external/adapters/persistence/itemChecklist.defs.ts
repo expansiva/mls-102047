@@ -31,13 +31,6 @@ export const definition = {
           "ordem"
         ],
         "unique": false
-      },
-      {
-        "name": "tarefas_itemchecklist_feito",
-        "columns": [
-          "feito"
-        ],
-        "unique": false
       }
     ]
   }

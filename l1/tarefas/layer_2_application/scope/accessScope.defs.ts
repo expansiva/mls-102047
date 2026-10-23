@@ -11,43 +11,17 @@ export const definition = {
     "scopeId": "accessScope",
     "grants": [
       {
-        "grantId": "gestorAvisosProprios",
-        "actorRef": "gestor",
-        "anchorEntity": "MembroEquipe",
-        "entityRefs": [
-          "AvisoVencimento"
-        ],
-        "disclosure": "fullRecord",
-        "scopeMode": "own",
-        "session": "verified",
-        "path": [
-          {
-            "entityId": "AvisoVencimento",
-            "steps": [
-              {
-                "relationshipId": "avisoResponsavel",
-                "from": "AvisoVencimento",
-                "to": "MembroEquipe",
-                "field": "AvisoVencimento.responsavelId"
-              }
-            ],
-            "pending": ""
-          }
-        ],
-        "pending": ""
-      },
-      {
         "grantId": "gestorListas",
         "actorRef": "gestor",
         "entityRefs": [
-          "Lista"
+          "ListaTarefas"
         ],
         "disclosure": "fullRecord",
         "scopeMode": "organization",
         "session": "verified",
         "path": [
           {
-            "entityId": "Lista",
+            "entityId": "ListaTarefas",
             "steps": [],
             "pending": ""
           }
@@ -55,25 +29,21 @@ export const definition = {
         "pending": ""
       },
       {
-        "grantId": "gestorMembros",
+        "grantId": "gestorParticipantes",
         "actorRef": "gestor",
         "entityRefs": [
-          "MembroEquipe"
+          "Participante"
         ],
         "disclosure": "fieldsOnly",
         "allowedFields": [
-          "MembroEquipe.id",
-          "MembroEquipe.version",
-          "MembroEquipe.details.identification",
-          "MembroEquipe.details.base",
-          "MembroEquipe.details.general",
-          "MembroEquipe.details.tarefas"
+          "Participante.details.identification",
+          "Participante.details.tarefas"
         ],
         "scopeMode": "organization",
         "session": "verified",
         "path": [
           {
-            "entityId": "MembroEquipe",
+            "entityId": "Participante",
             "steps": [],
             "pending": ""
           }
@@ -81,7 +51,7 @@ export const definition = {
         "pending": ""
       },
       {
-        "grantId": "gestorTarefasEquipe",
+        "grantId": "gestorTodasTarefas",
         "actorRef": "gestor",
         "entityRefs": [
           "Tarefa",
@@ -105,49 +75,36 @@ export const definition = {
         "pending": ""
       },
       {
-        "grantId": "membroAvisosProprios",
+        "grantId": "membroChecklistPropria",
         "actorRef": "membroEquipe",
-        "anchorEntity": "MembroEquipe",
+        "anchorEntity": "Participante",
         "entityRefs": [
-          "AvisoVencimento"
+          "ItemChecklist"
         ],
         "disclosure": "fullRecord",
         "scopeMode": "own",
         "session": "verified",
         "path": [
           {
-            "entityId": "AvisoVencimento",
-            "steps": [
-              {
-                "relationshipId": "avisoResponsavel",
-                "from": "AvisoVencimento",
-                "to": "MembroEquipe",
-                "field": "AvisoVencimento.responsavelId"
-              }
-            ],
-            "pending": ""
+            "entityId": "ItemChecklist",
+            "steps": [],
+            "pending": "ANCHOR_UNRESOLVED"
           }
         ],
-        "pending": ""
+        "pending": "ACCESS_ANCHOR"
       },
       {
-        "grantId": "membroConsultaListas",
+        "grantId": "membroConsultarListas",
         "actorRef": "membroEquipe",
         "entityRefs": [
-          "Lista"
+          "ListaTarefas"
         ],
-        "disclosure": "fieldsOnly",
-        "allowedFields": [
-          "Lista.nome",
-          "Lista.ativa",
-          "Lista.details.tipo",
-          "Lista.details.descricao"
-        ],
+        "disclosure": "fullRecord",
         "scopeMode": "organization",
         "session": "verified",
         "path": [
           {
-            "entityId": "Lista",
+            "entityId": "ListaTarefas",
             "steps": [],
             "pending": ""
           }
@@ -155,21 +112,23 @@ export const definition = {
         "pending": ""
       },
       {
-        "grantId": "membroEscolheResponsavel",
+        "grantId": "membroEscolherResponsavel",
         "actorRef": "membroEquipe",
         "entityRefs": [
-          "MembroEquipe"
+          "Participante"
         ],
         "disclosure": "fieldsOnly",
         "allowedFields": [
-          "MembroEquipe.details.identification.name",
-          "MembroEquipe.details.identification.status"
+          "Participante.details.identification.name",
+          "Participante.details.identification.status",
+          "Participante.details.tarefas.aceitaTarefasEfetivo",
+          "Participante.details.tarefas.podeCriarTarefasEfetivo"
         ],
         "scopeMode": "organization",
         "session": "verified",
         "path": [
           {
-            "entityId": "MembroEquipe",
+            "entityId": "Participante",
             "steps": [],
             "pending": ""
           }
@@ -179,10 +138,9 @@ export const definition = {
       {
         "grantId": "membroTarefasProprias",
         "actorRef": "membroEquipe",
-        "anchorEntity": "MembroEquipe",
+        "anchorEntity": "Participante",
         "entityRefs": [
-          "Tarefa",
-          "ItemChecklist"
+          "Tarefa"
         ],
         "disclosure": "fullRecord",
         "scopeMode": "own",
@@ -194,25 +152,7 @@ export const definition = {
               {
                 "relationshipId": "tarefaCriador",
                 "from": "Tarefa",
-                "to": "MembroEquipe",
-                "field": "Tarefa.criadorId"
-              }
-            ],
-            "pending": ""
-          },
-          {
-            "entityId": "ItemChecklist",
-            "steps": [
-              {
-                "relationshipId": "itemChecklistTarefa",
-                "from": "ItemChecklist",
-                "to": "Tarefa",
-                "field": "ItemChecklist.tarefaId"
-              },
-              {
-                "relationshipId": "tarefaCriador",
-                "from": "Tarefa",
-                "to": "MembroEquipe",
+                "to": "Participante",
                 "field": "Tarefa.criadorId"
               }
             ],

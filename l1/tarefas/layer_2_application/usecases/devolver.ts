@@ -19,124 +19,131 @@ export interface DevolverOutput extends Record<string, unknown> {
   titulo: string;
   status: string;
   prioridade: string;
-  prazo: string;
+  prazo?: string;
   listaId: string;
   responsavelId: string;
   criadorId: string;
   tarefaPaiId?: string;
-  chaveCriacao: string;
   criadaEm: string;
   details: {
     descricao?: string;
+    etiquetas?: string[];
     motivoDevolucao?: string;
     devolvidaEm?: string;
+    retomadaEm?: string;
     concluidaEm?: string;
     canceladaEm?: string;
+    quemAgeAgora?: string;
     aberta?: boolean;
     venceHoje?: boolean;
     atrasada?: boolean;
+    devolvidaPendente?: boolean;
     quantidadeSubtarefas?: number;
     progressoChecklist?: string;
   };
 }
 
 export async function devolver(input: DevolverInput, ctx: RequestContext): Promise<DevolverOutput> {
-  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+  const repository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
 
   const id = String(input.id ?? '');
   if (!id) {
-    throw new AppError('VALIDATION_ERROR', 'id is required.', 400);
+    throw new AppError('INVALID_INPUT', 'The task id is required.', 400);
   }
 
-  const rawMotivo = (input.details as { motivoDevolucao?: unknown } | undefined)?.motivoDevolucao;
-  const motivo = typeof rawMotivo === 'string' ? rawMotivo.trim() : '';
+  const motivoRaw = input.details?.motivoDevolucao;
+  const motivo = typeof motivoRaw === 'string' ? motivoRaw.trim() : '';
   if (!motivo) {
-    throw new AppError('MOTIVO_DEVOLUCAO_REQUIRED', 'The return reason is required to send a task back for adjustment.', 400, { ruleId: 'devolucaoExigeMotivo' });
-  }
-  if (motivo.length > 2000) {
-    throw new AppError('MOTIVO_DEVOLUCAO_TOO_LONG', 'The return reason must have at most 2000 characters.', 400, { ruleId: 'devolucaoExigeMotivo' });
+    throw new AppError('MOTIVO_DEVOLUCAO_REQUIRED', 'The reason for the return is required to send a task back.', 400, { ruleId: 'devolucaoExigeMotivo' });
   }
 
-  const tarefa = await tarefaRepository.get(id);
+  const found = await repository.list({ id });
+  const tarefa: Tarefa | undefined = found.find((t) => t.id === id);
   if (!tarefa) {
-    throw new AppError('NOT_FOUND', 'Tarefa not found.', 404);
+    throw new AppError('NOT_FOUND', 'Task not found.', 404);
   }
 
   if (input.version !== undefined && input.version !== null && Number(input.version) !== tarefa.version) {
-    throw new AppError('VERSION_CONFLICT', 'The task was changed by someone else; reload and try again.', 409);
+    throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
   }
 
-  if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
-    throw new AppError('TAREFA_ENCERRADA', 'A closed task (completed or cancelled) does not change status anymore.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
-  }
   if (tarefa.status !== 'emRevisao') {
-    throw new AppError('INVALID_STATE', 'Only a task in review can be sent back for adjustment.', 409);
+    throw new AppError('INVALID_STATE', 'Only a task under review can be returned.', 409, { ruleId: 'devolucaoExigeMotivo' });
   }
 
-  const actorPersonId = ctx.sessionContext.person?.mdmId;
-  if (!actorPersonId) {
-    throw new AppError('FORBIDDEN', 'The session person is required to review a task.', 403, { ruleId: 'somenteCriadorRevisa' });
+  const actorId = ctx.sessionContext.person?.mdmId;
+  if (!actorId) {
+    throw new AppError('FORBIDDEN', 'The session person could not be identified.', 403, { ruleId: 'apenasCriadorRevisa' });
   }
-  if (actorPersonId !== tarefa.criadorId) {
-    throw new AppError('FORBIDDEN', 'Only the creator of the task can send it back for adjustment.', 403, { ruleId: 'somenteCriadorRevisa' });
+  if (actorId !== tarefa.criadorId) {
+    throw new AppError('FORBIDDEN', 'Only the person who created the task can return it.', 403, { ruleId: 'apenasCriadorRevisa' });
   }
 
-  const nowIso = ctx.clock.nowIso();
-  const details: Tarefa['details'] = {
-    motivoDevolucao: motivo,
-    devolvidaEm: nowIso,
-  };
-  if (tarefa.details?.descricao !== undefined) details.descricao = tarefa.details.descricao;
-  if (tarefa.details?.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
-  if (tarefa.details?.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
+  const storedDetails: Tarefa['details'] = { ...tarefa.details };
+  delete storedDetails.quemAgeAgora;
+  delete storedDetails.aberta;
+  delete storedDetails.venceHoje;
+  delete storedDetails.atrasada;
+  delete storedDetails.devolvidaPendente;
+  delete storedDetails.quantidadeSubtarefas;
+  delete storedDetails.progressoChecklist;
+  delete storedDetails.retomadaEm;
 
+  const devolvidaEm = ctx.clock.nowIso();
   const next: Tarefa = {
-    id: tarefa.id,
-    version: tarefa.version,
-    titulo: tarefa.titulo,
+    ...tarefa,
     status: 'emAndamento',
-    prioridade: tarefa.prioridade,
-    prazo: tarefa.prazo,
-    listaId: tarefa.listaId,
-    responsavelId: tarefa.responsavelId,
-    criadorId: tarefa.criadorId,
-    chaveCriacao: tarefa.chaveCriacao,
-    criadaEm: tarefa.criadaEm,
-    details,
+    details: {
+      ...storedDetails,
+      motivoDevolucao: motivo,
+      devolvidaEm,
+    },
   };
-  if (tarefa.tarefaPaiId !== undefined) next.tarefaPaiId = tarefa.tarefaPaiId;
 
-  const saved = await tarefaRepository.transition(next, 'devolver');
+  const saved = await repository.transition(next, 'devolver');
 
-  const today = nowIso.slice(0, 10);
-  const prazoDay = String(saved.prazo).slice(0, 10);
-  const aberta = saved.status === 'aFazer' || saved.status === 'emAndamento' || saved.status === 'emRevisao';
+  const today = ctx.clock.nowIso().slice(0, 10);
+  const aberta = saved.status !== 'concluida' && saved.status !== 'cancelada';
+  const prazoDay = saved.prazo ? saved.prazo.slice(0, 10) : undefined;
+  const venceHoje = aberta && prazoDay !== undefined && prazoDay === today;
+  const atrasada = aberta && prazoDay !== undefined && prazoDay < today;
+  const quemAgeAgora =
+    saved.status === 'aFazer' || saved.status === 'emAndamento'
+      ? saved.responsavelId
+      : saved.status === 'emRevisao'
+        ? saved.criadorId
+        : undefined;
+  const devolvidaPendente =
+    saved.status === 'emAndamento' &&
+    saved.details.devolvidaEm !== undefined &&
+    (saved.details.retomadaEm === undefined || saved.details.retomadaEm < saved.details.devolvidaEm);
 
-  const outDetails: DevolverOutput['details'] = {
-    aberta,
-    venceHoje: aberta && prazoDay === today,
-    atrasada: aberta && prazoDay < today,
-  };
-  if (saved.details?.descricao !== undefined) outDetails.descricao = saved.details.descricao;
-  if (saved.details?.motivoDevolucao !== undefined) outDetails.motivoDevolucao = saved.details.motivoDevolucao;
-  if (saved.details?.devolvidaEm !== undefined) outDetails.devolvidaEm = saved.details.devolvidaEm;
-  if (saved.details?.concluidaEm !== undefined) outDetails.concluidaEm = saved.details.concluidaEm;
-  if (saved.details?.canceladaEm !== undefined) outDetails.canceladaEm = saved.details.canceladaEm;
-
-  const output: DevolverOutput = {
+  const out: DevolverOutput = {
     id: saved.id,
     version: saved.version,
     titulo: saved.titulo,
     status: saved.status,
     prioridade: saved.prioridade,
-    prazo: saved.prazo,
     listaId: saved.listaId,
     responsavelId: saved.responsavelId,
     criadorId: saved.criadorId,
-    chaveCriacao: saved.chaveCriacao,
     criadaEm: saved.criadaEm,
-    details: outDetails,
+    details: {
+      aberta,
+      venceHoje,
+      atrasada,
+      devolvidaPendente,
+    },
   };
-  if (saved.tarefaPaiId !== undefined) output.tarefaPaiId = saved.tarefaPaiId;
-  return output;
+  if (saved.prazo !== undefined) out.prazo = saved.prazo;
+  if (saved.tarefaPaiId !== undefined) out.tarefaPaiId = saved.tarefaPaiId;
+  if (saved.details.descricao !== undefined) out.details.descricao = saved.details.descricao;
+  if (saved.details.etiquetas !== undefined) out.details.etiquetas = saved.details.etiquetas;
+  if (saved.details.motivoDevolucao !== undefined) out.details.motivoDevolucao = saved.details.motivoDevolucao;
+  if (saved.details.devolvidaEm !== undefined) out.details.devolvidaEm = saved.details.devolvidaEm;
+  if (saved.details.retomadaEm !== undefined) out.details.retomadaEm = saved.details.retomadaEm;
+  if (saved.details.concluidaEm !== undefined) out.details.concluidaEm = saved.details.concluidaEm;
+  if (saved.details.canceladaEm !== undefined) out.details.canceladaEm = saved.details.canceladaEm;
+  if (quemAgeAgora !== undefined) out.details.quemAgeAgora = quemAgeAgora;
+  return out;
 }

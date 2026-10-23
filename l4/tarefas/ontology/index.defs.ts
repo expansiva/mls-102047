@@ -5,7 +5,7 @@ import type { Ns5OntologyIndexV3, Ns5Readonly } from '/_102035_/l2/solution/type
 export const tarefasOntologyIndex = {
   "schemaVersion": "2026-09-17-ns5-ontology-v3.1",
   "moduleName": "tarefas",
-  "businessDomain": "Gestão de tarefas da equipe (estilo ClickUp simples): listas, tarefas com subtarefas, checklist, revisão pelo criador e aviso diário de vencimentos.",
+  "businessDomain": "Gestão de tarefas da equipe: participantes escolhidos entre os usuários da organização, listas que agrupam tarefas, tarefas com responsável, prazo, prioridade, subtarefas, checklist e etiquetas, e o fluxo a fazer → em andamento → em revisão → concluída ou cancelada.",
   "platformOntology": "/_102034_/l4/ontology/mdm.defs.ts",
   "moduleNamespace": {
     "key": "tarefas",
@@ -13,12 +13,12 @@ export const tarefasOntologyIndex = {
   },
   "entities": [
     {
-      "entityId": "MembroEquipe",
+      "entityId": "Participante",
       "kind": "role",
       "subtype": "Person"
     },
     {
-      "entityId": "Lista",
+      "entityId": "ListaTarefas",
       "kind": "entity",
       "class": "supporting"
     },
@@ -31,42 +31,37 @@ export const tarefasOntologyIndex = {
       "entityId": "ItemChecklist",
       "kind": "entity",
       "class": "supporting"
-    },
-    {
-      "entityId": "AvisoVencimento",
-      "kind": "entity",
-      "class": "event"
     }
   ],
   "relationships": [
     {
       "relationshipId": "tarefaLista",
       "from": "Tarefa",
-      "to": "Lista",
+      "to": "ListaTarefas",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "A tarefa pertence a uma lista (projeto ou área).",
+      "description": "Cada tarefa pertence a uma lista de tarefas.",
       "field": "Tarefa.listaId"
     },
     {
       "relationshipId": "tarefaResponsavel",
       "from": "Tarefa",
-      "to": "MembroEquipe",
+      "to": "Participante",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Pessoa da equipe responsável por executar a tarefa.",
+      "description": "O responsável pela tarefa, escolhido pelo nome entre os participantes que aceitam tarefas.",
       "field": "Tarefa.responsavelId"
     },
     {
       "relationshipId": "tarefaCriador",
       "from": "Tarefa",
-      "to": "MembroEquipe",
+      "to": "Participante",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Pessoa da equipe que criou a tarefa e a revisa.",
+      "description": "Quem criou a tarefa, que revisa, aceita, devolve, reatribui ou cancela.",
       "field": "Tarefa.criadorId"
     },
     {
@@ -76,7 +71,7 @@ export const tarefasOntologyIndex = {
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Tarefa pai, quando a tarefa é uma subtarefa.",
+      "description": "Uma subtarefa aponta para a sua tarefa pai.",
       "field": "Tarefa.tarefaPaiId"
     },
     {
@@ -86,18 +81,8 @@ export const tarefasOntologyIndex = {
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Item da checklist pertence a uma tarefa.",
+      "description": "Cada item da checklist pertence a uma tarefa.",
       "field": "ItemChecklist.tarefaId"
-    },
-    {
-      "relationshipId": "avisoResponsavel",
-      "from": "AvisoVencimento",
-      "to": "MembroEquipe",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Responsável que recebe o aviso diário de vencimentos.",
-      "field": "AvisoVencimento.responsavelId"
     }
   ]
 } as const satisfies Ns5Readonly<Ns5OntologyIndexV3>;

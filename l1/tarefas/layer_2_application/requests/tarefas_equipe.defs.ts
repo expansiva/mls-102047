@@ -8,12 +8,9 @@ export const definition = {
   "status": "pending",
   "dependencies": [
     "_102047_/l1/tarefas/layer_2_application/usecases/cancelar.defs.ts",
-    "_102047_/l1/tarefas/layer_2_application/usecases/getLista.defs.ts",
-    "_102047_/l1/tarefas/layer_2_application/usecases/getMembroEquipe.defs.ts",
-    "_102047_/l1/tarefas/layer_2_application/usecases/getTarefa.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/listItemChecklist.defs.ts",
-    "_102047_/l1/tarefas/layer_2_application/usecases/listLista.defs.ts",
-    "_102047_/l1/tarefas/layer_2_application/usecases/listMembroEquipe.defs.ts",
+    "_102047_/l1/tarefas/layer_2_application/usecases/listListaTarefas.defs.ts",
+    "_102047_/l1/tarefas/layer_2_application/usecases/listParticipante.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/listTarefa.defs.ts",
     "_102047_/l1/tarefas/layer_2_application/usecases/updateTarefa.defs.ts"
   ],
@@ -21,19 +18,18 @@ export const definition = {
     "pageId": "tarefas_equipe",
     "requests": [
       {
-        "route": "tarefas.tarefas_equipe.carregarOpcoesEquipe",
+        "route": "tarefas.tarefas_equipe.carregarFiltrosEquipe",
         "kind": "qry",
         "uses": [
-          "listLista",
-          "listMembroEquipe",
-          "getMembroEquipe"
+          "listListaTarefas",
+          "listParticipante"
         ],
         "transaction": "none",
         "output": [
           {
             "kind": "list",
             "path": "listas",
-            "entity": "Lista",
+            "entity": "ListaTarefas",
             "items": "",
             "fields": [
               {
@@ -47,68 +43,47 @@ export const definition = {
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "membros.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.carregarOpcoesEquipe projects details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
             "kind": "list",
-            "path": "membros",
-            "entity": "MembroEquipe",
+            "path": "participantes",
+            "entity": "Participante",
             "items": "",
             "fields": [
               {
                 "field": "id",
                 "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "membros.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
+              },
               {
-                "field": "name",
+                "field": "details.identification.name",
                 "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              },
+              {
+                "field": "details.tarefas.aceitaTarefasEfetivo",
+                "path": "details.tarefas.aceitaTarefasEfetivo"
               }
             ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "membros.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.carregarOpcoesEquipe details.identification.status"
-          },
-          {
-            "kind": "unresolved",
-            "path": "membros.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
-          },
-          {
-            "kind": "unresolved",
-            "path": "membros.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
           }
         ],
         "params": [],
         "rules": [
-          "responsavelDeveSerMembroAtivo"
+          "participanteNaoConfiguradoAceitaECria"
         ],
         "doc": {
-          "raw": "Finalidade: Carrega de uma vez as listas e os membros da equipe usados nos filtros do quadro e na escolha do novo responsável.\nEntrada: Nenhuma entrada; o escopo é a equipe (organização) do gestor logado.\nProcessamento: Lê todas as listas da organização ordenadas por nome e todos os membros da equipe (papel tarefas.MembroEquipe) ordenados por nome, com a situação no cadastro. A situação permite distinguir os membros ativos, os únicos aceitos como responsável (responsavelDeveSerMembroAtivo).\nSaída: listas: id e nome de cada lista; membros: id, nome e situação no cadastro de cada membro da equipe.",
-          "purpose": "Carrega de uma vez as listas e os membros da equipe usados nos filtros do quadro e na escolha do novo responsável.",
-          "input": "Nenhuma entrada; o escopo é a equipe (organização) do gestor logado.",
-          "processing": "Lê todas as listas da organização ordenadas por nome e todos os membros da equipe (papel tarefas.MembroEquipe) ordenados por nome, com a situação no cadastro. A situação permite distinguir os membros ativos, os únicos aceitos como responsável (responsavelDeveSerMembroAtivo).",
-          "output": "listas: id e nome de cada lista; membros: id, nome e situação no cadastro de cada membro da equipe."
+          "raw": "Finalidade: Carrega as opções dos filtros de lista e de responsável da visão de tarefas da equipe.\nEntrada: Nenhuma entrada; o gestor é identificado pela sessão.\nProcessamento: Lê as listas de tarefas ordenadas pelo nome e os participantes do módulo pelo papel tarefas.Participante, ordenados pelo nome. aceitaTarefasEfetivo é calculado (participanteNaoConfiguradoAceitaECria: sem configuração vale sim), nunca gravado.\nSaída: As listas de tarefas (id e nome) e os participantes (id, nome, situação na plataforma e se aceita tarefas).",
+          "purpose": "Carrega as opções dos filtros de lista e de responsável da visão de tarefas da equipe.",
+          "input": "Nenhuma entrada; o gestor é identificado pela sessão.",
+          "processing": "Lê as listas de tarefas ordenadas pelo nome e os participantes do módulo pelo papel tarefas.Participante, ordenados pelo nome. aceitaTarefasEfetivo é calculado (participanteNaoConfiguradoAceitaECria: sem configuração vale sim), nunca gravado.",
+          "output": "As listas de tarefas (id e nome) e os participantes (id, nome, situação na plataforma e se aceita tarefas)."
         }
       },
       {
         "route": "tarefas.tarefas_equipe.listarTarefasEquipe",
         "kind": "qry",
         "uses": [
-          "listTarefa",
-          "getLista",
-          "getMembroEquipe"
+          "listTarefa"
         ],
         "transaction": "none",
         "output": [
@@ -126,16 +101,16 @@ export const definition = {
                 "path": "id"
               },
               {
+                "field": "version",
+                "path": "version"
+              },
+              {
                 "field": "titulo",
                 "path": "titulo"
               },
               {
-                "field": "listaId",
-                "path": "listaId"
-              },
-              {
-                "field": "responsavelId",
-                "path": "responsavelId"
+                "field": "status",
+                "path": "status"
               },
               {
                 "field": "prioridade",
@@ -146,77 +121,100 @@ export const definition = {
                 "path": "prazo"
               },
               {
+                "field": "listaId",
+                "path": "listaId"
+              },
+              {
+                "field": "responsavelId",
+                "path": "responsavelId"
+              },
+              {
+                "field": "criadaEm",
+                "path": "criadaEm"
+              },
+              {
+                "field": "details.quemAgeAgora",
+                "path": "details.quemAgeAgora"
+              },
+              {
+                "field": "details.venceHoje",
+                "path": "details.venceHoje"
+              },
+              {
+                "field": "details.atrasada",
+                "path": "details.atrasada"
+              },
+              {
+                "field": "details.progressoChecklist",
+                "path": "details.progressoChecklist"
+              }
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefas.items.quemAgeAgoraNome",
+            "entity": "Tarefa",
+            "rules": [
+              "membroVeResponsavelOuCriador",
+              "gestorPorAcessoPlataforma",
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefas.items.listaTarefas.nome",
+            "entity": "Tarefa",
+            "rules": [
+              "membroVeResponsavelOuCriador",
+              "gestorPorAcessoPlataforma",
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefas.items.participante.details.identification.name",
+            "entity": "Tarefa",
+            "rules": [
+              "membroVeResponsavelOuCriador",
+              "gestorPorAcessoPlataforma",
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento"
+            ]
+          },
+          {
+            "kind": "list",
+            "path": "contagemPorSituacao",
+            "entity": "Tarefa",
+            "items": "",
+            "fields": [
+              {
                 "field": "status",
                 "path": "status"
-              },
-              {
-                "field": "details",
-                "path": "details"
               }
             ]
           },
           {
-            "kind": "related",
-            "path": "tarefas.items.lista",
-            "entity": "Lista",
-            "relationship": "tarefaLista",
-            "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              },
-              {
-                "field": "nome",
-                "path": "nome"
-              }
+            "kind": "computed",
+            "path": "contagemPorSituacao.quantidade",
+            "entity": "Tarefa",
+            "rules": [
+              "membroVeResponsavelOuCriador",
+              "gestorPorAcessoPlataforma",
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento"
             ]
           },
           {
             "kind": "unresolved",
-            "path": "tarefas.items.responsavel.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.listarTarefasEquipe projects items.responsavel.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
-            "kind": "related",
-            "path": "tarefas.items.responsavel",
-            "entity": "MembroEquipe",
-            "fields": [
-              {
-                "field": "id",
-                "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefas.items.responsavel.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
-              {
-                "field": "name",
-                "path": "details.identification.name"
-              }
-            ]
+            "path": "tarefas.listaTarefas.nome",
+            "reason": "Interface TarefaResumo: field listaTarefas.nome is not a field of any entity."
           },
           {
             "kind": "unresolved",
-            "path": "tarefas.items.responsavel.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.listarTarefasEquipe items.responsavel.details.identification.status"
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefas.responsavel",
-            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefas.responsavel.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefas.responsavel.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
+            "path": "tarefas.participante.details.identification.name",
+            "reason": "Interface TarefaResumo: field participante.details.identification.name is not a field of any entity."
           }
         ],
         "params": [
@@ -233,46 +231,57 @@ export const definition = {
           {
             "name": "listaId",
             "target": "tarefas",
-            "field": "listaId"
+            "field": "listaId",
+            "optional": true
           },
           {
             "name": "responsavelId",
             "target": "tarefas",
-            "field": "responsavelId"
+            "field": "responsavelId",
+            "optional": true
           },
           {
             "name": "prioridade",
             "target": "tarefas",
-            "field": "prioridade"
+            "field": "prioridade",
+            "optional": true
           },
           {
             "name": "status",
             "target": "tarefas",
-            "field": "status"
+            "field": "status",
+            "optional": true
           },
           {
-            "name": "details",
-            "target": "tarefas",
-            "field": "details"
+            "name": "prazoDe",
+            "target": "",
+            "optional": true
+          },
+          {
+            "name": "prazoAte",
+            "target": "",
+            "optional": true
           }
         ],
         "rules": [
-          "editarSomenteTarefaVisivel"
+          "membroVeResponsavelOuCriador",
+          "gestorPorAcessoPlataforma",
+          "quemAgeAgoraPorSituacao",
+          "tarefaAbertaVencimento"
         ],
         "doc": {
-          "raw": "Finalidade: Lista paginada de todas as tarefas da equipe com os filtros do quadro do gestor; roda ao abrir e a cada mudança de filtro ou página.\nEntrada: listaId, responsavelId, prioridade, status: filtros exatos opcionais; prazoDe/prazoAte: intervalo opcional de prazo; details.venceHoje/details.atrasada: quando true, só tarefas abertas que vencem hoje ou estão atrasadas; page e pageSize: paginação.\nProcessamento: O gestor vê todas as tarefas da equipe (editarSomenteTarefaVisivel, escopo da organização). Aplica os filtros informados, ordena atrasadas e que vencem hoje primeiro e depois por prazo. Junta o nome da lista e o nome do responsável (cadastro mestre). Calcula venceHoje e atrasada (tarefa aberta com prazo igual ou anterior a hoje) e progressoChecklist (itens feitos do total, contagem dos ItemChecklist da tarefa); nada é gravado.\nSaída: Página { items, page, pageSize, hasMore } de tarefas com título, lista, responsável, prioridade, prazo, situação, sinais de vencimento e progresso da checklist.",
-          "purpose": "Lista paginada de todas as tarefas da equipe com os filtros do quadro do gestor; roda ao abrir e a cada mudança de filtro ou página.",
-          "input": "listaId, responsavelId, prioridade, status: filtros exatos opcionais; prazoDe/prazoAte: intervalo opcional de prazo; details.venceHoje/details.atrasada: quando true, só tarefas abertas que vencem hoje ou estão atrasadas; page e pageSize: paginação.",
-          "processing": "O gestor vê todas as tarefas da equipe (editarSomenteTarefaVisivel, escopo da organização). Aplica os filtros informados, ordena atrasadas e que vencem hoje primeiro e depois por prazo. Junta o nome da lista e o nome do responsável (cadastro mestre). Calcula venceHoje e atrasada (tarefa aberta com prazo igual ou anterior a hoje) e progressoChecklist (itens feitos do total, contagem dos ItemChecklist da tarefa); nada é gravado.",
-          "output": "Página { items, page, pageSize, hasMore } de tarefas com título, lista, responsável, prioridade, prazo, situação, sinais de vencimento e progresso da checklist."
+          "raw": "Finalidade: Lista todas as tarefas da organização com os filtros do gestor, servindo tanto a visão em lista quanto o quadro por situação.\nEntrada: listaId, responsavelId, prioridade e status: filtros opcionais por igualdade; prazoDe e prazoAte: intervalo opcional de prazo; page e pageSize: página pedida.\nProcessamento: Executa ao abrir a página (sem filtros) e a cada mudança de filtro ou página. O gestor, definido pelo acesso da plataforma (gestorPorAcessoPlataforma), vê todas as tarefas (membroVeResponsavelOuCriador). Ordena por criadaEm decrescente. Junta o nome da lista e os nomes do responsável e de quem age agora. Calcula quemAgeAgora pela situação (quemAgeAgoraPorSituacao), venceHoje e atrasada (tarefaAbertaVencimento) e progressoChecklist contando itens marcados sobre o total; nada disso é gravado. Conta as tarefas por situação sob os mesmos filtros, sem paginação.\nSaída: A página de tarefas resumidas { items, page, pageSize, hasMore } e a quantidade de tarefas em cada situação para os mesmos filtros.",
+          "purpose": "Lista todas as tarefas da organização com os filtros do gestor, servindo tanto a visão em lista quanto o quadro por situação.",
+          "input": "listaId, responsavelId, prioridade e status: filtros opcionais por igualdade; prazoDe e prazoAte: intervalo opcional de prazo; page e pageSize: página pedida.",
+          "processing": "Executa ao abrir a página (sem filtros) e a cada mudança de filtro ou página. O gestor, definido pelo acesso da plataforma (gestorPorAcessoPlataforma), vê todas as tarefas (membroVeResponsavelOuCriador). Ordena por criadaEm decrescente. Junta o nome da lista e os nomes do responsável e de quem age agora. Calcula quemAgeAgora pela situação (quemAgeAgoraPorSituacao), venceHoje e atrasada (tarefaAbertaVencimento) e progressoChecklist contando itens marcados sobre o total; nada disso é gravado. Conta as tarefas por situação sob os mesmos filtros, sem paginação.",
+          "output": "A página de tarefas resumidas { items, page, pageSize, hasMore } e a quantidade de tarefas em cada situação para os mesmos filtros."
         }
       },
       {
-        "route": "tarefas.tarefas_equipe.obterTarefa",
+        "route": "tarefas.tarefas_equipe.obterTarefaEquipe",
         "kind": "qry",
         "uses": [
-          "getTarefa",
-          "getMembroEquipe",
+          "listTarefa",
           "listItemChecklist"
         ],
         "transaction": "none",
@@ -307,90 +316,86 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.obterTarefa projects criador.details, responsavel.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.criador",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "criadorId",
+                "path": "criadorId"
+              },
               {
-                "field": "id",
-                "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.criador.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.quemAgeAgora",
+                "path": "details.quemAgeAgora"
+              },
               {
-                "field": "name",
-                "path": "details.identification.name"
-              }
-            ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.obterTarefa criador.details.identification.status"
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.obterTarefa projects criador.details, responsavel.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.responsavel",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.descricao",
+                "path": "details.descricao"
+              },
               {
-                "field": "id",
-                "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.responsavel.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.aberta",
+                "path": "details.aberta"
+              },
               {
-                "field": "name",
-                "path": "details.identification.name"
+                "field": "details.quantidadeSubtarefas",
+                "path": "details.quantidadeSubtarefas"
+              },
+              {
+                "field": "details.progressoChecklist",
+                "path": "details.progressoChecklist"
+              },
+              {
+                "field": "criadaEm",
+                "path": "criadaEm"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.obterTarefa responsavel.details.identification.status"
+            "kind": "computed",
+            "path": "tarefa.criadorNome",
+            "entity": "Tarefa",
+            "rules": [
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "moduloNaoGuardaComentarios"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.quemAgeAgoraNome",
+            "entity": "Tarefa",
+            "rules": [
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "moduloNaoGuardaComentarios"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.listaTarefas.nome",
+            "entity": "Tarefa",
+            "rules": [
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "moduloNaoGuardaComentarios"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.participante.details.identification.name",
+            "entity": "Tarefa",
+            "rules": [
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "moduloNaoGuardaComentarios"
+            ]
           },
           {
             "kind": "related",
-            "path": "tarefa.itensChecklist",
+            "path": "tarefa.checklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -403,62 +408,145 @@ export const definition = {
                 "path": "ordem"
               },
               {
-                "field": "feito",
-                "path": "feito"
+                "field": "details.descricao",
+                "path": "details.descricao"
               },
               {
-                "field": "details",
-                "path": "details"
+                "field": "details.concluido",
+                "path": "details.concluido"
+              },
+              {
+                "field": "details.concluidoEm",
+                "path": "details.concluidoEm"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+            "kind": "related",
+            "path": "tarefa.historico",
+            "entity": "Tarefa",
+            "relationship": "tarefaPai",
+            "fields": [
+              {
+                "field": "details.motivoDevolucao",
+                "path": "details.motivoDevolucao"
+              }
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.tipo",
+            "entity": "Tarefa",
+            "rules": [
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "moduloNaoGuardaComentarios"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.momento",
+            "entity": "Tarefa",
+            "rules": [
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "moduloNaoGuardaComentarios"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.responsavelNome",
+            "entity": "Tarefa",
+            "rules": [
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "moduloNaoGuardaComentarios"
+            ]
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.criador.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+            "path": "tarefa.listaTarefas.nome",
+            "reason": "Interface TarefaDetalhe: field listaTarefas.nome is not a field of any entity."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.criador.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
+            "path": "tarefa.participante.details.identification.name",
+            "reason": "Interface TarefaDetalhe: field participante.details.identification.name is not a field of any entity."
           }
         ],
         "params": [],
-        "rules": [],
+        "rules": [
+          "quemAgeAgoraPorSituacao",
+          "tarefaAbertaVencimento",
+          "moduloNaoGuardaComentarios"
+        ],
         "doc": {
-          "raw": "Finalidade: Abre a tarefa escolhida no quadro com detalhe, checklist e marcos do histórico.\nEntrada: tarefaId: id da tarefa selecionada no quadro.\nProcessamento: Lê a tarefa pelo id no escopo da equipe, junta os nomes do criador e do responsável no cadastro mestre e os itens da checklist ordenados por ordem. Calcula aberta, quantidadeSubtarefas (tarefas com esta como tarefa pai) e progressoChecklist (itens feitos do total), sem gravar.\nSaída: A tarefa com versão, situação, prazo, criador, responsável, descrição, subtarefas, checklist e os momentos de criação, devolução (com motivo), conclusão e cancelamento.",
-          "purpose": "Abre a tarefa escolhida no quadro com detalhe, checklist e marcos do histórico.",
-          "input": "tarefaId: id da tarefa selecionada no quadro.",
-          "processing": "Lê a tarefa pelo id no escopo da equipe, junta os nomes do criador e do responsável no cadastro mestre e os itens da checklist ordenados por ordem. Calcula aberta, quantidadeSubtarefas (tarefas com esta como tarefa pai) e progressoChecklist (itens feitos do total), sem gravar.",
-          "output": "A tarefa com versão, situação, prazo, criador, responsável, descrição, subtarefas, checklist e os momentos de criação, devolução (com motivo), conclusão e cancelamento."
+          "raw": "Finalidade: Abre uma tarefa da organização com tudo que o gestor confere antes de agir: responsável, prazo, checklist, subtarefas e histórico.\nEntrada: tarefaId: id da tarefa escolhida na lista ou no quadro.\nProcessamento: Lê a tarefa pelo id, junta o nome da lista e os nomes do responsável, de quem criou e de quem age agora. Lista os itens da checklist pela tarefa em ordem. Calcula quemAgeAgora (quemAgeAgoraPorSituacao), aberta (tarefaAbertaVencimento), quantidadeSubtarefas contando as tarefas que apontam esta como pai e progressoChecklist; nada disso é gravado. Monta o histórico em ordem de tempo a partir de criadaEm, devolvidaEm com motivo, retomadaEm, concluidaEm, canceladaEm e dos eventos de mudança de situação e reatribuição da ocorrência do processo de tarefa da plataforma. Comentários e anexos não vêm daqui (moduloNaoGuardaComentarios).\nSaída: A tarefa no estado atual, com sua checklist ordenada e o histórico de eventos em ordem de tempo.",
+          "purpose": "Abre uma tarefa da organização com tudo que o gestor confere antes de agir: responsável, prazo, checklist, subtarefas e histórico.",
+          "input": "tarefaId: id da tarefa escolhida na lista ou no quadro.",
+          "processing": "Lê a tarefa pelo id, junta o nome da lista e os nomes do responsável, de quem criou e de quem age agora. Lista os itens da checklist pela tarefa em ordem. Calcula quemAgeAgora (quemAgeAgoraPorSituacao), aberta (tarefaAbertaVencimento), quantidadeSubtarefas contando as tarefas que apontam esta como pai e progressoChecklist; nada disso é gravado. Monta o histórico em ordem de tempo a partir de criadaEm, devolvidaEm com motivo, retomadaEm, concluidaEm, canceladaEm e dos eventos de mudança de situação e reatribuição da ocorrência do processo de tarefa da plataforma. Comentários e anexos não vêm daqui (moduloNaoGuardaComentarios).",
+          "output": "A tarefa no estado atual, com sua checklist ordenada e o histórico de eventos em ordem de tempo."
         }
       },
       {
-        "route": "tarefas.tarefas_equipe.reatribuirTarefa",
+        "route": "tarefas.tarefas_equipe.buscarResponsaveisDisponiveis",
+        "kind": "qry",
+        "uses": [
+          "listParticipante"
+        ],
+        "transaction": "none",
+        "output": [
+          {
+            "kind": "list",
+            "path": "participantes",
+            "entity": "Participante",
+            "items": "",
+            "fields": [
+              {
+                "field": "id",
+                "path": "id"
+              },
+              {
+                "field": "details.identification.name",
+                "path": "details.identification.name"
+              },
+              {
+                "field": "details.identification.status",
+                "path": "details.identification.status"
+              },
+              {
+                "field": "details.tarefas.aceitaTarefasEfetivo",
+                "path": "details.tarefas.aceitaTarefasEfetivo"
+              }
+            ]
+          }
+        ],
+        "params": [
+          {
+            "name": "nome",
+            "target": "participantes",
+            "field": "details.identification.name",
+            "optional": true
+          }
+        ],
+        "rules": [
+          "responsavelAceitaTarefas",
+          "escolhaResponsavelPeloNome",
+          "participanteNaoConfiguradoAceitaECria"
+        ],
+        "doc": {
+          "raw": "Finalidade: Busca pelo nome os participantes que podem ser escolhidos como novo responsável.\nEntrada: nome: trecho do nome digitado; vazio traz os primeiros por ordem alfabética.\nProcessamento: Filtra participantes ativos que aceitam tarefas (responsavelAceitaTarefas), com aceitaTarefasEfetivo calculado como sim quando o gestor não configurou (participanteNaoConfiguradoAceitaECria). A busca é só pelo nome, nunca pelo e-mail (escolhaResponsavelPeloNome). Limita a uma quantidade curta de resultados ordenados pelo nome.\nSaída: Os participantes elegíveis encontrados, com id, nome, situação e se aceita tarefas.",
+          "purpose": "Busca pelo nome os participantes que podem ser escolhidos como novo responsável.",
+          "input": "nome: trecho do nome digitado; vazio traz os primeiros por ordem alfabética.",
+          "processing": "Filtra participantes ativos que aceitam tarefas (responsavelAceitaTarefas), com aceitaTarefasEfetivo calculado como sim quando o gestor não configurou (participanteNaoConfiguradoAceitaECria). A busca é só pelo nome, nunca pelo e-mail (escolhaResponsavelPeloNome). Limita a uma quantidade curta de resultados ordenados pelo nome.",
+          "output": "Os participantes elegíveis encontrados, com id, nome, situação e se aceita tarefas."
+        }
+      },
+      {
+        "route": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
         "kind": "cmd",
         "uses": [
           "updateTarefa",
-          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -493,90 +581,98 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.reatribuirTarefa projects criador.details, responsavel.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.criador",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "criadorId",
+                "path": "criadorId"
+              },
               {
-                "field": "id",
-                "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.criador.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.quemAgeAgora",
+                "path": "details.quemAgeAgora"
+              },
               {
-                "field": "name",
-                "path": "details.identification.name"
-              }
-            ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.reatribuirTarefa criador.details.identification.status"
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.reatribuirTarefa projects criador.details, responsavel.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.responsavel",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.descricao",
+                "path": "details.descricao"
+              },
               {
-                "field": "id",
-                "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.responsavel.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.aberta",
+                "path": "details.aberta"
+              },
               {
-                "field": "name",
-                "path": "details.identification.name"
+                "field": "details.quantidadeSubtarefas",
+                "path": "details.quantidadeSubtarefas"
+              },
+              {
+                "field": "details.progressoChecklist",
+                "path": "details.progressoChecklist"
+              },
+              {
+                "field": "criadaEm",
+                "path": "criadaEm"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.reatribuirTarefa responsavel.details.identification.status"
+            "kind": "computed",
+            "path": "tarefa.criadorNome",
+            "entity": "Tarefa",
+            "rules": [
+              "reatribuirApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "responsavelAceitaTarefas",
+              "edicaoNaoMudaSituacao",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.quemAgeAgoraNome",
+            "entity": "Tarefa",
+            "rules": [
+              "reatribuirApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "responsavelAceitaTarefas",
+              "edicaoNaoMudaSituacao",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.listaTarefas.nome",
+            "entity": "Tarefa",
+            "rules": [
+              "reatribuirApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "responsavelAceitaTarefas",
+              "edicaoNaoMudaSituacao",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.participante.details.identification.name",
+            "entity": "Tarefa",
+            "rules": [
+              "reatribuirApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "responsavelAceitaTarefas",
+              "edicaoNaoMudaSituacao",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ]
           },
           {
             "kind": "related",
-            "path": "tarefa.itensChecklist",
+            "path": "tarefa.checklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -589,67 +685,103 @@ export const definition = {
                 "path": "ordem"
               },
               {
-                "field": "feito",
-                "path": "feito"
+                "field": "details.descricao",
+                "path": "details.descricao"
               },
               {
-                "field": "details",
-                "path": "details"
+                "field": "details.concluido",
+                "path": "details.concluido"
+              },
+              {
+                "field": "details.concluidoEm",
+                "path": "details.concluidoEm"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+            "kind": "related",
+            "path": "tarefa.historico",
+            "entity": "Tarefa",
+            "relationship": "tarefaPai",
+            "fields": [
+              {
+                "field": "details.motivoDevolucao",
+                "path": "details.motivoDevolucao"
+              }
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.tipo",
+            "entity": "Tarefa",
+            "rules": [
+              "reatribuirApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "responsavelAceitaTarefas",
+              "edicaoNaoMudaSituacao",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.momento",
+            "entity": "Tarefa",
+            "rules": [
+              "reatribuirApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "responsavelAceitaTarefas",
+              "edicaoNaoMudaSituacao",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.responsavelNome",
+            "entity": "Tarefa",
+            "rules": [
+              "reatribuirApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "responsavelAceitaTarefas",
+              "edicaoNaoMudaSituacao",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ]
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.criador.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+            "path": "tarefa.listaTarefas.nome",
+            "reason": "Interface TarefaDetalhe: field listaTarefas.nome is not a field of any entity."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.criador.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
+            "path": "tarefa.participante.details.identification.name",
+            "reason": "Interface TarefaDetalhe: field participante.details.identification.name is not a field of any entity."
           }
         ],
         "params": [],
         "rules": [
-          "reatribuicaoPorCriadorOuGestor",
-          "responsavelDeveSerMembroAtivo",
+          "reatribuirApenasCriadorOuGestor",
+          "gestorPorAcessoPlataforma",
+          "responsavelAceitaTarefas",
           "edicaoNaoMudaSituacao",
-          "editarSomenteTarefaVisivel"
+          "quemAgeAgoraPorSituacao",
+          "avisarQuemAgeAgora"
         ],
         "doc": {
-          "raw": "Finalidade: Troca o responsável da tarefa pelo membro escolhido pelo gestor.\nEntrada: id: tarefa a reatribuir; version: versão lida, para concorrência otimista; responsavelId: novo responsável.\nProcessamento: Recusa se quem chama não for o criador nem o gestor (reatribuicaoPorCriadorOuGestor) e se o novo responsável não for membro ativo da equipe (responsavelDeveSerMembroAtivo). Grava apenas responsavelId, sem alterar a situação (edicaoNaoMudaSituacao); recusa versão divergente. Quando a etapa é do responsável, o novo responsável passa a ser quem age agora e é avisado.\nSaída: A tarefa atualizada com o novo responsável, nova versão, checklist e marcos do histórico.",
-          "purpose": "Troca o responsável da tarefa pelo membro escolhido pelo gestor.",
-          "input": "id: tarefa a reatribuir; version: versão lida, para concorrência otimista; responsavelId: novo responsável.",
-          "processing": "Recusa se quem chama não for o criador nem o gestor (reatribuicaoPorCriadorOuGestor) e se o novo responsável não for membro ativo da equipe (responsavelDeveSerMembroAtivo). Grava apenas responsavelId, sem alterar a situação (edicaoNaoMudaSituacao); recusa versão divergente. Quando a etapa é do responsável, o novo responsável passa a ser quem age agora e é avisado.",
-          "output": "A tarefa atualizada com o novo responsável, nova versão, checklist e marcos do histórico."
+          "raw": "Finalidade: Troca o responsável de uma tarefa pelo participante escolhido pelo gestor.\nEntrada: id: tarefa a reatribuir; version: versão lida, para concorrência otimista; responsavelId: novo responsável escolhido pelo nome.\nProcessamento: Recusa quem não é o criador nem gestor pelo acesso da plataforma (reatribuirApenasCriadorOuGestor, gestorPorAcessoPlataforma). Recusa responsável inativo ou que não aceita tarefas (responsavelAceitaTarefas). Recusa versão divergente. Grava só o responsável, sem mudar a situação (edicaoNaoMudaSituacao). Quando a tarefa está a fazer ou em andamento, o novo responsável passa a ser quem age agora (quemAgeAgoraPorSituacao, calculado, não gravado) e a ocorrência do processo da plataforma troca e avisa essa pessoa (avisarQuemAgeAgora).\nSaída: A tarefa no novo estado, com o novo responsável, quem age agora recalculado, checklist e histórico incluindo a troca.",
+          "purpose": "Troca o responsável de uma tarefa pelo participante escolhido pelo gestor.",
+          "input": "id: tarefa a reatribuir; version: versão lida, para concorrência otimista; responsavelId: novo responsável escolhido pelo nome.",
+          "processing": "Recusa quem não é o criador nem gestor pelo acesso da plataforma (reatribuirApenasCriadorOuGestor, gestorPorAcessoPlataforma). Recusa responsável inativo ou que não aceita tarefas (responsavelAceitaTarefas). Recusa versão divergente. Grava só o responsável, sem mudar a situação (edicaoNaoMudaSituacao). Quando a tarefa está a fazer ou em andamento, o novo responsável passa a ser quem age agora (quemAgeAgoraPorSituacao, calculado, não gravado) e a ocorrência do processo da plataforma troca e avisa essa pessoa (avisarQuemAgeAgora).",
+          "output": "A tarefa no novo estado, com o novo responsável, quem age agora recalculado, checklist e histórico incluindo a troca."
         }
       },
       {
-        "route": "tarefas.tarefas_equipe.cancelarTarefa",
+        "route": "tarefas.tarefas_equipe.cancelarTarefaEquipe",
         "kind": "cmd",
         "uses": [
           "cancelar",
-          "getMembroEquipe",
           "listItemChecklist"
         ],
         "transaction": "single",
@@ -684,90 +816,90 @@ export const definition = {
                 "path": "prazo"
               },
               {
-                "field": "criadaEm",
-                "path": "criadaEm"
-              },
-              {
-                "field": "criadorId",
-                "path": "criadorId"
+                "field": "listaId",
+                "path": "listaId"
               },
               {
                 "field": "responsavelId",
                 "path": "responsavelId"
               },
               {
-                "field": "details",
-                "path": "details"
-              }
-            ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.cancelarTarefa projects criador.details, responsavel.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.criador",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "criadorId",
+                "path": "criadorId"
+              },
               {
-                "field": "id",
-                "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.criador.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.quemAgeAgora",
+                "path": "details.quemAgeAgora"
+              },
               {
-                "field": "name",
-                "path": "details.identification.name"
-              }
-            ]
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.criador.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.cancelarTarefa criador.details.identification.status"
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details",
-            "reason": "DISCLOSURE: Route tarefas.tarefas_equipe.cancelarTarefa projects criador.details, responsavel.details. A grant names a sub-path, but the nested shape could not be read, so the container was not released."
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.responsavel",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.descricao",
+                "path": "details.descricao"
+              },
               {
-                "field": "id",
-                "path": "id"
-              }
-            ]
-          },
-          {
-            "kind": "related",
-            "path": "tarefa.responsavel.details.identification",
-            "entity": "MembroEquipe",
-            "fields": [
+                "field": "details.aberta",
+                "path": "details.aberta"
+              },
               {
-                "field": "name",
-                "path": "details.identification.name"
+                "field": "details.quantidadeSubtarefas",
+                "path": "details.quantidadeSubtarefas"
+              },
+              {
+                "field": "details.progressoChecklist",
+                "path": "details.progressoChecklist"
+              },
+              {
+                "field": "criadaEm",
+                "path": "criadaEm"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification.status",
-            "reason": "COMPUTED_NOT_DISCLOSED: tarefas.tarefas_equipe.cancelarTarefa responsavel.details.identification.status"
+            "kind": "computed",
+            "path": "tarefa.criadorNome",
+            "entity": "Tarefa",
+            "rules": [
+              "cancelarApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.quemAgeAgoraNome",
+            "entity": "Tarefa",
+            "rules": [
+              "cancelarApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.listaTarefas.nome",
+            "entity": "Tarefa",
+            "rules": [
+              "cancelarApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.participante.details.identification.name",
+            "entity": "Tarefa",
+            "rules": [
+              "cancelarApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
+            ]
           },
           {
             "kind": "related",
-            "path": "tarefa.itensChecklist",
+            "path": "tarefa.checklist",
             "entity": "ItemChecklist",
             "relationship": "itemChecklistTarefa",
             "fields": [
@@ -780,57 +912,88 @@ export const definition = {
                 "path": "ordem"
               },
               {
-                "field": "feito",
-                "path": "feito"
+                "field": "details.descricao",
+                "path": "details.descricao"
               },
               {
-                "field": "details",
-                "path": "details"
+                "field": "details.concluido",
+                "path": "details.concluido"
+              },
+              {
+                "field": "details.concluidoEm",
+                "path": "details.concluidoEm"
               }
             ]
           },
           {
-            "kind": "unresolved",
-            "path": "tarefa.criador",
-            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
+            "kind": "related",
+            "path": "tarefa.historico",
+            "entity": "Tarefa",
+            "relationship": "tarefaPai",
+            "fields": [
+              {
+                "field": "details.motivoDevolucao",
+                "path": "details.motivoDevolucao"
+              }
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.tipo",
+            "entity": "Tarefa",
+            "rules": [
+              "cancelarApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.momento",
+            "entity": "Tarefa",
+            "rules": [
+              "cancelarApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
+            ]
+          },
+          {
+            "kind": "computed",
+            "path": "tarefa.historico.responsavelNome",
+            "entity": "Tarefa",
+            "rules": [
+              "cancelarApenasCriadorOuGestor",
+              "gestorPorAcessoPlataforma",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
+            ]
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.criador.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
+            "path": "tarefa.listaTarefas.nome",
+            "reason": "Interface TarefaDetalhe: field listaTarefas.nome is not a field of any entity."
           },
           {
             "kind": "unresolved",
-            "path": "tarefa.criador.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel",
-            "reason": "MembroEquipe inside Tarefa needs one L4 relationship between them; found 2."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification",
-            "reason": "MembroEquipe inside MembroEquipe needs one L4 relationship between them; found 0."
-          },
-          {
-            "kind": "unresolved",
-            "path": "tarefa.responsavel.details.identification.status",
-            "reason": "Interface MembroIdentificacao: readonly status is not a field of MembroEquipe; it may stand for one of its paths."
+            "path": "tarefa.participante.details.identification.name",
+            "reason": "Interface TarefaDetalhe: field participante.details.identification.name is not a field of any entity."
           }
         ],
         "params": [],
         "rules": [
-          "cancelamentoPorCriadorOuGestor",
-          "tarefaEncerradaNaoTransiciona"
+          "cancelarApenasCriadorOuGestor",
+          "gestorPorAcessoPlataforma",
+          "avisarQuemAgeAgora",
+          "quemAgeAgoraPorSituacao"
         ],
         "doc": {
-          "raw": "Finalidade: Cancela a tarefa escolhida enquanto ela ainda está aberta.\nEntrada: id: tarefa a cancelar; version: versão lida, para concorrência otimista.\nProcessamento: Aplica a transição cancelar. Recusa se quem chama não for o criador nem o gestor ou se a tarefa não estiver a fazer, em andamento ou em revisão (cancelamentoPorCriadorOuGestor); tarefa concluída ou cancelada não muda (tarefaEncerradaNaoTransiciona). Registra canceladaEm e a mensagem na sala de discussão; recusa versão divergente.\nSaída: A tarefa na situação cancelada, com canceladaEm, nova versão, checklist e marcos do histórico.",
-          "purpose": "Cancela a tarefa escolhida enquanto ela ainda está aberta.",
+          "raw": "Finalidade: Cancela uma tarefa ainda aberta a pedido do gestor.\nEntrada: id: tarefa a cancelar; version: versão lida, para concorrência otimista.\nProcessamento: Recusa quem não é o criador nem gestor pelo acesso da plataforma e recusa tarefa que não está a fazer, em andamento ou em revisão (cancelarApenasCriadorOuGestor, gestorPorAcessoPlataforma). Recusa versão divergente. Aplica a transição cancelar, levando a situação a cancelada e registrando canceladaEm. Antes de trocar, identifica quem estava agindo e o processo da plataforma o avisa (avisarQuemAgeAgora); depois quem age agora passa a ser ninguém (quemAgeAgoraPorSituacao, calculado).\nSaída: A tarefa cancelada, não mais aberta, sem quem age agora, com checklist e histórico incluindo o cancelamento.",
+          "purpose": "Cancela uma tarefa ainda aberta a pedido do gestor.",
           "input": "id: tarefa a cancelar; version: versão lida, para concorrência otimista.",
-          "processing": "Aplica a transição cancelar. Recusa se quem chama não for o criador nem o gestor ou se a tarefa não estiver a fazer, em andamento ou em revisão (cancelamentoPorCriadorOuGestor); tarefa concluída ou cancelada não muda (tarefaEncerradaNaoTransiciona). Registra canceladaEm e a mensagem na sala de discussão; recusa versão divergente.",
-          "output": "A tarefa na situação cancelada, com canceladaEm, nova versão, checklist e marcos do histórico."
+          "processing": "Recusa quem não é o criador nem gestor pelo acesso da plataforma e recusa tarefa que não está a fazer, em andamento ou em revisão (cancelarApenasCriadorOuGestor, gestorPorAcessoPlataforma). Recusa versão divergente. Aplica a transição cancelar, levando a situação a cancelada e registrando canceladaEm. Antes de trocar, identifica quem estava agindo e o processo da plataforma o avisa (avisarQuemAgeAgora); depois quem age agora passa a ser ninguém (quemAgeAgoraPorSituacao, calculado).",
+          "output": "A tarefa cancelada, não mais aberta, sem quem age agora, com checklist e histórico incluindo o cancelamento."
         }
       }
     ]

@@ -33,10 +33,6 @@ export const definition = {
         "type": "integer"
       },
       {
-        "name": "feito",
-        "type": "boolean"
-      },
-      {
         "name": "details",
         "type": "object"
       },
@@ -45,8 +41,13 @@ export const definition = {
         "type": "string"
       },
       {
-        "name": "details.marcadoEm",
-        "type": "timestamp"
+        "name": "details.concluido",
+        "type": "boolean"
+      },
+      {
+        "name": "details.concluidoEm",
+        "type": "timestamp",
+        "derived": true
       }
     ],
     "lifecycle": {
@@ -54,8 +55,9 @@ export const definition = {
       "transitions": []
     },
     "invariants": [
-      "checklistNaoMudaSituacao",
-      "editarSomenteTarefaVisivel"
+      "itemChecklistSoQuemVeTarefa",
+      "marcarItemNaoMudaSituacao",
+      "itemChecklistTarefaNaoEncerrada"
     ],
     "imports": []
   }

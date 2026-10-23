@@ -6,396 +6,589 @@ import { getState, setState, subscribe, unsubscribe } from '/_102029_/l2/collabS
 import { runBlockingUiAction } from '/_102029_/l2/interactionRuntime.js';
 import type {
 Minhas_tarefasContracts,
-TarefaDetalhe,
-TarefaResumo,
-ListaOpcao,
-MembroOpcao,
-ItemChecklistEntrada,
+ListaTarefasNome,
+ParticipanteOpcao,
+EventoHistorico,
+TarefaCompleta,
+ItemChecklistNovo,
+ItemChecklistAjuste,
 } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
 export type {
 Minhas_tarefasContracts,
-ListaRef,
-MembroRef,
+ListaTarefasNome,
+ParticipanteNome,
+ParticipanteOpcao,
 TarefaResumo,
 ItemChecklistLinha,
-TarefaDetalhe,
-ListaOpcao,
-MembroOpcao,
-ItemChecklistEntrada,
+TarefaPaiRef,
+TarefaCompleta,
+EventoHistorico,
+ItemChecklistNovo,
+ItemChecklistAjuste,
 } from '/_102047_/l2/tarefas/web/contracts/minhas_tarefas.defs.js';
+
 type Input<R extends keyof Minhas_tarefasContracts> = Minhas_tarefasContracts[R]['input'];
 type Output<R extends keyof Minhas_tarefasContracts> = Minhas_tarefasContracts[R]['output'];
+
 export type ErrorState = { code: string; message: string; details?: unknown } | null;
-export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
-export type PageStatus = 'idle' | 'loading' | 'empty' | 'success' | 'error';
-export type FiltroTarefas = NonNullable<Input<'tarefas.minhas_tarefas.qryMinhasTarefas'>['filtro']>;
-export type Prioridade = 'low' | 'medium' | 'high';
-export type TarefasPage = Output<'tarefas.minhas_tarefas.qryMinhasTarefas'>['tarefas'];
-/** One checklist line being typed; every leaf is null until filled. */
-export type ChecklistItemDraft = {
-id: string | null;
-version: number | null;
-details: { descricao: string | null };
-ordem: number | null;
-feito: boolean | null;
-};
-/** Draft of cmdCriarTarefa: the new task form. chaveCriacao is generated when the draft starts and kept until success or clear. */
+type BffResult<T> = { ok: boolean; data: T | null; error: ErrorState };
+
+/** A page of resumed tarefas: { items, page, pageSize, hasMore }. */
+export type TarefasPagina = Output<'tarefas.minhas_tarefas.qryMinhasTarefas'>['tarefas'];
+
+/** The three groups of the list: tarefas I am responsible for, tarefas I created, tarefas that depend on me now. */
+export type GrupoTarefas = 'responsavel' | 'criadas' | 'dependeDeMim';
+
+export type Prioridade = TarefaCompleta['prioridade'];
+
+/** Form draft of cmdCriarTarefa; every leaf is null until typed. The creator comes from the session. */
 export type CriarTarefaDraft = {
-chaveCriacao: string;
-listaId: string | null;
 titulo: string | null;
-details: { descricao: string | null };
+details: { descricao: string | null; etiquetas: string | null };
 prioridade: Prioridade | null;
 prazo: string | null;
+listaId: string | null;
 responsavelId: string | null;
-checklist: ChecklistItemDraft[];
+tarefaPaiId: string | null;
 };
-/** Draft of cmdSalvarEdicao: edits the open task, prefilled from it (id and version come from the task read). */
-export type SalvarEdicaoDraft = {
+
+/** One new checklist item being typed. */
+export type ItemChecklistNovoDraft = {
+ordem: number | null;
+details: { descricao: string | null; concluido: boolean | null };
+};
+
+/** Form draft of cmdAdicionarItensChecklist: the new items; the tarefa is the loaded one. */
+export type AdicionarItensChecklistDraft = {
+itens: ItemChecklistNovoDraft[];
+};
+
+/** Form draft of cmdSalvarAlteracoes: the editable fields of the loaded tarefa (id and version come from it). */
+export type SalvarAlteracoesDraft = {
+titulo: string | null;
+details: { descricao: string | null; etiquetas: string | null };
+prioridade: Prioridade | null;
+prazo: string | null;
+listaId: string | null;
+responsavelId: string | null;
+tarefaPaiId: string | null;
+};
+
+/** One change of an existing checklist item; only the leaves that change are filled. */
+export type ItemChecklistAjusteDraft = {
 id: string | null;
 version: number | null;
-listaId: string | null;
-titulo: string | null;
-details: { descricao: string | null };
-prioridade: Prioridade | null;
-prazo: string | null;
-responsavelId: string | null;
+ordem: number | null;
+details: { descricao: string | null; concluido: boolean | null };
 };
-/** Draft of cmdSalvarChecklist: the checklist of the open task, prefilled from it. */
-export type SalvarChecklistDraft = {
-tarefaId: string | null;
-itens: ChecklistItemDraft[];
+
+/** Form draft of cmdAjustarChecklist: the changed items; the tarefa is the loaded one. */
+export type AjustarChecklistDraft = {
+itens: ItemChecklistAjusteDraft[];
 };
-/** Draft of cmdDevolver: the reason for sending the task back (id and version come from the open task). */
+
+/** Form draft of cmdDevolver: the reason for sending the tarefa back. */
 export type DevolverDraft = {
 details: { motivoDevolucao: string | null };
 };
-type RequestId =
-| 'qryMinhasTarefas'
-| 'qryTarefa'
-| 'qryListasAtivas'
-| 'qryBuscarMembros'
-| 'cmdCriarTarefa'
-| 'cmdSalvarEdicao'
-| 'cmdSalvarChecklist'
-| 'cmdIniciar'
-| 'cmdEnviarRevisao'
-| 'cmdAceitar'
-| 'cmdDevolver'
-| 'cmdCancelar';
-type CommandId = Extract<RequestId, `cmd${string}`>;
-type StatusMember = `${RequestId}Status`;
-type ErrorMember = `${RequestId}Error`;
-type TarefaOutput = Output<'tarefas.minhas_tarefas.cmdIniciar'>;
-type RefillDraft = 'none' | 'edit' | 'checklist' | 'both';
+
+type TarefaOutput = { tarefa: TarefaCompleta; historico: EventoHistorico[] };
+
+function emptyCriarTarefaDraft(): CriarTarefaDraft {
+return {
+titulo: null,
+details: { descricao: null, etiquetas: null },
+prioridade: null,
+prazo: null,
+listaId: null,
+responsavelId: null,
+tarefaPaiId: null,
+};
+}
+
+function emptyAdicionarItensChecklistDraft(): AdicionarItensChecklistDraft {
+return { itens: [] };
+}
+
+function emptySalvarAlteracoesDraft(): SalvarAlteracoesDraft {
+return {
+titulo: null,
+details: { descricao: null, etiquetas: null },
+prioridade: null,
+prazo: null,
+listaId: null,
+responsavelId: null,
+tarefaPaiId: null,
+};
+}
+
+function emptyAjustarChecklistDraft(): AjustarChecklistDraft {
+return { itens: [] };
+}
+
+function emptyDevolverDraft(): DevolverDraft {
+return { details: { motivoDevolucao: null } };
+}
+
+function draftFromTarefa(tarefa: TarefaCompleta): SalvarAlteracoesDraft {
+return {
+titulo: tarefa.titulo,
+details: {
+descricao: tarefa.details.descricao ?? null,
+etiquetas: tarefa.details.etiquetas ?? null,
+},
+prioridade: tarefa.prioridade,
+prazo: tarefa.prazo ?? null,
+listaId: tarefa.listaId,
+responsavelId: tarefa.responsavelId,
+tarefaPaiId: tarefa.tarefaPaiId ?? null,
+};
+}
+
+function filled(value: string | null): value is string {
+return value !== null && value.trim() !== '';
+}
+
+function unexpectedError(error: unknown): ErrorState {
+return { code: 'client.unexpected', message: '', details: { name: error instanceof Error ? error.name : 'unknown' } };
+}
+
+const PAGE_SIZE = 20;
+
+const COMMAND_IDS = [
+'cmdCriarTarefa',
+'cmdAdicionarItensChecklist',
+'cmdSalvarAlteracoes',
+'cmdAjustarChecklist',
+'cmdIniciar',
+'cmdEnviarParaRevisao',
+'cmdAceitar',
+'cmdDevolver',
+'cmdRetomar',
+'cmdCancelar',
+] as const;
+type CommandId = typeof COMMAND_IDS[number];
+type QueryId = 'qryMinhasTarefas' | 'qryTarefasDoGrupo' | 'qryTarefa' | 'qryResponsaveis' | 'qryListas';
+
+const COMMAND_STATUS_MEMBER = {
+cmdCriarTarefa: 'cmdCriarTarefaStatus',
+cmdAdicionarItensChecklist: 'cmdAdicionarItensChecklistStatus',
+cmdSalvarAlteracoes: 'cmdSalvarAlteracoesStatus',
+cmdAjustarChecklist: 'cmdAjustarChecklistStatus',
+cmdIniciar: 'cmdIniciarStatus',
+cmdEnviarParaRevisao: 'cmdEnviarParaRevisaoStatus',
+cmdAceitar: 'cmdAceitarStatus',
+cmdDevolver: 'cmdDevolverStatus',
+cmdRetomar: 'cmdRetomarStatus',
+cmdCancelar: 'cmdCancelarStatus',
+} as const;
+
+const COMMAND_ERROR_MEMBER = {
+cmdCriarTarefa: 'cmdCriarTarefaError',
+cmdAdicionarItensChecklist: 'cmdAdicionarItensChecklistError',
+cmdSalvarAlteracoes: 'cmdSalvarAlteracoesError',
+cmdAjustarChecklist: 'cmdAjustarChecklistError',
+cmdIniciar: 'cmdIniciarError',
+cmdEnviarParaRevisao: 'cmdEnviarParaRevisaoError',
+cmdAceitar: 'cmdAceitarError',
+cmdDevolver: 'cmdDevolverError',
+cmdRetomar: 'cmdRetomarError',
+cmdCancelar: 'cmdCancelarError',
+} as const;
+
+const QUERY_STATUS_MEMBER = {
+qryMinhasTarefas: 'qryMinhasTarefasStatus',
+qryTarefasDoGrupo: 'qryTarefasDoGrupoStatus',
+qryTarefa: 'qryTarefaStatus',
+qryResponsaveis: 'qryResponsaveisStatus',
+qryListas: 'qryListasStatus',
+} as const;
+
+const QUERY_ERROR_MEMBER = {
+qryMinhasTarefas: 'qryMinhasTarefasError',
+qryTarefasDoGrupo: 'qryTarefasDoGrupoError',
+qryTarefa: 'qryTarefaError',
+qryResponsaveis: 'qryResponsaveisError',
+qryListas: 'qryListasError',
+} as const;
+
+// every state and status member, and nothing else
 type StateMember =
 | 'tarefas'
+| 'quantidadeDependeDeMim'
+| 'quantidadeResponsavel'
+| 'quantidadeCriadas'
+| 'quantidadeVenceHoje'
+| 'quantidadeAtrasadas'
 | 'tarefa'
+| 'historico'
+| 'podeCriarTarefasEfetivo'
+| 'participantes'
 | 'listas'
-| 'membros'
 | 'selectedTarefa'
-| 'filtro'
+| 'grupoTarefas'
 | 'cmdCriarTarefaDraft'
-| 'cmdSalvarEdicaoDraft'
-| 'cmdSalvarChecklistDraft'
+| 'cmdAdicionarItensChecklistDraft'
+| 'cmdSalvarAlteracoesDraft'
+| 'cmdAjustarChecklistDraft'
 | 'cmdDevolverDraft'
 | 'pageStatus'
+| 'scenary'
 | 'qryMinhasTarefasStatus'
 | 'qryMinhasTarefasError'
+| 'qryTarefasDoGrupoStatus'
+| 'qryTarefasDoGrupoError'
 | 'qryTarefaStatus'
 | 'qryTarefaError'
-| 'qryListasAtivasStatus'
-| 'qryListasAtivasError'
-| 'qryBuscarMembrosStatus'
-| 'qryBuscarMembrosError'
+| 'qryResponsaveisStatus'
+| 'qryResponsaveisError'
+| 'qryListasStatus'
+| 'qryListasError'
 | 'cmdCriarTarefaStatus'
 | 'cmdCriarTarefaError'
-| 'cmdSalvarEdicaoStatus'
-| 'cmdSalvarEdicaoError'
-| 'cmdSalvarChecklistStatus'
-| 'cmdSalvarChecklistError'
+| 'cmdAdicionarItensChecklistStatus'
+| 'cmdAdicionarItensChecklistError'
+| 'cmdSalvarAlteracoesStatus'
+| 'cmdSalvarAlteracoesError'
+| 'cmdAjustarChecklistStatus'
+| 'cmdAjustarChecklistError'
 | 'cmdIniciarStatus'
 | 'cmdIniciarError'
-| 'cmdEnviarRevisaoStatus'
-| 'cmdEnviarRevisaoError'
+| 'cmdEnviarParaRevisaoStatus'
+| 'cmdEnviarParaRevisaoError'
 | 'cmdAceitarStatus'
 | 'cmdAceitarError'
 | 'cmdDevolverStatus'
 | 'cmdDevolverError'
+| 'cmdRetomarStatus'
+| 'cmdRetomarError'
 | 'cmdCancelarStatus'
-| 'cmdCancelarError'
-| 'scenary';
+| 'cmdCancelarError';
+
 const STATE_MEMBER_BY_KEY: Record<string, StateMember> = {
 'ui.tarefas.minhas_tarefas.tarefas': 'tarefas',
+'ui.tarefas.minhas_tarefas.quantidadeDependeDeMim': 'quantidadeDependeDeMim',
+'ui.tarefas.minhas_tarefas.quantidadeResponsavel': 'quantidadeResponsavel',
+'ui.tarefas.minhas_tarefas.quantidadeCriadas': 'quantidadeCriadas',
+'ui.tarefas.minhas_tarefas.quantidadeVenceHoje': 'quantidadeVenceHoje',
+'ui.tarefas.minhas_tarefas.quantidadeAtrasadas': 'quantidadeAtrasadas',
 'ui.tarefas.minhas_tarefas.tarefa': 'tarefa',
+'ui.tarefas.minhas_tarefas.historico': 'historico',
+'ui.tarefas.minhas_tarefas.podeCriarTarefasEfetivo': 'podeCriarTarefasEfetivo',
+'ui.tarefas.minhas_tarefas.participantes': 'participantes',
 'ui.tarefas.minhas_tarefas.listas': 'listas',
-'ui.tarefas.minhas_tarefas.membros': 'membros',
 'ui.tarefas.minhas_tarefas.selectedTarefa': 'selectedTarefa',
-'ui.tarefas.minhas_tarefas.filtro': 'filtro',
+'ui.tarefas.minhas_tarefas.grupoTarefas': 'grupoTarefas',
 'ui.tarefas.minhas_tarefas.cmdCriarTarefaDraft': 'cmdCriarTarefaDraft',
-'ui.tarefas.minhas_tarefas.cmdSalvarEdicaoDraft': 'cmdSalvarEdicaoDraft',
-'ui.tarefas.minhas_tarefas.cmdSalvarChecklistDraft': 'cmdSalvarChecklistDraft',
+'ui.tarefas.minhas_tarefas.cmdAdicionarItensChecklistDraft': 'cmdAdicionarItensChecklistDraft',
+'ui.tarefas.minhas_tarefas.cmdSalvarAlteracoesDraft': 'cmdSalvarAlteracoesDraft',
+'ui.tarefas.minhas_tarefas.cmdAjustarChecklistDraft': 'cmdAjustarChecklistDraft',
 'ui.tarefas.minhas_tarefas.cmdDevolverDraft': 'cmdDevolverDraft',
 'ui.tarefas.minhas_tarefas.pageStatus': 'pageStatus',
+'ui.tarefas.minhas_tarefas.scenary': 'scenary',
 'ui.tarefas.minhas_tarefas.qryMinhasTarefasStatus': 'qryMinhasTarefasStatus',
 'ui.tarefas.minhas_tarefas.qryMinhasTarefasError': 'qryMinhasTarefasError',
+'ui.tarefas.minhas_tarefas.qryTarefasDoGrupoStatus': 'qryTarefasDoGrupoStatus',
+'ui.tarefas.minhas_tarefas.qryTarefasDoGrupoError': 'qryTarefasDoGrupoError',
 'ui.tarefas.minhas_tarefas.qryTarefaStatus': 'qryTarefaStatus',
 'ui.tarefas.minhas_tarefas.qryTarefaError': 'qryTarefaError',
-'ui.tarefas.minhas_tarefas.qryListasAtivasStatus': 'qryListasAtivasStatus',
-'ui.tarefas.minhas_tarefas.qryListasAtivasError': 'qryListasAtivasError',
-'ui.tarefas.minhas_tarefas.qryBuscarMembrosStatus': 'qryBuscarMembrosStatus',
-'ui.tarefas.minhas_tarefas.qryBuscarMembrosError': 'qryBuscarMembrosError',
+'ui.tarefas.minhas_tarefas.qryResponsaveisStatus': 'qryResponsaveisStatus',
+'ui.tarefas.minhas_tarefas.qryResponsaveisError': 'qryResponsaveisError',
+'ui.tarefas.minhas_tarefas.qryListasStatus': 'qryListasStatus',
+'ui.tarefas.minhas_tarefas.qryListasError': 'qryListasError',
 'ui.tarefas.minhas_tarefas.cmdCriarTarefaStatus': 'cmdCriarTarefaStatus',
 'ui.tarefas.minhas_tarefas.cmdCriarTarefaError': 'cmdCriarTarefaError',
-'ui.tarefas.minhas_tarefas.cmdSalvarEdicaoStatus': 'cmdSalvarEdicaoStatus',
-'ui.tarefas.minhas_tarefas.cmdSalvarEdicaoError': 'cmdSalvarEdicaoError',
-'ui.tarefas.minhas_tarefas.cmdSalvarChecklistStatus': 'cmdSalvarChecklistStatus',
-'ui.tarefas.minhas_tarefas.cmdSalvarChecklistError': 'cmdSalvarChecklistError',
+'ui.tarefas.minhas_tarefas.cmdAdicionarItensChecklistStatus': 'cmdAdicionarItensChecklistStatus',
+'ui.tarefas.minhas_tarefas.cmdAdicionarItensChecklistError': 'cmdAdicionarItensChecklistError',
+'ui.tarefas.minhas_tarefas.cmdSalvarAlteracoesStatus': 'cmdSalvarAlteracoesStatus',
+'ui.tarefas.minhas_tarefas.cmdSalvarAlteracoesError': 'cmdSalvarAlteracoesError',
+'ui.tarefas.minhas_tarefas.cmdAjustarChecklistStatus': 'cmdAjustarChecklistStatus',
+'ui.tarefas.minhas_tarefas.cmdAjustarChecklistError': 'cmdAjustarChecklistError',
 'ui.tarefas.minhas_tarefas.cmdIniciarStatus': 'cmdIniciarStatus',
 'ui.tarefas.minhas_tarefas.cmdIniciarError': 'cmdIniciarError',
-'ui.tarefas.minhas_tarefas.cmdEnviarRevisaoStatus': 'cmdEnviarRevisaoStatus',
-'ui.tarefas.minhas_tarefas.cmdEnviarRevisaoError': 'cmdEnviarRevisaoError',
+'ui.tarefas.minhas_tarefas.cmdEnviarParaRevisaoStatus': 'cmdEnviarParaRevisaoStatus',
+'ui.tarefas.minhas_tarefas.cmdEnviarParaRevisaoError': 'cmdEnviarParaRevisaoError',
 'ui.tarefas.minhas_tarefas.cmdAceitarStatus': 'cmdAceitarStatus',
 'ui.tarefas.minhas_tarefas.cmdAceitarError': 'cmdAceitarError',
 'ui.tarefas.minhas_tarefas.cmdDevolverStatus': 'cmdDevolverStatus',
 'ui.tarefas.minhas_tarefas.cmdDevolverError': 'cmdDevolverError',
+'ui.tarefas.minhas_tarefas.cmdRetomarStatus': 'cmdRetomarStatus',
+'ui.tarefas.minhas_tarefas.cmdRetomarError': 'cmdRetomarError',
 'ui.tarefas.minhas_tarefas.cmdCancelarStatus': 'cmdCancelarStatus',
 'ui.tarefas.minhas_tarefas.cmdCancelarError': 'cmdCancelarError',
-'ui.tarefas.minhas_tarefas.scenary': 'scenary',
 };
+
 const STATE_KEYS = Object.keys(STATE_MEMBER_BY_KEY);
-const DATA_MEMBERS: StateMember[] = ['tarefas', 'tarefa', 'listas', 'membros'];
-const PAGE_SIZE = 20;
-const ROUTE_SUFFIX = '/tarefas/minhas_tarefas';
-const STORAGE_PREFIX = 'tarefas.minhas_tarefas.';
-function toFiltro(raw: string | null): FiltroTarefas | null {
-if (raw === 'criadasPorMim' || raw === 'atribuidasAMim' || raw === 'emRevisao' || raw === 'devolvidas') return raw;
-return null;
-}
-function isBlank(value: string | null): boolean {
-return value === null || value.trim() === '';
-}
-function emptyCriarTarefaDraft(): CriarTarefaDraft {
-return {
-chaveCriacao: crypto.randomUUID(),
-listaId: null,
-titulo: null,
-details: { descricao: null },
-prioridade: null,
-prazo: null,
-responsavelId: null,
-checklist: [],
-};
-}
-function emptyEdicaoDraft(): SalvarEdicaoDraft {
-return {
-id: null,
-version: null,
-listaId: null,
-titulo: null,
-details: { descricao: null },
-prioridade: null,
-prazo: null,
-responsavelId: null,
-};
-}
-function emptyChecklistDraft(): SalvarChecklistDraft {
-return { tarefaId: null, itens: [] };
-}
-function emptyDevolverDraft(): DevolverDraft {
-return { details: { motivoDevolucao: null } };
-}
-function edicaoDraftFromTarefa(tarefa: TarefaDetalhe): SalvarEdicaoDraft {
-return {
-id: tarefa.id,
-version: tarefa.version,
-listaId: tarefa.listaId,
-titulo: tarefa.titulo,
-details: { descricao: tarefa.details.descricao ?? null },
-prioridade: tarefa.prioridade,
-prazo: tarefa.prazo,
-responsavelId: tarefa.responsavelId,
-};
-}
-function checklistDraftFromTarefa(tarefa: TarefaDetalhe): SalvarChecklistDraft {
-return {
-tarefaId: tarefa.id,
-itens: tarefa.checklist.map((item) => ({
-id: item.id,
-version: item.version,
-details: { descricao: item.details.descricao },
-ordem: item.ordem,
-feito: item.feito,
-})),
-};
-}
-function toEntrada(item: ChecklistItemDraft, index: number): ItemChecklistEntrada | null {
-const descricao = item.details.descricao;
-if (descricao === null || descricao.trim() === '') return null;
-return {
-...(item.id !== null ? { id: item.id } : {}),
-...(item.version !== null ? { version: item.version } : {}),
-details: { descricao },
-ordem: item.ordem ?? index + 1,
-feito: item.feito ?? false,
-};
-}
-function toEntradas(items: ChecklistItemDraft[]): ItemChecklistEntrada[] | null {
-const result: ItemChecklistEntrada[] = [];
-for (let index = 0; index < items.length; index += 1) {
-const entrada = toEntrada(items[index], index);
-if (entrada === null) return null;
-result.push(entrada);
-}
-return result;
-}
+
+/** States whose source is a request output: hydrated from the shared state when a visit starts. */
+const DATA_KEYS = [
+'ui.tarefas.minhas_tarefas.tarefas',
+'ui.tarefas.minhas_tarefas.quantidadeDependeDeMim',
+'ui.tarefas.minhas_tarefas.quantidadeResponsavel',
+'ui.tarefas.minhas_tarefas.quantidadeCriadas',
+'ui.tarefas.minhas_tarefas.quantidadeVenceHoje',
+'ui.tarefas.minhas_tarefas.quantidadeAtrasadas',
+'ui.tarefas.minhas_tarefas.tarefa',
+'ui.tarefas.minhas_tarefas.historico',
+'ui.tarefas.minhas_tarefas.podeCriarTarefasEfetivo',
+'ui.tarefas.minhas_tarefas.participantes',
+'ui.tarefas.minhas_tarefas.listas',
+];
+
 export class TarefasMinhas_tarefasShared extends StateLitElement {
-/** state tarefas — the page of my tasks (created by me or assigned to me), summarized with list, owner, creator, deadline, status and indicators; source qryMinhasTarefas.tarefas; organism listaTarefas */
-@property({ attribute: false }) tarefas: TarefasPage | null = null;
-/** state tarefa — the open task in full detail (fields, cycle milestones, return reason, my role, ordered checklist); source qryTarefa.tarefa; organisms acoesTarefa, detalheTarefa, formTarefa, historicoTarefa */
-@property({ attribute: false }) tarefa: TarefaDetalhe | null = null;
-/** state listas — active lists (projects or areas) that can receive tasks; source qryListasAtivas.listas; organism formTarefa */
-@property({ attribute: false }) listas: ListaOpcao[] = [];
-/** state membros — active team members found by name, to choose or change the owner; source qryBuscarMembros.membros; organism formTarefa */
-@property({ attribute: false }) membros: MembroOpcao[] = [];
-/** state selectedTarefa — the id of the task selected in listaTarefas (the record itself is in tarefa); source entry.params.tarefaId; organisms detalheTarefa, listaTarefas; kept in the URL */
+/** state tarefas — the page of resumed tarefas shown in the list (the group named by grupoTarefas), with lista, responsavel, creator, who acts now, checklist progress and due/returned marks; source qryMinhasTarefas.tarefas; organism tarefasLista */
+@property({ attribute: false }) tarefas: TarefasPagina | null = null;
+/** state quantidadeDependeDeMim — total of open tarefas that depend on the session person now; source qryMinhasTarefas.quantidadeDependeDeMim; organism tarefasLista */
+@property({ attribute: false }) quantidadeDependeDeMim: number = 0;
+/** state quantidadeResponsavel — total of open tarefas the session person is responsible for; source qryMinhasTarefas.quantidadeResponsavel; organism tarefasLista */
+@property({ attribute: false }) quantidadeResponsavel: number = 0;
+/** state quantidadeCriadas — total of open tarefas the session person created; source qryMinhasTarefas.quantidadeCriadas; organism tarefasLista */
+@property({ attribute: false }) quantidadeCriadas: number = 0;
+/** state quantidadeVenceHoje — total of tarefas that are due today; source qryMinhasTarefas.quantidadeVenceHoje; organism tarefasLista */
+@property({ attribute: false }) quantidadeVenceHoje: number = 0;
+/** state quantidadeAtrasadas — total of late tarefas; source qryMinhasTarefas.quantidadeAtrasadas; organism tarefasLista */
+@property({ attribute: false }) quantidadeAtrasadas: number = 0;
+/** state tarefa — the opened tarefa with all its fields, names, parent, return/resume/conclusion/cancel marks, the session person's role (souResponsavel, souCriador) and the ordered checklist; this is the selected record; source qryTarefa.tarefa; organisms tarefaAcoes, tarefaDetalhe, tarefaForm */
+@property({ attribute: false }) tarefa: TarefaCompleta | null = null;
+/** state historico — the lifecycle events of the opened tarefa in chronological order; source qryTarefa.historico; organism tarefaHistorico */
+@property({ attribute: false }) historico: EventoHistorico[] = [];
+/** state podeCriarTarefasEfetivo — whether the session person can create tarefas (true when not configured); source qryMinhasTarefas.podeCriarTarefasEfetivo; organism tarefaForm */
+@property({ attribute: false }) podeCriarTarefasEfetivo: boolean = false;
+/** state participantes — active participants that can be chosen as responsavel, with status and whether they accept tarefas; source qryResponsaveis.participantes; organism tarefaForm */
+@property({ attribute: false }) participantes: ParticipanteOpcao[] = [];
+/** state listas — the lists of tarefas (id and name) to choose the lista of a tarefa; source qryListas.listas; organism tarefaForm */
+@property({ attribute: false }) listas: ListaTarefasNome[] = [];
+/** state selectedTarefa — the id of the tarefa selected in tarefasLista; the record itself is in `tarefa`; source entry.params.tarefaId; organisms tarefaDetalhe, tarefasLista; lives in the URL */
 @property({ attribute: false }) selectedTarefa: string | null = null;
-/** state filtro — the quick filter of the list (criadasPorMim, atribuidasAMim, emRevisao, devolvidas; null means all mine); source entry.params.filtro; organism listaTarefas; persisted */
-@property({ attribute: false }) filtro: FiltroTarefas | null = null;
-/** state cmdCriarTarefaDraft — form draft to create a task (includes the generated creation key); source cmdCriarTarefa.input; organism formTarefa */
+/** state grupoTarefas — the group of the list currently loaded in `tarefas` ('dependeDeMim' on open); source qryTarefasDoGrupo input (completed by the shared) */
+@property({ attribute: false }) grupoTarefas: GrupoTarefas = 'dependeDeMim';
+/** state cmdCriarTarefaDraft — form draft of the new tarefa (titulo, descricao, prioridade, prazo, lista, responsavel, tarefa pai, etiquetas), prefilled by the entry params listaId, responsavelId and tarefaPaiId; source cmdCriarTarefa.input; organism tarefaForm */
 @property({ attribute: false }) cmdCriarTarefaDraft: CriarTarefaDraft = emptyCriarTarefaDraft();
-/** state cmdSalvarEdicaoDraft — form draft to edit the open task, prefilled from it; source cmdSalvarEdicao.input; organism formTarefa */
-@property({ attribute: false }) cmdSalvarEdicaoDraft: SalvarEdicaoDraft = emptyEdicaoDraft();
-/** state cmdSalvarChecklistDraft — form draft of the checklist of the open task, prefilled from it; source cmdSalvarChecklist.input; organism formTarefa */
-@property({ attribute: false }) cmdSalvarChecklistDraft: SalvarChecklistDraft = emptyChecklistDraft();
-/** state cmdDevolverDraft — draft with the reason to send the open task back for adjustment; source cmdDevolver.input; organism acoesTarefa */
+/** state cmdAdicionarItensChecklistDraft — form draft of the new checklist items to add to the opened tarefa; source cmdAdicionarItensChecklist.input; organism tarefaForm */
+@property({ attribute: false }) cmdAdicionarItensChecklistDraft: AdicionarItensChecklistDraft = emptyAdicionarItensChecklistDraft();
+/** state cmdSalvarAlteracoesDraft — form draft editing the opened tarefa, filled from `tarefa` when it loads or is saved; source cmdSalvarAlteracoes.input; organism tarefaForm */
+@property({ attribute: false }) cmdSalvarAlteracoesDraft: SalvarAlteracoesDraft = emptySalvarAlteracoesDraft();
+/** state cmdAjustarChecklistDraft — form draft of the changes to existing checklist items of the opened tarefa (only changed leaves filled); source cmdAjustarChecklist.input; organism tarefaForm */
+@property({ attribute: false }) cmdAjustarChecklistDraft: AjustarChecklistDraft = emptyAjustarChecklistDraft();
+/** state cmdDevolverDraft — draft with the reason typed to send the opened tarefa back to the responsavel; source cmdDevolver.input; organism tarefaAcoes */
 @property({ attribute: false }) cmdDevolverDraft: DevolverDraft = emptyDevolverDraft();
-/** state pageStatus — overall status of the page load: loading while the initial requests run, error if one failed, empty when the loaded lists are empty, success otherwise */
-@property({ attribute: false }) pageStatus: PageStatus = 'idle';
-/** state qryMinhasTarefasStatus — status of the request qryMinhasTarefas; source status */
-@property({ attribute: false }) qryMinhasTarefasStatus: RequestStatus = 'idle';
-/** state qryMinhasTarefasError — error of the request qryMinhasTarefas, null when none; source status */
-@property({ attribute: false }) qryMinhasTarefasError: ErrorState = null;
-/** state qryTarefaStatus — status of the request qryTarefa; source status */
-@property({ attribute: false }) qryTarefaStatus: RequestStatus = 'idle';
-/** state qryTarefaError — error of the request qryTarefa, null when none; source status */
-@property({ attribute: false }) qryTarefaError: ErrorState = null;
-/** state qryListasAtivasStatus — status of the request qryListasAtivas; source status */
-@property({ attribute: false }) qryListasAtivasStatus: RequestStatus = 'idle';
-/** state qryListasAtivasError — error of the request qryListasAtivas, null when none; source status */
-@property({ attribute: false }) qryListasAtivasError: ErrorState = null;
-/** state qryBuscarMembrosStatus — status of the request qryBuscarMembros; source status */
-@property({ attribute: false }) qryBuscarMembrosStatus: RequestStatus = 'idle';
-/** state qryBuscarMembrosError — error of the request qryBuscarMembros, null when none; source status */
-@property({ attribute: false }) qryBuscarMembrosError: ErrorState = null;
-/** state cmdCriarTarefaStatus — status of the command cmdCriarTarefa; source status */
-@property({ attribute: false }) cmdCriarTarefaStatus: RequestStatus = 'idle';
-/** state cmdCriarTarefaError — error of the command cmdCriarTarefa, null when none; source status */
-@property({ attribute: false }) cmdCriarTarefaError: ErrorState = null;
-/** state cmdSalvarEdicaoStatus — status of the command cmdSalvarEdicao; source status */
-@property({ attribute: false }) cmdSalvarEdicaoStatus: RequestStatus = 'idle';
-/** state cmdSalvarEdicaoError — error of the command cmdSalvarEdicao, null when none; source status */
-@property({ attribute: false }) cmdSalvarEdicaoError: ErrorState = null;
-/** state cmdSalvarChecklistStatus — status of the command cmdSalvarChecklist; source status */
-@property({ attribute: false }) cmdSalvarChecklistStatus: RequestStatus = 'idle';
-/** state cmdSalvarChecklistError — error of the command cmdSalvarChecklist, null when none; source status */
-@property({ attribute: false }) cmdSalvarChecklistError: ErrorState = null;
-/** state cmdIniciarStatus — status of the command cmdIniciar; source status */
-@property({ attribute: false }) cmdIniciarStatus: RequestStatus = 'idle';
-/** state cmdIniciarError — error of the command cmdIniciar, null when none; source status */
-@property({ attribute: false }) cmdIniciarError: ErrorState = null;
-/** state cmdEnviarRevisaoStatus — status of the command cmdEnviarRevisao; source status */
-@property({ attribute: false }) cmdEnviarRevisaoStatus: RequestStatus = 'idle';
-/** state cmdEnviarRevisaoError — error of the command cmdEnviarRevisao, null when none; source status */
-@property({ attribute: false }) cmdEnviarRevisaoError: ErrorState = null;
-/** state cmdAceitarStatus — status of the command cmdAceitar; source status */
-@property({ attribute: false }) cmdAceitarStatus: RequestStatus = 'idle';
-/** state cmdAceitarError — error of the command cmdAceitar, null when none; source status */
-@property({ attribute: false }) cmdAceitarError: ErrorState = null;
-/** state cmdDevolverStatus — status of the command cmdDevolver; source status */
-@property({ attribute: false }) cmdDevolverStatus: RequestStatus = 'idle';
-/** state cmdDevolverError — error of the command cmdDevolver, null when none; source status */
-@property({ attribute: false }) cmdDevolverError: ErrorState = null;
-/** state cmdCancelarStatus — status of the command cmdCancelar; source status */
-@property({ attribute: false }) cmdCancelarStatus: RequestStatus = 'idle';
-/** state cmdCancelarError — error of the command cmdCancelar, null when none; source status */
-@property({ attribute: false }) cmdCancelarError: ErrorState = null;
+/** state pageStatus — overall state of the page: idle, loading while the opening load runs, empty when the loaded list is empty, success, or error */
+@property({ attribute: false }) pageStatus: 'idle' | 'loading' | 'empty' | 'success' | 'error' = 'idle';
 /** state scenary — the visible scene of the page; '' until the page shows its first scene */
 @property({ attribute: false }) scenary = '';
-private prefillListaId: string | null = null;
-private prefillResponsavelId: string | null = null;
-private tarefaSeq = 0;
-private membrosSeq = 0;
-private readonly onPopState = (): void => {
-if (window.location.pathname.endsWith(ROUTE_SUFFIX)) {
-this.resetVisit();
-this.enterPage();
-}
-};
+/** state qryMinhasTarefasStatus — status of the request qryMinhasTarefas */
+@property({ attribute: false }) qryMinhasTarefasStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state qryMinhasTarefasError — error of the request qryMinhasTarefas, null when none */
+@property({ attribute: false }) qryMinhasTarefasError: ErrorState = null;
+/** state qryTarefasDoGrupoStatus — status of the request qryTarefasDoGrupo */
+@property({ attribute: false }) qryTarefasDoGrupoStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state qryTarefasDoGrupoError — error of the request qryTarefasDoGrupo, null when none */
+@property({ attribute: false }) qryTarefasDoGrupoError: ErrorState = null;
+/** state qryTarefaStatus — status of the request qryTarefa */
+@property({ attribute: false }) qryTarefaStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state qryTarefaError — error of the request qryTarefa, null when none */
+@property({ attribute: false }) qryTarefaError: ErrorState = null;
+/** state qryResponsaveisStatus — status of the request qryResponsaveis */
+@property({ attribute: false }) qryResponsaveisStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state qryResponsaveisError — error of the request qryResponsaveis, null when none */
+@property({ attribute: false }) qryResponsaveisError: ErrorState = null;
+/** state qryListasStatus — status of the request qryListas */
+@property({ attribute: false }) qryListasStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state qryListasError — error of the request qryListas, null when none */
+@property({ attribute: false }) qryListasError: ErrorState = null;
+/** state cmdCriarTarefaStatus — status of the command cmdCriarTarefa */
+@property({ attribute: false }) cmdCriarTarefaStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdCriarTarefaError — error of the command cmdCriarTarefa, null when none */
+@property({ attribute: false }) cmdCriarTarefaError: ErrorState = null;
+/** state cmdAdicionarItensChecklistStatus — status of the command cmdAdicionarItensChecklist */
+@property({ attribute: false }) cmdAdicionarItensChecklistStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdAdicionarItensChecklistError — error of the command cmdAdicionarItensChecklist, null when none */
+@property({ attribute: false }) cmdAdicionarItensChecklistError: ErrorState = null;
+/** state cmdSalvarAlteracoesStatus — status of the command cmdSalvarAlteracoes */
+@property({ attribute: false }) cmdSalvarAlteracoesStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdSalvarAlteracoesError — error of the command cmdSalvarAlteracoes, null when none */
+@property({ attribute: false }) cmdSalvarAlteracoesError: ErrorState = null;
+/** state cmdAjustarChecklistStatus — status of the command cmdAjustarChecklist */
+@property({ attribute: false }) cmdAjustarChecklistStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdAjustarChecklistError — error of the command cmdAjustarChecklist, null when none */
+@property({ attribute: false }) cmdAjustarChecklistError: ErrorState = null;
+/** state cmdIniciarStatus — status of the command cmdIniciar */
+@property({ attribute: false }) cmdIniciarStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdIniciarError — error of the command cmdIniciar, null when none */
+@property({ attribute: false }) cmdIniciarError: ErrorState = null;
+/** state cmdEnviarParaRevisaoStatus — status of the command cmdEnviarParaRevisao */
+@property({ attribute: false }) cmdEnviarParaRevisaoStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdEnviarParaRevisaoError — error of the command cmdEnviarParaRevisao, null when none */
+@property({ attribute: false }) cmdEnviarParaRevisaoError: ErrorState = null;
+/** state cmdAceitarStatus — status of the command cmdAceitar */
+@property({ attribute: false }) cmdAceitarStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdAceitarError — error of the command cmdAceitar, null when none */
+@property({ attribute: false }) cmdAceitarError: ErrorState = null;
+/** state cmdDevolverStatus — status of the command cmdDevolver */
+@property({ attribute: false }) cmdDevolverStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdDevolverError — error of the command cmdDevolver, null when none */
+@property({ attribute: false }) cmdDevolverError: ErrorState = null;
+/** state cmdRetomarStatus — status of the command cmdRetomar */
+@property({ attribute: false }) cmdRetomarStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdRetomarError — error of the command cmdRetomar, null when none */
+@property({ attribute: false }) cmdRetomarError: ErrorState = null;
+/** state cmdCancelarStatus — status of the command cmdCancelar */
+@property({ attribute: false }) cmdCancelarStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+/** state cmdCancelarError — error of the command cmdCancelar, null when none */
+@property({ attribute: false }) cmdCancelarError: ErrorState = null;
+
+// ---------------------------------------------------------------- plumbing
+
 private publish<M extends StateMember>(member: M, value: this[M]): void {
 (this as unknown as Record<string, unknown>)[member] = value;
 setState(`ui.tarefas.minhas_tarefas.${member}`, value);
-if (member === 'filtro') {
-this.persistFiltro(this.filtro);
-}
 if (member === 'selectedTarefa') {
-this.syncSelectedUrl(this.selectedTarefa);
+this.syncTarefaIdToUrl(this.selectedTarefa);
 }
 }
+
 private assignState(key: string, value: unknown): void {
 const member = STATE_MEMBER_BY_KEY[key];
 if (member) (this as unknown as Record<string, unknown>)[member] = value;
 }
-private persistFiltro(value: FiltroTarefas | null): void {
-try {
-if (value === null) {
-localStorage.removeItem(`${STORAGE_PREFIX}filtro`);
-} else {
-localStorage.setItem(`${STORAGE_PREFIX}filtro`, value);
-}
-} catch {
-// storage unavailable: the filter just does not persist
-}
-}
-private syncSelectedUrl(value: string | null): void {
+
+private syncTarefaIdToUrl(id: string | null): void {
 try {
 const url = new URL(window.location.href);
-if (value === null) {
+if (id === null) {
 url.searchParams.delete('tarefaId');
 } else {
-url.searchParams.set('tarefaId', value);
+url.searchParams.set('tarefaId', id);
 }
-history.replaceState(history.state, '', `${url.pathname}${url.search}${url.hash}`);
+window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
 } catch {
-// URL not writable: the selection just stays out of the query
+// the URL is only a mirror of the selection
 }
 }
-private readParam(name: string, useLocalStorage: boolean): string | null {
+
+private stateKey(member: string): string {
+return `ui.tarefas.minhas_tarefas.${member}`;
+}
+
+private readParam(name: string, useStorage: boolean): string | null {
 const raw = new URLSearchParams(window.location.search).get(name);
 if (raw !== null && raw !== '') return raw;
-if (useLocalStorage) {
+if (useStorage) {
 try {
-const stored = localStorage.getItem(`${STORAGE_PREFIX}${name}`);
+const stored = localStorage.getItem(`tarefas.minhas_tarefas.${name}`);
 if (stored !== null && stored !== '') return stored;
 } catch {
-return null;
+// storage unavailable
 }
 }
 return null;
 }
+
+private hydrateData(): void {
+for (const key of DATA_KEYS) {
+const value = getState(key);
+if (value !== undefined) this.assignState(key, value);
+}
+}
+
+/** Publishes the initial value of every transient member: a new visit never sees an old error, scene or draft. */
+private resetVisit(): void {
+this.publish('pageStatus', 'idle');
+this.publish('scenary', '');
+this.publish('grupoTarefas', 'dependeDeMim');
+this.publish('qryMinhasTarefasStatus', 'idle');
+this.publish('qryMinhasTarefasError', null);
+this.publish('qryTarefasDoGrupoStatus', 'idle');
+this.publish('qryTarefasDoGrupoError', null);
+this.publish('qryTarefaStatus', 'idle');
+this.publish('qryTarefaError', null);
+this.publish('qryResponsaveisStatus', 'idle');
+this.publish('qryResponsaveisError', null);
+this.publish('qryListasStatus', 'idle');
+this.publish('qryListasError', null);
+this.publish('cmdCriarTarefaStatus', 'idle');
+this.publish('cmdCriarTarefaError', null);
+this.publish('cmdAdicionarItensChecklistStatus', 'idle');
+this.publish('cmdAdicionarItensChecklistError', null);
+this.publish('cmdSalvarAlteracoesStatus', 'idle');
+this.publish('cmdSalvarAlteracoesError', null);
+this.publish('cmdAjustarChecklistStatus', 'idle');
+this.publish('cmdAjustarChecklistError', null);
+this.publish('cmdIniciarStatus', 'idle');
+this.publish('cmdIniciarError', null);
+this.publish('cmdEnviarParaRevisaoStatus', 'idle');
+this.publish('cmdEnviarParaRevisaoError', null);
+this.publish('cmdAceitarStatus', 'idle');
+this.publish('cmdAceitarError', null);
+this.publish('cmdDevolverStatus', 'idle');
+this.publish('cmdDevolverError', null);
+this.publish('cmdRetomarStatus', 'idle');
+this.publish('cmdRetomarError', null);
+this.publish('cmdCancelarStatus', 'idle');
+this.publish('cmdCancelarError', null);
+this.publish('cmdCriarTarefaDraft', emptyCriarTarefaDraft());
+this.publish('cmdAdicionarItensChecklistDraft', emptyAdicionarItensChecklistDraft());
+this.publish('cmdSalvarAlteracoesDraft', emptySalvarAlteracoesDraft());
+this.publish('cmdAjustarChecklistDraft', emptyAjustarChecklistDraft());
+this.publish('cmdDevolverDraft', emptyDevolverDraft());
+}
+
+/** A command result lives until the person changes what it acted on. */
+private resetCommandResults(): void {
+if (this.cmdCriarTarefaStatus !== 'idle') this.publish('cmdCriarTarefaStatus', 'idle');
+if (this.cmdCriarTarefaError !== null) this.publish('cmdCriarTarefaError', null);
+if (this.cmdAdicionarItensChecklistStatus !== 'idle') this.publish('cmdAdicionarItensChecklistStatus', 'idle');
+if (this.cmdAdicionarItensChecklistError !== null) this.publish('cmdAdicionarItensChecklistError', null);
+if (this.cmdSalvarAlteracoesStatus !== 'idle') this.publish('cmdSalvarAlteracoesStatus', 'idle');
+if (this.cmdSalvarAlteracoesError !== null) this.publish('cmdSalvarAlteracoesError', null);
+if (this.cmdAjustarChecklistStatus !== 'idle') this.publish('cmdAjustarChecklistStatus', 'idle');
+if (this.cmdAjustarChecklistError !== null) this.publish('cmdAjustarChecklistError', null);
+if (this.cmdIniciarStatus !== 'idle') this.publish('cmdIniciarStatus', 'idle');
+if (this.cmdIniciarError !== null) this.publish('cmdIniciarError', null);
+if (this.cmdEnviarParaRevisaoStatus !== 'idle') this.publish('cmdEnviarParaRevisaoStatus', 'idle');
+if (this.cmdEnviarParaRevisaoError !== null) this.publish('cmdEnviarParaRevisaoError', null);
+if (this.cmdAceitarStatus !== 'idle') this.publish('cmdAceitarStatus', 'idle');
+if (this.cmdAceitarError !== null) this.publish('cmdAceitarError', null);
+if (this.cmdDevolverStatus !== 'idle') this.publish('cmdDevolverStatus', 'idle');
+if (this.cmdDevolverError !== null) this.publish('cmdDevolverError', null);
+if (this.cmdRetomarStatus !== 'idle') this.publish('cmdRetomarStatus', 'idle');
+if (this.cmdRetomarError !== null) this.publish('cmdRetomarError', null);
+if (this.cmdCancelarStatus !== 'idle') this.publish('cmdCancelarStatus', 'idle');
+if (this.cmdCancelarError !== null) this.publish('cmdCancelarError', null);
+}
+
+private applyEntryParams(): void {
+const listaId = this.readParam('listaId', true);
+const responsavelId = this.readParam('responsavelId', true);
+const tarefaPaiId = this.readParam('tarefaPaiId', true);
+this.publish('cmdCriarTarefaDraft', { ...emptyCriarTarefaDraft(), listaId, responsavelId, tarefaPaiId });
+const tarefaId = this.readParam('tarefaId', false);
+void this.qryTarefa(tarefaId);
+}
+
+private onPopState = (): void => {
+if (!window.location.pathname.endsWith('/tarefas/minhas_tarefas')) return;
+this.resetVisit();
+this.applyEntryParams();
+void this.qryMinhasTarefas();
+};
+
 public connectedCallback(): void {
 super.connectedCallback();
 this.hydrateData();
 this.resetVisit();
 subscribe([...STATE_KEYS], this);
 window.addEventListener('popstate', this.onPopState);
-this.enterPage();
+this.applyEntryParams();
+void this.qryMinhasTarefas();
 }
+
 public disconnectedCallback(): void {
 window.removeEventListener('popstate', this.onPopState);
 unsubscribe([...STATE_KEYS], this);
 super.disconnectedCallback();
 }
+
 public handleIcaStateChange(key: string, value: any): void {
 if (!(key in STATE_MEMBER_BY_KEY)) {
 super.handleIcaStateChange(key, value);
@@ -405,562 +598,506 @@ if (value === undefined) return;
 this.assignState(key, value);
 this.requestUpdate();
 }
-private hydrateData(): void {
-for (const member of DATA_MEMBERS) {
-const key = `ui.tarefas.minhas_tarefas.${member}`;
-const stored = getState(key);
-if (stored !== undefined) this.assignState(key, stored);
-}
-}
-/** Starts a fresh visit: transient members go back to their initial value. */
-private resetVisit(): void {
-this.tarefaSeq += 1;
-this.membrosSeq += 1;
-this.publish('cmdCriarTarefaDraft', emptyCriarTarefaDraft());
-this.publish('cmdSalvarEdicaoDraft', emptyEdicaoDraft());
-this.publish('cmdSalvarChecklistDraft', emptyChecklistDraft());
-this.publish('cmdDevolverDraft', emptyDevolverDraft());
-this.publish('pageStatus', 'idle');
-this.publish('scenary', '');
-this.resetQueryResults();
-this.resetCommandResults();
-}
-private enterPage(): void {
-this.applyEntryParams();
-void this.initialLoad();
-}
-private applyEntryParams(): void {
-this.publish('filtro', toFiltro(this.readParam('filtro', true)));
-this.prefillListaId = this.readParam('listaId', true);
-this.prefillResponsavelId = this.readParam('responsavelId', true);
-this.publish('cmdCriarTarefaDraft', this.prefilledCriarDraft());
-const tarefaId = this.readParam('tarefaId', false);
-this.publish('selectedTarefa', tarefaId);
-if (tarefaId === null) {
-this.publish('tarefa', null);
-}
-}
-private prefilledCriarDraft(): CriarTarefaDraft {
-return {
-...emptyCriarTarefaDraft(),
-listaId: this.prefillListaId,
-responsavelId: this.prefillResponsavelId,
-};
-}
-private async initialLoad(): Promise<void> {
-const selected = this.selectedTarefa;
-await Promise.all([
-this.qryMinhasTarefas(),
-this.qryListasAtivas(),
-selected !== null ? this.qryTarefa(selected) : Promise.resolve(),
-]);
-}
-private refreshPageStatus(): void {
-const tarefasStatus = this.qryMinhasTarefasStatus;
-const listasStatus = this.qryListasAtivasStatus;
-if (tarefasStatus === 'loading' || listasStatus === 'loading') {
-this.publish('pageStatus', 'loading');
-return;
-}
-if (tarefasStatus === 'error' || listasStatus === 'error') {
-this.publish('pageStatus', 'error');
-return;
-}
-const tarefasCount = this.tarefas === null ? 0 : this.tarefas.items.length;
-if (tarefasCount === 0 && this.listas.length === 0) {
-this.publish('pageStatus', 'empty');
-return;
-}
-this.publish('pageStatus', 'success');
-}
-// ---- status helpers ----
-private setStatus(request: RequestId, status: RequestStatus): void {
-this.publish(`${request}Status` as StatusMember, status);
-}
-private setError(request: RequestId, error: ErrorState): void {
-this.publish(`${request}Error` as ErrorMember, error);
-}
-private statusOf(request: RequestId): RequestStatus {
-return this[`${request}Status` as StatusMember];
-}
-private fail(request: RequestId, error: ErrorState): void {
-this.setError(request, error);
-this.setStatus(request, 'error');
-}
-private failRequired(request: RequestId, stateKeys: string[]): void {
-this.fail(request, { code: 'client.requiredMissing', message: '', details: { stateKeys } });
-}
-private toError(error: ErrorState): ErrorState {
-if (error !== null) return error;
-return { code: 'client.unexpected', message: '', details: { name: 'noResponse' } };
-}
-private unexpectedError(error: unknown): ErrorState {
-const name = error instanceof Error ? error.name : 'unknown';
-return { code: 'client.unexpected', message: '', details: { name } };
-}
-/** Query results go back to idle at the start of a visit. */
-private resetQueryResults(): void {
-this.publish('qryMinhasTarefasError', null);
-this.publish('qryMinhasTarefasStatus', 'idle');
-this.publish('qryTarefaError', null);
-this.publish('qryTarefaStatus', 'idle');
-this.publish('qryListasAtivasError', null);
-this.publish('qryListasAtivasStatus', 'idle');
-this.publish('qryBuscarMembrosError', null);
-this.publish('qryBuscarMembrosStatus', 'idle');
-}
-/** Within the visit a command result lives until the person changes what it acted on. */
-private resetCommandResults(): void {
-this.publish('cmdCriarTarefaError', null);
-this.publish('cmdCriarTarefaStatus', 'idle');
-this.publish('cmdSalvarEdicaoError', null);
-this.publish('cmdSalvarEdicaoStatus', 'idle');
-this.publish('cmdSalvarChecklistError', null);
-this.publish('cmdSalvarChecklistStatus', 'idle');
-this.publish('cmdIniciarError', null);
-this.publish('cmdIniciarStatus', 'idle');
-this.publish('cmdEnviarRevisaoError', null);
-this.publish('cmdEnviarRevisaoStatus', 'idle');
-this.publish('cmdAceitarError', null);
-this.publish('cmdAceitarStatus', 'idle');
-this.publish('cmdDevolverError', null);
-this.publish('cmdDevolverStatus', 'idle');
-this.publish('cmdCancelarError', null);
-this.publish('cmdCancelarStatus', 'idle');
-}
-// ---- scene, selection, drafts ----
-/** scene — publishes the visible scene of the page (value is the scene id; '' for none). */
-public setScenario(value: string): void {
-this.publish('scenary', value);
-this.resetCommandResults();
-}
-/** select — opens a task: publishes its id in selectedTarefa and loads the record into tarefa (and fills the edit and checklist drafts from it). Pass null (or '') to clear the selection and the open task. */
-public async selectDetalheTarefa(id: string | null): Promise<void> {
-const next = id === '' ? null : id;
-this.resetCommandResults();
-this.publish('selectedTarefa', next);
-if (next === null) {
-this.tarefaSeq += 1;
-this.publish('tarefa', null);
-this.publish('cmdSalvarEdicaoDraft', emptyEdicaoDraft());
-this.publish('cmdSalvarChecklistDraft', emptyChecklistDraft());
-this.publish('cmdDevolverDraft', emptyDevolverDraft());
-return;
-}
-await this.qryTarefa(next);
-}
-/** draft — replaces the create-task draft (title, description, list, priority, deadline, owner, checklist). The creation key of the draft is kept. */
-public setCmdCriarTarefaDraft(value: CriarTarefaDraft): void {
-this.publish('cmdCriarTarefaDraft', { ...value, chaveCriacao: this.cmdCriarTarefaDraft.chaveCriacao });
-this.resetCommandResults();
-}
-/** draft — clears the create-task draft (as when the form opens) and generates a new creation key. */
-public clearCmdCriarTarefaDraft(): void {
-this.publish('cmdCriarTarefaDraft', emptyCriarTarefaDraft());
-this.resetCommandResults();
-}
-/** draft — replaces the edit draft of the open task (list, title, description, priority, deadline, owner); keep id and version from the draft. */
-public setCmdSalvarEdicaoDraft(value: SalvarEdicaoDraft): void {
-this.publish('cmdSalvarEdicaoDraft', value);
-this.resetCommandResults();
-}
-/** draft — replaces the checklist draft of the open task (edit descriptions, order, mark items done, add items without id). */
-public setCmdSalvarChecklistDraft(value: SalvarChecklistDraft): void {
-this.publish('cmdSalvarChecklistDraft', value);
-this.resetCommandResults();
-}
-/** draft — replaces the draft with the reason to send the open task back for adjustment. */
-public setCmdDevolverDraft(value: DevolverDraft): void {
-this.publish('cmdDevolverDraft', value);
-this.resetCommandResults();
-}
-// ---- queries ----
-/** request qryMinhasTarefas — lists, paged, the tasks I created or own, with the quick filter; redraws tarefas (replace, or append the next page when append is true; page, pageSize and hasMore live in the list); filtro: the quick filter (omit to keep the current one, null for all mine; a new value is published and loads from the first page); page: page to load (default 1); append: true for a load-more (does nothing unless tarefas.hasMore) */
-public async qryMinhasTarefas(filtro: FiltroTarefas | null = this.filtro, page = 1, append = false): Promise<void> {
-if (this.qryMinhasTarefasStatus === 'loading') return;
-const current = this.tarefas;
-if (append && (current === null || !current.hasMore)) return;
-if (filtro !== this.filtro) {
-this.publish('filtro', filtro);
-}
-this.setStatus('qryMinhasTarefas', 'loading');
-this.setError('qryMinhasTarefas', null);
-if (!append) {
-this.refreshPageStatus();
-}
+
+// ------------------------------------------------------------- run helpers
+
+private async runQuery<T>(
+id: QueryId,
+call: () => Promise<BffResult<T>>,
+onSuccess: (output: T) => void,
+): Promise<boolean> {
+const statusMember = QUERY_STATUS_MEMBER[id];
+const errorMember = QUERY_ERROR_MEMBER[id];
+if (this[statusMember] === 'loading') return false;
+this.publish(statusMember, 'loading');
+this.publish(errorMember, null);
 try {
-const input: Input<'tarefas.minhas_tarefas.qryMinhasTarefas'> = {
-...(filtro !== null ? { filtro } : {}),
-page,
-pageSize: PAGE_SIZE,
-};
-const response = await execBff<Output<'tarefas.minhas_tarefas.qryMinhasTarefas'>>('tarefas.minhas_tarefas.qryMinhasTarefas', input, { mode: 'silent' });
+const response = await call();
 if (!response.ok || !response.data) {
-this.fail('qryMinhasTarefas', this.toError(response.error));
-} else {
-const loaded = response.data.tarefas;
-const base = this.tarefas;
-if (append && base !== null) {
-this.publish('tarefas', { ...loaded, items: [...base.items, ...loaded.items] });
-} else {
-this.publish('tarefas', loaded);
+this.publish(errorMember, response.error ?? unexpectedError(null));
+this.publish(statusMember, 'error');
+return false;
 }
-this.setStatus('qryMinhasTarefas', 'success');
-}
+onSuccess(response.data);
+this.publish(statusMember, 'success');
+return true;
 } catch (error) {
-this.fail('qryMinhasTarefas', this.unexpectedError(error));
-}
-this.refreshPageStatus();
-}
-/** request qryTarefa — reads one task with checklist and cycle milestones; redraws tarefa (replace) and refills the edit and checklist drafts from it; tarefaId: id of the task. Prefer selectDetalheTarefa to open a task. A newer call discards the answer of an older one. */
-public async qryTarefa(tarefaId: string): Promise<void> {
-this.tarefaSeq += 1;
-const seq = this.tarefaSeq;
-this.setStatus('qryTarefa', 'loading');
-this.setError('qryTarefa', null);
-try {
-const input: Input<'tarefas.minhas_tarefas.qryTarefa'> = { tarefaId };
-const response = await execBff<Output<'tarefas.minhas_tarefas.qryTarefa'>>('tarefas.minhas_tarefas.qryTarefa', input, { mode: 'silent' });
-if (seq !== this.tarefaSeq) return;
-if (!response.ok || !response.data) {
-this.fail('qryTarefa', this.toError(response.error));
-return;
-}
-const loaded = response.data.tarefa;
-this.publish('tarefa', loaded);
-this.publish('cmdSalvarEdicaoDraft', edicaoDraftFromTarefa(loaded));
-this.publish('cmdSalvarChecklistDraft', checklistDraftFromTarefa(loaded));
-this.publish('cmdDevolverDraft', emptyDevolverDraft());
-this.setStatus('qryTarefa', 'success');
-} catch (error) {
-if (seq !== this.tarefaSeq) return;
-this.fail('qryTarefa', this.unexpectedError(error));
+this.publish(errorMember, unexpectedError(error));
+this.publish(statusMember, 'error');
+return false;
 }
 }
-/** request qryListasAtivas — brings the active lists that can receive a task; redraws listas (replace); no arguments */
-public async qryListasAtivas(): Promise<void> {
-if (this.qryListasAtivasStatus === 'loading') return;
-this.setStatus('qryListasAtivas', 'loading');
-this.setError('qryListasAtivas', null);
-this.refreshPageStatus();
-try {
-const input: Input<'tarefas.minhas_tarefas.qryListasAtivas'> = {};
-const response = await execBff<Output<'tarefas.minhas_tarefas.qryListasAtivas'>>('tarefas.minhas_tarefas.qryListasAtivas', input, { mode: 'silent' });
-if (!response.ok || !response.data) {
-this.fail('qryListasAtivas', this.toError(response.error));
-} else {
-this.publish('listas', response.data.listas);
-this.setStatus('qryListasAtivas', 'success');
-}
-} catch (error) {
-this.fail('qryListasAtivas', this.unexpectedError(error));
-}
-this.refreshPageStatus();
-}
-/** request qryBuscarMembros — searches active team members by name to choose or change the owner; redraws membros (replace; an empty term clears it without calling); termo: part of the name typed. A newer call discards the answer of an older one. */
-public async qryBuscarMembros(termo: string): Promise<void> {
-this.membrosSeq += 1;
-const seq = this.membrosSeq;
-if (termo.trim() === '') {
-this.publish('membros', []);
-this.setStatus('qryBuscarMembros', 'idle');
-this.setError('qryBuscarMembros', null);
-return;
-}
-this.setStatus('qryBuscarMembros', 'loading');
-this.setError('qryBuscarMembros', null);
-try {
-const input: Input<'tarefas.minhas_tarefas.qryBuscarMembros'> = { termo };
-const response = await execBff<Output<'tarefas.minhas_tarefas.qryBuscarMembros'>>('tarefas.minhas_tarefas.qryBuscarMembros', input, { mode: 'silent' });
-if (seq !== this.membrosSeq) return;
-if (!response.ok || !response.data) {
-this.fail('qryBuscarMembros', this.toError(response.error));
-return;
-}
-this.publish('membros', response.data.membros);
-this.setStatus('qryBuscarMembros', 'success');
-} catch (error) {
-if (seq !== this.membrosSeq) return;
-this.fail('qryBuscarMembros', this.unexpectedError(error));
-}
-}
-// ---- commands ----
-private async runCommand(
-request: CommandId,
-call: (signal: AbortSignal) => Promise<{ ok: boolean; data: TarefaOutput | null; error: ErrorState }>,
-onSuccess: (tarefa: TarefaDetalhe) => void,
+
+private async runCommand<T>(
+id: CommandId,
+call: (signal: AbortSignal) => Promise<BffResult<T>>,
+onSuccess: (output: T) => void,
 ): Promise<void> {
-if (this.statusOf(request) === 'loading') return;
-this.setStatus(request, 'loading');
-this.setError(request, null);
+const statusMember = COMMAND_STATUS_MEMBER[id];
+const errorMember = COMMAND_ERROR_MEMBER[id];
+if (this[statusMember] === 'loading') return;
+this.publish(statusMember, 'loading');
+this.publish(errorMember, null);
 try {
-const response = await runBlockingUiAction(call);
+const response = await runBlockingUiAction((signal: AbortSignal) => call(signal));
 if (response === undefined) {
-this.fail(request, { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
+this.publish(errorMember, { code: 'client.unexpected', message: '', details: { name: 'aborted' } });
+this.publish(statusMember, 'error');
 return;
 }
 if (!response.ok || !response.data) {
-this.fail(request, this.toError(response.error));
+this.publish(errorMember, response.error ?? unexpectedError(null));
+this.publish(statusMember, 'error');
 return;
 }
-onSuccess(response.data.tarefa);
-this.setStatus(request, 'success');
+onSuccess(response.data);
+this.publish(statusMember, 'success');
 } catch (error) {
-this.fail(request, this.unexpectedError(error));
+this.publish(errorMember, unexpectedError(error));
+this.publish(statusMember, 'error');
 }
 }
-private currentTarefa(request: CommandId): TarefaDetalhe | null {
-if (this.tarefa === null) {
-this.failRequired(request, ['tarefa']);
-return null;
+
+private requiredMissing(id: CommandId, stateKeys: string[]): void {
+this.publish(COMMAND_ERROR_MEMBER[id], { code: 'client.requiredMissing', message: '', details: { stateKeys } });
+this.publish(COMMAND_STATUS_MEMBER[id], 'error');
 }
-return this.tarefa;
+
+/** Applies the output shared by every tarefa command: redraws the opened record, its history and the selection, and refills the edit draft from the saved record. */
+private applyTarefaOutput(output: TarefaOutput): void {
+this.publish('tarefa', output.tarefa);
+this.publish('historico', output.historico);
+this.publish('selectedTarefa', output.tarefa.id);
+this.publish('cmdSalvarAlteracoesDraft', draftFromTarefa(output.tarefa));
 }
-/** Whether a returned task still belongs to the list under the current quick filter (rules of the list route). */
-private belongsToList(tarefa: TarefaDetalhe): boolean {
-switch (this.filtro) {
-case null:
-return true;
-case 'criadasPorMim':
-return tarefa.souCriador;
-case 'atribuidasAMim':
-return tarefa.souResponsavel;
-case 'emRevisao':
-return tarefa.status === 'emRevisao';
-case 'devolvidas':
-return tarefa.details.devolvidaEm !== undefined && tarefa.status === 'emAndamento';
-default:
-return true;
+
+// ------------------------------------------------------------------ scene
+
+/** scene — publishes the visible scene of the page; also clears the result of every command */
+public setScenario(value: string): void {
+this.resetCommandResults();
+this.publish('scenary', value);
+}
+
+// ---------------------------------------------------------------- drafts
+
+/** draft — replaces the draft of the new tarefa (every leaf null until typed) */
+public setCmdCriarTarefaDraft(value: CriarTarefaDraft): void {
+this.resetCommandResults();
+this.publish('cmdCriarTarefaDraft', value);
+}
+
+/** draft — replaces the draft of the new checklist items to add to the opened tarefa */
+public setCmdAdicionarItensChecklistDraft(value: AdicionarItensChecklistDraft): void {
+this.resetCommandResults();
+this.publish('cmdAdicionarItensChecklistDraft', value);
+}
+
+/** draft — replaces the draft that edits the opened tarefa (title, description, priority, due date, lista, responsavel, parent, labels) */
+public setCmdSalvarAlteracoesDraft(value: SalvarAlteracoesDraft): void {
+this.resetCommandResults();
+this.publish('cmdSalvarAlteracoesDraft', value);
+}
+
+/** draft — replaces the draft of the changes to existing checklist items (fill id, version and only the leaves that change) */
+public setCmdAjustarChecklistDraft(value: AjustarChecklistDraft): void {
+this.resetCommandResults();
+this.publish('cmdAjustarChecklistDraft', value);
+}
+
+/** draft — replaces the draft with the reason to send the opened tarefa back */
+public setCmdDevolverDraft(value: DevolverDraft): void {
+this.resetCommandResults();
+this.publish('cmdDevolverDraft', value);
+}
+
+// --------------------------------------------------------------- queries
+
+/** request qryMinhasTarefas — opening load: the first page of the tarefas that depend on the session person now, the totals per group and due date, and whether the person can create tarefas; redraws tarefas (replace, or append more items when append is true), the five totals and podeCriarTarefasEfetivo (replace), grupoTarefas = 'dependeDeMim', and pageStatus; page: page to load (default 1), append: true adds the page to the loaded items (only when hasMore) */
+public async qryMinhasTarefas(page: number = 1, append: boolean = false): Promise<void> {
+if (this.qryMinhasTarefasStatus === 'loading') return;
+if (append && (!this.tarefas || !this.tarefas.hasMore || this.grupoTarefas !== 'dependeDeMim')) return;
+if (!append) this.publish('pageStatus', 'loading');
+const input: Input<'tarefas.minhas_tarefas.qryMinhasTarefas'> = { page, pageSize: PAGE_SIZE };
+const ok = await this.runQuery(
+'qryMinhasTarefas',
+() => execBff<Output<'tarefas.minhas_tarefas.qryMinhasTarefas'>>('tarefas.minhas_tarefas.qryMinhasTarefas', input, { mode: 'silent' }),
+(output) => {
+const current = this.tarefas;
+const next: TarefasPagina = append && current
+? { ...output.tarefas, items: [...current.items, ...output.tarefas.items] }
+: output.tarefas;
+this.publish('tarefas', next);
+this.publish('grupoTarefas', 'dependeDeMim');
+this.publish('quantidadeDependeDeMim', output.quantidadeDependeDeMim);
+this.publish('quantidadeResponsavel', output.quantidadeResponsavel);
+this.publish('quantidadeCriadas', output.quantidadeCriadas);
+this.publish('quantidadeVenceHoje', output.quantidadeVenceHoje);
+this.publish('quantidadeAtrasadas', output.quantidadeAtrasadas);
+this.publish('podeCriarTarefasEfetivo', output.podeCriarTarefasEfetivo);
+},
+);
+if (ok) {
+const loaded = this.tarefas;
+this.publish('pageStatus', !loaded || loaded.items.length === 0 ? 'empty' : 'success');
+} else if (!append) {
+this.publish('pageStatus', 'error');
 }
 }
-/** Updates the loaded row of the task by id, or removes it when it no longer belongs to the list. */
-private applyRow(tarefa: TarefaDetalhe): void {
-const page = this.tarefas;
-if (page === null) return;
-const current = page.items.find((row) => row.id === tarefa.id);
-if (current === undefined) return;
-if (!this.belongsToList(tarefa)) {
-this.publish('tarefas', { ...page, items: page.items.filter((row) => row.id !== tarefa.id) });
+
+/** request qryTarefasDoGrupo — loads a page of the session person's tarefas in one group (responsavel, criadas or dependeDeMim); redraws tarefas (replace, or append when append is true and the loaded group has more) and grupoTarefas; grupo: the group to show, page: page to load (default 1), append: true adds the page to the loaded items */
+public async qryTarefasDoGrupo(grupo: GrupoTarefas, page: number = 1, append: boolean = false): Promise<void> {
+if (this.qryTarefasDoGrupoStatus === 'loading') return;
+if (append && (!this.tarefas || !this.tarefas.hasMore || this.grupoTarefas !== grupo)) return;
+const input: Input<'tarefas.minhas_tarefas.qryTarefasDoGrupo'> = { grupo, page, pageSize: PAGE_SIZE };
+await this.runQuery(
+'qryTarefasDoGrupo',
+() => execBff<Output<'tarefas.minhas_tarefas.qryTarefasDoGrupo'>>('tarefas.minhas_tarefas.qryTarefasDoGrupo', input, { mode: 'silent' }),
+(output) => {
+const current = this.tarefas;
+const next: TarefasPagina = append && current
+? { ...output.tarefas, items: [...current.items, ...output.tarefas.items] }
+: output.tarefas;
+this.publish('tarefas', next);
+this.publish('grupoTarefas', grupo);
+},
+);
+}
+
+/** request qryTarefa — selects and opens a tarefa with its checklist, the person's role and its history; redraws selectedTarefa, tarefa and historico (replace) and refills cmdSalvarAlteracoesDraft from the record; tarefaId: id of the chosen tarefa, or null to clear the selection */
+public async qryTarefa(tarefaId: string | null): Promise<void> {
+this.resetCommandResults();
+if (tarefaId === null || tarefaId === '') {
+this.publish('selectedTarefa', null);
+this.publish('tarefa', null);
+this.publish('historico', []);
+this.publish('cmdSalvarAlteracoesDraft', emptySalvarAlteracoesDraft());
+this.publish('cmdAdicionarItensChecklistDraft', emptyAdicionarItensChecklistDraft());
+this.publish('cmdAjustarChecklistDraft', emptyAjustarChecklistDraft());
+this.publish('cmdDevolverDraft', emptyDevolverDraft());
+this.publish('qryTarefaStatus', 'idle');
+this.publish('qryTarefaError', null);
 return;
 }
-const updated: TarefaResumo = {
-id: tarefa.id,
-version: tarefa.version,
-titulo: tarefa.titulo,
-listaId: tarefa.listaId,
-lista: tarefa.lista,
-responsavelId: tarefa.responsavelId,
-responsavel: tarefa.responsavel,
-criadorId: tarefa.criadorId,
-criador: tarefa.criador,
-prioridade: tarefa.prioridade,
-prazo: tarefa.prazo,
-status: tarefa.status,
-details: {
-quantidadeSubtarefas: current.details.quantidadeSubtarefas,
-progressoChecklist: current.details.progressoChecklist,
-venceHoje: current.details.venceHoje,
-atrasada: current.details.atrasada,
-...(tarefa.details.devolvidaEm !== undefined ? { devolvidaEm: tarefa.details.devolvidaEm } : {}),
+if (this.qryTarefaStatus === 'loading') return;
+this.publish('selectedTarefa', tarefaId);
+const input: Input<'tarefas.minhas_tarefas.qryTarefa'> = { tarefaId };
+const ok = await this.runQuery(
+'qryTarefa',
+() => execBff<Output<'tarefas.minhas_tarefas.qryTarefa'>>('tarefas.minhas_tarefas.qryTarefa', input, { mode: 'silent' }),
+(output) => {
+this.publish('tarefa', output.tarefa);
+this.publish('historico', output.historico);
+this.publish('cmdSalvarAlteracoesDraft', draftFromTarefa(output.tarefa));
+this.publish('cmdAdicionarItensChecklistDraft', emptyAdicionarItensChecklistDraft());
+this.publish('cmdAjustarChecklistDraft', emptyAjustarChecklistDraft());
+this.publish('cmdDevolverDraft', emptyDevolverDraft());
 },
+);
+if (!ok) {
+this.publish('tarefa', null);
+this.publish('historico', []);
+}
+}
+
+/** request qryResponsaveis — searches by name the active participants that can be chosen as responsavel; redraws participantes (replace); busca: part of the name typed, empty brings the first by name */
+public async qryResponsaveis(busca: string = ''): Promise<void> {
+const input: Input<'tarefas.minhas_tarefas.qryResponsaveis'> = {
+...(busca !== '' ? { busca } : {}),
 };
-this.publish('tarefas', { ...page, items: page.items.map((row) => (row.id === tarefa.id ? updated : row)) });
+await this.runQuery(
+'qryResponsaveis',
+() => execBff<Output<'tarefas.minhas_tarefas.qryResponsaveis'>>('tarefas.minhas_tarefas.qryResponsaveis', input, { mode: 'silent' }),
+(output) => {
+this.publish('participantes', output.participantes);
+},
+);
 }
-/** Applies a task returned by a command: redraws tarefa, its loaded row, and the drafts that edit it. */
-private applyTarefa(tarefa: TarefaDetalhe, refill: RefillDraft): void {
-this.publish('tarefa', tarefa);
-this.applyRow(tarefa);
-if (refill === 'edit' || refill === 'both') {
-this.publish('cmdSalvarEdicaoDraft', edicaoDraftFromTarefa(tarefa));
-} else if (this.cmdSalvarEdicaoDraft.id === tarefa.id) {
-this.publish('cmdSalvarEdicaoDraft', { ...this.cmdSalvarEdicaoDraft, version: tarefa.version });
+
+/** request qryListas — searches the lists of tarefas by name to choose the lista of a tarefa; redraws listas (replace); busca: part of the list name, empty brings the first by name */
+public async qryListas(busca: string = ''): Promise<void> {
+const input: Input<'tarefas.minhas_tarefas.qryListas'> = {
+...(busca !== '' ? { busca } : {}),
+};
+await this.runQuery(
+'qryListas',
+() => execBff<Output<'tarefas.minhas_tarefas.qryListas'>>('tarefas.minhas_tarefas.qryListas', input, { mode: 'silent' }),
+(output) => {
+this.publish('listas', output.listas);
+},
+);
 }
-if (refill === 'checklist' || refill === 'both') {
-this.publish('cmdSalvarChecklistDraft', checklistDraftFromTarefa(tarefa));
-}
-}
-/** request cmdCriarTarefa — creates a task with its initial checklist from cmdCriarTarefaDraft (idempotent through the creation key kept in the draft); redraws tarefa with the created task and selects it (selectedTarefa), refills the edit and checklist drafts, and resets cmdCriarTarefaDraft to a new empty draft; requires list, title, priority, deadline and owner in the draft; no arguments */
+
+// -------------------------------------------------------------- commands
+
+/** request cmdCriarTarefa — creates a new tarefa in aFazer with the chosen responsavel from cmdCriarTarefaDraft (the creator is filled from the session); redraws tarefa, historico and selectedTarefa with the created record, refills cmdSalvarAlteracoesDraft and empties cmdCriarTarefaDraft; the lists and totals are not changed, reload with qryMinhasTarefas; no arguments */
 public async cmdCriarTarefa(): Promise<void> {
 const draft = this.cmdCriarTarefaDraft;
+const titulo = draft.titulo;
+const prioridade = draft.prioridade;
+const listaId = draft.listaId;
+const responsavelId = draft.responsavelId;
 const missing: string[] = [];
-if (isBlank(draft.listaId)) missing.push('cmdCriarTarefaDraft.listaId');
-if (isBlank(draft.titulo)) missing.push('cmdCriarTarefaDraft.titulo');
-if (draft.prioridade === null) missing.push('cmdCriarTarefaDraft.prioridade');
-if (isBlank(draft.prazo)) missing.push('cmdCriarTarefaDraft.prazo');
-if (isBlank(draft.responsavelId)) missing.push('cmdCriarTarefaDraft.responsavelId');
-const itens = toEntradas(draft.checklist);
-if (itens === null) missing.push('cmdCriarTarefaDraft.checklist');
-const { listaId, titulo, prioridade, prazo, responsavelId } = draft;
-if (
-missing.length > 0 ||
-listaId === null ||
-titulo === null ||
-prioridade === null ||
-prazo === null ||
-responsavelId === null ||
-itens === null
-) {
-this.failRequired('cmdCriarTarefa', missing);
+if (!filled(titulo)) missing.push(this.stateKey('cmdCriarTarefaDraft.titulo'));
+if (prioridade === null) missing.push(this.stateKey('cmdCriarTarefaDraft.prioridade'));
+if (!filled(listaId)) missing.push(this.stateKey('cmdCriarTarefaDraft.listaId'));
+if (!filled(responsavelId)) missing.push(this.stateKey('cmdCriarTarefaDraft.responsavelId'));
+if (missing.length > 0 || !filled(titulo) || prioridade === null || !filled(listaId) || !filled(responsavelId)) {
+this.requiredMissing('cmdCriarTarefa', missing);
 return;
 }
 const descricao = draft.details.descricao;
+const etiquetas = draft.details.etiquetas;
+const prazo = draft.prazo;
+const tarefaPaiId = draft.tarefaPaiId;
 const input: Input<'tarefas.minhas_tarefas.cmdCriarTarefa'> = {
-chaveCriacao: draft.chaveCriacao,
-listaId,
 titulo,
-details: { ...(descricao !== null && descricao !== '' ? { descricao } : {}) },
+details: {
+...(filled(descricao) ? { descricao } : {}),
+...(filled(etiquetas) ? { etiquetas } : {}),
+},
 prioridade,
-prazo,
+...(filled(prazo) ? { prazo } : {}),
+listaId,
 responsavelId,
-...(itens.length > 0 ? { checklist: itens } : {}),
+criadorId: '',
+...(filled(tarefaPaiId) ? { tarefaPaiId } : {}),
 };
 await this.runCommand(
 'cmdCriarTarefa',
 (signal) => execBff<Output<'tarefas.minhas_tarefas.cmdCriarTarefa'>>('tarefas.minhas_tarefas.cmdCriarTarefa', input, { mode: 'blocking', signal }),
-(created) => {
-this.applyTarefa(created, 'both');
-this.publish('selectedTarefa', created.id);
+(output) => {
+this.applyTarefaOutput(output);
 this.publish('cmdCriarTarefaDraft', emptyCriarTarefaDraft());
 },
 );
 }
-/** request cmdSalvarEdicao — saves the edited fields of the open task (including owner change) from cmdSalvarEdicaoDraft; editing never changes the status; redraws tarefa, updates its row in tarefas by id and refills cmdSalvarEdicaoDraft from the saved task; requires id, version, list, title, priority, deadline and owner in the draft; no arguments */
-public async cmdSalvarEdicao(): Promise<void> {
-const draft = this.cmdSalvarEdicaoDraft;
+
+/** request cmdAdicionarItensChecklist — adds the items of cmdAdicionarItensChecklistDraft to the checklist of the opened tarefa; does nothing when the draft has no items; redraws tarefa (with the updated checklist and progress), historico and selectedTarefa, then empties the draft; no arguments */
+public async cmdAdicionarItensChecklist(): Promise<void> {
+const tarefa = this.tarefa;
+const itens = this.cmdAdicionarItensChecklistDraft.itens;
 const missing: string[] = [];
-if (draft.id === null) missing.push('cmdSalvarEdicaoDraft.id');
-if (draft.version === null) missing.push('cmdSalvarEdicaoDraft.version');
-if (isBlank(draft.listaId)) missing.push('cmdSalvarEdicaoDraft.listaId');
-if (isBlank(draft.titulo)) missing.push('cmdSalvarEdicaoDraft.titulo');
-if (draft.prioridade === null) missing.push('cmdSalvarEdicaoDraft.prioridade');
-if (isBlank(draft.prazo)) missing.push('cmdSalvarEdicaoDraft.prazo');
-if (isBlank(draft.responsavelId)) missing.push('cmdSalvarEdicaoDraft.responsavelId');
-const { id, version, listaId, titulo, prioridade, prazo, responsavelId } = draft;
-if (
-missing.length > 0 ||
-id === null ||
-version === null ||
-listaId === null ||
-titulo === null ||
-prioridade === null ||
-prazo === null ||
-responsavelId === null
-) {
-this.failRequired('cmdSalvarEdicao', missing);
+if (!tarefa) missing.push(this.stateKey('tarefa'));
+const payload: ItemChecklistNovo[] = [];
+itens.forEach((item, index) => {
+const descricao = item.details.descricao;
+if (item.ordem === null) missing.push(this.stateKey(`cmdAdicionarItensChecklistDraft.itens.${index}.ordem`));
+if (!filled(descricao)) missing.push(this.stateKey(`cmdAdicionarItensChecklistDraft.itens.${index}.details.descricao`));
+if (item.ordem !== null && filled(descricao)) {
+payload.push({ ordem: item.ordem, details: { descricao, concluido: item.details.concluido === true } });
+}
+});
+if (missing.length > 0 || !tarefa) {
+this.requiredMissing('cmdAdicionarItensChecklist', missing);
+return;
+}
+if (payload.length === 0) return;
+const input: Input<'tarefas.minhas_tarefas.cmdAdicionarItensChecklist'> = { tarefaId: tarefa.id, itens: payload };
+await this.runCommand(
+'cmdAdicionarItensChecklist',
+(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdAdicionarItensChecklist'>>('tarefas.minhas_tarefas.cmdAdicionarItensChecklist', input, { mode: 'blocking', signal }),
+(output) => {
+this.applyTarefaOutput(output);
+this.publish('cmdAdicionarItensChecklistDraft', emptyAdicionarItensChecklistDraft());
+},
+);
+}
+
+/** request cmdSalvarAlteracoes — saves the fields of cmdSalvarAlteracoesDraft on the opened tarefa and swaps the responsavel when it changed, without changing the status; redraws tarefa, historico and selectedTarefa and refills cmdSalvarAlteracoesDraft from the saved record; no arguments */
+public async cmdSalvarAlteracoes(): Promise<void> {
+const tarefa = this.tarefa;
+const draft = this.cmdSalvarAlteracoesDraft;
+const titulo = draft.titulo;
+const prioridade = draft.prioridade;
+const listaId = draft.listaId;
+const responsavelId = draft.responsavelId;
+const missing: string[] = [];
+if (!tarefa) missing.push(this.stateKey('tarefa'));
+if (!filled(titulo)) missing.push(this.stateKey('cmdSalvarAlteracoesDraft.titulo'));
+if (prioridade === null) missing.push(this.stateKey('cmdSalvarAlteracoesDraft.prioridade'));
+if (!filled(listaId)) missing.push(this.stateKey('cmdSalvarAlteracoesDraft.listaId'));
+if (!filled(responsavelId)) missing.push(this.stateKey('cmdSalvarAlteracoesDraft.responsavelId'));
+if (missing.length > 0 || !tarefa || !filled(titulo) || prioridade === null || !filled(listaId) || !filled(responsavelId)) {
+this.requiredMissing('cmdSalvarAlteracoes', missing);
 return;
 }
 const descricao = draft.details.descricao;
-const input: Input<'tarefas.minhas_tarefas.cmdSalvarEdicao'> = {
-id,
-version,
-listaId,
+const etiquetas = draft.details.etiquetas;
+const prazo = draft.prazo;
+const tarefaPaiId = draft.tarefaPaiId;
+const input: Input<'tarefas.minhas_tarefas.cmdSalvarAlteracoes'> = {
+id: tarefa.id,
+version: tarefa.version,
 titulo,
-details: { ...(descricao !== null && descricao !== '' ? { descricao } : {}) },
+details: {
+...(filled(descricao) ? { descricao } : {}),
+...(filled(etiquetas) ? { etiquetas } : {}),
+},
 prioridade,
-prazo,
+...(filled(prazo) ? { prazo } : {}),
+listaId,
 responsavelId,
+...(filled(tarefaPaiId) ? { tarefaPaiId } : {}),
 };
 await this.runCommand(
-'cmdSalvarEdicao',
-(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdSalvarEdicao'>>('tarefas.minhas_tarefas.cmdSalvarEdicao', input, { mode: 'blocking', signal }),
-(saved) => {
-this.applyTarefa(saved, 'edit');
+'cmdSalvarAlteracoes',
+(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdSalvarAlteracoes'>>('tarefas.minhas_tarefas.cmdSalvarAlteracoes', input, { mode: 'blocking', signal }),
+(output) => {
+this.applyTarefaOutput(output);
 },
 );
 }
-/** request cmdSalvarChecklist — saves the checklist of the open task from cmdSalvarChecklistDraft (edit, reorder, mark done, add items without id); never changes the status; redraws tarefa with the saved checklist and refills cmdSalvarChecklistDraft from it; requires the task id and a description in every item; no arguments */
-public async cmdSalvarChecklist(): Promise<void> {
-const draft = this.cmdSalvarChecklistDraft;
+
+/** request cmdAjustarChecklist — edits, reorders, checks or unchecks the checklist items listed in cmdAjustarChecklistDraft of the opened tarefa; items with nothing to change are skipped and nothing is sent when none is left; redraws tarefa (updated checklist and progress), historico and selectedTarefa, then empties the draft; no arguments */
+public async cmdAjustarChecklist(): Promise<void> {
+const tarefa = this.tarefa;
+const itens = this.cmdAjustarChecklistDraft.itens;
 const missing: string[] = [];
-if (draft.tarefaId === null) missing.push('cmdSalvarChecklistDraft.tarefaId');
-const itens = toEntradas(draft.itens);
-if (itens === null) missing.push('cmdSalvarChecklistDraft.itens');
-const tarefaId = draft.tarefaId;
-if (missing.length > 0 || tarefaId === null || itens === null) {
-this.failRequired('cmdSalvarChecklist', missing);
+if (!tarefa) missing.push(this.stateKey('tarefa'));
+const payload: ItemChecklistAjuste[] = [];
+itens.forEach((item, index) => {
+const descricao = item.details.descricao;
+const concluido = item.details.concluido;
+const hasChange = item.ordem !== null || filled(descricao) || concluido !== null;
+if (!hasChange) return;
+if (!filled(item.id)) missing.push(this.stateKey(`cmdAjustarChecklistDraft.itens.${index}.id`));
+if (item.version === null) missing.push(this.stateKey(`cmdAjustarChecklistDraft.itens.${index}.version`));
+if (filled(item.id) && item.version !== null) {
+payload.push({
+id: item.id,
+version: item.version,
+...(item.ordem !== null ? { ordem: item.ordem } : {}),
+details: {
+...(filled(descricao) ? { descricao } : {}),
+...(concluido !== null ? { concluido } : {}),
+},
+});
+}
+});
+if (missing.length > 0 || !tarefa) {
+this.requiredMissing('cmdAjustarChecklist', missing);
 return;
 }
-const input: Input<'tarefas.minhas_tarefas.cmdSalvarChecklist'> = { tarefaId, itens };
+if (payload.length === 0) return;
+const input: Input<'tarefas.minhas_tarefas.cmdAjustarChecklist'> = { tarefaId: tarefa.id, itens: payload };
 await this.runCommand(
-'cmdSalvarChecklist',
-(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdSalvarChecklist'>>('tarefas.minhas_tarefas.cmdSalvarChecklist', input, { mode: 'blocking', signal }),
-(saved) => {
-this.applyTarefa(saved, 'checklist');
+'cmdAjustarChecklist',
+(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdAjustarChecklist'>>('tarefas.minhas_tarefas.cmdAjustarChecklist', input, { mode: 'blocking', signal }),
+(output) => {
+this.applyTarefaOutput(output);
+this.publish('cmdAjustarChecklistDraft', emptyAjustarChecklistDraft());
 },
 );
 }
-/** request cmdIniciar — the owner starts the open task (a fazer to em andamento); redraws tarefa and updates or removes its row in tarefas by id; no arguments (uses the open task and its version) */
+
+/** request cmdIniciar — the responsavel starts the opened tarefa (aFazer to emAndamento); redraws tarefa, historico and selectedTarefa with the returned record; no arguments, id and version come from the opened tarefa */
 public async cmdIniciar(): Promise<void> {
-const current = this.currentTarefa('cmdIniciar');
-if (!current) return;
-const input: Input<'tarefas.minhas_tarefas.cmdIniciar'> = { id: current.id, version: current.version };
+const tarefa = this.tarefa;
+if (!tarefa) {
+this.requiredMissing('cmdIniciar', [this.stateKey('tarefa')]);
+return;
+}
+const input: Input<'tarefas.minhas_tarefas.cmdIniciar'> = { id: tarefa.id, version: tarefa.version };
 await this.runCommand(
 'cmdIniciar',
 (signal) => execBff<Output<'tarefas.minhas_tarefas.cmdIniciar'>>('tarefas.minhas_tarefas.cmdIniciar', input, { mode: 'blocking', signal }),
-(updated) => {
-this.applyTarefa(updated, 'none');
+(output) => {
+this.applyTarefaOutput(output);
 },
 );
 }
-/** request cmdEnviarRevisao — the owner sends or resends the open task to the creator's review (em andamento to em revisao); redraws tarefa and updates or removes its row in tarefas by id; no arguments (uses the open task and its version) */
-public async cmdEnviarRevisao(): Promise<void> {
-const current = this.currentTarefa('cmdEnviarRevisao');
-if (!current) return;
-const input: Input<'tarefas.minhas_tarefas.cmdEnviarRevisao'> = { id: current.id, version: current.version };
+
+/** request cmdEnviarParaRevisao — the responsavel sends the opened tarefa to review by its creator (emAndamento to emRevisao); redraws tarefa, historico and selectedTarefa with the returned record; no arguments, id and version come from the opened tarefa */
+public async cmdEnviarParaRevisao(): Promise<void> {
+const tarefa = this.tarefa;
+if (!tarefa) {
+this.requiredMissing('cmdEnviarParaRevisao', [this.stateKey('tarefa')]);
+return;
+}
+const input: Input<'tarefas.minhas_tarefas.cmdEnviarParaRevisao'> = { id: tarefa.id, version: tarefa.version };
 await this.runCommand(
-'cmdEnviarRevisao',
-(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdEnviarRevisao'>>('tarefas.minhas_tarefas.cmdEnviarRevisao', input, { mode: 'blocking', signal }),
-(updated) => {
-this.applyTarefa(updated, 'none');
+'cmdEnviarParaRevisao',
+(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdEnviarParaRevisao'>>('tarefas.minhas_tarefas.cmdEnviarParaRevisao', input, { mode: 'blocking', signal }),
+(output) => {
+this.applyTarefaOutput(output);
 },
 );
 }
-/** request cmdAceitar — the creator accepts the delivery and concludes the open task (em revisao to concluida); redraws tarefa and updates or removes its row in tarefas by id; no arguments (uses the open task and its version) */
+
+/** request cmdAceitar — the creator accepts the delivery of the opened tarefa in review (it becomes concluida); redraws tarefa, historico and selectedTarefa with the returned record; no arguments, id and version come from the opened tarefa */
 public async cmdAceitar(): Promise<void> {
-const current = this.currentTarefa('cmdAceitar');
-if (!current) return;
-const input: Input<'tarefas.minhas_tarefas.cmdAceitar'> = { id: current.id, version: current.version };
+const tarefa = this.tarefa;
+if (!tarefa) {
+this.requiredMissing('cmdAceitar', [this.stateKey('tarefa')]);
+return;
+}
+const input: Input<'tarefas.minhas_tarefas.cmdAceitar'> = { id: tarefa.id, version: tarefa.version };
 await this.runCommand(
 'cmdAceitar',
 (signal) => execBff<Output<'tarefas.minhas_tarefas.cmdAceitar'>>('tarefas.minhas_tarefas.cmdAceitar', input, { mode: 'blocking', signal }),
-(updated) => {
-this.applyTarefa(updated, 'none');
+(output) => {
+this.applyTarefaOutput(output);
 },
 );
 }
-/** request cmdDevolver — the creator sends the open task in review back for adjustment with the reason typed in cmdDevolverDraft (back to em andamento); redraws tarefa and updates or removes its row in tarefas by id, then resets cmdDevolverDraft; requires a non-empty reason; no arguments */
+
+/** request cmdDevolver — the creator sends the opened tarefa in review back to the responsavel with the reason typed in cmdDevolverDraft (it returns to emAndamento); redraws tarefa, historico and selectedTarefa with the returned record and empties cmdDevolverDraft; no arguments */
 public async cmdDevolver(): Promise<void> {
-const current = this.currentTarefa('cmdDevolver');
-if (!current) return;
+const tarefa = this.tarefa;
 const motivo = this.cmdDevolverDraft.details.motivoDevolucao;
-if (motivo === null || motivo.trim() === '') {
-this.failRequired('cmdDevolver', ['cmdDevolverDraft.details.motivoDevolucao']);
+const missing: string[] = [];
+if (!tarefa) missing.push(this.stateKey('tarefa'));
+if (!filled(motivo)) missing.push(this.stateKey('cmdDevolverDraft.details.motivoDevolucao'));
+if (missing.length > 0 || !tarefa || !filled(motivo)) {
+this.requiredMissing('cmdDevolver', missing);
 return;
 }
 const input: Input<'tarefas.minhas_tarefas.cmdDevolver'> = {
-id: current.id,
-version: current.version,
+id: tarefa.id,
+version: tarefa.version,
 details: { motivoDevolucao: motivo },
 };
 await this.runCommand(
 'cmdDevolver',
 (signal) => execBff<Output<'tarefas.minhas_tarefas.cmdDevolver'>>('tarefas.minhas_tarefas.cmdDevolver', input, { mode: 'blocking', signal }),
-(updated) => {
-this.applyTarefa(updated, 'none');
+(output) => {
+this.applyTarefaOutput(output);
 this.publish('cmdDevolverDraft', emptyDevolverDraft());
 },
 );
 }
-/** request cmdCancelar — the creator cancels the open task (a fazer, em andamento or em revisao to cancelada); redraws tarefa and updates or removes its row in tarefas by id; no arguments (uses the open task and its version) */
+
+/** request cmdRetomar — the responsavel resumes the opened tarefa that was returned, to continue the work; redraws tarefa, historico and selectedTarefa with the returned record; no arguments, id and version come from the opened tarefa */
+public async cmdRetomar(): Promise<void> {
+const tarefa = this.tarefa;
+if (!tarefa) {
+this.requiredMissing('cmdRetomar', [this.stateKey('tarefa')]);
+return;
+}
+const input: Input<'tarefas.minhas_tarefas.cmdRetomar'> = { id: tarefa.id, version: tarefa.version };
+await this.runCommand(
+'cmdRetomar',
+(signal) => execBff<Output<'tarefas.minhas_tarefas.cmdRetomar'>>('tarefas.minhas_tarefas.cmdRetomar', input, { mode: 'blocking', signal }),
+(output) => {
+this.applyTarefaOutput(output);
+},
+);
+}
+
+/** request cmdCancelar — the creator cancels the opened tarefa; redraws tarefa, historico and selectedTarefa with the returned record; no arguments, id and version come from the opened tarefa */
 public async cmdCancelar(): Promise<void> {
-const current = this.currentTarefa('cmdCancelar');
-if (!current) return;
-const input: Input<'tarefas.minhas_tarefas.cmdCancelar'> = { id: current.id, version: current.version };
+const tarefa = this.tarefa;
+if (!tarefa) {
+this.requiredMissing('cmdCancelar', [this.stateKey('tarefa')]);
+return;
+}
+const input: Input<'tarefas.minhas_tarefas.cmdCancelar'> = { id: tarefa.id, version: tarefa.version };
 await this.runCommand(
 'cmdCancelar',
 (signal) => execBff<Output<'tarefas.minhas_tarefas.cmdCancelar'>>('tarefas.minhas_tarefas.cmdCancelar', input, { mode: 'blocking', signal }),
-(updated) => {
-this.applyTarefa(updated, 'none');
+(output) => {
+this.applyTarefaOutput(output);
 },
 );
 }

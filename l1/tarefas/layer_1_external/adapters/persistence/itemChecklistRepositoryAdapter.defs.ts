@@ -32,16 +32,16 @@ export const definition = {
         "column": "ordem"
       },
       {
-        "field": "feito",
-        "column": "feito"
-      },
-      {
         "field": "details.descricao",
         "column": "json:details.descricao"
       },
       {
-        "field": "details.marcadoEm",
-        "column": "json:details.marcadoEm"
+        "field": "details.concluido",
+        "column": "json:details.concluido"
+      },
+      {
+        "field": "details.concluidoEm",
+        "column": "json:details.concluidoEm"
       }
     ]
   }

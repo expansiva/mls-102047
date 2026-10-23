@@ -4,9 +4,9 @@ export type ItemChecklist = {
   version: number;
   tarefaId: string;
   ordem: number;
-  feito: boolean;
   details: {
     descricao: string;
-    marcadoEm?: string;
+    concluido: boolean;
+    concluidoEm?: string;
   };
 };

@@ -16,60 +16,33 @@ export interface IniciarOutput extends Record<string, unknown> {
   titulo: string;
   status: string;
   prioridade: string;
-  prazo: string;
+  prazo?: string;
   listaId: string;
   responsavelId: string;
   criadorId: string;
   tarefaPaiId?: string;
-  chaveCriacao: string;
   criadaEm: string;
   details: {
     descricao?: string;
+    etiquetas?: string[];
     motivoDevolucao?: string;
     devolvidaEm?: string;
+    retomadaEm?: string;
     concluidaEm?: string;
     canceladaEm?: string;
+    quemAgeAgora?: string;
     aberta?: boolean;
     venceHoje?: boolean;
     atrasada?: boolean;
+    devolvidaPendente?: boolean;
     quantidadeSubtarefas?: number;
     progressoChecklist?: string;
   };
 }
 
-function toOutput(tarefa: Tarefa, today: string): IniciarOutput {
-  const aberta = tarefa.status === 'aFazer' || tarefa.status === 'emAndamento' || tarefa.status === 'emRevisao';
-  const prazoDia = String(tarefa.prazo).slice(0, 10);
-  const details: IniciarOutput['details'] = {
-    aberta,
-    venceHoje: aberta && prazoDia === today,
-    atrasada: aberta && prazoDia < today,
-  };
-  if (tarefa.details?.descricao !== undefined) details.descricao = tarefa.details.descricao;
-  if (tarefa.details?.motivoDevolucao !== undefined) details.motivoDevolucao = tarefa.details.motivoDevolucao;
-  if (tarefa.details?.devolvidaEm !== undefined) details.devolvidaEm = tarefa.details.devolvidaEm;
-  if (tarefa.details?.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
-  if (tarefa.details?.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
-
-  const output: IniciarOutput = {
-    id: tarefa.id,
-    version: tarefa.version,
-    titulo: tarefa.titulo,
-    status: tarefa.status,
-    prioridade: tarefa.prioridade,
-    prazo: tarefa.prazo,
-    listaId: tarefa.listaId,
-    responsavelId: tarefa.responsavelId,
-    criadorId: tarefa.criadorId,
-    chaveCriacao: tarefa.chaveCriacao,
-    criadaEm: tarefa.criadaEm,
-    details,
-  };
-  if (tarefa.tarefaPaiId !== undefined) output.tarefaPaiId = tarefa.tarefaPaiId;
-  return output;
-}
-
 export async function iniciar(input: IniciarInput, ctx: RequestContext): Promise<IniciarOutput> {
+  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
+
   const id = String(input.id ?? '');
   if (!id) {
     throw new AppError('VALIDATION_ERROR', 'id is required.', 400);
@@ -79,8 +52,8 @@ export async function iniciar(input: IniciarInput, ctx: RequestContext): Promise
     throw new AppError('VALIDATION_ERROR', 'version is required.', 400);
   }
 
-  const tarefaRepository = resolveRepository<TarefaRepository>(ctx, 'TarefaRepository');
-  const tarefa = await tarefaRepository.get(id);
+  const found = await tarefaRepository.list({ id });
+  const tarefa = found.find((t) => t.id === id);
   if (!tarefa) {
     throw new AppError('NOT_FOUND', 'Tarefa not found.', 404);
   }
@@ -88,44 +61,63 @@ export async function iniciar(input: IniciarInput, ctx: RequestContext): Promise
     throw new AppError('CONCURRENCY_CONFLICT', 'Version does not match the stored row.', 409);
   }
 
-  if (tarefa.status === 'concluida' || tarefa.status === 'cancelada') {
-    throw new AppError('TASK_CLOSED', 'A closed task cannot change status.', 409, { ruleId: 'tarefaEncerradaNaoTransiciona' });
+  // apenasResponsavelExecuta: only the responsável of the task can start it.
+  const sessionPersonId = ctx.sessionContext.person?.mdmId;
+  if (!sessionPersonId) {
+    throw new AppError('FORBIDDEN', 'The session has no identified person.', 403, { ruleId: 'apenasResponsavelExecuta' });
   }
+  if (sessionPersonId !== tarefa.responsavelId) {
+    throw new AppError('FORBIDDEN', 'Only the responsible participant can start the task.', 403, { ruleId: 'apenasResponsavelExecuta' });
+  }
+
   if (tarefa.status !== 'aFazer') {
-    throw new AppError('INVALID_STATE', 'Only a task in aFazer can be started.', 409);
+    throw new AppError('INVALID_STATE', 'Only a task in "aFazer" can be started.', 409);
   }
 
-  const actorId = ctx.sessionContext.person?.mdmId;
-  if (!actorId) {
-    throw new AppError('UNAUTHENTICATED', 'The session has no identified team member.', 401);
-  }
-  if (actorId !== tarefa.responsavelId) {
-    throw new AppError('FORBIDDEN', 'Only the responsible member can start the task.', 403, { ruleId: 'somenteResponsavelExecuta' });
-  }
-
-  const details: Tarefa['details'] = {};
-  if (tarefa.details?.descricao !== undefined) details.descricao = tarefa.details.descricao;
-  if (tarefa.details?.motivoDevolucao !== undefined) details.motivoDevolucao = tarefa.details.motivoDevolucao;
-  if (tarefa.details?.devolvidaEm !== undefined) details.devolvidaEm = tarefa.details.devolvidaEm;
-  if (tarefa.details?.concluidaEm !== undefined) details.concluidaEm = tarefa.details.concluidaEm;
-  if (tarefa.details?.canceladaEm !== undefined) details.canceladaEm = tarefa.details.canceladaEm;
+  // Derived fields are never stored.
+  const {
+    quemAgeAgora: _quemAgeAgora,
+    aberta: _aberta,
+    venceHoje: _venceHoje,
+    atrasada: _atrasada,
+    devolvidaPendente: _devolvidaPendente,
+    quantidadeSubtarefas: _quantidadeSubtarefas,
+    progressoChecklist: _progressoChecklist,
+    ...storedDetails
+  } = tarefa.details;
+  void _quemAgeAgora;
+  void _aberta;
+  void _venceHoje;
+  void _atrasada;
+  void _devolvidaPendente;
+  void _quantidadeSubtarefas;
+  void _progressoChecklist;
 
   const next: Tarefa = {
-    id: tarefa.id,
-    version: tarefa.version,
-    titulo: tarefa.titulo,
+    ...tarefa,
     status: 'emAndamento',
-    prioridade: tarefa.prioridade,
-    prazo: tarefa.prazo,
-    listaId: tarefa.listaId,
-    responsavelId: tarefa.responsavelId,
-    criadorId: tarefa.criadorId,
-    chaveCriacao: tarefa.chaveCriacao,
-    criadaEm: tarefa.criadaEm,
-    details,
+    details: { ...storedDetails },
   };
-  if (tarefa.tarefaPaiId !== undefined) next.tarefaPaiId = tarefa.tarefaPaiId;
 
   const saved = await tarefaRepository.transition(next, 'iniciar');
-  return toOutput(saved, ctx.clock.nowIso().slice(0, 10));
+
+  const out: IniciarOutput = {
+    id: saved.id,
+    version: saved.version,
+    titulo: saved.titulo,
+    status: saved.status,
+    prioridade: saved.prioridade,
+    listaId: saved.listaId,
+    responsavelId: saved.responsavelId,
+    criadorId: saved.criadorId,
+    criadaEm: saved.criadaEm,
+    details: {
+      ...saved.details,
+      quemAgeAgora: saved.responsavelId,
+      aberta: true,
+    },
+  };
+  if (saved.prazo !== undefined) out.prazo = saved.prazo;
+  if (saved.tarefaPaiId !== undefined) out.tarefaPaiId = saved.tarefaPaiId;
+  return out;
 }

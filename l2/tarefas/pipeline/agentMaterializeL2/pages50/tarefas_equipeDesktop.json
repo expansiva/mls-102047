@@ -4,40 +4,56 @@
   "module": "tarefas",
   "pageId": "tarefas_equipe",
   "device": "desktop",
-  "contextHash": "sha256:2c945815b104d885b6085bbefce3ba81e561dc96d8a34c4a07bf84dd5f73f7c2",
+  "contextHash": "sha256:24190bf5529143863d36804b1ad7e42b1314162558ab2c7a6f27dcf44680df15",
   "sourcePath": "l2/tarefas/web/desktop/page11/tarefas_equipe.ts",
-  "sourceHash": "sha256:0655aa11634a67052607c7e6f30511bdbdc3c0ebc7a7cedde69cdae15893dced",
+  "sourceHash": "sha256:fdfae10a1a20231f5b2bfd23a712a166dc2a5a0ceec1918249fd3e52a47fef2f",
   "attempt": 1,
   "design": {
-    "concept": "Um quadro de trabalho do gestor: à esquerda, a fila de todas as tarefas da equipe na ordem em que o backend entrega (prazo mais próximo primeiro), com uma barra de filtros compacta no topo; à direita, um painel que mostra a tarefa escolhida (detalhe, ações do gestor e histórico) sem tirar o gestor da lista. As datas atrasadas ganham a cor de alerta e só elas.",
+    "concept": "Uma mesa de operação em duas regiões mantém a fila de tarefas à esquerda e a tarefa selecionada à direita, para que o gestor investigue e aja sem perder o contexto do trabalho. A fila oferece lentes compactas e alterna entre lista e quadro; o painel lateral concentra os fatos, a checklist, o histórico e as ações permitidas.",
     "views": [
       {
-        "id": "vazio",
-        "purpose": "Estado do painel lateral quando nenhuma tarefa está escolhida: orienta a escolher uma tarefa no quadro."
+        "id": "lista",
+        "purpose": "Exibir a fila filtrada em formato denso de lista, com a seleção preservada no painel."
       },
       {
-        "id": "detalhe",
-        "purpose": "Painel da tarefa escolhida: resumo, checklist, ações de reatribuir/cancelar e histórico. Tem controle de voltar, que limpa a seleção."
+        "id": "quadro",
+        "purpose": "Exibir as mesmas tarefas distribuídas visualmente pelas situações, mantendo o painel da tarefa aberto."
       }
     ],
-    "decisions": "Seguimos o template timelineList: lista como protagonista e painel de detalhe ao lado (master-detail); a lista nunca some. O scene host cobre apenas a região do painel (mode scenary), com default seguindo selectedTarefa para que o id na URL reabra a tarefa; voltar chama obterTarefa(null). Colunas do quadro sem ordenação própria para preservar a ordem única por prazo e manter o índice da linha confiável; paginação por 'Carregar mais' usando hasMore. Filtros: selects para lista, responsável, prioridade e situação, calendário duplo para prazo e dois botões alternáveis para 'vence hoje' e 'atrasadas'. A cor de alarme só aparece na data de tarefas atrasadas; 'vence hoje' é uma etiqueta de aviso. Reatribuir usa autocomplete de membros (inativos aparecem desabilitados) e fica desabilitado até haver uma escolha diferente do atual. Cancelar é secundário na tela e só o botão de confirmar dentro do alert-modal usa estilo de perigo, nomeando a tarefa; o modal é aberto de forma imperativa porque a página não guarda estado. Retorno das ações é local, em feedback contextual acima dos botões, sem toast global. O histórico usa a timeline com os marcos que o contrato entrega (criação, devolução com motivo, conclusão, cancelamento). Erros de carga têm estado próprio com tentar de novo e, quando faltar pré-condição, texto claro e botão de voltar."
+    "decisions": "Segui o modelo workQueueSplit: a fila recebe maior espaço e permanece sempre visível ao lado do painel de inspeção, enquanto ações ficam somente no painel contextual. Usei o host de cenários apenas para alternar as duas leituras paralelas da fila; o painel não é uma navegação. Como o contrato entrega progresso da checklist como texto, ele é apresentado literalmente, sem calcular uma porcentagem."
   },
   "advisories": [
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section quadroEquipe needs an element with data-section-id=\"quadroEquipe\"."
+      "message": "Section filaTarefas needs an element with data-section-id=\"filaTarefas\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section tarefaSelecionada needs an element with data-section-id=\"tarefaSelecionada\"."
+      "message": "Section tarefaAberta needs an element with data-section-id=\"tarefaAberta\"."
     },
     {
       "code": "M4_PAGE_SECTION",
-      "message": "Section historico needs an element with data-section-id=\"historico\"."
+      "message": "Section historicoTarefa needs an element with data-section-id=\"historicoTarefa\"."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism tarefasEquipe (Busca pelo título da tarefa) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+      "message": "Organism tarefasEquipe (busca por título e filtros da lista) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-faceted-search>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasEquipe (filtro por situação e prioridade) renders neither <groupselectmany--ml-multi-select-dropdown> nor <groupselectmany--ml-popover-multi-select>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasEquipe (alternar entre lista e quadro) renders neither <groupselectone--ml-segmented-control> nor <groupnavigatesection--ml-navigate-pills>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaDetalhe (itens da checklist) renders neither <groupviewdata--ml-vertical-record-list>."
+    },
+    {
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefaAcoes (confirmação do cancelamento) renders neither <groupnotifyuser--ml-alert-modal>."
     }
   ]
 }

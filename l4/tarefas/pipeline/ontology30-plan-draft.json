@@ -1,30 +1,29 @@
 {
   "moduleName": "tarefas",
-  "businessDomain": "Gestão de tarefas da equipe (estilo ClickUp simples): listas, tarefas com subtarefas, checklist, revisão pelo criador e aviso diário de vencimentos.",
+  "businessDomain": "Gestão de tarefas da equipe: participantes escolhidos entre os usuários da organização, listas que agrupam tarefas, tarefas com responsável, prazo, prioridade, subtarefas, checklist e etiquetas, e o fluxo a fazer → em andamento → em revisão → concluída ou cancelada.",
   "entities": [
     {
-      "entityId": "MembroEquipe",
+      "entityId": "Participante",
       "kind": "role",
       "family": "mdm",
-      "title": "Membro da equipe",
-      "description": "Pessoa da equipe que cria, executa e revisa tarefas; é responsável ou criadora de tarefas. O gestor também é um membro da equipe.",
+      "title": "Participante",
+      "description": "Usuário da organização escolhido pelo gestor na lista de usuários da plataforma para participar do módulo. O módulo não cadastra nem pede dado pessoal; guarda no seu espaço apenas se aceita tarefas e se pode criar tarefas (sem configuração, aceita e pode criar). É o responsável e quem criou cada tarefa.",
       "displayField": "details.identification.name",
-      "writer": "crud",
       "subtype": "Person",
-      "roleTag": "tarefas.MembroEquipe",
+      "roleTag": "tarefas.Participante",
       "source": "/_102034_/l4/ontology/mdm.defs.ts"
     },
     {
-      "entityId": "Lista",
+      "entityId": "ListaTarefas",
       "kind": "entity",
       "family": "tdm",
-      "title": "Lista",
-      "description": "Agrupamento de tarefas por projeto ou área, cadastrado e mantido pelo gestor.",
+      "title": "Lista de tarefas",
+      "description": "Cadastro simples do gestor que agrupa tarefas por projeto ou área.",
       "displayField": "nome",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
-        "table": "tarefas_lista",
+        "table": "tarefas_listatarefas",
         "kind": "relational"
       }
     },
@@ -33,7 +32,7 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Tarefa",
-      "description": "Tarefa com título, descrição, prioridade, prazo, lista, responsável, criador, tarefa pai opcional, etiquetas e motivo de devolução; percorre as situações a fazer, em andamento, em revisão, concluída e cancelada. Anexos e discussão são serviços da plataforma (anexos e task-room da Task).",
+      "description": "Tarefa com título, descrição, prioridade, prazo, lista, responsável, quem criou, tarefa pai opcional e etiquetas; percorre as situações a fazer, em andamento, em revisão, concluída e cancelada, como ocorrência do processo de tarefa da plataforma, com a conversa da própria tarefa.",
       "displayField": "titulo",
       "class": "core",
       "storage": {
@@ -47,26 +46,12 @@
       "kind": "entity",
       "family": "tdm",
       "title": "Item da checklist",
-      "description": "Item marcável da checklist de uma tarefa, com descrição e indicação de feito.",
+      "description": "Item marcável da checklist de uma tarefa, adicionado por quem cria ou edita e marcado pelo responsável.",
       "displayField": "descricao",
       "class": "supporting",
       "storage": {
         "target": "moduleDatabase",
         "table": "tarefas_itemchecklist",
-        "kind": "relational"
-      }
-    },
-    {
-      "entityId": "AvisoVencimento",
-      "kind": "entity",
-      "family": "tdm",
-      "title": "Aviso diário de vencimentos",
-      "description": "Aviso gerado todo dia às 8h para cada responsável, com suas tarefas abertas que vencem hoje ou estão atrasadas; um novo aviso não começa enquanto o do dia anterior não terminou.",
-      "displayField": "dataReferencia",
-      "class": "event",
-      "storage": {
-        "target": "moduleDatabase",
-        "table": "tarefas_avisovencimento",
         "kind": "relational"
       }
     }
@@ -75,31 +60,31 @@
     {
       "relationshipId": "tarefaLista",
       "from": "Tarefa",
-      "to": "Lista",
+      "to": "ListaTarefas",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "A tarefa pertence a uma lista (projeto ou área).",
+      "description": "Cada tarefa pertence a uma lista de tarefas.",
       "field": "Tarefa.listaId"
     },
     {
       "relationshipId": "tarefaResponsavel",
       "from": "Tarefa",
-      "to": "MembroEquipe",
+      "to": "Participante",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Pessoa da equipe responsável por executar a tarefa.",
+      "description": "O responsável pela tarefa, escolhido pelo nome entre os participantes que aceitam tarefas.",
       "field": "Tarefa.responsavelId"
     },
     {
       "relationshipId": "tarefaCriador",
       "from": "Tarefa",
-      "to": "MembroEquipe",
+      "to": "Participante",
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Pessoa da equipe que criou a tarefa e a revisa.",
+      "description": "Quem criou a tarefa, que revisa, aceita, devolve, reatribui ou cancela.",
       "field": "Tarefa.criadorId"
     },
     {
@@ -109,7 +94,7 @@
       "type": "manyToOne",
       "required": false,
       "mode": "fk",
-      "description": "Tarefa pai, quando a tarefa é uma subtarefa.",
+      "description": "Uma subtarefa aponta para a sua tarefa pai.",
       "field": "Tarefa.tarefaPaiId"
     },
     {
@@ -119,30 +104,20 @@
       "type": "manyToOne",
       "required": true,
       "mode": "fk",
-      "description": "Item da checklist pertence a uma tarefa.",
+      "description": "Cada item da checklist pertence a uma tarefa.",
       "field": "ItemChecklist.tarefaId"
-    },
-    {
-      "relationshipId": "avisoResponsavel",
-      "from": "AvisoVencimento",
-      "to": "MembroEquipe",
-      "type": "manyToOne",
-      "required": true,
-      "mode": "fk",
-      "description": "Responsável que recebe o aviso diário de vencimentos.",
-      "field": "AvisoVencimento.responsavelId"
     }
   ],
   "normalizations": [
     {
       "kind": "derivedFromPlatform",
-      "entityId": "MembroEquipe",
-      "detail": "roleTag tarefas.MembroEquipe; source /_102034_/l4/ontology/mdm.defs.ts"
+      "entityId": "Participante",
+      "detail": "roleTag tarefas.Participante; source /_102034_/l4/ontology/mdm.defs.ts"
     },
     {
       "kind": "derivedFromPlatform",
-      "entityId": "Lista",
-      "detail": "storage.table tarefas_lista"
+      "entityId": "ListaTarefas",
+      "detail": "storage.table tarefas_listatarefas"
     },
     {
       "kind": "derivedFromPlatform",
@@ -153,11 +128,6 @@
       "kind": "derivedFromPlatform",
       "entityId": "ItemChecklist",
       "detail": "storage.table tarefas_itemchecklist"
-    },
-    {
-      "kind": "derivedFromPlatform",
-      "entityId": "AvisoVencimento",
-      "detail": "storage.table tarefas_avisovencimento"
     }
   ]
 }

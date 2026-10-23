@@ -16,8 +16,9 @@ export const definition = {
     "entityId": "ItemChecklist",
     "operation": "update",
     "rulesApplied": [
-      "checklistNaoMudaSituacao",
-      "editarSomenteTarefaVisivel"
+      "itemChecklistSoQuemVeTarefa",
+      "itemChecklistTarefaNaoEncerrada",
+      "marcarItemNaoMudaSituacao"
     ],
     "effects": []
   }

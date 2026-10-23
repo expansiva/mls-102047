@@ -7,8 +7,8 @@ export const definition = {
   "moduleName": "tarefas",
   "status": "pending",
   "dependencies": [
-    "_102047_/l1/tarefas/layer_3_domain/entities/lista.defs.ts",
-    "_102047_/l1/tarefas/layer_3_domain/entities/membroEquipe.defs.ts"
+    "_102047_/l1/tarefas/layer_3_domain/entities/listaTarefas.defs.ts",
+    "_102047_/l1/tarefas/layer_3_domain/entities/participante.defs.ts"
   ],
   "data": {
     "entityId": "Tarefa",
@@ -43,26 +43,22 @@ export const definition = {
       {
         "name": "listaId",
         "type": "record",
-        "ref": "Lista"
+        "ref": "ListaTarefas"
       },
       {
         "name": "responsavelId",
         "type": "record",
-        "ref": "MembroEquipe"
+        "ref": "Participante"
       },
       {
         "name": "criadorId",
         "type": "record",
-        "ref": "MembroEquipe"
+        "ref": "Participante"
       },
       {
         "name": "tarefaPaiId",
         "type": "record",
         "ref": "Tarefa"
-      },
-      {
-        "name": "chaveCriacao",
-        "type": "uuid"
       },
       {
         "name": "criadaEm",
@@ -78,11 +74,19 @@ export const definition = {
         "type": "text"
       },
       {
+        "name": "details.etiquetas",
+        "type": "string"
+      },
+      {
         "name": "details.motivoDevolucao",
         "type": "text"
       },
       {
         "name": "details.devolvidaEm",
+        "type": "timestamp"
+      },
+      {
+        "name": "details.retomadaEm",
         "type": "timestamp"
       },
       {
@@ -92,6 +96,12 @@ export const definition = {
       {
         "name": "details.canceladaEm",
         "type": "timestamp"
+      },
+      {
+        "name": "details.quemAgeAgora",
+        "type": "record",
+        "derived": true,
+        "ref": "Participante"
       },
       {
         "name": "details.aberta",
@@ -105,6 +115,11 @@ export const definition = {
       },
       {
         "name": "details.atrasada",
+        "type": "boolean",
+        "derived": true
+      },
+      {
+        "name": "details.devolvidaPendente",
         "type": "boolean",
         "derived": true
       },
@@ -150,11 +165,10 @@ export const definition = {
           ],
           "to": "emAndamento",
           "by": [
-            "membroEquipe",
-            "gestor"
+            "membroEquipe"
           ],
           "ruleRefs": [
-            "somenteResponsavelExecuta"
+            "apenasResponsavelExecuta"
           ]
         },
         {
@@ -164,11 +178,11 @@ export const definition = {
           ],
           "to": "emRevisao",
           "by": [
-            "membroEquipe",
-            "gestor"
+            "membroEquipe"
           ],
           "ruleRefs": [
-            "somenteResponsavelExecuta"
+            "apenasResponsavelExecuta",
+            "avisarQuemAgeAgora"
           ]
         },
         {
@@ -178,11 +192,10 @@ export const definition = {
           ],
           "to": "concluida",
           "by": [
-            "membroEquipe",
-            "gestor"
+            "membroEquipe"
           ],
           "ruleRefs": [
-            "somenteCriadorRevisa"
+            "apenasCriadorRevisa"
           ]
         },
         {
@@ -192,12 +205,26 @@ export const definition = {
           ],
           "to": "emAndamento",
           "by": [
-            "membroEquipe",
-            "gestor"
+            "membroEquipe"
           ],
           "ruleRefs": [
-            "somenteCriadorRevisa",
-            "devolucaoExigeMotivo"
+            "apenasCriadorRevisa",
+            "devolucaoExigeMotivo",
+            "avisarQuemAgeAgora"
+          ]
+        },
+        {
+          "transitionId": "retomar",
+          "from": [
+            "emAndamento"
+          ],
+          "to": "emAndamento",
+          "by": [
+            "membroEquipe"
+          ],
+          "ruleRefs": [
+            "apenasResponsavelExecuta",
+            "retomarSoAposDevolucao"
           ]
         },
         {
@@ -209,21 +236,27 @@ export const definition = {
           ],
           "to": "cancelada",
           "by": [
-            "membroEquipe",
-            "gestor"
+            "gestor",
+            "membroEquipe"
           ],
           "ruleRefs": [
-            "cancelamentoPorCriadorOuGestor"
+            "cancelarApenasCriadorOuGestor",
+            "avisarQuemAgeAgora"
           ]
         }
       ]
     },
     "invariants": [
-      "criacaoIdempotente",
-      "reatribuicaoPorCriadorOuGestor",
+      "podeCriarTarefasExigido",
+      "responsavelAceitaTarefas",
+      "escolhaResponsavelPeloNome",
+      "reatribuirApenasCriadorOuGestor",
       "edicaoNaoMudaSituacao",
-      "tarefaPaiNaoPodeSerElaMesma",
-      "tarefaEncerradaNaoTransiciona"
+      "tarefaPaiDiferenteDaPropria",
+      "quemAgeAgoraPorSituacao",
+      "resumoDiarioOitoHoras",
+      "avisoNaoSobrepostoPorPessoa",
+      "membroVeResponsavelOuCriador"
     ],
     "imports": []
   }

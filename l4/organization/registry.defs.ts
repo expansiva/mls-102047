@@ -801,20 +801,20 @@ export const solutionRegistry = {
       "roles": [
         {
           "subtype": "Person",
-          "roleTag": "tarefas.MembroEquipe",
+          "roleTag": "tarefas.Participante",
           "namespace": "tarefas"
         }
       ],
       "generalFields": [],
       "entities": [
         {
-          "entityId": "MembroEquipe",
+          "entityId": "Participante",
           "kind": "role",
           "mdmSubtype": "Person",
           "class": "mdm"
         },
         {
-          "entityId": "Lista",
+          "entityId": "ListaTarefas",
           "kind": "entity",
           "class": "supporting"
         },
@@ -827,11 +827,6 @@ export const solutionRegistry = {
           "entityId": "ItemChecklist",
           "kind": "entity",
           "class": "supporting"
-        },
-        {
-          "entityId": "AvisoVencimento",
-          "kind": "entity",
-          "class": "event"
         }
       ],
       "events": [
@@ -844,7 +839,7 @@ export const solutionRegistry = {
           "on": "Tarefa.cancelar"
         }
       ],
-      "updatedAt": "2026-10-16T07:05:56.587Z"
+      "updatedAt": "2026-10-23T01:12:36.704Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;

@@ -4,31 +4,27 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "desktop",
-  "contextHash": "sha256:5d038ea005eb9c4138c0d26ab68bd652d2f5ef1c655ad345537fd195ef48a10a",
+  "contextHash": "sha256:4f87919cd8e6441a2a7f1cac39881731f4bfbf756a9c723460503cf7a14d12e9",
   "sourcePath": "l2/tarefas/web/desktop/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:6bc0c4a1f0dcc25c6319e9c7d4c50d1b584fe4447e4ea502d80234c2dcbe04b3",
+  "sourceHash": "sha256:cb5e428b9281b162de39b3f478555e30a200f00289bedc83b8408c2a9560d9d9",
   "attempt": 1,
   "design": {
-    "concept": "A planner's working list with a working panel beside it. On the left, quick filters and the task table in the order the backend returns it (deadline first). On the right, a panel that changes mode: empty prompt, open task, edit task, new task. The list stays visible and the selected row stays marked, so the person never leaves the list.",
+    "concept": "Uma fila de trabalho por prazo ocupa a maior parte da tela, mantendo visíveis os compromissos enquanto o membro abre a tarefa escolhida em um painel de trabalho à direita. O painel alterna entre contexto vazio, detalhes editáveis e criação, sem tirar a lista do campo de visão.",
     "views": [
       {
-        "id": "inicio",
-        "purpose": "Empty panel. It asks the person to pick a task or start a new one."
+        "id": "vazio",
+        "purpose": "Mantém o painel lateral orientado para a seleção enquanto a lista continua disponível."
       },
       {
         "id": "detalhe",
-        "purpose": "The open task. It shows status, role, return reason, fields, a checklist you can tick and save, and the history. A sticky bar at the bottom holds the lifecycle actions allowed for my role. Back closes the task and clears the selection."
-      },
-      {
-        "id": "editar",
-        "purpose": "Edit the fields of the open task (list, title, description, priority, deadline, owner) and, in a second block, its checklist (text, done, order, add). Each block has its own save. Back returns to the task."
+        "purpose": "Permite conferir, editar checklist e avançar a tarefa selecionada ao lado da fila."
       },
       {
         "id": "nova",
-        "purpose": "Create a task with its initial checklist, in the same panel next to the list. On success the new task opens in the detail view."
+        "purpose": "Abre a criação de uma tarefa no painel lateral sem navegar para fora da fila."
       }
     ],
-    "decisions": "Template followed: master-detail with the list always visible and a single 'Nova tarefa' button above it. The create and edit forms are panel modes. The scene host covers only the right region (mode=scenary), and the list lives outside it. The host default follows selectedTarefa so a reload with the id in the URL opens the record. Going back to 'inicio' or opening 'nova' clears the selection.\n\nAfter create and after save-edit success the page moves to the detail view with a .then() on the shared command. Success is shown locally: the row and the card change in place, and there are no page banners.\n\nThe template's lifecycle actions are plain native buttons, because the button-group event carries no data and cannot tell which button was pressed. Cancelling and returning use native <details> disclosures: cancelling is a confirmation that names the task, and returning holds the reason field. This gives a confirmation without page state. Danger style appears once, on the confirm-cancel button.\n\nCommand errors render inside the panel in normal body colour, above the buttons. Alarm colour is used only on overdue dates. Due-today gets weight and a caption instead.\n\nLeft out on purpose: the quick-assign picker and the search-by-title box, because the contract has no assign command and no search parameter. The checklist progress bar is also left out, because the progress is a string and the page must not parse it, so it shows as text. Save buttons are disabled until the required fields are filled, but there is no dirty tracking or close-confirm because the page holds no state. A missing opening context (client.preconditionMissing) shows a plain explanation with a back button. The row array is read from tarefas.items, with page and hasMore, as the shared JSDoc describes the list."
+    "decisions": "Segui o padrão master-detail do template: a lista continua fixa e a área lateral é um scenary regional para detalhes e criação. Como o contrato não oferece busca, ordenação controlável, atribuição sem abrir a tarefa ou um total de registros, não exponho controles que não poderiam funcionar; o backend entrega a fila carregada. Os três grupos disponíveis são uma troca de escopo por pills, e prazos atrasados recebem a única ênfase de alarme na tabela."
   },
   "advisories": [
     {
@@ -44,28 +40,24 @@
       "message": "Section secEdicao needs an element with data-section-id=\"secEdicao\"."
     },
     {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section secHistorico needs an element with data-section-id=\"secHistorico\"."
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasLista (progresso da checklist na linha) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism listaTarefas (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
+      "message": "Organism tarefasLista (busca pelo título e filtros da lista) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism listaTarefas (busca por título) renders neither <groupsearchcontent--ml-search-filters> nor <groupsearchcontent--ml-search-bar>."
+      "message": "Organism tarefaDetalhe (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-segmented-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesTarefa (ações principais) renders neither <grouptriggeraction--ml-button-group> nor <grouptriggeraction--ml-split-button>."
+      "message": "Organism tarefaAcoes (ação secundária de cancelar) renders neither <grouptriggeraction--ml-kebab-action-trigger> nor <grouptriggeraction--ml-icon-button>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesTarefa (ações secundárias) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesTarefa (confirmação da ação) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-alert-modal>."
+      "message": "Organism tarefaAcoes (confirmação de cancelamento e retorno das ações) renders neither <groupnotifyuser--ml-alert-modal> nor <groupnotifyuser--ml-toast-notification>."
     }
   ]
 }

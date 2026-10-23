@@ -2,54 +2,54 @@
 
 export const definition = {
   "template": {
-    "category": "_102020_/l4/collabux/templates/workPlanningBoard/page21.md",
-    "experience": "timelineList"
+    "category": "_102020_/l4/collabux/templates/operationsQueue/page21.md",
+    "experience": "workQueueSplit"
   },
-  "intent": "No celular, permitir ao gestor percorrer as tarefas da equipe em uma coluna fluida (cerca de 390px, usável entre 360px e 430px), filtrar, abrir uma tarefa e, a partir dela, trocar o responsável ou cancelar.",
+  "intent": "Em tela estreita, fluida em torno de 390px e utilizável de 360px a 430px, o gestor percorre todas as tarefas filtradas, alterna entre lista e quadro por situação, abre uma tarefa para conferir responsável, prazo e checklist, troca o responsável ou cancela e consulta o histórico.",
   "sections": [
     {
-      "id": "quadroEquipe",
+      "id": "filaTarefas",
       "priority": "primary",
-      "purpose": "Lista compacta das tarefas da equipe com filtros recolhíveis, destacando atrasadas e as que vencem hoje.",
+      "purpose": "Mostrar as tarefas filtradas em cartões empilhados ou no quadro por situação, com quem age agora e marcas de vence hoje ou atrasada visíveis sem rolagem lateral.",
       "organisms": [
         "tarefasEquipe"
       ]
     },
     {
-      "id": "tarefaSelecionada",
+      "id": "tarefaAberta",
       "priority": "main",
-      "purpose": "Ao tocar numa tarefa, mostrar seu detalhe empilhado e logo abaixo as ações do gestor.",
+      "purpose": "Mostrar a tarefa escolhida em leitura vertical, com responsável, prazo e progresso da checklist no topo e as ações de trocar responsável ou cancelar logo abaixo.",
       "organisms": [
-        "detalheTarefa",
-        "acoesGestor"
+        "tarefaDetalhe",
+        "tarefaAcoes"
       ]
     },
     {
-      "id": "historico",
+      "id": "historicoTarefa",
       "priority": "secondary",
-      "purpose": "Histórico da tarefa ao final, consultado quando o gestor precisa entender o contexto.",
+      "purpose": "Mostrar os eventos da tarefa em ordem de tempo, depois do detalhe, para consulta quando necessário.",
       "organisms": [
-        "historicoTarefa"
+        "tarefaHistorico"
       ]
     }
   ],
   "organisms": {
     "tarefasEquipe": {
       "kind": "list",
-      "text": "Tarefas da equipe com título, responsável, prazo, situação e prioridade, filtráveis por lista, responsável, prioridade, prazo e situação, com sinal para as que vencem hoje ou estão atrasadas.",
+      "text": "Todas as tarefas filtradas por lista, responsável, prioridade, prazo e situação, em lista compacta ou em quadro por situação, mostrando quem age agora e marcando as que vencem hoje ou estão atrasadas. Lista vazia e erro aparecem separados.",
       "intents": []
     },
-    "detalheTarefa": {
+    "tarefaDetalhe": {
       "kind": "detail",
-      "text": "Detalhe da tarefa tocada: descrição, criador, responsável, prazo, situação, subtarefas e checklist com o progresso.",
+      "text": "A tarefa aberta com situação, responsável atual, quem age agora, prazo, criada em, subtarefas e checklist com progresso.",
       "intents": []
     },
-    "acoesGestor": {
+    "tarefaAcoes": {
       "kind": "actions",
-      "text": "Trocar o responsável escolhendo uma pessoa ativa da equipe, que é avisada, ou cancelar a tarefa aberta.",
+      "text": "Trocar o responsável escolhendo pelo nome entre quem aceita tarefas, ou cancelar a tarefa aberta após confirmar.",
       "intents": [
         {
-          "id": "reatribuirTarefa",
+          "id": "trocarResponsavel",
           "kind": "submit"
         },
         {
@@ -58,68 +58,84 @@ export const definition = {
         }
       ]
     },
-    "historicoTarefa": {
+    "tarefaHistorico": {
       "kind": "timeline",
-      "text": "Histórico da tarefa: criação, início, revisões, devoluções, reatribuições com aviso ao novo responsável e cancelamento.",
+      "text": "Histórico da tarefa: criação, execução, revisões, devoluções, trocas de responsável e cancelamento.",
       "intents": []
     }
   },
   "molecules": {
     "tarefasEquipe": [
       {
-        "role": "Lista das tarefas adaptada a tela estreita",
-        "preferred": "groupviewtable--ml-responsive-data-table",
-        "alternative": "groupviewtable--ml-responsive-table"
+        "role": "busca por título com filtros",
+        "preferred": "groupsearchcontent--ml-search-filters",
+        "alternative": "groupsearchcontent--ml-search-bar"
       },
       {
-        "role": "Filtro por lista, responsável, prioridade ou situação",
-        "preferred": "groupselectone--ml-select",
-        "alternative": "groupselectone--ml-combobox"
+        "role": "filtro por situação e prioridade",
+        "preferred": "groupselectmany--ml-popover-multi-select",
+        "alternative": "groupselectmany--ml-multi-select-dropdown"
       },
       {
-        "role": "Filtro por período de prazo",
-        "preferred": "groupenterdateinterval--ml-date-interval-presets"
-      },
-      {
-        "role": "Busca pelo título da tarefa",
-        "preferred": "groupsearchcontent--ml-search-bar",
-        "alternative": "groupsearchcontent--ml-search-filters"
-      }
-    ],
-    "detalheTarefa": [
-      {
-        "role": "Resumo da tarefa tocada",
-        "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
-      },
-      {
-        "role": "Itens da checklist em ordem",
-        "preferred": "groupviewdata--ml-vertical-record-list"
-      }
-    ],
-    "acoesGestor": [
-      {
-        "role": "Escolha do novo responsável pelo nome",
+        "role": "filtro por lista ou responsável",
         "preferred": "groupselectone--ml-select-one-autocomplete",
         "alternative": "groupselectone--ml-combobox"
       },
       {
-        "role": "Ações de reatribuir e cancelar",
+        "role": "filtro por intervalo de prazo",
+        "preferred": "groupenterdateinterval--ml-date-interval-presets",
+        "alternative": "groupenterdateinterval--ml-date-interval-drag"
+      },
+      {
+        "role": "alternar entre lista e quadro",
+        "preferred": "groupselectone--ml-segmented-control",
+        "alternative": "groupnavigatesection--ml-navigate-pills"
+      },
+      {
+        "role": "lista de tarefas em tela estreita",
+        "preferred": "groupviewtable--ml-responsive-data-table",
+        "alternative": "groupviewtable--ml-responsive-table"
+      }
+    ],
+    "tarefaDetalhe": [
+      {
+        "role": "resumo da tarefa aberta",
+        "preferred": "groupviewcard--ml-vertical-card",
+        "alternative": "groupviewcard--ml-view-card-horizontal"
+      },
+      {
+        "role": "progresso da checklist",
+        "preferred": "groupshowprogress--ml-linear-progress",
+        "alternative": "groupshowprogress--ml-circular-progress"
+      },
+      {
+        "role": "itens da checklist",
+        "preferred": "groupviewdata--ml-vertical-record-list"
+      }
+    ],
+    "tarefaAcoes": [
+      {
+        "role": "escolha do novo responsável pelo nome",
+        "preferred": "groupselectone--ml-select-one-autocomplete",
+        "alternative": "groupselectone--ml-combobox"
+      },
+      {
+        "role": "botões de trocar responsável e cancelar",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-kebab-action-trigger"
       },
       {
-        "role": "Confirmação antes de cancelar",
+        "role": "confirmação do cancelamento",
         "preferred": "groupnotifyuser--ml-alert-modal"
       },
       {
-        "role": "Retorno após reatribuir ou cancelar",
+        "role": "retorno da ação concluída",
         "preferred": "groupnotifyuser--ml-toast-notification"
       }
     ],
-    "historicoTarefa": [
+    "tarefaHistorico": [
       {
-        "role": "Eventos da tarefa em ordem de tempo",
+        "role": "eventos da tarefa em ordem de tempo",
         "preferred": "groupviewdata--ml-timeline-view",
         "alternative": "groupviewdata--ml-vertical-record-list"
       }

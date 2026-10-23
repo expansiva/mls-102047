@@ -18,7 +18,7 @@ export const definition = {
     "entityId": "Tarefa",
     "operation": "transition",
     "rulesApplied": [
-      "somenteCriadorRevisa"
+      "apenasCriadorRevisa"
     ],
     "effects": [
       {

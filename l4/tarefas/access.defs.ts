@@ -11,105 +11,143 @@ export const tarefasAccess = {
       "kind": "internal",
       "origin": "named",
       "title": "Membro da equipe",
-      "description": "Cria tarefas, executa as que lhe são atribuídas (inicia e envia para revisão) e revisa as que criou (aceita, devolve com motivo ou cancela).",
-      "personEntity": "MembroEquipe"
+      "description": "Usuário da organização que cria tarefas (quando pode criar), executa as tarefas de que é responsável, inicia, envia para revisão, aceita ou devolve as que criou e vê o que depende dele agora.",
+      "personEntity": "Participante"
     },
     {
       "actorId": "gestor",
       "kind": "internal",
       "origin": "named",
       "title": "Gestor",
-      "description": "Faz tudo o que o membro faz e, além disso, vê e acompanha todas as tarefas da equipe, mantém as listas, reatribui e cancela tarefas.",
-      "personEntity": "MembroEquipe"
+      "description": "Usuário da organização com acesso de gestor na plataforma: escolhe quem participa e marca quem aceita e quem pode criar tarefas, mantém as listas, reatribui e cancela tarefas e acompanha todas as tarefas em lista e em quadro por situação.",
+      "personEntity": ""
     }
   ],
   "grants": [
     {
       "grantId": "membroTarefasProprias",
       "actorRef": "membroEquipe",
-      "title": "Tarefas que criei ou que me foram atribuídas",
-      "description": "O membro cria tarefas, executa as que lhe são atribuídas, revisa, devolve, cancela e reatribui as que criou e edita os campos das tarefas que vê, junto com a checklist.",
+      "title": "Minhas tarefas",
+      "description": "O membro vê e trabalha nas tarefas de que é responsável e nas que criou: cria (quando pode criar), edita campos, inicia, envia para revisão, aceita, devolve, retoma, reatribui e cancela conforme o seu papel na tarefa, e vê o que depende dele agora.",
       "entityRefs": [
-        "Tarefa",
+        "Tarefa"
+      ],
+      "dataScope": {
+        "mode": "own",
+        "description": "Tarefas cujo responsável ou quem criou é o participante da sessão.",
+        "anchorEntity": "Participante"
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Todos os campos da tarefa, incluindo motivo da devolução, quem age agora, prazo e progresso da checklist."
+      }
+    },
+    {
+      "grantId": "membroChecklistPropria",
+      "actorRef": "membroEquipe",
+      "title": "Checklist das minhas tarefas",
+      "description": "O membro adiciona, edita e marca itens da checklist das tarefas de que é responsável ou que criou.",
+      "entityRefs": [
         "ItemChecklist"
       ],
       "dataScope": {
         "mode": "own",
-        "description": "Tarefas em que o membro da sessão é o responsável ou o criador, e os itens de checklist dessas tarefas.",
-        "anchorEntity": "MembroEquipe"
+        "description": "Itens de checklist de tarefas cujo responsável ou quem criou é o participante da sessão.",
+        "anchorEntity": "Participante"
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "O membro vê a tarefa completa, incluindo motivo de devolução, andamento e checklist."
+        "description": "Todos os campos do item da checklist."
       }
     },
     {
-      "grantId": "membroAvisosProprios",
+      "grantId": "membroEscolherResponsavel",
       "actorRef": "membroEquipe",
-      "title": "Meus avisos diários de vencimento",
-      "description": "O membro consulta o aviso diário com as suas tarefas abertas que vencem hoje ou estão atrasadas.",
+      "title": "Escolher responsável pelo nome",
+      "description": "O membro vê os participantes pelo nome, numa lista com busca, para escolher o responsável entre quem aceita tarefas; não vê dados pessoais nem e-mail.",
       "entityRefs": [
-        "AvisoVencimento"
+        "Participante"
       ],
       "dataScope": {
-        "mode": "own",
-        "description": "Somente os avisos em que o membro da sessão é o responsável.",
-        "anchorEntity": "MembroEquipe"
+        "mode": "organization",
+        "description": "Participantes do módulo na organização, para a escolha do responsável."
       },
       "disclosure": {
-        "mode": "fullRecord",
-        "description": "O membro vê o aviso inteiro com as tarefas listadas."
+        "mode": "fieldsOnly",
+        "description": "Somente o nome, a situação do registro e as marcas efetivas de aceitar e criar tarefas.",
+        "allowedFields": [
+          "Participante.details.identification.name",
+          "Participante.details.identification.status",
+          "Participante.details.tarefas.aceitaTarefasEfetivo",
+          "Participante.details.tarefas.podeCriarTarefasEfetivo"
+        ]
       }
     },
     {
-      "grantId": "membroConsultaListas",
+      "grantId": "membroConsultarListas",
       "actorRef": "membroEquipe",
-      "title": "Escolher a lista da tarefa",
-      "description": "O membro consulta as listas para escolher onde a nova tarefa ficará.",
+      "title": "Consultar listas",
+      "description": "O membro vê as listas de tarefas para escolher a lista ao criar ou editar uma tarefa.",
       "entityRefs": [
-        "Lista"
+        "ListaTarefas"
       ],
       "dataScope": {
         "mode": "organization",
         "description": "Todas as listas da organização."
       },
       "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Nome, situação, tipo e descrição da lista; os indicadores de acompanhamento ficam com o gestor.",
-        "allowedFields": [
-          "Lista.nome",
-          "Lista.ativa",
-          "Lista.details.tipo",
-          "Lista.details.descricao"
-        ]
+        "mode": "fullRecord",
+        "description": "Nome, descrição e quantidade de tarefas abertas da lista."
       }
     },
     {
-      "grantId": "membroEscolheResponsavel",
-      "actorRef": "membroEquipe",
-      "title": "Escolher responsável na equipe",
-      "description": "O membro vê os nomes das pessoas da equipe para atribuir ou reatribuir a tarefa.",
+      "grantId": "gestorParticipantes",
+      "actorRef": "gestor",
+      "title": "Configurar participantes",
+      "description": "O gestor escolhe, entre os usuários da organização, quem participa do módulo e marca se aceita tarefas e se pode criar tarefas, sem cadastrar ninguém nem ver dado pessoal.",
       "entityRefs": [
-        "MembroEquipe"
+        "Participante"
       ],
       "dataScope": {
         "mode": "organization",
-        "description": "Todas as pessoas da equipe."
+        "description": "Usuários da organização e participantes do módulo."
       },
       "disclosure": {
         "mode": "fieldsOnly",
-        "description": "Somente nome e situação (ativo ou inativo) de cada membro.",
+        "description": "Identificação (nome, situação, papéis) e as marcas do módulo de tarefas; sem dados base nem pessoais.",
         "allowedFields": [
-          "MembroEquipe.details.identification.name",
-          "MembroEquipe.details.identification.status"
+          "Participante.details.identification",
+          "Participante.details.tarefas"
+        ],
+        "deniedFields": [
+          "Participante.details.base",
+          "Participante.details.person",
+          "Participante.details.general"
         ]
       }
     },
     {
-      "grantId": "gestorTarefasEquipe",
+      "grantId": "gestorListas",
       "actorRef": "gestor",
-      "title": "Todas as tarefas da equipe",
-      "description": "O gestor vê, acompanha, edita, reatribui e cancela qualquer tarefa da equipe, além de fazer tudo o que o membro faz, com a checklist.",
+      "title": "Manter listas",
+      "description": "O gestor cria e altera as listas que agrupam tarefas por projeto ou área.",
+      "entityRefs": [
+        "ListaTarefas"
+      ],
+      "dataScope": {
+        "mode": "organization",
+        "description": "Todas as listas da organização."
+      },
+      "disclosure": {
+        "mode": "fullRecord",
+        "description": "Todos os campos da lista."
+      }
+    },
+    {
+      "grantId": "gestorTodasTarefas",
+      "actorRef": "gestor",
+      "title": "Acompanhar, reatribuir e cancelar tarefas",
+      "description": "O gestor acompanha todas as tarefas por lista, responsável, prioridade, prazo e situação, em lista e em quadro, reatribui o responsável e cancela tarefas.",
       "entityRefs": [
         "Tarefa",
         "ItemChecklist"
@@ -120,62 +158,7 @@ export const tarefasAccess = {
       },
       "disclosure": {
         "mode": "fullRecord",
-        "description": "O gestor vê a tarefa completa em lista ou em quadro por situação."
-      }
-    },
-    {
-      "grantId": "gestorListas",
-      "actorRef": "gestor",
-      "title": "Manter listas",
-      "description": "O gestor cadastra, altera e acompanha as listas que agrupam tarefas por projeto ou área.",
-      "entityRefs": [
-        "Lista"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Todas as listas da organização."
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "O gestor vê a lista inteira, incluindo a quantidade de tarefas abertas."
-      }
-    },
-    {
-      "grantId": "gestorMembros",
-      "actorRef": "gestor",
-      "title": "Pessoas da equipe",
-      "description": "O gestor mantém o cadastro das pessoas da equipe neste módulo e escolhe responsáveis ao reatribuir.",
-      "entityRefs": [
-        "MembroEquipe"
-      ],
-      "dataScope": {
-        "mode": "organization",
-        "description": "Todas as pessoas da equipe."
-      },
-      "disclosure": {
-        "mode": "fieldsOnly",
-        "description": "Dados de identificação e contato do membro, sem o registro de consentimento de privacidade.",
-        "deniedFields": [
-          "MembroEquipe.details.person.privacyConsent"
-        ]
-      }
-    },
-    {
-      "grantId": "gestorAvisosProprios",
-      "actorRef": "gestor",
-      "title": "Meus avisos diários de vencimento",
-      "description": "Como responsável de tarefas, o gestor consulta o seu aviso diário de tarefas que vencem hoje ou estão atrasadas.",
-      "entityRefs": [
-        "AvisoVencimento"
-      ],
-      "dataScope": {
-        "mode": "own",
-        "description": "Somente os avisos em que o gestor da sessão é o responsável.",
-        "anchorEntity": "MembroEquipe"
-      },
-      "disclosure": {
-        "mode": "fullRecord",
-        "description": "O gestor vê o aviso inteiro com as tarefas listadas."
+        "description": "Todos os campos das tarefas e dos itens de checklist."
       }
     }
   ]

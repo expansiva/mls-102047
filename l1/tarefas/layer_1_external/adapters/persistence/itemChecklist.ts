@@ -26,11 +26,6 @@ export const tableDefinition = {
       "nullable": true
     },
     {
-      "name": "feito",
-      "postgresType": "BOOLEAN",
-      "nullable": true
-    },
-    {
       "name": "details",
       "postgresType": "JSONB",
       "defaultSql": "'{}'::jsonb"
@@ -50,12 +45,6 @@ export const tableDefinition = {
       "name": "tarefas_itemchecklist_ordem",
       "columns": [
         "ordem"
-      ]
-    },
-    {
-      "name": "tarefas_itemchecklist_feito",
-      "columns": [
-        "feito"
       ]
     }
   ],
@@ -80,11 +69,6 @@ export const migrationPlan = {
       "op": "createIndex",
       "tableName": "tarefas_itemchecklist",
       "name": "tarefas_itemchecklist_ordem"
-    },
-    {
-      "op": "createIndex",
-      "tableName": "tarefas_itemchecklist",
-      "name": "tarefas_itemchecklist_feito"
     }
   ],
   "blocked": []

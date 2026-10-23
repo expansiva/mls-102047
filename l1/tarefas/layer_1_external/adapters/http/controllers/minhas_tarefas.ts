@@ -7,35 +7,60 @@ import type { Minhas_tarefasContracts } from '/_102047_/l2/tarefas/web/contracts
 
 export const routes: ControllerRoute[] = [
   { key: 'tarefas.minhas_tarefas.cmdAceitar', handler: handleCmdAceitar },
+  { key: 'tarefas.minhas_tarefas.cmdAdicionarItensChecklist', handler: handleCmdAdicionarItensChecklist },
+  { key: 'tarefas.minhas_tarefas.cmdAjustarChecklist', handler: handleCmdAjustarChecklist },
   { key: 'tarefas.minhas_tarefas.cmdCancelar', handler: handleCmdCancelar },
   { key: 'tarefas.minhas_tarefas.cmdCriarTarefa', handler: handleCmdCriarTarefa },
   { key: 'tarefas.minhas_tarefas.cmdDevolver', handler: handleCmdDevolver },
-  { key: 'tarefas.minhas_tarefas.cmdEnviarRevisao', handler: handleCmdEnviarRevisao },
+  { key: 'tarefas.minhas_tarefas.cmdEnviarParaRevisao', handler: handleCmdEnviarParaRevisao },
   { key: 'tarefas.minhas_tarefas.cmdIniciar', handler: handleCmdIniciar },
-  { key: 'tarefas.minhas_tarefas.cmdSalvarChecklist', handler: handleCmdSalvarChecklist },
-  { key: 'tarefas.minhas_tarefas.cmdSalvarEdicao', handler: handleCmdSalvarEdicao },
-  { key: 'tarefas.minhas_tarefas.qryBuscarMembros', handler: handleQryBuscarMembros },
-  { key: 'tarefas.minhas_tarefas.qryListasAtivas', handler: handleQryListasAtivas },
+  { key: 'tarefas.minhas_tarefas.cmdRetomar', handler: handleCmdRetomar },
+  { key: 'tarefas.minhas_tarefas.cmdSalvarAlteracoes', handler: handleCmdSalvarAlteracoes },
+  { key: 'tarefas.minhas_tarefas.qryListas', handler: handleQryListas },
   { key: 'tarefas.minhas_tarefas.qryMinhasTarefas', handler: handleQryMinhasTarefas },
+  { key: 'tarefas.minhas_tarefas.qryResponsaveis', handler: handleQryResponsaveis },
   { key: 'tarefas.minhas_tarefas.qryTarefa', handler: handleQryTarefa },
+  { key: 'tarefas.minhas_tarefas.qryTarefasDoGrupo', handler: handleQryTarefasDoGrupo },
 ];
 
 async function handleCmdAceitar(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAceitar']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
-  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
+  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], [], {  });
   if (invalid) throw invalid;
   const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAceitar']['input'];
   const data = await requests["tarefas.minhas_tarefas.cmdAceitar"](params, input.ctx);
   return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAceitar']['output'], error: null };
 }
 
+async function handleCmdAdicionarItensChecklist(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAdicionarItensChecklist']['output']>> {
+  const held = authorize(input.request, ['membroChecklistPropria', 'membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['tarefaId', 'itens', 'itens.ordem', 'itens.details', 'itens.details.descricao', 'itens.details.concluido']);
+  const invalid = validateInput(scoped, ['tarefaId', 'itens', 'itens.ordem', 'itens.details', 'itens.details.descricao', 'itens.details.concluido'], ['tarefaId', 'itens', 'itens.ordem', 'itens.details', 'itens.details.descricao', 'itens.details.concluido'], [], {  });
+  if (invalid) throw invalid;
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAdicionarItensChecklist']['input'];
+  const data = await requests["tarefas.minhas_tarefas.cmdAdicionarItensChecklist"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAdicionarItensChecklist']['output'], error: null };
+}
+
+async function handleCmdAjustarChecklist(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAjustarChecklist']['output']>> {
+  const held = authorize(input.request, ['membroChecklistPropria', 'membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['tarefaId', 'itens', 'itens.id', 'itens.version', 'itens.ordem', 'itens.details', 'itens.details.descricao', 'itens.details.concluido']);
+  const invalid = validateInput(scoped, ['tarefaId', 'itens', 'itens.id', 'itens.version', 'itens.details'], ['tarefaId', 'itens', 'itens.id', 'itens.version', 'itens.ordem', 'itens.details', 'itens.details.descricao', 'itens.details.concluido'], [], {  });
+  if (invalid) throw invalid;
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAjustarChecklist']['input'];
+  const data = await requests["tarefas.minhas_tarefas.cmdAjustarChecklist"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdAjustarChecklist']['output'], error: null };
+}
+
 async function handleCmdCancelar(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdCancelar']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
-  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
+  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], [], {  });
   if (invalid) throw invalid;
   const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdCancelar']['input'];
   const data = await requests["tarefas.minhas_tarefas.cmdCancelar"](params, input.ctx);
@@ -43,10 +68,10 @@ async function handleCmdCancelar(input: IRequestEnvelope): Promise<BffResponse<M
 }
 
 async function handleCmdCriarTarefa(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdCriarTarefa']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['chaveCriacao', 'listaId', 'titulo', 'details', 'details.descricao', 'prioridade', 'prazo', 'responsavelId', 'criadorId', 'checklist', 'checklist.id', 'checklist.version', 'checklist.details', 'checklist.details.descricao', 'checklist.ordem', 'checklist.feito']);
-  const invalid = validateInput(scoped, ['chaveCriacao', 'listaId', 'titulo', 'details', 'prioridade', 'prazo', 'responsavelId', 'checklist.details', 'checklist.details.descricao', 'checklist.ordem', 'checklist.feito'], ['chaveCriacao', 'listaId', 'titulo', 'details', 'details.descricao', 'prioridade', 'prazo', 'responsavelId', 'criadorId', 'checklist', 'checklist.id', 'checklist.version', 'checklist.details', 'checklist.details.descricao', 'checklist.ordem', 'checklist.feito'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['titulo', 'details', 'details.descricao', 'details.etiquetas', 'prioridade', 'prazo', 'listaId', 'responsavelId', 'criadorId', 'tarefaPaiId']);
+  const invalid = validateInput(scoped, ['titulo', 'details', 'prioridade', 'listaId', 'responsavelId', 'criadorId'], ['titulo', 'details', 'details.descricao', 'details.etiquetas', 'prioridade', 'prazo', 'listaId', 'responsavelId', 'criadorId', 'tarefaPaiId'], [], { 'prioridade': ['baixa', 'media', 'alta'] });
   if (invalid) throw invalid;
   const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdCriarTarefa']['input'];
   const data = await requests["tarefas.minhas_tarefas.cmdCriarTarefa"](params, input.ctx);
@@ -54,102 +79,113 @@ async function handleCmdCriarTarefa(input: IRequestEnvelope): Promise<BffRespons
 }
 
 async function handleCmdDevolver(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdDevolver']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'details', 'details.motivoDevolucao']);
-  const invalid = validateInput(scoped, ['id', 'version', 'details', 'details.motivoDevolucao'], ['id', 'version', 'details', 'details.motivoDevolucao'], []);
+  const invalid = validateInput(scoped, ['id', 'version', 'details', 'details.motivoDevolucao'], ['id', 'version', 'details', 'details.motivoDevolucao'], [], {  });
   if (invalid) throw invalid;
   const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdDevolver']['input'];
   const data = await requests["tarefas.minhas_tarefas.cmdDevolver"](params, input.ctx);
   return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdDevolver']['output'], error: null };
 }
 
-async function handleCmdEnviarRevisao(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdEnviarRevisao']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+async function handleCmdEnviarParaRevisao(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdEnviarParaRevisao']['output']>> {
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
-  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
+  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], [], {  });
   if (invalid) throw invalid;
-  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdEnviarRevisao']['input'];
-  const data = await requests["tarefas.minhas_tarefas.cmdEnviarRevisao"](params, input.ctx);
-  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdEnviarRevisao']['output'], error: null };
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdEnviarParaRevisao']['input'];
+  const data = await requests["tarefas.minhas_tarefas.cmdEnviarParaRevisao"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdEnviarParaRevisao']['output'], error: null };
 }
 
 async function handleCmdIniciar(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdIniciar']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
-  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], []);
+  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], [], {  });
   if (invalid) throw invalid;
   const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdIniciar']['input'];
   const data = await requests["tarefas.minhas_tarefas.cmdIniciar"](params, input.ctx);
   return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdIniciar']['output'], error: null };
 }
 
-async function handleCmdSalvarChecklist(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarChecklist']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+async function handleCmdRetomar(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdRetomar']['output']>> {
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['tarefaId', 'itens', 'itens.id', 'itens.version', 'itens.details', 'itens.details.descricao', 'itens.ordem', 'itens.feito']);
-  const invalid = validateInput(scoped, ['tarefaId', 'itens', 'itens.details', 'itens.details.descricao', 'itens.ordem', 'itens.feito'], ['tarefaId', 'itens', 'itens.id', 'itens.version', 'itens.details', 'itens.details.descricao', 'itens.ordem', 'itens.feito'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version']);
+  const invalid = validateInput(scoped, ['id', 'version'], ['id', 'version'], [], {  });
   if (invalid) throw invalid;
-  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarChecklist']['input'];
-  const data = await requests["tarefas.minhas_tarefas.cmdSalvarChecklist"](params, input.ctx);
-  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarChecklist']['output'], error: null };
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdRetomar']['input'];
+  const data = await requests["tarefas.minhas_tarefas.cmdRetomar"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdRetomar']['output'], error: null };
 }
 
-async function handleCmdSalvarEdicao(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarEdicao']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+async function handleCmdSalvarAlteracoes(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarAlteracoes']['output']>> {
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'listaId', 'titulo', 'details', 'details.descricao', 'prioridade', 'prazo', 'responsavelId']);
-  const invalid = validateInput(scoped, ['id', 'version', 'listaId', 'titulo', 'details', 'prioridade', 'prazo', 'responsavelId'], ['id', 'version', 'listaId', 'titulo', 'details', 'details.descricao', 'prioridade', 'prazo', 'responsavelId'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['id', 'version', 'titulo', 'details', 'details.descricao', 'details.etiquetas', 'prioridade', 'prazo', 'listaId', 'responsavelId', 'tarefaPaiId']);
+  const invalid = validateInput(scoped, ['id', 'version', 'titulo', 'details', 'prioridade', 'listaId', 'responsavelId'], ['id', 'version', 'titulo', 'details', 'details.descricao', 'details.etiquetas', 'prioridade', 'prazo', 'listaId', 'responsavelId', 'tarefaPaiId'], [], { 'prioridade': ['baixa', 'media', 'alta'] });
   if (invalid) throw invalid;
-  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarEdicao']['input'];
-  const data = await requests["tarefas.minhas_tarefas.cmdSalvarEdicao"](params, input.ctx);
-  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarEdicao']['output'], error: null };
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarAlteracoes']['input'];
+  const data = await requests["tarefas.minhas_tarefas.cmdSalvarAlteracoes"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.cmdSalvarAlteracoes']['output'], error: null };
 }
 
-async function handleQryBuscarMembros(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.qryBuscarMembros']['output']>> {
-  const held = authorize(input.request, ['membroEscolheResponsavel']);
+async function handleQryListas(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.qryListas']['output']>> {
+  const held = authorize(input.request, ['membroConsultarListas']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['termo']);
-  const invalid = validateInput(scoped, ['termo'], ['termo'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['busca']);
+  const invalid = validateInput(scoped, [], ['busca'], [], {  });
   if (invalid) throw invalid;
-  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryBuscarMembros']['input'];
-  const data = await requests["tarefas.minhas_tarefas.qryBuscarMembros"](params, input.ctx);
-  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryBuscarMembros']['output'], error: null };
-}
-
-async function handleQryListasAtivas(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.qryListasAtivas']['output']>> {
-  const held = authorize(input.request, ['membroConsultaListas']);
-  if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, []);
-  const invalid = validateInput(scoped, [], [], []);
-  if (invalid) throw invalid;
-  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryListasAtivas']['input'];
-  const data = await requests["tarefas.minhas_tarefas.qryListasAtivas"](params, input.ctx);
-  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryListasAtivas']['output'], error: null };
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryListas']['input'];
+  const data = await requests["tarefas.minhas_tarefas.qryListas"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryListas']['output'], error: null };
 }
 
 async function handleQryMinhasTarefas(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.qryMinhasTarefas']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel']);
   if (held instanceof AppError) throw held;
-  const scoped = scopeParams(input.request.params, input.ctx, held, ['filtro', 'page', 'pageSize']);
-  const invalid = validateInput(scoped, ['page', 'pageSize'], ['filtro', 'page', 'pageSize'], []);
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['page', 'pageSize']);
+  const invalid = validateInput(scoped, ['page', 'pageSize'], ['page', 'pageSize'], [], {  });
   if (invalid) throw invalid;
   const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryMinhasTarefas']['input'];
   const data = await requests["tarefas.minhas_tarefas.qryMinhasTarefas"](params, input.ctx);
   return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryMinhasTarefas']['output'], error: null };
 }
 
+async function handleQryResponsaveis(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.qryResponsaveis']['output']>> {
+  const held = authorize(input.request, ['membroEscolherResponsavel']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['busca']);
+  const invalid = validateInput(scoped, [], ['busca'], [], {  });
+  if (invalid) throw invalid;
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryResponsaveis']['input'];
+  const data = await requests["tarefas.minhas_tarefas.qryResponsaveis"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryResponsaveis']['output'], error: null };
+}
+
 async function handleQryTarefa(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.qryTarefa']['output']>> {
-  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultaListas', 'membroEscolheResponsavel']);
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel', 'membroChecklistPropria']);
   if (held instanceof AppError) throw held;
   const scoped = scopeParams(input.request.params, input.ctx, held, ['tarefaId']);
-  const invalid = validateInput(scoped, ['tarefaId'], ['tarefaId'], []);
+  const invalid = validateInput(scoped, ['tarefaId'], ['tarefaId'], [], {  });
   if (invalid) throw invalid;
   const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryTarefa']['input'];
   const data = await requests["tarefas.minhas_tarefas.qryTarefa"](params, input.ctx);
   return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryTarefa']['output'], error: null };
+}
+
+async function handleQryTarefasDoGrupo(input: IRequestEnvelope): Promise<BffResponse<Minhas_tarefasContracts['tarefas.minhas_tarefas.qryTarefasDoGrupo']['output']>> {
+  const held = authorize(input.request, ['membroTarefasProprias', 'membroConsultarListas', 'membroEscolherResponsavel']);
+  if (held instanceof AppError) throw held;
+  const scoped = scopeParams(input.request.params, input.ctx, held, ['grupo', 'page', 'pageSize']);
+  const invalid = validateInput(scoped, ['grupo', 'page', 'pageSize'], ['grupo', 'page', 'pageSize'], [], {  });
+  if (invalid) throw invalid;
+  const params = scoped as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryTarefasDoGrupo']['input'];
+  const data = await requests["tarefas.minhas_tarefas.qryTarefasDoGrupo"](params, input.ctx);
+  return { ok: true, data: data as Minhas_tarefasContracts['tarefas.minhas_tarefas.qryTarefasDoGrupo']['output'], error: null };
 }
 
 function scopeParams(params: unknown, ctx: { sessionContext?: { actorId?: string } }, held: readonly string[], allowed: readonly string[]): Record<string, unknown> {
@@ -191,7 +227,8 @@ function authorize(request: BffRequest, grantIds: readonly string[]): AppError |
 }
 
 // `null` is accepted only where the contract type declares it; elsewhere it is refused, never read as absent.
-function validateInput(params: unknown, fields: readonly string[], allowed: readonly string[], nullable: readonly string[] = []): AppError | null {
+// A required member is a present key. `''` is a string, refused only when a closed union omits it.
+function validateInput(params: unknown, fields: readonly string[], allowed: readonly string[], nullable: readonly string[] = [], unions: Readonly<Record<string, readonly string[]>> = {}): AppError | null {
   const body = params && typeof params === 'object' && !Array.isArray(params) ? params as Record<string, unknown> : null;
   if (!body) return new AppError('VALIDATION_ERROR', 'Request body must be an object.', 400);
   const invalidPath = (value: unknown, prefix: string): string => {
@@ -201,6 +238,8 @@ function validateInput(params: unknown, fields: readonly string[], allowed: read
       const path = prefix ? prefix + '.' + key : key;
       if (!allowed.includes(path)) return path + ' is not permitted.';
       if (child === null && !nullable.includes(path)) return path + ' must not be null.';
+      const permitted = unions[path];
+      if (permitted && child !== null && (typeof child !== 'string' || !permitted.includes(child))) return path + ' is not a permitted value.';
       const invalid = invalidPath(child, path); if (invalid) return invalid;
     }
     return '';
@@ -210,7 +249,7 @@ function validateInput(params: unknown, fields: readonly string[], allowed: read
     // A required member of an absent optional parent is not required; a required parent has its own entry.
     // A list on the way applies the rest of the path to each of its items: an empty list requires nothing.
     const missing = (value: unknown, parts: readonly string[], path: string, top: boolean): string => {
-      if (parts.length === 0) return value === undefined || (value === null && !nullable.includes(field)) || value === '' ? path : '';
+      if (parts.length === 0) return value === undefined || (value === null && !nullable.includes(field)) ? path : '';
       if (!top && (value === undefined || value === null)) return '';
       if (Array.isArray(value)) {
         for (const [index, item] of value.entries()) { const found = missing(item, parts, `${path}[${index}]`, false); if (found) return found; }

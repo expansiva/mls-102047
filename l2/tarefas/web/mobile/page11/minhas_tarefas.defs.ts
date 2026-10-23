@@ -5,81 +5,78 @@ export const definition = {
     "category": "_102020_/l4/collabux/templates/workPlanningBoard/page21.md",
     "experience": "timelineList"
   },
-  "intent": "No celular, ver de relance minhas tarefas e agir na que importa agora: abrir, marcar checklist, iniciar, enviar, revisar ou criar uma nova tarefa. O conteúdo é fluido, em uma coluna estreita de cerca de 390px, e continua usável entre 360px e 430px.",
+  "intent": "No celular, em conteúdo fluido estreito em torno de 390px e usável de 360px a 430px, mostrar primeiro o que depende de mim agora e o que vence hoje ou está atrasado, permitindo abrir uma tarefa, ler checklist e motivo da devolução e agir com poucos toques; criar ou ajustar tarefa fica num fluxo próprio.",
   "sections": [
     {
       "id": "secTarefas",
       "priority": "primary",
-      "purpose": "Mostrar minhas tarefas em uma lista empilhada, com filtros rápidos que se movem na horizontal e prazo e situação visíveis em cada item.",
+      "purpose": "Lista compacta das minhas tarefas, alternando entre depende de mim agora, responsável e criadas, com prazo, prioridade, quem age agora, progresso da checklist e marcação de vence hoje ou atrasada.",
       "organisms": [
-        "listaTarefas"
+        "tarefasLista"
       ]
     },
     {
       "id": "secTarefaAberta",
       "priority": "main",
-      "purpose": "Ao tocar em uma tarefa, mostrar seus dados e a checklist, com as ações de ciclo do meu papel logo abaixo e fáceis de alcançar com o polegar.",
+      "purpose": "A tarefa aberta em uma coluna: dados e checklist, ações do meu papel logo abaixo e o histórico ao final.",
       "organisms": [
-        "detalheTarefa",
-        "acoesTarefa"
+        "tarefaDetalhe",
+        "tarefaAcoes",
+        "tarefaHistorico"
       ]
     },
     {
       "id": "secEdicao",
-      "priority": "main",
-      "purpose": "Criar ou editar a tarefa com os campos empilhados, um por linha, na largura disponível, incluindo marcar itens da checklist e trocar o responsável.",
-      "organisms": [
-        "formTarefa"
-      ]
-    },
-    {
-      "id": "secHistorico",
       "priority": "secondary",
-      "purpose": "Histórico da tarefa em seção recolhida, abaixo do detalhe, para quando eu precisar entender o que já aconteceu.",
+      "purpose": "Criar uma tarefa ou ajustar campos, responsável e checklist sem mudar a situação, em campos empilhados.",
       "organisms": [
-        "historicoTarefa"
+        "tarefaForm"
       ]
     }
   ],
   "organisms": {
-    "listaTarefas": {
+    "tarefasLista": {
       "kind": "list",
-      "text": "Tarefas que criei ou pelas quais sou responsável, cada uma com título, lista, responsável, prioridade, prazo, situação, subtarefas e progresso da checklist. Destaca as que vencem hoje ou estão atrasadas e filtra por criadas por mim, atribuídas a mim, em revisão e devolvidas.",
+      "text": "Tarefas de que sou responsável e as que criei, começando pelo que depende de mim agora, com título, prazo, prioridade, lista, quem age agora, progresso da checklist e marcação de vence hoje, atrasada ou devolvida; lista vazia e erro aparecem de forma distinta.",
       "intents": []
     },
-    "detalheTarefa": {
+    "tarefaDetalhe": {
       "kind": "detail",
-      "text": "A tarefa aberta: descrição, lista, criador, responsável, prazo, prioridade, situação, motivo da devolução em destaque quando houver e checklist com os itens marcados.",
+      "text": "A tarefa aberta: motivo da devolução no topo quando houver, depois responsável, quem criou, prazo, prioridade, lista, criada em, descrição, etiquetas, subtarefas e a checklist com itens concluídos e quando.",
       "intents": []
     },
-    "formTarefa": {
+    "tarefaForm": {
       "kind": "form",
-      "text": "Criar ou editar a tarefa: escolho a lista, preencho título, descrição, prioridade e prazo, escolho ou troco o responsável pelo nome e ajusto ou marco os itens da checklist. Editar não muda a situação da tarefa.",
+      "text": "Criar uma tarefa com título, descrição, prioridade, prazo, lista, tarefa pai opcional e etiquetas, escolhendo o responsável pelo nome entre quem aceita tarefas e adicionando itens de checklist; ou ajustar campos, trocar o responsável de uma tarefa que criei e editar ou marcar itens da checklist, sem mudar a situação.",
       "intents": [
         {
           "id": "criarTarefa",
           "kind": "submit"
         },
         {
-          "id": "salvarEdicao",
+          "id": "adicionarItensChecklist",
           "kind": "submit"
         },
         {
-          "id": "salvarChecklist",
+          "id": "salvarAlteracoes",
+          "kind": "submit"
+        },
+        {
+          "id": "ajustarChecklist",
           "kind": "submit"
         }
       ]
     },
-    "acoesTarefa": {
+    "tarefaAcoes": {
       "kind": "actions",
-      "text": "Ações de ciclo conforme meu papel na tarefa: como responsável, iniciar e enviar ou reenviar para revisão; como criador, aceitar a entrega, devolver com motivo ou cancelar. A ação principal fica em destaque e as demais ficam em um menu; marcar a checklist e trocar o responsável ficam no formulário.",
+      "text": "A ação principal da situação atual em destaque (iniciar, enviar para revisão, retomar, aceitar ou devolver com motivo) e, num menu, cancelar a tarefa que criei; marcar itens e trocar o responsável ficam no ajuste da tarefa.",
       "intents": [
         {
           "id": "iniciar",
           "kind": "submit"
         },
         {
-          "id": "enviarRevisao",
+          "id": "enviarParaRevisao",
           "kind": "submit"
         },
         {
@@ -91,49 +88,57 @@ export const definition = {
           "kind": "submit"
         },
         {
+          "id": "retomar",
+          "kind": "submit"
+        },
+        {
           "id": "cancelar",
           "kind": "submit"
         }
       ]
     },
-    "historicoTarefa": {
+    "tarefaHistorico": {
       "kind": "timeline",
-      "text": "Histórico da tarefa: criação, atribuição e aviso ao responsável, início, envio para revisão, aceite ou devolução com motivo, reatribuição e cancelamento.",
+      "text": "Histórico da tarefa: criação, início, envios para revisão, devoluções com motivo, retomadas, aceite, troca de responsável e cancelamento.",
       "intents": []
     }
   },
   "molecules": {
-    "listaTarefas": [
+    "tarefasLista": [
       {
-        "role": "lista de tarefas",
+        "role": "lista de tarefas em tela estreita",
         "preferred": "groupviewtable--ml-responsive-data-table",
         "alternative": "groupviewtable--ml-responsive-table"
       },
       {
-        "role": "filtros rápidos",
+        "role": "alternar entre depende de mim, responsável e criadas",
         "preferred": "groupnavigatesection--ml-navigate-pills",
         "alternative": "groupnavigatesection--ml-tabs"
       },
       {
         "role": "progresso da checklist",
-        "preferred": "groupshowprogress--ml-linear-progress",
-        "alternative": "groupshowprogress--ml-circular-progress"
+        "preferred": "groupshowprogress--ml-circular-progress",
+        "alternative": "groupshowprogress--ml-linear-progress"
       },
       {
-        "role": "busca por título",
+        "role": "busca pelo título",
         "preferred": "groupsearchcontent--ml-search-bar",
         "alternative": "groupsearchcontent--ml-search-filters"
       }
     ],
-    "detalheTarefa": [
+    "tarefaDetalhe": [
       {
-        "role": "cartão da tarefa",
-        "preferred": "groupviewcard--ml-vertical-card",
-        "alternative": "groupviewcard--ml-view-card-horizontal"
+        "role": "cartão com os dados da tarefa",
+        "preferred": "groupviewcard--ml-vertical-card"
       },
       {
-        "role": "item da checklist",
-        "preferred": "groupenterboolean--ml-checkbox-preference"
+        "role": "checklist com itens concluídos",
+        "preferred": "groupviewtable--ml-responsive-table",
+        "alternative": "groupviewtable--ml-data-table-minimal"
+      },
+      {
+        "role": "progresso da checklist",
+        "preferred": "groupshowprogress--ml-linear-progress"
       },
       {
         "role": "motivo da devolução",
@@ -141,45 +146,53 @@ export const definition = {
         "alternative": "groupnotifyuser--ml-contextual-feedback"
       }
     ],
-    "formTarefa": [
+    "tarefaForm": [
       {
-        "role": "lista da tarefa",
-        "preferred": "groupselectone--ml-select",
-        "alternative": "groupselectone--ml-select-one-autocomplete"
-      },
-      {
-        "role": "responsável",
-        "preferred": "groupselectone--ml-select-one-autocomplete",
-        "alternative": "groupselectone--ml-combobox"
-      },
-      {
-        "role": "prioridade",
-        "preferred": "groupselectone--ml-segmented-control",
-        "alternative": "groupselectone--ml-radio-group"
-      },
-      {
-        "role": "título e item da checklist",
-        "preferred": "groupentertext--ml-enter-text",
-        "alternative": "groupentertext--ml-floating-text-input"
+        "role": "título e itens da checklist",
+        "preferred": "groupentertext--ml-floating-text-input",
+        "alternative": "groupentertext--ml-enter-text"
       },
       {
         "role": "descrição",
         "preferred": "groupentertext--ml-multiline-text"
       },
       {
+        "role": "etiquetas",
+        "preferred": "groupentertext--ml-tag-input"
+      },
+      {
         "role": "prazo",
         "preferred": "groupenterdate--ml-date-shortcut-picker",
-        "alternative": "groupenterdate--ml-date-picker"
+        "alternative": "groupenterdate--ml-compact-calendar"
+      },
+      {
+        "role": "responsável pelo nome",
+        "preferred": "groupselectone--ml-select-one-autocomplete",
+        "alternative": "groupselectone--ml-combobox"
+      },
+      {
+        "role": "prioridade",
+        "preferred": "groupselectone--ml-segmented-control",
+        "alternative": "groupselectone--ml-select"
+      },
+      {
+        "role": "lista e tarefa pai",
+        "preferred": "groupselectone--ml-select",
+        "alternative": "groupselectone--ml-combobox"
+      },
+      {
+        "role": "salvar ou criar",
+        "preferred": "grouptriggeraction--ml-button-standard"
       }
     ],
-    "acoesTarefa": [
+    "tarefaAcoes": [
       {
-        "role": "ação principal",
+        "role": "ação principal da situação",
         "preferred": "grouptriggeraction--ml-button-standard",
         "alternative": "grouptriggeraction--ml-split-button"
       },
       {
-        "role": "ações secundárias",
+        "role": "menu com cancelar",
         "preferred": "grouptriggeraction--ml-kebab-action-trigger"
       },
       {
@@ -187,14 +200,14 @@ export const definition = {
         "preferred": "groupentertext--ml-multiline-text"
       },
       {
-        "role": "confirmação da ação",
+        "role": "retorno das ações",
         "preferred": "groupnotifyuser--ml-toast-notification",
         "alternative": "groupnotifyuser--ml-alert-modal"
       }
     ],
-    "historicoTarefa": [
+    "tarefaHistorico": [
       {
-        "role": "linha do tempo",
+        "role": "eventos da tarefa",
         "preferred": "groupviewdata--ml-timeline-view",
         "alternative": "groupviewdata--ml-vertical-record-list"
       }

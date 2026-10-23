@@ -4,43 +4,31 @@
   "module": "tarefas",
   "pageId": "minhas_tarefas",
   "device": "mobile",
-  "contextHash": "sha256:c36d68e4b3e9ef04fb5e6fd326c5aad4447017802049e5ef8d13e36a0ac16ace",
+  "contextHash": "sha256:29e566abda1994e5d9d79d04b440f83f225518cf3dd66a2a0740d04a5e8564be",
   "sourcePath": "l2/tarefas/web/mobile/page11/minhas_tarefas.ts",
-  "sourceHash": "sha256:ed98c04f26c15b0086a21bbd784a14d41278197b203d14cf5135f9f7684bd280",
+  "sourceHash": "sha256:088ac8e240031ef5ec7360e14544dc8ff5c229a62a785a95ea8ccb6b3ed23b7b",
   "attempt": 1,
   "design": {
-    "concept": "A thumb-first task queue. The list of my tasks (filter pills on top, one stacked card per task, deadline and status visible) is the home. Tapping a task slides to its detail with role-based lifecycle actions pinned at the bottom within thumb reach. Create, edit, checklist, return-with-reason and cancel-confirmation are separate one-purpose steps that always have a back path.",
+    "concept": "Uma fila móvel de compromissos começa em “Depende de mim”, destacando vencimentos de hoje e atrasados antes de qualquer edição. Cada tarefa abre em uma cena focada para leitura, ação e histórico; criar e ajustar ficam em cenas próprias, preservando a lista como ponto de retorno.",
     "views": [
       {
         "id": "lista",
-        "purpose": "Home. Quick filters, 'Nova tarefa' button and the stacked list of tasks (overdue date in alarm color, status chip, checklist progress). Loading, empty, error and precondition states."
+        "purpose": "Fila principal de tarefas, com alternância entre os três recortes pessoais e abertura de uma tarefa."
       },
       {
-        "id": "tarefa",
-        "purpose": "Open task: returned-reason banner, task card, read-only checklist, shortcuts to edit and to tick the checklist, collapsed history, and a sticky action bar with the main lifecycle action for my role plus a 'more actions' menu."
+        "id": "detalhe",
+        "purpose": "Leitura completa da tarefa, checklist, ações adequadas ao papel e histórico."
       },
       {
-        "id": "campos",
-        "purpose": "Edit the task fields (list, title, description, priority, deadline, owner by name). Editing never changes status."
+        "id": "criar",
+        "purpose": "Cadastro concentrado de uma nova tarefa e seus primeiros itens de checklist."
       },
       {
-        "id": "checklist",
-        "purpose": "Tick, rewrite and add checklist items of the open task and save them on their own."
-      },
-      {
-        "id": "devolver",
-        "purpose": "Creator sends a task in review back, with the mandatory reason."
-      },
-      {
-        "id": "cancelar",
-        "purpose": "Plain confirmation naming the task before the only destructive action."
-      },
-      {
-        "id": "nova",
-        "purpose": "Create a task: stacked fields plus the initial checklist, with a single outcome button."
+        "id": "editar",
+        "purpose": "Ajuste deliberado dos campos e da checklist sem alterar a situação."
       }
     ],
-    "decisions": "The scene host in mode 'scenary' carries the whole flow; the default scene follows selectedTarefa so a reload with the task id reopens it, and going back to the list clears the selection. I chose groupviewtable--ml-responsive-table (the alternative) because it turns rows into labeled cards on narrow screens, avoiding horizontal scroll and the hidden-columns behaviour of the data table. Filter pills carry empty tab bodies (the molecule renders tab bodies as raw HTML) and the list sits below them. The secondary-actions menu is a native details element rather than the kebab molecule, because the kebab does not render a menu and the page may hold no open/closed state. Return-with-reason and cancel are their own scenes instead of modals or inline toggles for the same reason (no state), and the cancel scene names the task and holds the only danger button. Owner is chosen with the combobox, whose keystroke event feeds qryBuscarMembros. Deadline uses the plain date picker, since the shortcut picker offers mostly past dates. Checklist progress, status and flags are shown exactly as the backend returns them; nothing is counted or derived (no progress bar, since progress is a string). Success is local: the chip, card and row update in place and creating/saving moves to the task; only errors get a banner. Save buttons stay disabled until required fields are filled. The dirty-close confirm was left out because it would need page state."
+    "decisions": "Segui a tradução mobile do template: a lista é a casa da experiência e detalhes/criação/edição são cenas com retorno, nunca painéis laterais. A lista usa a tabela responsiva como cartões em tela estreita para manter a seleção por índice do contrato; não há busca visual porque as consultas declaradas não oferecem busca por título. O prazo atrasado é o único dado em tom de alarme, e ações de ciclo aparecem somente quando a situação e o papel entregue pelo backend permitem."
   },
   "advisories": [
     {
@@ -56,24 +44,20 @@
       "message": "Section secEdicao needs an element with data-section-id=\"secEdicao\"."
     },
     {
-      "code": "M4_PAGE_SECTION",
-      "message": "Section secHistorico needs an element with data-section-id=\"secHistorico\"."
+      "code": "M4_PAGE_MOLECULE_UNUSED",
+      "message": "Organism tarefasLista (progresso da checklist) renders neither <groupshowprogress--ml-circular-progress> nor <groupshowprogress--ml-linear-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism listaTarefas (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress> nor <groupshowprogress--ml-circular-progress>."
+      "message": "Organism tarefasLista (busca pelo título) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism listaTarefas (busca por título) renders neither <groupsearchcontent--ml-search-bar> nor <groupsearchcontent--ml-search-filters>."
+      "message": "Organism tarefaDetalhe (progresso da checklist) renders neither <groupshowprogress--ml-linear-progress>."
     },
     {
       "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesTarefa (ações secundárias) renders neither <grouptriggeraction--ml-kebab-action-trigger>."
-    },
-    {
-      "code": "M4_PAGE_MOLECULE_UNUSED",
-      "message": "Organism acoesTarefa (confirmação da ação) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-alert-modal>."
+      "message": "Organism tarefaAcoes (retorno das ações) renders neither <groupnotifyuser--ml-toast-notification> nor <groupnotifyuser--ml-alert-modal>."
     }
   ]
 }

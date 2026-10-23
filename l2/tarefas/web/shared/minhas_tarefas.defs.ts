@@ -3,22 +3,12 @@
 export const definition = {
   "entry": {
     "params": {
-      "filtro": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:listaTarefas",
-        "persist": true,
-        "required": false
-      },
       "tarefaId": {
         "type": "string",
         "sources": [
           "url"
         ],
-        "effect": "select:detalheTarefa",
+        "effect": "select:tarefaDetalhe",
         "persist": false,
         "required": false
       },
@@ -28,7 +18,7 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "prefill:formTarefa",
+        "effect": "prefill:tarefaForm",
         "persist": false,
         "required": false
       },
@@ -38,7 +28,17 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "prefill:formTarefa",
+        "effect": "prefill:tarefaForm",
+        "persist": false,
+        "required": false
+      },
+      "tarefaPaiId": {
+        "type": "string",
+        "sources": [
+          "url",
+          "localStorage"
+        ],
+        "effect": "prefill:tarefaForm",
         "persist": false,
         "required": false
       }
@@ -49,6 +49,19 @@ export const definition = {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
+        "tarefas",
+        "quantidadeDependeDeMim",
+        "quantidadeResponsavel",
+        "quantidadeCriadas",
+        "quantidadeVenceHoje",
+        "quantidadeAtrasadas",
+        "podeCriarTarefasEfetivo"
+      ]
+    },
+    "qryTarefasDoGrupo": {
+      "kind": "qry",
+      "trigger": "qryTarefasDoGrupo",
+      "returns": [
         "tarefas"
       ]
     },
@@ -56,44 +69,57 @@ export const definition = {
       "kind": "qry",
       "trigger": "qryTarefa",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ]
     },
-    "qryListasAtivas": {
+    "qryResponsaveis": {
       "kind": "qry",
-      "trigger": "onLoad",
+      "trigger": "qryResponsaveis",
+      "returns": [
+        "participantes"
+      ]
+    },
+    "qryListas": {
+      "kind": "qry",
+      "trigger": "qryListas",
       "returns": [
         "listas"
-      ]
-    },
-    "qryBuscarMembros": {
-      "kind": "qry",
-      "trigger": "qryBuscarMembros",
-      "returns": [
-        "membros"
       ]
     },
     "cmdCriarTarefa": {
       "kind": "cmd",
       "trigger": "criarTarefa",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ],
       "writes": "Tarefa.create"
     },
-    "cmdSalvarEdicao": {
+    "cmdAdicionarItensChecklist": {
       "kind": "cmd",
-      "trigger": "salvarEdicao",
+      "trigger": "adicionarItensChecklist",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
+      ],
+      "writes": "ItemChecklist.create"
+    },
+    "cmdSalvarAlteracoes": {
+      "kind": "cmd",
+      "trigger": "salvarAlteracoes",
+      "returns": [
+        "tarefa",
+        "historico"
       ],
       "writes": "Tarefa.update"
     },
-    "cmdSalvarChecklist": {
+    "cmdAjustarChecklist": {
       "kind": "cmd",
-      "trigger": "salvarChecklist",
+      "trigger": "ajustarChecklist",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ],
       "writes": "ItemChecklist.update"
     },
@@ -101,15 +127,17 @@ export const definition = {
       "kind": "cmd",
       "trigger": "iniciar",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ],
       "writes": "Tarefa.iniciar"
     },
-    "cmdEnviarRevisao": {
+    "cmdEnviarParaRevisao": {
       "kind": "cmd",
-      "trigger": "enviarRevisao",
+      "trigger": "enviarParaRevisao",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ],
       "writes": "Tarefa.enviarParaRevisao"
     },
@@ -117,7 +145,8 @@ export const definition = {
       "kind": "cmd",
       "trigger": "aceitar",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ],
       "writes": "Tarefa.aceitar"
     },
@@ -125,15 +154,26 @@ export const definition = {
       "kind": "cmd",
       "trigger": "devolver",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ],
       "writes": "Tarefa.devolver"
+    },
+    "cmdRetomar": {
+      "kind": "cmd",
+      "trigger": "retomar",
+      "returns": [
+        "tarefa",
+        "historico"
+      ],
+      "writes": "Tarefa.retomar"
     },
     "cmdCancelar": {
       "kind": "cmd",
       "trigger": "cancelar",
       "returns": [
-        "tarefa"
+        "tarefa",
+        "historico"
       ],
       "writes": "Tarefa.cancelar"
     }
@@ -141,206 +181,275 @@ export const definition = {
   "states": {
     "tarefas": {
       "source": "qryMinhasTarefas.tarefas",
-      "description": "the list of Tarefa resumida com lista, responsável, criador, prazo, situação e indicadores de prazo, subtarefas e checklist.",
+      "description": "the list of Tarefa em forma resumida, com lista, responsável, quem criou, quem age agora, progresso da checklist e marcações de vencimento e devolução.",
       "organisms": [
-        "listaTarefas"
+        "tarefasLista"
+      ]
+    },
+    "quantidadeDependeDeMim": {
+      "source": "qryMinhasTarefas.quantidadeDependeDeMim",
+      "description": "the quantidadeDependeDeMim that qryMinhasTarefas returns",
+      "organisms": [
+        "tarefasLista"
+      ]
+    },
+    "quantidadeResponsavel": {
+      "source": "qryMinhasTarefas.quantidadeResponsavel",
+      "description": "the quantidadeResponsavel that qryMinhasTarefas returns",
+      "organisms": [
+        "tarefasLista"
+      ]
+    },
+    "quantidadeCriadas": {
+      "source": "qryMinhasTarefas.quantidadeCriadas",
+      "description": "the quantidadeCriadas that qryMinhasTarefas returns",
+      "organisms": [
+        "tarefasLista"
+      ]
+    },
+    "quantidadeVenceHoje": {
+      "source": "qryMinhasTarefas.quantidadeVenceHoje",
+      "description": "the quantidadeVenceHoje that qryMinhasTarefas returns",
+      "organisms": [
+        "tarefasLista"
+      ]
+    },
+    "quantidadeAtrasadas": {
+      "source": "qryMinhasTarefas.quantidadeAtrasadas",
+      "description": "the quantidadeAtrasadas that qryMinhasTarefas returns",
+      "organisms": [
+        "tarefasLista"
       ]
     },
     "tarefa": {
       "source": "qryTarefa.tarefa",
-      "description": "Tarefa completa com lista, criador, responsável, situação, marcos do ciclo, motivo da devolução, papel de quem consulta e checklist ordenada.",
+      "description": "Tarefa com todos os seus campos, nomes do responsável e de quem criou, lista, tarefa pai, marcos de devolução, retomada, conclusão e cancelamento, papel da pessoa da sessão e a checklist em ordem.",
       "organisms": [
-        "acoesTarefa",
-        "detalheTarefa",
-        "formTarefa",
-        "historicoTarefa"
+        "tarefaAcoes",
+        "tarefaDetalhe",
+        "tarefaForm"
+      ]
+    },
+    "historico": {
+      "source": "qryTarefa.historico",
+      "description": "the list of Marco do ciclo de uma tarefa: criação, início, envio para revisão, devolução com motivo, retomada, aceite, troca de responsável ou cancelamento, com momento e pessoa envolvida.",
+      "organisms": [
+        "tarefaHistorico"
+      ]
+    },
+    "podeCriarTarefasEfetivo": {
+      "source": "qryMinhasTarefas.podeCriarTarefasEfetivo",
+      "description": "the podeCriarTarefasEfetivo that qryMinhasTarefas returns",
+      "organisms": [
+        "tarefaForm"
+      ]
+    },
+    "participantes": {
+      "source": "qryResponsaveis.participantes",
+      "description": "the list of Participante ativo que pode ser escolhido como responsável, com sua situação e se aceita tarefas.",
+      "organisms": [
+        "tarefaForm"
       ]
     },
     "listas": {
-      "source": "qryListasAtivas.listas",
-      "description": "the list of Lista ativa que pode receber tarefas, com nome e tipo.",
+      "source": "qryListas.listas",
+      "description": "the list of Lista de tarefas identificada pelo nome.",
       "organisms": [
-        "formTarefa"
-      ]
-    },
-    "membros": {
-      "source": "qryBuscarMembros.membros",
-      "description": "the list of Membro da equipe que pode ser escolhido como responsável, com nome e situação no cadastro.",
-      "organisms": [
-        "formTarefa"
+        "tarefaForm"
       ]
     },
     "selectedTarefa": {
       "source": "entry.params.tarefaId",
-      "description": "the id of the Tarefa selected in listaTarefas",
+      "description": "the id of the Tarefa selected in tarefasLista",
       "organisms": [
-        "detalheTarefa",
-        "listaTarefas"
+        "tarefaDetalhe",
+        "tarefasLista"
       ]
     }
   },
   "journeys": [
     {
-      "step": "cancelarTarefaCriador/localizarCriada",
+      "step": "minhasTarefas/listarMinhas",
       "organisms": [
-        "listaTarefas",
-        "detalheTarefa"
+        "tarefasLista"
       ]
     },
     {
-      "step": "cancelarTarefaCriador/cancelarCriada",
+      "step": "minhasTarefas/verDetalhe",
       "organisms": [
-        "acoesTarefa"
-      ]
-    },
-    {
-      "step": "criarTarefa/localizarLista",
-      "organisms": [
-        "formTarefa"
+        "tarefaDetalhe",
+        "tarefaHistorico"
       ]
     },
     {
       "step": "criarTarefa/preencherTarefa",
       "organisms": [
-        "formTarefa"
+        "tarefaForm"
       ]
     },
     {
-      "step": "editarTarefa/localizarTarefa",
+      "step": "criarTarefa/adicionarChecklist",
       "organisms": [
-        "listaTarefas",
-        "detalheTarefa"
+        "tarefaForm"
+      ]
+    },
+    {
+      "step": "editarTarefa/localizarTarefaEdicao",
+      "organisms": [
+        "tarefasLista"
       ]
     },
     {
       "step": "editarTarefa/alterarCampos",
       "organisms": [
-        "formTarefa"
+        "tarefaForm"
       ]
     },
     {
       "step": "editarTarefa/ajustarChecklist",
       "organisms": [
-        "formTarefa"
+        "tarefaForm"
       ]
     },
     {
-      "step": "executarTarefa/abrirMinhaTarefa",
+      "step": "executarTarefa/abrirTarefa",
       "organisms": [
-        "listaTarefas",
-        "detalheTarefa"
+        "tarefasLista"
       ]
     },
     {
       "step": "executarTarefa/verTarefa",
       "organisms": [
-        "detalheTarefa",
-        "historicoTarefa"
+        "tarefaDetalhe"
       ]
     },
     {
       "step": "executarTarefa/iniciarTarefa",
       "organisms": [
-        "acoesTarefa"
+        "tarefaAcoes"
       ]
     },
     {
-      "step": "executarTarefa/marcarChecklist",
+      "step": "executarTarefa/marcarItem",
       "organisms": [
-        "formTarefa"
+        "tarefaForm"
       ]
     },
     {
       "step": "executarTarefa/enviarRevisao",
       "organisms": [
-        "acoesTarefa"
+        "tarefaAcoes"
       ]
     },
     {
-      "step": "reatribuirTarefaCriador/localizarParaReatribuir",
+      "step": "retomarTarefa/lerMotivo",
       "organisms": [
-        "listaTarefas",
-        "detalheTarefa"
+        "tarefaDetalhe"
       ]
     },
     {
-      "step": "reatribuirTarefaCriador/escolherNovoResponsavel",
+      "step": "retomarTarefa/retomar",
       "organisms": [
-        "formTarefa"
+        "tarefaAcoes"
       ]
     },
     {
-      "step": "reatribuirTarefaCriador/trocarResponsavel",
+      "step": "retomarTarefa/reenviarRevisao",
       "organisms": [
-        "formTarefa"
+        "tarefaAcoes"
       ]
     },
     {
-      "step": "retomarTarefaDevolvida/abrirDevolvida",
+      "step": "revisarTarefa/abrirRevisao",
       "organisms": [
-        "listaTarefas",
-        "detalheTarefa"
+        "tarefasLista"
       ]
     },
     {
-      "step": "retomarTarefaDevolvida/lerMotivo",
+      "step": "revisarTarefa/conferirTarefa",
       "organisms": [
-        "detalheTarefa",
-        "historicoTarefa"
-      ]
-    },
-    {
-      "step": "retomarTarefaDevolvida/ajustarCampos",
-      "organisms": [
-        "formTarefa"
-      ]
-    },
-    {
-      "step": "retomarTarefaDevolvida/reenviarRevisao",
-      "organisms": [
-        "acoesTarefa"
-      ]
-    },
-    {
-      "step": "revisarTarefa/abrirTarefaRevisao",
-      "organisms": [
-        "listaTarefas",
-        "detalheTarefa"
-      ]
-    },
-    {
-      "step": "revisarTarefa/conferirEntrega",
-      "organisms": [
-        "detalheTarefa",
-        "historicoTarefa"
+        "tarefaDetalhe",
+        "tarefaHistorico"
       ]
     },
     {
       "step": "revisarTarefa/aceitarTarefa",
       "organisms": [
-        "acoesTarefa"
+        "tarefaAcoes"
       ]
     },
     {
       "step": "revisarTarefa/devolverTarefa",
       "organisms": [
-        "acoesTarefa"
+        "tarefaAcoes"
+      ]
+    },
+    {
+      "step": "cancelarTarefaCriada/localizarCriadaCancelar",
+      "organisms": [
+        "tarefasLista"
+      ]
+    },
+    {
+      "step": "cancelarTarefaCriada/cancelarCriada",
+      "organisms": [
+        "tarefaAcoes"
+      ]
+    },
+    {
+      "step": "reatribuirTarefaCriada/localizarCriada",
+      "organisms": [
+        "tarefasLista"
+      ]
+    },
+    {
+      "step": "reatribuirTarefaCriada/verResponsavelCriada",
+      "organisms": [
+        "tarefaDetalhe"
+      ]
+    },
+    {
+      "step": "reatribuirTarefaCriada/trocarResponsavelCriada",
+      "organisms": [
+        "tarefaForm"
+      ]
+    },
+    {
+      "step": "resumoDiario/lerResumo",
+      "organisms": [
+        "tarefasLista"
+      ]
+    },
+    {
+      "step": "resumoDiario/verVencendo",
+      "organisms": [
+        "tarefaDetalhe"
       ]
     }
   ],
   "rules": [
-    "cancelamentoPorCriadorOuGestor",
-    "checklistNaoMudaSituacao",
-    "criacaoIdempotente",
+    "apenasCriadorRevisa",
+    "apenasResponsavelExecuta",
+    "avisarQuemAgeAgora",
+    "cancelarApenasCriadorOuGestor",
+    "criarTarefaExigePodeCriar",
     "devolucaoExigeMotivo",
     "edicaoNaoMudaSituacao",
-    "editarSomenteTarefaVisivel",
-    "listaInativaNaoRecebeTarefa",
-    "reatribuicaoPorCriadorOuGestor",
-    "responsavelDeveSerMembroAtivo",
-    "somenteCriadorRevisa",
-    "somenteResponsavelExecuta",
-    "tarefaEncerradaNaoTransiciona"
+    "escolhaResponsavelPeloNome",
+    "itemChecklistSoQuemVeTarefa",
+    "itemChecklistTarefaNaoEncerrada",
+    "marcarItemNaoMudaSituacao",
+    "membroVeResponsavelOuCriador",
+    "moduloNaoGuardaComentarios",
+    "participanteNaoConfiguradoAceitaECria",
+    "participanteSemCadastroPessoal",
+    "podeCriarTarefasExigido",
+    "quemAgeAgoraPorSituacao",
+    "reatribuirApenasCriadorOuGestor",
+    "responsavelAceitaTarefas",
+    "retomarSoAposDevolucao",
+    "tarefaAbertaVencimento",
+    "tarefaPaiDiferenteDaPropria"
   ],
   "access": {
     "actors": [
@@ -348,8 +457,9 @@ export const definition = {
     ],
     "grants": [
       "membroTarefasProprias",
-      "membroConsultaListas",
-      "membroEscolheResponsavel"
+      "membroChecklistPropria",
+      "membroEscolherResponsavel",
+      "membroConsultarListas"
     ]
   }
 } as const;

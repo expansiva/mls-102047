@@ -16,19 +16,8 @@ export const definition = {
     "primaryKey": [
       "id"
     ],
-    "uniqueKeys": [
-      [
-        "chaveCriacao"
-      ]
-    ],
+    "uniqueKeys": [],
     "indexes": [
-      {
-        "name": "tarefas_tarefa_chaveCriacao",
-        "columns": [
-          "chaveCriacao"
-        ],
-        "unique": true
-      },
       {
         "name": "tarefas_tarefa_titulo",
         "columns": [

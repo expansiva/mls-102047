@@ -5,30 +5,21 @@ export const seedPlan = {
   "phase": "plan",
   "scenarios": [
     {
-      "scenarioId": "model_avisoVencimento",
-      "tableId": "avisoVencimento",
-      "source": "model:AvisoVencimento",
+      "scenarioId": "criarTarefa",
+      "tableId": "itemChecklist",
+      "source": "journey:criarTarefa",
       "constraints": [
-        "ref:responsavelId:MembroEquipe",
-        "state:completed",
-        "state:failed",
-        "state:pending",
-        "uniqueKeys:responsavelId+dataReferencia"
+        "ref:tarefaId:Tarefa"
       ],
       "refs": [
         {
-          "field": "responsavelId",
-          "relationshipId": "avisoResponsavel",
-          "entityId": "MembroEquipe"
+          "field": "tarefaId",
+          "relationshipId": "itemChecklistTarefa",
+          "entityId": "Tarefa"
         }
       ],
-      "states": [
-        "pending",
-        "completed",
-        "failed"
-      ],
-      "entityId": "AvisoVencimento",
-      "stateField": "status"
+      "states": [],
+      "entityId": "ItemChecklist"
     },
     {
       "scenarioId": "editarTarefa",
@@ -65,53 +56,41 @@ export const seedPlan = {
       "entityId": "ItemChecklist"
     },
     {
-      "scenarioId": "criarTarefa",
-      "tableId": "lista",
-      "source": "journey:criarTarefa",
-      "constraints": [
-        "uniqueKeys:nome"
-      ],
-      "refs": [],
-      "states": [],
-      "entityId": "Lista"
-    },
-    {
       "scenarioId": "manterListas",
-      "tableId": "lista",
+      "tableId": "listaTarefas",
       "source": "journey:manterListas",
       "constraints": [
         "uniqueKeys:nome"
       ],
       "refs": [],
       "states": [],
-      "entityId": "Lista"
+      "entityId": "ListaTarefas"
     },
     {
-      "scenarioId": "acompanharTarefasEquipe",
+      "scenarioId": "acompanharTarefas",
       "tableId": "tarefa",
-      "source": "journey:acompanharTarefasEquipe",
+      "source": "journey:acompanharTarefas",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
-        "ref:tarefaPaiId:Tarefa",
-        "uniqueKeys:chaveCriacao"
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
+        "ref:tarefaPaiId:Tarefa"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -124,69 +103,31 @@ export const seedPlan = {
       "stateField": "status"
     },
     {
-      "scenarioId": "avisoDiarioVencimentos",
+      "scenarioId": "cancelarTarefa",
       "tableId": "tarefa",
-      "source": "journey:avisoDiarioVencimentos",
+      "source": "journey:cancelarTarefa",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
         "ref:tarefaPaiId:Tarefa",
-        "uniqueKeys:chaveCriacao"
+        "state:cancelada"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
-        },
-        {
-          "field": "tarefaPaiId",
-          "relationshipId": "tarefaPai",
-          "entityId": "Tarefa"
-        }
-      ],
-      "states": [],
-      "entityId": "Tarefa",
-      "stateField": "status"
-    },
-    {
-      "scenarioId": "cancelarTarefaCriador",
-      "tableId": "tarefa",
-      "source": "journey:cancelarTarefaCriador",
-      "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
-        "ref:tarefaPaiId:Tarefa",
-        "state:cancelada",
-        "uniqueKeys:chaveCriacao"
-      ],
-      "refs": [
-        {
-          "field": "criadorId",
-          "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
-        },
-        {
-          "field": "listaId",
-          "relationshipId": "tarefaLista",
-          "entityId": "Lista"
-        },
-        {
-          "field": "responsavelId",
-          "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -201,32 +142,31 @@ export const seedPlan = {
       "stateField": "status"
     },
     {
-      "scenarioId": "cancelarTarefaGestor",
+      "scenarioId": "cancelarTarefaCriada",
       "tableId": "tarefa",
-      "source": "journey:cancelarTarefaGestor",
+      "source": "journey:cancelarTarefaCriada",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
         "ref:tarefaPaiId:Tarefa",
-        "state:cancelada",
-        "uniqueKeys:chaveCriacao"
+        "state:cancelada"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -245,28 +185,27 @@ export const seedPlan = {
       "tableId": "tarefa",
       "source": "journey:criarTarefa",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
         "ref:tarefaPaiId:Tarefa",
-        "state:aFazer",
-        "uniqueKeys:chaveCriacao"
+        "state:aFazer"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -285,27 +224,26 @@ export const seedPlan = {
       "tableId": "tarefa",
       "source": "journey:editarTarefa",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
-        "ref:tarefaPaiId:Tarefa",
-        "uniqueKeys:chaveCriacao"
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
+        "ref:tarefaPaiId:Tarefa"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -322,28 +260,27 @@ export const seedPlan = {
       "tableId": "tarefa",
       "source": "journey:executarTarefa",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
         "ref:tarefaPaiId:Tarefa",
-        "state:emAndamento",
-        "uniqueKeys:chaveCriacao"
+        "state:emAndamento"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -358,31 +295,30 @@ export const seedPlan = {
       "stateField": "status"
     },
     {
-      "scenarioId": "reatribuirTarefaCriador",
+      "scenarioId": "minhasTarefas",
       "tableId": "tarefa",
-      "source": "journey:reatribuirTarefaCriador",
+      "source": "journey:minhasTarefas",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
-        "ref:tarefaPaiId:Tarefa",
-        "uniqueKeys:chaveCriacao"
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
+        "ref:tarefaPaiId:Tarefa"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -395,31 +331,30 @@ export const seedPlan = {
       "stateField": "status"
     },
     {
-      "scenarioId": "reatribuirTarefaGestor",
+      "scenarioId": "reatribuirTarefa",
       "tableId": "tarefa",
-      "source": "journey:reatribuirTarefaGestor",
+      "source": "journey:reatribuirTarefa",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
-        "ref:tarefaPaiId:Tarefa",
-        "uniqueKeys:chaveCriacao"
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
+        "ref:tarefaPaiId:Tarefa"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -432,31 +367,30 @@ export const seedPlan = {
       "stateField": "status"
     },
     {
-      "scenarioId": "retomarTarefaDevolvida",
+      "scenarioId": "reatribuirTarefaCriada",
       "tableId": "tarefa",
-      "source": "journey:retomarTarefaDevolvida",
+      "source": "journey:reatribuirTarefaCriada",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
-        "ref:tarefaPaiId:Tarefa",
-        "uniqueKeys:chaveCriacao"
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
+        "ref:tarefaPaiId:Tarefa"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -465,6 +399,81 @@ export const seedPlan = {
         }
       ],
       "states": [],
+      "entityId": "Tarefa",
+      "stateField": "status"
+    },
+    {
+      "scenarioId": "resumoDiario",
+      "tableId": "tarefa",
+      "source": "journey:resumoDiario",
+      "constraints": [
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
+        "ref:tarefaPaiId:Tarefa"
+      ],
+      "refs": [
+        {
+          "field": "criadorId",
+          "relationshipId": "tarefaCriador",
+          "entityId": "Participante"
+        },
+        {
+          "field": "listaId",
+          "relationshipId": "tarefaLista",
+          "entityId": "ListaTarefas"
+        },
+        {
+          "field": "responsavelId",
+          "relationshipId": "tarefaResponsavel",
+          "entityId": "Participante"
+        },
+        {
+          "field": "tarefaPaiId",
+          "relationshipId": "tarefaPai",
+          "entityId": "Tarefa"
+        }
+      ],
+      "states": [],
+      "entityId": "Tarefa",
+      "stateField": "status"
+    },
+    {
+      "scenarioId": "retomarTarefa",
+      "tableId": "tarefa",
+      "source": "journey:retomarTarefa",
+      "constraints": [
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
+        "ref:tarefaPaiId:Tarefa",
+        "state:emAndamento"
+      ],
+      "refs": [
+        {
+          "field": "criadorId",
+          "relationshipId": "tarefaCriador",
+          "entityId": "Participante"
+        },
+        {
+          "field": "listaId",
+          "relationshipId": "tarefaLista",
+          "entityId": "ListaTarefas"
+        },
+        {
+          "field": "responsavelId",
+          "relationshipId": "tarefaResponsavel",
+          "entityId": "Participante"
+        },
+        {
+          "field": "tarefaPaiId",
+          "relationshipId": "tarefaPai",
+          "entityId": "Tarefa"
+        }
+      ],
+      "states": [
+        "emAndamento"
+      ],
       "entityId": "Tarefa",
       "stateField": "status"
     },
@@ -473,28 +482,27 @@ export const seedPlan = {
       "tableId": "tarefa",
       "source": "journey:revisarTarefa",
       "constraints": [
-        "ref:criadorId:MembroEquipe",
-        "ref:listaId:Lista",
-        "ref:responsavelId:MembroEquipe",
+        "ref:criadorId:Participante",
+        "ref:listaId:ListaTarefas",
+        "ref:responsavelId:Participante",
         "ref:tarefaPaiId:Tarefa",
-        "state:concluida",
-        "uniqueKeys:chaveCriacao"
+        "state:concluida"
       ],
       "refs": [
         {
           "field": "criadorId",
           "relationshipId": "tarefaCriador",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "listaId",
           "relationshipId": "tarefaLista",
-          "entityId": "Lista"
+          "entityId": "ListaTarefas"
         },
         {
           "field": "responsavelId",
           "relationshipId": "tarefaResponsavel",
-          "entityId": "MembroEquipe"
+          "entityId": "Participante"
         },
         {
           "field": "tarefaPaiId",
@@ -511,6 +519,10 @@ export const seedPlan = {
   ]
 } as const;
 
+export const seedRows0 = {"seedFor":"listaTarefas","purpose":"test","rows":[{"nome":"tarefas.listaTarefas.manterListas.nome","details":{"version":1},"id":"df242dcb-e5ea-511e-be5c-82442de1b126"}]} satisfies TableSeedRows;
+export const seedRows1 = {"seedFor":"mdmEntityIndex","purpose":"test","rows":[{"mdmId":"44c2dbd3-9f7a-5a13-9142-793c285ccc4f","subtype":"Person","name":"Membro da equipe","status":"Active","docType":null,"docId":null,"countryCode":"US","tags":["tarefas.Person","tarefas","actor","membroEquipe","tarefas.Participante"],"searchVector":"membro da equipe membroequipe tarefas","mergedInto":null,"dynamoPk":"44c2dbd3-9f7a-5a13-9142-793c285ccc4f","createdAt":"2026-07-01T00:00:00.000Z","updatedAt":"2026-07-01T00:00:00.000Z"},{"mdmId":"b4162417-5a3c-5d89-908f-68fac78937a7","subtype":"Person","name":"Gestor","status":"Active","docType":null,"docId":null,"countryCode":"US","tags":["tarefas.Person","tarefas","actor","gestor"],"searchVector":"gestor gestor tarefas","mergedInto":null,"dynamoPk":"b4162417-5a3c-5d89-908f-68fac78937a7","createdAt":"2026-07-01T00:00:00.000Z","updatedAt":"2026-07-01T00:00:00.000Z"}]} satisfies TableSeedRows;
+export const seedRows2 = {"seedFor":"mdmDocumentCache","purpose":"test","rows":[{"mdmId":"44c2dbd3-9f7a-5a13-9142-793c285ccc4f","version":1,"details":{"mdmId":"44c2dbd3-9f7a-5a13-9142-793c285ccc4f","subtype":"Person","name":"Membro da equipe","status":"Active","docType":"SSN","docId":null,"countryCode":"US","tags":["tarefas.Person","tarefas","actor","membroEquipe","tarefas.Participante"],"mergedInto":null,"createdAt":"2026-07-01T00:00:00.000Z","updatedAt":"2026-07-01T00:00:00.000Z","moduleTypes":[],"aliases":[],"addresses":[],"contacts":[],"relationshipRefs":{},"notes":null,"actorId":"membroEquipe"}},{"mdmId":"b4162417-5a3c-5d89-908f-68fac78937a7","version":1,"details":{"mdmId":"b4162417-5a3c-5d89-908f-68fac78937a7","subtype":"Person","name":"Gestor","status":"Active","docType":"SSN","docId":null,"countryCode":"US","tags":["tarefas.Person","tarefas","actor","gestor"],"mergedInto":null,"createdAt":"2026-07-01T00:00:00.000Z","updatedAt":"2026-07-01T00:00:00.000Z","moduleTypes":[],"aliases":[],"addresses":[],"contacts":[],"relationshipRefs":{},"notes":null,"actorId":"gestor"}}]} satisfies TableSeedRows;
+
 export const certificationFixture = {
   "schemaVersion": "2026-09-27-m1-certification-fixture-v1",
   "phase": "plan",
@@ -520,53 +532,6 @@ export const certificationFixture = {
   ],
   "datasets": [
     {
-      "supportId": "data:AvisoVencimento",
-      "entityId": "AvisoVencimento",
-      "tableId": "avisoVencimento",
-      "dependsOn": [],
-      "sourceRefs": [
-        "grant:gestorAvisosProprios",
-        "grant:membroAvisosProprios",
-        "journey:acompanharTarefasEquipe/filtrarTarefas",
-        "journey:acompanharTarefasEquipe/verDetalhe",
-        "journey:acompanharTarefasEquipe/verQuadro",
-        "journey:avisoDiarioVencimentos/abrirAviso",
-        "journey:avisoDiarioVencimentos/verVencendo",
-        "journey:cancelarTarefaCriador/cancelarCriada",
-        "journey:cancelarTarefaCriador/localizarCriada",
-        "journey:cancelarTarefaGestor/cancelarPeloGestor",
-        "journey:cancelarTarefaGestor/localizarParaCancelar",
-        "journey:criarTarefa/localizarLista",
-        "journey:criarTarefa/preencherTarefa",
-        "journey:editarTarefa/ajustarChecklist",
-        "journey:editarTarefa/alterarCampos",
-        "journey:editarTarefa/localizarTarefa",
-        "journey:executarTarefa/abrirMinhaTarefa",
-        "journey:executarTarefa/enviarRevisao",
-        "journey:executarTarefa/iniciarTarefa",
-        "journey:executarTarefa/marcarChecklist",
-        "journey:executarTarefa/verTarefa",
-        "journey:reatribuirTarefaCriador/escolherNovoResponsavel",
-        "journey:reatribuirTarefaCriador/localizarParaReatribuir",
-        "journey:reatribuirTarefaCriador/trocarResponsavel",
-        "journey:reatribuirTarefaGestor/escolherResponsavelEquipe",
-        "journey:reatribuirTarefaGestor/localizarTarefaEquipe",
-        "journey:reatribuirTarefaGestor/reatribuir",
-        "journey:retomarTarefaDevolvida/abrirDevolvida",
-        "journey:retomarTarefaDevolvida/ajustarCampos",
-        "journey:retomarTarefaDevolvida/lerMotivo",
-        "journey:retomarTarefaDevolvida/reenviarRevisao",
-        "journey:revisarTarefa/abrirTarefaRevisao",
-        "journey:revisarTarefa/aceitarTarefa",
-        "journey:revisarTarefa/conferirEntrega",
-        "journey:revisarTarefa/devolverTarefa",
-        "process:avisoDiario",
-        "relationship:AvisoVencimento/avisoResponsavel",
-        "relationship:MembroEquipe/avisoResponsavel",
-        "relationship:MembroEquipe/tarefaResponsavel"
-      ]
-    },
-    {
       "supportId": "data:ItemChecklist",
       "entityId": "ItemChecklist",
       "tableId": "itemChecklist",
@@ -574,88 +539,92 @@ export const certificationFixture = {
         "Tarefa"
       ],
       "sourceRefs": [
-        "grant:gestorTarefasEquipe",
-        "grant:membroTarefasProprias",
-        "journey:acompanharTarefasEquipe/filtrarTarefas",
-        "journey:acompanharTarefasEquipe/verDetalhe",
-        "journey:acompanharTarefasEquipe/verQuadro",
-        "journey:avisoDiarioVencimentos/abrirAviso",
-        "journey:avisoDiarioVencimentos/verVencendo",
-        "journey:cancelarTarefaCriador/cancelarCriada",
-        "journey:cancelarTarefaCriador/localizarCriada",
-        "journey:cancelarTarefaGestor/cancelarPeloGestor",
-        "journey:cancelarTarefaGestor/localizarParaCancelar",
-        "journey:criarTarefa/localizarLista",
+        "grant:gestorTodasTarefas",
+        "grant:membroChecklistPropria",
+        "journey:acompanharTarefas/abrirTarefaGestor",
+        "journey:acompanharTarefas/filtrarTarefas",
+        "journey:acompanharTarefas/verQuadro",
+        "journey:cancelarTarefa/cancelar",
+        "journey:cancelarTarefa/localizarTarefaCancelar",
+        "journey:cancelarTarefaCriada/cancelarCriada",
+        "journey:cancelarTarefaCriada/localizarCriadaCancelar",
+        "journey:criarTarefa/adicionarChecklist",
         "journey:criarTarefa/preencherTarefa",
         "journey:editarTarefa/ajustarChecklist",
         "journey:editarTarefa/alterarCampos",
-        "journey:editarTarefa/localizarTarefa",
-        "journey:executarTarefa/abrirMinhaTarefa",
+        "journey:editarTarefa/localizarTarefaEdicao",
+        "journey:executarTarefa/abrirTarefa",
         "journey:executarTarefa/enviarRevisao",
         "journey:executarTarefa/iniciarTarefa",
-        "journey:executarTarefa/marcarChecklist",
+        "journey:executarTarefa/marcarItem",
         "journey:executarTarefa/verTarefa",
-        "journey:reatribuirTarefaCriador/escolherNovoResponsavel",
-        "journey:reatribuirTarefaCriador/localizarParaReatribuir",
-        "journey:reatribuirTarefaCriador/trocarResponsavel",
-        "journey:reatribuirTarefaGestor/escolherResponsavelEquipe",
-        "journey:reatribuirTarefaGestor/localizarTarefaEquipe",
-        "journey:reatribuirTarefaGestor/reatribuir",
-        "journey:retomarTarefaDevolvida/abrirDevolvida",
-        "journey:retomarTarefaDevolvida/ajustarCampos",
-        "journey:retomarTarefaDevolvida/lerMotivo",
-        "journey:retomarTarefaDevolvida/reenviarRevisao",
-        "journey:revisarTarefa/abrirTarefaRevisao",
+        "journey:minhasTarefas/listarMinhas",
+        "journey:minhasTarefas/verDetalhe",
+        "journey:reatribuirTarefa/localizarTarefaReatribuir",
+        "journey:reatribuirTarefa/trocarResponsavel",
+        "journey:reatribuirTarefa/verResponsavelAtual",
+        "journey:reatribuirTarefaCriada/localizarCriada",
+        "journey:reatribuirTarefaCriada/trocarResponsavelCriada",
+        "journey:reatribuirTarefaCriada/verResponsavelCriada",
+        "journey:resumoDiario/lerResumo",
+        "journey:resumoDiario/verVencendo",
+        "journey:retomarTarefa/lerMotivo",
+        "journey:retomarTarefa/reenviarRevisao",
+        "journey:retomarTarefa/retomar",
+        "journey:revisarTarefa/abrirRevisao",
         "journey:revisarTarefa/aceitarTarefa",
-        "journey:revisarTarefa/conferirEntrega",
+        "journey:revisarTarefa/conferirTarefa",
         "journey:revisarTarefa/devolverTarefa",
         "relationship:ItemChecklist/itemChecklistTarefa",
         "relationship:Tarefa/itemChecklistTarefa"
       ]
     },
     {
-      "supportId": "data:Lista",
-      "entityId": "Lista",
-      "tableId": "lista",
+      "supportId": "data:ListaTarefas",
+      "entityId": "ListaTarefas",
+      "tableId": "listaTarefas",
       "dependsOn": [],
       "sourceRefs": [
         "grant:gestorListas",
-        "grant:membroConsultaListas",
-        "journey:acompanharTarefasEquipe/filtrarTarefas",
-        "journey:acompanharTarefasEquipe/verDetalhe",
-        "journey:acompanharTarefasEquipe/verQuadro",
-        "journey:cancelarTarefaCriador/cancelarCriada",
-        "journey:cancelarTarefaCriador/localizarCriada",
-        "journey:cancelarTarefaGestor/cancelarPeloGestor",
-        "journey:cancelarTarefaGestor/localizarParaCancelar",
-        "journey:criarTarefa/localizarLista",
+        "grant:membroConsultarListas",
+        "journey:acompanharTarefas/abrirTarefaGestor",
+        "journey:acompanharTarefas/filtrarTarefas",
+        "journey:acompanharTarefas/verQuadro",
+        "journey:cancelarTarefa/cancelar",
+        "journey:cancelarTarefa/localizarTarefaCancelar",
+        "journey:cancelarTarefaCriada/cancelarCriada",
+        "journey:cancelarTarefaCriada/localizarCriadaCancelar",
+        "journey:criarTarefa/adicionarChecklist",
         "journey:criarTarefa/preencherTarefa",
         "journey:editarTarefa/ajustarChecklist",
         "journey:editarTarefa/alterarCampos",
-        "journey:editarTarefa/localizarTarefa",
-        "journey:executarTarefa/abrirMinhaTarefa",
+        "journey:editarTarefa/localizarTarefaEdicao",
+        "journey:executarTarefa/abrirTarefa",
         "journey:executarTarefa/enviarRevisao",
         "journey:executarTarefa/iniciarTarefa",
-        "journey:executarTarefa/marcarChecklist",
+        "journey:executarTarefa/marcarItem",
         "journey:executarTarefa/verTarefa",
         "journey:manterListas/criarLista",
         "journey:manterListas/editarLista",
-        "journey:manterListas/verListas",
-        "journey:reatribuirTarefaCriador/escolherNovoResponsavel",
-        "journey:reatribuirTarefaCriador/localizarParaReatribuir",
-        "journey:reatribuirTarefaCriador/trocarResponsavel",
-        "journey:reatribuirTarefaGestor/escolherResponsavelEquipe",
-        "journey:reatribuirTarefaGestor/localizarTarefaEquipe",
-        "journey:reatribuirTarefaGestor/reatribuir",
-        "journey:retomarTarefaDevolvida/abrirDevolvida",
-        "journey:retomarTarefaDevolvida/ajustarCampos",
-        "journey:retomarTarefaDevolvida/lerMotivo",
-        "journey:retomarTarefaDevolvida/reenviarRevisao",
-        "journey:revisarTarefa/abrirTarefaRevisao",
+        "journey:manterListas/localizarLista",
+        "journey:minhasTarefas/listarMinhas",
+        "journey:minhasTarefas/verDetalhe",
+        "journey:reatribuirTarefa/localizarTarefaReatribuir",
+        "journey:reatribuirTarefa/trocarResponsavel",
+        "journey:reatribuirTarefa/verResponsavelAtual",
+        "journey:reatribuirTarefaCriada/localizarCriada",
+        "journey:reatribuirTarefaCriada/trocarResponsavelCriada",
+        "journey:reatribuirTarefaCriada/verResponsavelCriada",
+        "journey:resumoDiario/lerResumo",
+        "journey:resumoDiario/verVencendo",
+        "journey:retomarTarefa/lerMotivo",
+        "journey:retomarTarefa/reenviarRevisao",
+        "journey:retomarTarefa/retomar",
+        "journey:revisarTarefa/abrirRevisao",
         "journey:revisarTarefa/aceitarTarefa",
-        "journey:revisarTarefa/conferirEntrega",
+        "journey:revisarTarefa/conferirTarefa",
         "journey:revisarTarefa/devolverTarefa",
-        "relationship:Lista/tarefaLista",
+        "relationship:ListaTarefas/tarefaLista",
         "relationship:Tarefa/tarefaLista"
       ]
     },
@@ -664,55 +633,59 @@ export const certificationFixture = {
       "entityId": "Tarefa",
       "tableId": "tarefa",
       "dependsOn": [
-        "Lista"
+        "ListaTarefas"
       ],
       "sourceRefs": [
-        "grant:gestorTarefasEquipe",
+        "grant:gestorTodasTarefas",
         "grant:membroTarefasProprias",
-        "journey:acompanharTarefasEquipe/filtrarTarefas",
-        "journey:acompanharTarefasEquipe/verDetalhe",
-        "journey:acompanharTarefasEquipe/verQuadro",
-        "journey:avisoDiarioVencimentos/abrirAviso",
-        "journey:avisoDiarioVencimentos/verVencendo",
-        "journey:cancelarTarefaCriador/cancelarCriada",
-        "journey:cancelarTarefaCriador/localizarCriada",
-        "journey:cancelarTarefaGestor/cancelarPeloGestor",
-        "journey:cancelarTarefaGestor/localizarParaCancelar",
-        "journey:criarTarefa/localizarLista",
+        "journey:acompanharTarefas/abrirTarefaGestor",
+        "journey:acompanharTarefas/filtrarTarefas",
+        "journey:acompanharTarefas/verQuadro",
+        "journey:cancelarTarefa/cancelar",
+        "journey:cancelarTarefa/localizarTarefaCancelar",
+        "journey:cancelarTarefaCriada/cancelarCriada",
+        "journey:cancelarTarefaCriada/localizarCriadaCancelar",
+        "journey:configurarParticipantes/incluirParticipante",
+        "journey:configurarParticipantes/localizarUsuario",
+        "journey:configurarParticipantes/marcarPermissoes",
+        "journey:criarTarefa/adicionarChecklist",
         "journey:criarTarefa/preencherTarefa",
         "journey:editarTarefa/ajustarChecklist",
         "journey:editarTarefa/alterarCampos",
-        "journey:editarTarefa/localizarTarefa",
-        "journey:executarTarefa/abrirMinhaTarefa",
+        "journey:editarTarefa/localizarTarefaEdicao",
+        "journey:executarTarefa/abrirTarefa",
         "journey:executarTarefa/enviarRevisao",
         "journey:executarTarefa/iniciarTarefa",
-        "journey:executarTarefa/marcarChecklist",
+        "journey:executarTarefa/marcarItem",
         "journey:executarTarefa/verTarefa",
         "journey:manterListas/criarLista",
         "journey:manterListas/editarLista",
-        "journey:manterListas/verListas",
-        "journey:reatribuirTarefaCriador/escolherNovoResponsavel",
-        "journey:reatribuirTarefaCriador/localizarParaReatribuir",
-        "journey:reatribuirTarefaCriador/trocarResponsavel",
-        "journey:reatribuirTarefaGestor/escolherResponsavelEquipe",
-        "journey:reatribuirTarefaGestor/localizarTarefaEquipe",
-        "journey:reatribuirTarefaGestor/reatribuir",
-        "journey:retomarTarefaDevolvida/abrirDevolvida",
-        "journey:retomarTarefaDevolvida/ajustarCampos",
-        "journey:retomarTarefaDevolvida/lerMotivo",
-        "journey:retomarTarefaDevolvida/reenviarRevisao",
-        "journey:revisarTarefa/abrirTarefaRevisao",
+        "journey:manterListas/localizarLista",
+        "journey:minhasTarefas/listarMinhas",
+        "journey:minhasTarefas/verDetalhe",
+        "journey:reatribuirTarefa/localizarTarefaReatribuir",
+        "journey:reatribuirTarefa/trocarResponsavel",
+        "journey:reatribuirTarefa/verResponsavelAtual",
+        "journey:reatribuirTarefaCriada/localizarCriada",
+        "journey:reatribuirTarefaCriada/trocarResponsavelCriada",
+        "journey:reatribuirTarefaCriada/verResponsavelCriada",
+        "journey:resumoDiario/lerResumo",
+        "journey:resumoDiario/verVencendo",
+        "journey:retomarTarefa/lerMotivo",
+        "journey:retomarTarefa/reenviarRevisao",
+        "journey:retomarTarefa/retomar",
+        "journey:revisarTarefa/abrirRevisao",
         "journey:revisarTarefa/aceitarTarefa",
-        "journey:revisarTarefa/conferirEntrega",
+        "journey:revisarTarefa/conferirTarefa",
         "journey:revisarTarefa/decidirRevisao",
         "journey:revisarTarefa/devolverTarefa",
         "ontology:Tarefa/lifecycleStates/aFazer",
         "ontology:Tarefa/lifecycleStates/emAndamento",
         "ontology:Tarefa/lifecycleStates/emRevisao",
         "relationship:ItemChecklist/itemChecklistTarefa",
-        "relationship:Lista/tarefaLista",
-        "relationship:MembroEquipe/tarefaCriador",
-        "relationship:MembroEquipe/tarefaResponsavel",
+        "relationship:ListaTarefas/tarefaLista",
+        "relationship:Participante/tarefaCriador",
+        "relationship:Participante/tarefaResponsavel",
         "relationship:Tarefa/itemChecklistTarefa",
         "relationship:Tarefa/tarefaCriador",
         "relationship:Tarefa/tarefaLista",
@@ -724,21 +697,21 @@ export const certificationFixture = {
     {
       "supportId": "identity:gestor",
       "kind": "identity",
-      "entityId": "MembroEquipe",
+      "entityId": "",
       "actorRefs": [
         "gestor"
       ],
-      "gap": "RUNTIME_TEST_IDENTITY_UNREFERENCED: no verified runtime capability provisions an authenticated test identity for gestor bound to MembroEquipe",
+      "gap": "PERSON_ENTITY_UNDECLARED: actor gestor declares no personEntity; the test identity cannot be bound",
       "owner": "runtime"
     },
     {
       "supportId": "identity:membroEquipe",
       "kind": "identity",
-      "entityId": "MembroEquipe",
+      "entityId": "Participante",
       "actorRefs": [
         "membroEquipe"
       ],
-      "gap": "RUNTIME_TEST_IDENTITY_UNREFERENCED: no verified runtime capability provisions an authenticated test identity for membroEquipe bound to MembroEquipe",
+      "gap": "RUNTIME_TEST_IDENTITY_UNREFERENCED: no verified runtime capability provisions an authenticated test identity for membroEquipe bound to Participante",
       "owner": "runtime"
     }
   ],
@@ -747,5 +720,5 @@ export const certificationFixture = {
 
 export function applicableSeeds(mode: string): TableSeedRows[] {
   if (mode !== 'development' && mode !== 'presentation') return [];
-  return [];
+  return [seedRows0, seedRows1, seedRows2];
 }

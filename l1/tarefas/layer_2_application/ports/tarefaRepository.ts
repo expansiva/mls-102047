@@ -8,7 +8,6 @@ export type TarefaFilter = Record<string, unknown>;
 export interface TarefaRepository {
   create(tarefa: Tarefa): Promise<Tarefa>;
   list(tarefaFilter: TarefaFilter): Promise<Tarefa[]>;
-  get(id: string): Promise<Tarefa>;
   update(tarefa: Tarefa): Promise<Tarefa>;
   transition(tarefa: Tarefa, transitionId: string): Promise<Tarefa>;
 }
@@ -28,7 +27,6 @@ export async function removeMemory(id: string): Promise<boolean> {
 export const pendingTarefaRepository: TarefaRepository = {
   async create(record: Tarefa): Promise<Tarefa> { await table().insert({ record }); return record; },
   async list(filter: TarefaFilter): Promise<Tarefa[]> { return table().findMany({ where: filter as Partial<Tarefa> }); },
-  async get(id: string): Promise<Tarefa> { throw new AppError('REPOSITORY_NOT_IMPLEMENTED', 'get is not implemented.', 501); },
   async update(tarefa: Tarefa): Promise<Tarefa> {  const where = { id: tarefa.id } as Partial<Tarefa>; await table().update({ where, patch: tarefa }); const saved = await table().findOne({ where }); if (!saved) throw new AppError('NOT_FOUND', 'Record not found.', 404); return saved; },
   async transition(tarefa: Tarefa, transitionId: string): Promise<Tarefa> { void transitionId; const where = { id: tarefa.id } as Partial<Tarefa>; await table().update({ where, patch: tarefa }); const saved = await table().findOne({ where }); if (!saved) throw new AppError('NOT_FOUND', 'Record not found.', 404); return saved; },
 };

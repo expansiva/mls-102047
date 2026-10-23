@@ -15,14 +15,13 @@ export interface StructureGrant {
 }
 
 export const grants: readonly StructureGrant[] = [
-  {"grantId":"gestorAvisosProprios","actorRef":"gestor","scopeMode":"own","session":"verified","pending":"","disclosure":"fullRecord","recordField":"responsavelId","recordFields":{"AvisoVencimento":"responsavelId"},"entityRefs":["AvisoVencimento"],"selfAnchored":false},
-  {"grantId":"gestorListas","actorRef":"gestor","scopeMode":"organization","session":"verified","pending":"","disclosure":"fullRecord","recordField":"","recordFields":{},"entityRefs":["Lista"],"selfAnchored":false},
-  {"grantId":"gestorMembros","actorRef":"gestor","scopeMode":"organization","session":"verified","pending":"","disclosure":"fieldsOnly","recordField":"","recordFields":{},"entityRefs":["MembroEquipe"],"selfAnchored":false},
-  {"grantId":"gestorTarefasEquipe","actorRef":"gestor","scopeMode":"organization","session":"verified","pending":"","disclosure":"fullRecord","recordField":"","recordFields":{},"entityRefs":["Tarefa","ItemChecklist"],"selfAnchored":false},
-  {"grantId":"membroAvisosProprios","actorRef":"membroEquipe","scopeMode":"own","session":"verified","pending":"","disclosure":"fullRecord","recordField":"responsavelId","recordFields":{"AvisoVencimento":"responsavelId"},"entityRefs":["AvisoVencimento"],"selfAnchored":false},
-  {"grantId":"membroConsultaListas","actorRef":"membroEquipe","scopeMode":"organization","session":"verified","pending":"","disclosure":"fieldsOnly","recordField":"","recordFields":{},"entityRefs":["Lista"],"selfAnchored":false},
-  {"grantId":"membroEscolheResponsavel","actorRef":"membroEquipe","scopeMode":"organization","session":"verified","pending":"","disclosure":"fieldsOnly","recordField":"","recordFields":{},"entityRefs":["MembroEquipe"],"selfAnchored":false},
-  {"grantId":"membroTarefasProprias","actorRef":"membroEquipe","scopeMode":"own","session":"verified","pending":"ACCESS_ANCHOR","disclosure":"fullRecord","recordField":"criadorId","recordFields":{"Tarefa":"criadorId"},"entityRefs":["Tarefa","ItemChecklist"],"selfAnchored":false}
+  {"grantId":"gestorListas","actorRef":"gestor","scopeMode":"organization","session":"verified","pending":"","disclosure":"fullRecord","recordField":"","recordFields":{},"entityRefs":["ListaTarefas"],"selfAnchored":false},
+  {"grantId":"gestorParticipantes","actorRef":"gestor","scopeMode":"organization","session":"verified","pending":"","disclosure":"fieldsOnly","recordField":"","recordFields":{},"entityRefs":["Participante"],"selfAnchored":false},
+  {"grantId":"gestorTodasTarefas","actorRef":"gestor","scopeMode":"organization","session":"verified","pending":"","disclosure":"fullRecord","recordField":"","recordFields":{},"entityRefs":["Tarefa","ItemChecklist"],"selfAnchored":false},
+  {"grantId":"membroChecklistPropria","actorRef":"membroEquipe","scopeMode":"own","session":"verified","pending":"ACCESS_ANCHOR","disclosure":"fullRecord","recordField":"","recordFields":{},"entityRefs":["ItemChecklist"],"selfAnchored":false},
+  {"grantId":"membroConsultarListas","actorRef":"membroEquipe","scopeMode":"organization","session":"verified","pending":"","disclosure":"fullRecord","recordField":"","recordFields":{},"entityRefs":["ListaTarefas"],"selfAnchored":false},
+  {"grantId":"membroEscolherResponsavel","actorRef":"membroEquipe","scopeMode":"organization","session":"verified","pending":"","disclosure":"fieldsOnly","recordField":"","recordFields":{},"entityRefs":["Participante"],"selfAnchored":false},
+  {"grantId":"membroTarefasProprias","actorRef":"membroEquipe","scopeMode":"own","session":"verified","pending":"ACCESS_ANCHOR","disclosure":"fullRecord","recordField":"criadorId","recordFields":{"Tarefa":"criadorId"},"entityRefs":["Tarefa"],"selfAnchored":false}
 ];
 
 export function resolveGrant(grantId: string): StructureGrant | { code: string; detail: string } {

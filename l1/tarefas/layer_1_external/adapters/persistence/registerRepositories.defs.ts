@@ -7,25 +7,20 @@ export const definition = {
   "moduleName": "tarefas",
   "status": "pending",
   "dependencies": [
-    "_102047_/l1/tarefas/layer_1_external/adapters/persistence/avisoVencimentoRepositoryAdapter.defs.ts",
     "_102047_/l1/tarefas/layer_1_external/adapters/persistence/itemChecklistRepositoryAdapter.defs.ts",
-    "_102047_/l1/tarefas/layer_1_external/adapters/persistence/listaRepositoryAdapter.defs.ts",
+    "_102047_/l1/tarefas/layer_1_external/adapters/persistence/listaTarefasRepositoryAdapter.defs.ts",
     "_102047_/l1/tarefas/layer_1_external/adapters/persistence/tarefaRepositoryAdapter.defs.ts"
   ],
   "data": {
     "registrationId": "registerRepositories",
     "adapters": [
       {
-        "portId": "AvisoVencimentoRepository",
-        "adapterArtifactId": "AvisoVencimentoRepository"
-      },
-      {
         "portId": "ItemChecklistRepository",
         "adapterArtifactId": "ItemChecklistRepository"
       },
       {
-        "portId": "ListaRepository",
-        "adapterArtifactId": "ListaRepository"
+        "portId": "ListaTarefasRepository",
+        "adapterArtifactId": "ListaTarefasRepository"
       },
       {
         "portId": "TarefaRepository",

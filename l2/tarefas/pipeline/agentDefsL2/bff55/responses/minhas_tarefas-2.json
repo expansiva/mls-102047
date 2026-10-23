@@ -1,8 +1,8 @@
 {
   "attempt": "2",
   "model": "claude-opus-5-5",
-  "promptChars": 78570,
-  "receivedAt": "2026-10-17T14:01:34.997Z",
+  "promptChars": 93349,
+  "receivedAt": "2026-10-23T01:49:55.951Z",
   "raw": {
     "type": "flexible",
     "result": {
@@ -10,32 +10,98 @@
       "arguments": {
         "types": [
           {
-            "name": "ListaRef",
-            "description": "Lista (projeto ou área) à qual uma tarefa pertence, identificada pelo nome.",
+            "name": "ListaTarefasNome",
+            "description": "Lista de tarefas identificada pelo nome.",
             "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ListaTarefas.id"
+                  ]
+                }
+              },
               {
                 "name": "nome",
                 "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Lista.nome"
+                    "ListaTarefas.nome"
                   ]
                 }
               }
             ]
           },
           {
-            "name": "MembroRef",
-            "description": "Membro da equipe ligado a uma tarefa, identificado pelo nome.",
+            "name": "ParticipanteNome",
+            "description": "Participante identificado pelo nome lido da plataforma.",
             "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.id"
+                  ]
+                }
+              },
               {
                 "name": "name",
                 "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "Participante.details.identification.name"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ParticipanteOpcao",
+            "description": "Participante ativo que pode ser escolhido como responsável, com sua situação e se aceita tarefas.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.id"
+                  ]
+                }
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "status",
+                "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details.identification.status"
+                  ]
+                }
+              },
+              {
+                "name": "aceitaTarefasEfetivo",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details.tarefas.aceitaTarefasEfetivo"
                   ]
                 }
               }
@@ -43,7 +109,7 @@
           },
           {
             "name": "TarefaResumo",
-            "description": "Tarefa resumida com lista, responsável, criador, prazo, situação e indicadores de prazo, subtarefas e checklist.",
+            "description": "Tarefa em forma resumida, com lista, responsável, quem criou, quem age agora, progresso da checklist e marcações de vencimento e devolução.",
             "fields": [
               {
                 "name": "id",
@@ -76,6 +142,37 @@
                 }
               },
               {
+                "name": "status",
+                "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.status"
+                  ]
+                }
+              },
+              {
+                "name": "prazo",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.prazo"
+                  ]
+                }
+              },
+              {
+                "name": "prioridade",
+                "type": "'baixa' | 'media' | 'alta'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.prioridade"
+                  ]
+                }
+              },
+              {
                 "name": "listaId",
                 "type": "string",
                 "origin": {
@@ -86,12 +183,12 @@
                 }
               },
               {
-                "name": "lista",
-                "type": "ListaRef",
+                "name": "listaTarefas",
+                "type": "ListaTarefasNome",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Lista.nome"
+                    "ListaTarefas.nome"
                   ]
                 }
               },
@@ -107,11 +204,12 @@
               },
               {
                 "name": "responsavel",
-                "type": "MembroRef",
+                "type": "ParticipanteNome",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "Tarefa.responsavelId",
+                    "Participante.details.identification.name"
                   ]
                 }
               },
@@ -127,51 +225,35 @@
               },
               {
                 "name": "criador",
-                "type": "MembroRef",
+                "type": "ParticipanteNome",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "Tarefa.criadorId",
+                    "Participante.details.identification.name"
                   ]
                 }
               },
               {
-                "name": "prioridade",
-                "type": "'low' | 'medium' | 'high'",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Tarefa.prioridade"
-                  ]
-                }
-              },
-              {
-                "name": "prazo",
+                "name": "quemAgeAgora",
                 "type": "string",
+                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Tarefa.prazo"
+                    "Tarefa.details.quemAgeAgora"
                   ]
                 }
               },
               {
-                "name": "status",
-                "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
+                "name": "quemAgeAgoraNome",
+                "type": "string",
+                "optional": true,
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Tarefa.status"
-                  ]
-                }
-              },
-              {
-                "name": "quantidadeSubtarefas",
-                "type": "number",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Tarefa.details.quantidadeSubtarefas"
+                    "Tarefa.details.quemAgeAgora",
+                    "Participante.details.identification.name"
                   ]
                 }
               },
@@ -206,13 +288,32 @@
                 }
               },
               {
-                "name": "devolvidaEm",
-                "type": "string",
-                "optional": true,
+                "name": "devolvidaPendente",
+                "type": "boolean",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Tarefa.details.devolvidaEm"
+                    "Tarefa.details.devolvidaPendente"
+                  ]
+                }
+              },
+              {
+                "name": "aberta",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.aberta"
+                  ]
+                }
+              },
+              {
+                "name": "criadaEm",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
@@ -220,7 +321,7 @@
           },
           {
             "name": "ItemChecklistLinha",
-            "description": "Item da checklist de uma tarefa, com ordem, descrição e marcação de feito.",
+            "description": "Item marcável da checklist de uma tarefa.",
             "fields": [
               {
                 "name": "id",
@@ -253,16 +354,6 @@
                 }
               },
               {
-                "name": "feito",
-                "type": "boolean",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "ItemChecklist.feito"
-                  ]
-                }
-              },
-              {
                 "name": "descricao",
                 "type": "string",
                 "origin": {
@@ -273,21 +364,57 @@
                 }
               },
               {
-                "name": "marcadoEm",
+                "name": "concluido",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ItemChecklist.details.concluido"
+                  ]
+                }
+              },
+              {
+                "name": "concluidoEm",
                 "type": "string",
                 "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "ItemChecklist.details.marcadoEm"
+                    "ItemChecklist.details.concluidoEm"
                   ]
                 }
               }
             ]
           },
           {
-            "name": "TarefaDetalhe",
-            "description": "Tarefa completa com lista, criador, responsável, situação, marcos do ciclo, motivo da devolução, papel de quem consulta e checklist ordenada.",
+            "name": "TarefaPaiRef",
+            "description": "Tarefa pai identificada pelo título.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "titulo",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.titulo"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "TarefaCompleta",
+            "description": "Tarefa com todos os seus campos, nomes do responsável e de quem criou, lista, tarefa pai, marcos de devolução, retomada, conclusão e cancelamento, papel da pessoa da sessão e a checklist em ordem.",
             "fields": [
               {
                 "name": "id",
@@ -320,6 +447,16 @@
                 }
               },
               {
+                "name": "status",
+                "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.status"
+                  ]
+                }
+              },
+              {
                 "name": "descricao",
                 "type": "string",
                 "optional": true,
@@ -327,6 +464,27 @@
                   "kind": "field",
                   "paths": [
                     "Tarefa.details.descricao"
+                  ]
+                }
+              },
+              {
+                "name": "prazo",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.prazo"
+                  ]
+                }
+              },
+              {
+                "name": "prioridade",
+                "type": "'baixa' | 'media' | 'alta'",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.prioridade"
                   ]
                 }
               },
@@ -341,32 +499,12 @@
                 }
               },
               {
-                "name": "lista",
-                "type": "ListaRef",
+                "name": "listaTarefas",
+                "type": "ListaTarefasNome",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Lista.nome"
-                  ]
-                }
-              },
-              {
-                "name": "criadorId",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Tarefa.criadorId"
-                  ]
-                }
-              },
-              {
-                "name": "criador",
-                "type": "MembroRef",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "ListaTarefas.nome"
                   ]
                 }
               },
@@ -382,41 +520,33 @@
               },
               {
                 "name": "responsavel",
-                "type": "MembroRef",
+                "type": "ParticipanteNome",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "Tarefa.responsavelId",
+                    "Participante.details.identification.name"
                   ]
                 }
               },
               {
-                "name": "prazo",
+                "name": "criadorId",
                 "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "Tarefa.prazo"
+                    "Tarefa.criadorId"
                   ]
                 }
               },
               {
-                "name": "prioridade",
-                "type": "'low' | 'medium' | 'high'",
+                "name": "criador",
+                "type": "ParticipanteNome",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Tarefa.prioridade"
-                  ]
-                }
-              },
-              {
-                "name": "status",
-                "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Tarefa.status"
+                    "Tarefa.criadorId",
+                    "Participante.details.identification.name"
                   ]
                 }
               },
@@ -427,6 +557,60 @@
                   "kind": "field",
                   "paths": [
                     "Tarefa.criadaEm"
+                  ]
+                }
+              },
+              {
+                "name": "etiquetas",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.etiquetas"
+                  ]
+                }
+              },
+              {
+                "name": "tarefaPaiId",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.tarefaPaiId"
+                  ]
+                }
+              },
+              {
+                "name": "tarefaPai",
+                "type": "TarefaPaiRef",
+                "optional": true,
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.tarefaPaiId",
+                    "Tarefa.titulo"
+                  ]
+                }
+              },
+              {
+                "name": "quantidadeSubtarefas",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.quantidadeSubtarefas"
+                  ]
+                }
+              },
+              {
+                "name": "progressoChecklist",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.progressoChecklist"
                   ]
                 }
               },
@@ -453,6 +637,17 @@
                 }
               },
               {
+                "name": "retomadaEm",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.retomadaEm"
+                  ]
+                }
+              },
+              {
                 "name": "concluidaEm",
                 "type": "string",
                 "optional": true,
@@ -475,12 +670,45 @@
                 }
               },
               {
-                "name": "souCriador",
-                "type": "boolean",
+                "name": "quemAgeAgora",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.quemAgeAgora"
+                  ]
+                }
+              },
+              {
+                "name": "quemAgeAgoraNome",
+                "type": "string",
+                "optional": true,
                 "origin": {
                   "kind": "aggregate",
                   "paths": [
-                    "Tarefa.criadorId"
+                    "Tarefa.details.quemAgeAgora",
+                    "Participante.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "devolvidaPendente",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.devolvidaPendente"
+                  ]
+                }
+              },
+              {
+                "name": "aberta",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.aberta"
                   ]
                 }
               },
@@ -495,125 +723,108 @@
                 }
               },
               {
-                "name": "checklist",
-                "type": "ItemChecklistLinha[]",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "ItemChecklist.ordem",
-                    "ItemChecklist.feito",
-                    "ItemChecklist.details.descricao",
-                    "ItemChecklist.details.marcadoEm"
-                  ]
-                }
-              }
-            ]
-          },
-          {
-            "name": "ListaOpcao",
-            "description": "Lista ativa que pode receber tarefas, com nome e tipo.",
-            "fields": [
-              {
-                "name": "id",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Lista.id"
-                  ]
-                }
-              },
-              {
-                "name": "nome",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Lista.nome"
-                  ]
-                }
-              },
-              {
-                "name": "ativa",
+                "name": "souCriador",
                 "type": "boolean",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Lista.ativa"
+                    "Tarefa.criadorId"
                   ]
                 }
               },
               {
-                "name": "tipo",
-                "type": "'project' | 'area'",
+                "name": "itens",
+                "type": "ItemChecklistLinha[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Lista.details.tipo"
+                    "ItemChecklist.tarefaId",
+                    "ItemChecklist.ordem"
                   ]
                 }
               }
             ]
           },
           {
-            "name": "MembroOpcao",
-            "description": "Membro da equipe que pode ser escolhido como responsável, com nome e situação no cadastro.",
+            "name": "EventoHistorico",
+            "description": "Marco do ciclo de uma tarefa: criação, início, envio para revisão, devolução com motivo, retomada, aceite, troca de responsável ou cancelamento, com momento e pessoa envolvida.",
             "fields": [
               {
-                "name": "id",
+                "name": "tipo",
                 "type": "string",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "MembroEquipe.id"
+                    "Tarefa.status",
+                    "Tarefa.criadaEm",
+                    "Tarefa.details.devolvidaEm",
+                    "Tarefa.details.retomadaEm",
+                    "Tarefa.details.concluidaEm",
+                    "Tarefa.details.canceladaEm"
                   ]
                 }
               },
               {
-                "name": "name",
+                "name": "momento",
                 "type": "string",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "MembroEquipe.details.identification.name"
+                    "Tarefa.criadaEm",
+                    "Tarefa.details.devolvidaEm",
+                    "Tarefa.details.retomadaEm",
+                    "Tarefa.details.concluidaEm",
+                    "Tarefa.details.canceladaEm"
                   ]
                 }
               },
               {
                 "name": "status",
-                "type": "'Active' | 'Inactive' | 'Merged' | 'Blocked'",
+                "type": "'aFazer' | 'emAndamento' | 'emRevisao' | 'concluida' | 'cancelada'",
+                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "MembroEquipe.details.identification.status"
+                    "Tarefa.status"
+                  ]
+                }
+              },
+              {
+                "name": "responsavelNome",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.responsavelId",
+                    "Participante.details.identification.name"
+                  ]
+                }
+              },
+              {
+                "name": "motivoDevolucao",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.motivoDevolucao"
                   ]
                 }
               }
             ]
           },
           {
-            "name": "ItemChecklistEntrada",
-            "description": "Item da checklist informado na criação ou no ajuste da checklist; sem id é um item novo.",
+            "name": "ItemChecklistNovo",
+            "description": "Novo item marcável a acrescentar à checklist de uma tarefa.",
             "fields": [
               {
-                "name": "id",
-                "type": "string",
-                "optional": true,
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "ItemChecklist.id"
-                  ]
-                }
-              },
-              {
-                "name": "version",
+                "name": "ordem",
                 "type": "number",
-                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "ItemChecklist.version"
+                    "ItemChecklist.ordem"
                   ]
                 }
               },
@@ -628,8 +839,45 @@
                 }
               },
               {
+                "name": "concluido",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ItemChecklist.details.concluido"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "name": "ItemChecklistAjuste",
+            "description": "Alteração de um item existente da checklist: descrição, ordem ou marcação.",
+            "fields": [
+              {
+                "name": "id",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ItemChecklist.id"
+                  ]
+                }
+              },
+              {
+                "name": "version",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ItemChecklist.version"
+                  ]
+                }
+              },
+              {
                 "name": "ordem",
                 "type": "number",
+                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -638,12 +886,24 @@
                 }
               },
               {
-                "name": "feito",
-                "type": "boolean",
+                "name": "descricao",
+                "type": "string",
+                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "ItemChecklist.feito"
+                    "ItemChecklist.details.descricao"
+                  ]
+                }
+              },
+              {
+                "name": "concluido",
+                "type": "boolean",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ItemChecklist.details.concluido"
                   ]
                 }
               }
@@ -658,17 +918,124 @@
             "writes": "",
             "input": [
               {
-                "name": "filtro",
-                "type": "'criadasPorMim' | 'atribuidasAMim' | 'emRevisao' | 'devolvidas'",
-                "optional": true,
+                "name": "page",
+                "type": "number",
                 "origin": {
                   "kind": "context",
+                  "paths": []
+                }
+              },
+              {
+                "name": "pageSize",
+                "type": "number",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "tarefas",
+                "type": "TarefaResumo[]",
+                "paginated": true,
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.details.quemAgeAgora",
+                    "Tarefa.criadaEm"
+                  ]
+                }
+              },
+              {
+                "name": "quantidadeDependeDeMim",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.details.quemAgeAgora"
+                  ]
+                }
+              },
+              {
+                "name": "quantidadeResponsavel",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.responsavelId",
+                    "Tarefa.details.aberta"
+                  ]
+                }
+              },
+              {
+                "name": "quantidadeCriadas",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.criadorId",
-                    "Tarefa.responsavelId",
-                    "Tarefa.status",
-                    "Tarefa.details.devolvidaEm"
+                    "Tarefa.details.aberta"
                   ]
+                }
+              },
+              {
+                "name": "quantidadeVenceHoje",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.details.venceHoje"
+                  ]
+                }
+              },
+              {
+                "name": "quantidadeAtrasadas",
+                "type": "number",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.details.atrasada"
+                  ]
+                }
+              },
+              {
+                "name": "possoCriar",
+                "type": "boolean",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Participante.details.tarefas.podeCriarTarefasEfetivo"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "membroVeResponsavelOuCriador",
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento",
+              "participanteNaoConfiguradoAceitaECria",
+              "criarTarefaExigePodeCriar"
+            ],
+            "jsdoc": {
+              "purpose": "Carrega a abertura de minhas tarefas: a primeira página do que depende da pessoa da sessão agora, os totais de cada grupo e de vencimento, e se ela pode criar tarefas.",
+              "input": "page e pageSize: página e tamanho da página do grupo 'depende de mim agora'.",
+              "processing": "Filtra as tarefas em que a pessoa da sessão é quem age agora (membroVeResponsavelOuCriador), ordenadas por atrasada, vence hoje e criadaEm. quemAgeAgora é calculado pela situação (quemAgeAgoraPorSituacao); aberta, venceHoje e atrasada são calculados pela data de hoje (tarefaAbertaVencimento); progressoChecklist conta itens concluídos sobre o total. Conta no servidor as tarefas abertas de que é responsável, as que criou, as que dependem dela, as que vencem hoje e as atrasadas. possoCriar é a marca efetiva de poder criar tarefas da pessoa da sessão, valendo sim quando não configurada (participanteNaoConfiguradoAceitaECria, criarTarefaExigePodeCriar). Campos derivados são calculados, nunca gravados.",
+              "output": "Página { items, page, pageSize, hasMore } de tarefas resumidas que dependem da pessoa agora, os totais por grupo e de vencimento e o indicador possoCriar."
+            }
+          },
+          {
+            "id": "qryTarefasDoGrupo",
+            "kind": "qry",
+            "when": "interaction",
+            "writes": "",
+            "input": [
+              {
+                "name": "grupo",
+                "type": "string",
+                "origin": {
+                  "kind": "context",
+                  "paths": []
                 }
               },
               {
@@ -694,21 +1061,26 @@
                 "type": "TarefaResumo[]",
                 "paginated": true,
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Tarefa.id"
+                    "Tarefa.responsavelId",
+                    "Tarefa.criadorId",
+                    "Tarefa.details.quemAgeAgora",
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "editarSomenteTarefaVisivel"
+              "membroVeResponsavelOuCriador",
+              "quemAgeAgoraPorSituacao",
+              "tarefaAbertaVencimento"
             ],
             "jsdoc": {
-              "purpose": "Lista, paginadas, as tarefas que o membro da sessão criou ou pelas quais é responsável, com o filtro rápido escolhido.",
-              "input": "filtro: criadasPorMim (criadorId = sessão), atribuidasAMim (responsavelId = sessão), emRevisao (status emRevisao), devolvidas (devolvidaEm preenchida e status emAndamento); ausente traz todas as minhas. page e pageSize: página pedida e tamanho da página.",
-              "processing": "Filtra pelas tarefas visíveis ao membro (editarSomenteTarefaVisivel: criador ou responsável é a pessoa da sessão), aplica o filtro, ordena por prazo. Junta o nome da lista e os nomes de responsável e criador em lote. Calcula venceHoje e atrasada (tarefa aberta com prazo hoje ou anterior a hoje), quantidadeSubtarefas (contagem de tarefas filhas) e progressoChecklist (itens feitos do total) — todos derivados, nunca gravados.",
-              "output": "Página de tarefas { items, page, pageSize, hasMore } no formato resumido, com lista, responsável, criador, prioridade, prazo, situação e indicadores."
+              "purpose": "Busca uma página das tarefas da pessoa da sessão num grupo: responsável, criadas ou depende de mim agora.",
+              "input": "grupo: 'responsavel', 'criadas' ou 'dependeDeMim'; page e pageSize: página pedida e tamanho.",
+              "processing": "Filtra por responsavelId, criadorId ou quemAgeAgora igual à pessoa da sessão conforme o grupo (membroVeResponsavelOuCriador), abertas primeiro, atrasadas e que vencem hoje antes, depois criadaEm. Calcula quemAgeAgora (quemAgeAgoraPorSituacao), aberta, venceHoje, atrasada (tarefaAbertaVencimento), devolvidaPendente e progressoChecklist; nada é gravado.",
+              "output": "Página { items, page, pageSize, hasMore } de tarefas resumidas do grupo pedido."
             }
           },
           {
@@ -722,99 +1094,126 @@
                 "type": "string",
                 "origin": {
                   "kind": "context",
-                  "paths": [
-                    "Tarefa.id"
-                  ]
+                  "paths": []
                 }
               }
             ],
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
                   ]
                 }
-              }
-            ],
-            "rules": [
-              "editarSomenteTarefaVisivel"
-            ],
-            "jsdoc": {
-              "purpose": "Abre uma tarefa escolhida com seus dados, checklist e marcos do ciclo.",
-              "input": "tarefaId: id da tarefa selecionada.",
-              "processing": "Lê a tarefa pelo id e recusa se o membro não for criador nem responsável (editarSomenteTarefaVisivel). Junta o nome da lista, os nomes de criador e responsável e os itens da checklist ordenados por ordem. Calcula souCriador e souResponsavel comparando criadorId e responsavelId com a pessoa da sessão.",
-              "output": "A tarefa no estado atual, com descrição, lista, criador, responsável, prazo, prioridade, situação, motivo e data da devolução, datas de criação, conclusão e cancelamento, papel de quem consulta e checklist."
-            }
-          },
-          {
-            "id": "qryListasAtivas",
-            "kind": "qry",
-            "when": "onLoad",
-            "writes": "",
-            "input": [],
-            "output": [
+              },
               {
-                "name": "listas",
-                "type": "ListaOpcao[]",
+                "name": "historico",
+                "type": "EventoHistorico[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "Lista.id"
+                    "Tarefa.criadaEm",
+                    "Tarefa.details.devolvidaEm",
+                    "Tarefa.details.retomadaEm",
+                    "Tarefa.details.concluidaEm",
+                    "Tarefa.details.canceladaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "listaInativaNaoRecebeTarefa"
+              "membroVeResponsavelOuCriador",
+              "quemAgeAgoraPorSituacao",
+              "itemChecklistSoQuemVeTarefa",
+              "moduloNaoGuardaComentarios"
             ],
             "jsdoc": {
-              "purpose": "Traz as listas onde o membro pode colocar uma tarefa.",
-              "input": "Nenhuma.",
-              "processing": "Filtra as listas com ativa = true (listaInativaNaoRecebeTarefa) e ordena por nome.",
-              "output": "Listas ativas com id, nome, ativa e tipo."
+              "purpose": "Abre uma tarefa com seus dados, checklist, papel da pessoa da sessão e histórico.",
+              "input": "tarefaId: id da tarefa escolhida na lista ou vinda de um aviso.",
+              "processing": "Lê a tarefa pelo id e recusa se a pessoa da sessão não for responsável, quem criou nem quem age agora (membroVeResponsavelOuCriador). Compõe nomes do responsável, de quem criou e de quem age agora, nome da lista, título da tarefa pai, quantidade de subtarefas, progressoChecklist e os itens da checklist em ordem (itemChecklistSoQuemVeTarefa). Calcula quemAgeAgora pela situação (quemAgeAgoraPorSituacao), souResponsavel e souCriador comparando com a pessoa da sessão. Monta o histórico pelos marcos da tarefa e do processo da plataforma, em ordem de tempo; comentários e anexos ficam na conversa da plataforma (moduloNaoGuardaComentarios).",
+              "output": "A tarefa completa com a checklist em ordem e a lista de eventos do histórico em ordem cronológica."
             }
           },
           {
-            "id": "qryBuscarMembros",
+            "id": "qryResponsaveis",
             "kind": "qry",
             "when": "interaction",
             "writes": "",
             "input": [
               {
-                "name": "termo",
+                "name": "busca",
                 "type": "string",
+                "optional": true,
                 "origin": {
                   "kind": "context",
-                  "paths": [
-                    "MembroEquipe.details.identification.name"
-                  ]
+                  "paths": []
                 }
               }
             ],
             "output": [
               {
-                "name": "membros",
-                "type": "MembroOpcao[]",
+                "name": "participantes",
+                "type": "ParticipanteOpcao[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
-                    "MembroEquipe.id"
+                    "Participante.details.identification.name",
+                    "Participante.details.identification.status",
+                    "Participante.details.tarefas.aceitaTarefasEfetivo"
                   ]
                 }
               }
             ],
             "rules": [
-              "responsavelDeveSerMembroAtivo"
+              "escolhaResponsavelPeloNome",
+              "responsavelAceitaTarefas",
+              "participanteNaoConfiguradoAceitaECria",
+              "participanteSemCadastroPessoal"
             ],
             "jsdoc": {
-              "purpose": "Busca membros da equipe pelo nome para escolher ou trocar o responsável.",
-              "input": "termo: trecho do nome digitado.",
-              "processing": "Busca no cadastro mestre membros com o papel tarefas.MembroEquipe cujo nome contém o termo, somente com situação Active (responsavelDeveSerMembroAtivo), ordenados por nome, limitados a um número curto de resultados.",
-              "output": "Membros ativos encontrados com id, nome e situação."
+              "purpose": "Busca pelo nome os participantes que podem ser escolhidos como responsável.",
+              "input": "busca: trecho do nome digitado; vazio traz os primeiros por nome.",
+              "processing": "Filtra participantes com o papel tarefas.Participante, situação Active e aceitaTarefasEfetivo verdadeiro, valendo sim quando não configurado (responsavelAceitaTarefas, participanteNaoConfiguradoAceitaECria). Busca só pelo nome, nunca pelo e-mail (escolhaResponsavelPeloNome), e não expõe outro dado pessoal (participanteSemCadastroPessoal). Limita a uma quantidade curta, ordenada por nome.",
+              "output": "Participantes elegíveis com id, nome, situação e aceita tarefas efetivo."
+            }
+          },
+          {
+            "id": "qryListas",
+            "kind": "qry",
+            "when": "interaction",
+            "writes": "",
+            "input": [
+              {
+                "name": "busca",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "context",
+                  "paths": []
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "listas",
+                "type": "ListaTarefasNome[]",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ListaTarefas.nome"
+                  ]
+                }
+              }
+            ],
+            "rules": [],
+            "jsdoc": {
+              "purpose": "Busca as listas de tarefas pelo nome para escolher a lista da tarefa.",
+              "input": "busca: trecho do nome da lista; vazio traz as primeiras por nome.",
+              "processing": "Busca listas pelo texto no nome, ordenadas por nome, limitadas a uma quantidade curta.",
+              "output": "Listas com id e nome."
             }
           },
           {
@@ -823,26 +1222,6 @@
             "when": "criarTarefa",
             "writes": "Tarefa.create",
             "input": [
-              {
-                "name": "chaveCriacao",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Tarefa.chaveCriacao"
-                  ]
-                }
-              },
-              {
-                "name": "listaId",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Tarefa.listaId"
-                  ]
-                }
-              },
               {
                 "name": "titulo",
                 "type": "string",
@@ -866,7 +1245,7 @@
               },
               {
                 "name": "prioridade",
-                "type": "'low' | 'medium' | 'high'",
+                "type": "'baixa' | 'media' | 'alta'",
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -877,10 +1256,21 @@
               {
                 "name": "prazo",
                 "type": "string",
+                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
                     "Tarefa.prazo"
+                  ]
+                }
+              },
+              {
+                "name": "listaId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.listaId"
                   ]
                 }
               },
@@ -897,7 +1287,6 @@
               {
                 "name": "criadorId",
                 "type": "string",
-                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -906,15 +1295,24 @@
                 }
               },
               {
-                "name": "checklist",
-                "type": "ItemChecklistEntrada[]",
+                "name": "tarefaPaiId",
+                "type": "string",
                 "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
-                    "ItemChecklist.details.descricao",
-                    "ItemChecklist.ordem",
-                    "ItemChecklist.feito"
+                    "Tarefa.tarefaPaiId"
+                  ]
+                }
+              },
+              {
+                "name": "etiquetas",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.etiquetas"
                   ]
                 }
               }
@@ -922,31 +1320,108 @@
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "criacaoIdempotente",
-              "listaInativaNaoRecebeTarefa",
-              "responsavelDeveSerMembroAtivo"
+              "criarTarefaExigePodeCriar",
+              "podeCriarTarefasExigido",
+              "participanteNaoConfiguradoAceitaECria",
+              "responsavelAceitaTarefas",
+              "escolhaResponsavelPeloNome",
+              "tarefaPaiDiferenteDaPropria",
+              "avisarQuemAgeAgora"
             ],
             "jsdoc": {
-              "purpose": "Cria uma nova tarefa com sua checklist inicial.",
-              "input": "chaveCriacao: chave gerada ao abrir o formulário; listaId, titulo, descricao, prioridade, prazo, responsavelId: dados da tarefa; criadorId: criador da tarefa, opcional — o servidor sempre grava a pessoa da sessão e recusa um valor diferente dela; checklist: itens iniciais com descrição, ordem e feito.",
-              "processing": "Recusa lista inativa (listaInativaNaoRecebeTarefa) e responsável que não seja membro ativo (responsavelDeveSerMembroAtivo). Se já existir tarefa com a mesma chaveCriacao, devolve a já criada sem criar outra nem repetir mensagens (criacaoIdempotente). Caso contrário grava, em uma transação, a tarefa em aFazer com criadorId = pessoa da sessão e os itens da checklist; criadaEm é preenchido pelo sistema. Avisa o responsável.",
-              "output": "A tarefa criada em situação aFazer, no formato de detalhe, com checklist."
+              "purpose": "Cria uma nova tarefa em a fazer com o responsável escolhido.",
+              "input": "titulo, descricao, prioridade, prazo, listaId, responsavelId, tarefaPaiId opcional e etiquetas da nova tarefa; criadorId: quem cria, que precisa ser a própria pessoa da sessão.",
+              "processing": "Recusa se a pessoa da sessão não puder criar tarefas pela marca efetiva (criarTarefaExigePodeCriar, podeCriarTarefasExigido, participanteNaoConfiguradoAceitaECria) e recusa criadorId diferente da pessoa da sessão: quem criou é sempre ela (criarTarefaExigePodeCriar). Recusa responsável que não seja participante ativo que aceita tarefas (responsavelAceitaTarefas, escolhaResponsavelPeloNome) e tarefa pai inválida (tarefaPaiDiferenteDaPropria). Grava com status aFazer; criadaEm é preenchido pelo sistema. Abre a ocorrência do processo da tarefa e avisa o responsável (avisarQuemAgeAgora).",
+              "output": "A tarefa criada, em a fazer, completa e com checklist vazia, e seu histórico com o evento de criação."
             }
           },
           {
-            "id": "cmdSalvarEdicao",
+            "id": "cmdAdicionarItensChecklist",
             "kind": "cmd",
-            "when": "salvarEdicao",
+            "when": "adicionarItensChecklist",
+            "writes": "ItemChecklist.create",
+            "input": [
+              {
+                "name": "tarefaId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "ItemChecklist.tarefaId"
+                  ]
+                }
+              },
+              {
+                "name": "itens",
+                "type": "ItemChecklistNovo[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "ItemChecklist.ordem",
+                    "ItemChecklist.details.descricao",
+                    "ItemChecklist.details.concluido"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "tarefa",
+                "type": "TarefaCompleta",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "itemChecklistSoQuemVeTarefa",
+              "itemChecklistTarefaNaoEncerrada",
+              "marcarItemNaoMudaSituacao"
+            ],
+            "jsdoc": {
+              "purpose": "Acrescenta itens marcáveis à checklist de uma tarefa.",
+              "input": "tarefaId: tarefa que recebe os itens; itens: ordem, descrição e marcação inicial de concluído de cada novo item (normalmente falso).",
+              "processing": "Recusa se a pessoa da sessão não vê a tarefa (itemChecklistSoQuemVeTarefa) ou se a tarefa está concluída ou cancelada (itemChecklistTarefaNaoEncerrada). Grava os itens todos juntos com a marcação informada; concluidoEm é preenchido pelo sistema quando o item já vem marcado. A situação da tarefa não muda (marcarItemNaoMudaSituacao). progressoChecklist é recalculado, nunca gravado.",
+              "output": "A tarefa completa com a checklist atualizada e o novo progresso, e seu histórico."
+            }
+          },
+          {
+            "id": "cmdSalvarAlteracoes",
+            "kind": "cmd",
+            "when": "salvarAlteracoes",
             "writes": "Tarefa.update",
             "input": [
               {
@@ -970,16 +1445,6 @@
                 }
               },
               {
-                "name": "listaId",
-                "type": "string",
-                "origin": {
-                  "kind": "field",
-                  "paths": [
-                    "Tarefa.listaId"
-                  ]
-                }
-              },
-              {
                 "name": "titulo",
                 "type": "string",
                 "origin": {
@@ -1002,7 +1467,7 @@
               },
               {
                 "name": "prioridade",
-                "type": "'low' | 'medium' | 'high'",
+                "type": "'baixa' | 'media' | 'alta'",
                 "origin": {
                   "kind": "field",
                   "paths": [
@@ -1013,10 +1478,21 @@
               {
                 "name": "prazo",
                 "type": "string",
+                "optional": true,
                 "origin": {
                   "kind": "field",
                   "paths": [
                     "Tarefa.prazo"
+                  ]
+                }
+              },
+              {
+                "name": "listaId",
+                "type": "string",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.listaId"
                   ]
                 }
               },
@@ -1029,38 +1505,72 @@
                     "Tarefa.responsavelId"
                   ]
                 }
+              },
+              {
+                "name": "tarefaPaiId",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.tarefaPaiId"
+                  ]
+                }
+              },
+              {
+                "name": "etiquetas",
+                "type": "string",
+                "optional": true,
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.details.etiquetas"
+                  ]
+                }
               }
             ],
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
               "edicaoNaoMudaSituacao",
-              "editarSomenteTarefaVisivel",
-              "reatribuicaoPorCriadorOuGestor",
-              "responsavelDeveSerMembroAtivo",
-              "listaInativaNaoRecebeTarefa"
+              "membroVeResponsavelOuCriador",
+              "reatribuirApenasCriadorOuGestor",
+              "responsavelAceitaTarefas",
+              "escolhaResponsavelPeloNome",
+              "tarefaPaiDiferenteDaPropria",
+              "avisarQuemAgeAgora"
             ],
             "jsdoc": {
-              "purpose": "Salva a edição dos campos da tarefa, incluindo a troca de responsável.",
-              "input": "id e version: tarefa e versão lida; listaId, titulo, descricao, prioridade, prazo, responsavelId: novos valores.",
-              "processing": "Recusa se o membro não vê a tarefa (editarSomenteTarefaVisivel) ou se a versão mudou. Se a lista mudou, recusa lista inativa (listaInativaNaoRecebeTarefa). Se o responsável mudou, exige que a pessoa da sessão seja a criadora (reatribuicaoPorCriadorOuGestor) e que o novo responsável seja membro ativo (responsavelDeveSerMembroAtivo), e avisa o novo responsável. Nunca altera a situação (edicaoNaoMudaSituacao).",
-              "output": "A tarefa atualizada, com nova versão, no formato de detalhe com checklist."
+              "purpose": "Salva os campos ajustados de uma tarefa e, quando muda, troca o responsável, sem mudar a situação.",
+              "input": "id e version da tarefa; titulo, descricao, prioridade, prazo, listaId, responsavelId, tarefaPaiId e etiquetas com os novos valores.",
+              "processing": "Recusa se a pessoa não vê a tarefa (membroVeResponsavelOuCriador) ou se a version mudou. Nunca altera status (edicaoNaoMudaSituacao). Se responsavelId mudou, exige que a pessoa seja quem criou (reatribuirApenasCriadorOuGestor) e que o novo seja participante ativo que aceita tarefas (responsavelAceitaTarefas, escolhaResponsavelPeloNome), e avisa o novo responsável quando ele passa a agir agora (avisarQuemAgeAgora). Recusa tarefa pai igual à própria ou a uma subtarefa (tarefaPaiDiferenteDaPropria).",
+              "output": "A tarefa completa nos novos valores, com a mesma situação, e seu histórico incluindo a troca de responsável quando houver."
             }
           },
           {
-            "id": "cmdSalvarChecklist",
+            "id": "cmdAjustarChecklist",
             "kind": "cmd",
-            "when": "salvarChecklist",
+            "when": "ajustarChecklist",
             "writes": "ItemChecklist.update",
             "input": [
               {
@@ -1075,15 +1585,15 @@
               },
               {
                 "name": "itens",
-                "type": "ItemChecklistEntrada[]",
+                "type": "ItemChecklistAjuste[]",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "ItemChecklist.id",
                     "ItemChecklist.version",
-                    "ItemChecklist.details.descricao",
                     "ItemChecklist.ordem",
-                    "ItemChecklist.feito"
+                    "ItemChecklist.details.descricao",
+                    "ItemChecklist.details.concluido"
                   ]
                 }
               }
@@ -1091,24 +1601,35 @@
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "checklistNaoMudaSituacao",
-              "editarSomenteTarefaVisivel"
+              "itemChecklistSoQuemVeTarefa",
+              "itemChecklistTarefaNaoEncerrada",
+              "marcarItemNaoMudaSituacao"
             ],
             "jsdoc": {
-              "purpose": "Salva a checklist da tarefa: altera descrição e ordem, marca ou desmarca itens e inclui itens novos.",
-              "input": "tarefaId: tarefa dona da checklist; itens: itens com id e version quando existentes, e descricao, ordem e feito.",
-              "processing": "Recusa se o membro não vê a tarefa (editarSomenteTarefaVisivel) ou se a versão de algum item mudou. Atualiza cada item; ao marcar feito registra marcadoEm, ao desmarcar o limpa; itens sem id são incluídos. Não altera a situação da tarefa (checklistNaoMudaSituacao).",
-              "output": "A tarefa com a checklist salva, em ordem, e o restante dos dados no formato de detalhe."
+              "purpose": "Edita, reordena, marca ou desmarca itens da checklist de uma tarefa.",
+              "input": "tarefaId: tarefa dos itens; itens: id, version e os novos valores de ordem, descrição ou concluído de cada item.",
+              "processing": "Recusa se a pessoa não vê a tarefa (itemChecklistSoQuemVeTarefa), se a tarefa está concluída ou cancelada (itemChecklistTarefaNaoEncerrada), se algum item não pertence à tarefa ou se a version mudou. Grava os itens; concluidoEm é preenchido pelo sistema ao marcar e limpo ao desmarcar. A situação da tarefa não muda (marcarItemNaoMudaSituacao).",
+              "output": "A tarefa completa com a checklist atualizada e o novo progresso, e seu histórico."
             }
           },
           {
@@ -1141,30 +1662,40 @@
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "somenteResponsavelExecuta",
-              "tarefaEncerradaNaoTransiciona"
+              "apenasResponsavelExecuta",
+              "quemAgeAgoraPorSituacao"
             ],
             "jsdoc": {
-              "purpose": "Inicia a tarefa, passando de a fazer para em andamento.",
+              "purpose": "Inicia a tarefa de que a pessoa é responsável.",
               "input": "id e version da tarefa.",
-              "processing": "Exige que a pessoa da sessão seja o responsável (somenteResponsavelExecuta) e que a tarefa esteja em aFazer, recusando tarefa concluída ou cancelada (tarefaEncerradaNaoTransiciona). Aplica a transição iniciar e registra a mensagem na sala de discussão.",
-              "output": "A tarefa em situação emAndamento, no formato de detalhe."
+              "processing": "Recusa se a pessoa da sessão não é o responsável (apenasResponsavelExecuta), se a tarefa não está em aFazer ou se a version mudou. Passa a emAndamento; o responsável continua sendo quem age agora (quemAgeAgoraPorSituacao).",
+              "output": "A tarefa completa em andamento e seu histórico com o início."
             }
           },
           {
-            "id": "cmdEnviarRevisao",
+            "id": "cmdEnviarParaRevisao",
             "kind": "cmd",
-            "when": "enviarRevisao",
+            "when": "enviarParaRevisao",
             "writes": "Tarefa.enviarParaRevisao",
             "input": [
               {
@@ -1191,24 +1722,35 @@
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "somenteResponsavelExecuta",
-              "tarefaEncerradaNaoTransiciona"
+              "apenasResponsavelExecuta",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
             ],
             "jsdoc": {
-              "purpose": "Envia ou reenvia a tarefa para revisão do criador.",
+              "purpose": "Envia para revisão de quem criou a tarefa em andamento do responsável.",
               "input": "id e version da tarefa.",
-              "processing": "Exige que a pessoa da sessão seja o responsável (somenteResponsavelExecuta) e que a tarefa esteja em emAndamento, recusando tarefa encerrada (tarefaEncerradaNaoTransiciona). Aplica enviarParaRevisao, registra a mensagem na sala e avisa o criador.",
-              "output": "A tarefa em situação emRevisao, no formato de detalhe."
+              "processing": "Recusa se a pessoa não é o responsável (apenasResponsavelExecuta), se a tarefa não está emAndamento ou se a version mudou. Passa a emRevisao; quem criou passa a agir agora (quemAgeAgoraPorSituacao) e é avisado (avisarQuemAgeAgora).",
+              "output": "A tarefa completa em revisão e seu histórico com o envio."
             }
           },
           {
@@ -1241,24 +1783,34 @@
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "somenteCriadorRevisa",
-              "tarefaEncerradaNaoTransiciona"
+              "apenasCriadorRevisa",
+              "quemAgeAgoraPorSituacao"
             ],
             "jsdoc": {
-              "purpose": "Aceita a entrega da tarefa e a conclui.",
+              "purpose": "Aceita a entrega de uma tarefa em revisão criada pela pessoa.",
               "input": "id e version da tarefa.",
-              "processing": "Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa) e que a tarefa esteja em emRevisao, recusando tarefa encerrada (tarefaEncerradaNaoTransiciona). Aplica aceitar, registra concluidaEm e a mensagem na sala.",
-              "output": "A tarefa em situação concluida com a data de conclusão, no formato de detalhe."
+              "processing": "Recusa se a pessoa não é quem criou (apenasCriadorRevisa), se a tarefa não está emRevisao ou se a version mudou. Passa a concluida e registra concluidaEm; ninguém age agora (quemAgeAgoraPorSituacao).",
+              "output": "A tarefa completa concluída e seu histórico com o aceite."
             }
           },
           {
@@ -1301,25 +1853,96 @@
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
+                  ]
+                }
+              }
+            ],
+            "rules": [
+              "apenasCriadorRevisa",
+              "devolucaoExigeMotivo",
+              "quemAgeAgoraPorSituacao",
+              "avisarQuemAgeAgora"
+            ],
+            "jsdoc": {
+              "purpose": "Devolve ao responsável, com motivo, uma tarefa em revisão criada pela pessoa.",
+              "input": "id e version da tarefa; motivoDevolucao: o que precisa ser corrigido.",
+              "processing": "Recusa se a pessoa não é quem criou (apenasCriadorRevisa), se a tarefa não está emRevisao, se a version mudou ou se o motivo está vazio (devolucaoExigeMotivo). Grava o motivo, registra devolvidaEm e volta a emAndamento; o responsável passa a agir agora (quemAgeAgoraPorSituacao) e é avisado (avisarQuemAgeAgora).",
+              "output": "A tarefa completa em andamento com o motivo da devolução e devolvida aguardando retomada, e seu histórico com a devolução."
+            }
+          },
+          {
+            "id": "cmdRetomar",
+            "kind": "cmd",
+            "when": "retomar",
+            "writes": "Tarefa.retomar",
+            "input": [
+              {
+                "name": "id",
+                "type": "string",
                 "origin": {
                   "kind": "field",
                   "paths": [
                     "Tarefa.id"
                   ]
                 }
+              },
+              {
+                "name": "version",
+                "type": "number",
+                "origin": {
+                  "kind": "field",
+                  "paths": [
+                    "Tarefa.version"
+                  ]
+                }
+              }
+            ],
+            "output": [
+              {
+                "name": "tarefa",
+                "type": "TarefaCompleta",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
+                  ]
+                }
               }
             ],
             "rules": [
-              "somenteCriadorRevisa",
-              "devolucaoExigeMotivo",
-              "tarefaEncerradaNaoTransiciona"
+              "apenasResponsavelExecuta",
+              "retomarSoAposDevolucao"
             ],
             "jsdoc": {
-              "purpose": "Devolve a tarefa em revisão para ajuste, com o motivo.",
-              "input": "id e version da tarefa; motivoDevolucao: por que a entrega volta para ajuste.",
-              "processing": "Exige que a pessoa da sessão seja a criadora (somenteCriadorRevisa), que a tarefa esteja em emRevisao (tarefaEncerradaNaoTransiciona) e recusa motivo vazio (devolucaoExigeMotivo). Aplica devolver, grava o motivo e devolvidaEm, volta para emAndamento e avisa o responsável.",
-              "output": "A tarefa em situação emAndamento com o motivo e a data da devolução, no formato de detalhe."
+              "purpose": "Retoma a tarefa devolvida para continuar o trabalho.",
+              "input": "id e version da tarefa.",
+              "processing": "Recusa se a pessoa não é o responsável (apenasResponsavelExecuta), se a version mudou ou se a tarefa não está emAndamento devolvida e ainda não retomada (retomarSoAposDevolucao). Registra retomadaEm e mantém emAndamento; devolvidaPendente passa a falso por cálculo.",
+              "output": "A tarefa completa em andamento já retomada e seu histórico com a retomada."
             }
           },
           {
@@ -1352,56 +1975,91 @@
             "output": [
               {
                 "name": "tarefa",
-                "type": "TarefaDetalhe",
+                "type": "TarefaCompleta",
                 "origin": {
-                  "kind": "field",
+                  "kind": "aggregate",
                   "paths": [
                     "Tarefa.id"
+                  ]
+                }
+              },
+              {
+                "name": "historico",
+                "type": "EventoHistorico[]",
+                "origin": {
+                  "kind": "aggregate",
+                  "paths": [
+                    "Tarefa.criadaEm"
                   ]
                 }
               }
             ],
             "rules": [
-              "cancelamentoPorCriadorOuGestor",
-              "tarefaEncerradaNaoTransiciona"
+              "cancelarApenasCriadorOuGestor",
+              "avisarQuemAgeAgora",
+              "quemAgeAgoraPorSituacao"
             ],
             "jsdoc": {
-              "purpose": "Cancela uma tarefa criada pelo membro.",
+              "purpose": "Cancela uma tarefa criada pela pessoa.",
               "input": "id e version da tarefa.",
-              "processing": "Exige que a pessoa da sessão seja a criadora (cancelamentoPorCriadorOuGestor) e que a tarefa esteja em aFazer, emAndamento ou emRevisao (tarefaEncerradaNaoTransiciona). Aplica cancelar, registra canceladaEm e a mensagem na sala.",
-              "output": "A tarefa em situação cancelada com a data do cancelamento, no formato de detalhe."
+              "processing": "Recusa se a pessoa não é quem criou nem gestor (cancelarApenasCriadorOuGestor), se a tarefa não está em aFazer, emAndamento ou emRevisao ou se a version mudou. Passa a cancelada e registra canceladaEm; quem estava agindo é avisado (avisarQuemAgeAgora) e ninguém age agora (quemAgeAgoraPorSituacao).",
+              "output": "A tarefa completa cancelada e seu histórico com o cancelamento."
             }
           }
         ],
         "bindings": {
           "organisms": [
             {
-              "organism": "listaTarefas",
+              "organism": "tarefasLista",
               "reads": "qryMinhasTarefas.tarefas"
             },
             {
-              "organism": "detalheTarefa",
+              "organism": "tarefasLista",
+              "reads": "qryMinhasTarefas.quantidadeDependeDeMim"
+            },
+            {
+              "organism": "tarefasLista",
+              "reads": "qryMinhasTarefas.quantidadeResponsavel"
+            },
+            {
+              "organism": "tarefasLista",
+              "reads": "qryMinhasTarefas.quantidadeCriadas"
+            },
+            {
+              "organism": "tarefasLista",
+              "reads": "qryMinhasTarefas.quantidadeVenceHoje"
+            },
+            {
+              "organism": "tarefasLista",
+              "reads": "qryMinhasTarefas.quantidadeAtrasadas"
+            },
+            {
+              "organism": "tarefaDetalhe",
               "reads": "qryTarefa.tarefa"
             },
             {
-              "organism": "acoesTarefa",
+              "organism": "tarefaAcoes",
               "reads": "qryTarefa.tarefa"
             },
             {
-              "organism": "historicoTarefa",
+              "organism": "tarefaHistorico",
+              "reads": "qryTarefa.historico"
+            },
+            {
+              "organism": "tarefaForm",
               "reads": "qryTarefa.tarefa"
             },
             {
-              "organism": "formTarefa",
-              "reads": "qryTarefa.tarefa"
+              "organism": "tarefaForm",
+              "reads": "qryMinhasTarefas.possoCriar"
             },
             {
-              "organism": "formTarefa",
-              "reads": "qryListasAtivas.listas"
+              "organism": "tarefaForm",
+              "reads": "qryResponsaveis.participantes"
             },
             {
-              "organism": "formTarefa",
-              "reads": "qryBuscarMembros.membros"
+              "organism": "tarefaForm",
+              "reads": "qryListas.listas"
             }
           ],
           "commands": [
@@ -1412,13 +2070,19 @@
               ]
             },
             {
-              "endpoint": "cmdSalvarEdicao",
+              "endpoint": "cmdAdicionarItensChecklist",
               "refreshes": [
                 "qryMinhasTarefas"
               ]
             },
             {
-              "endpoint": "cmdSalvarChecklist",
+              "endpoint": "cmdSalvarAlteracoes",
+              "refreshes": [
+                "qryMinhasTarefas"
+              ]
+            },
+            {
+              "endpoint": "cmdAjustarChecklist",
               "refreshes": [
                 "qryMinhasTarefas"
               ]
@@ -1430,7 +2094,7 @@
               ]
             },
             {
-              "endpoint": "cmdEnviarRevisao",
+              "endpoint": "cmdEnviarParaRevisao",
               "refreshes": [
                 "qryMinhasTarefas"
               ]
@@ -1443,6 +2107,12 @@
             },
             {
               "endpoint": "cmdDevolver",
+              "refreshes": [
+                "qryMinhasTarefas"
+              ]
+            },
+            {
+              "endpoint": "cmdRetomar",
               "refreshes": [
                 "qryMinhasTarefas"
               ]
@@ -1456,7 +2126,7 @@
           ],
           "selections": [
             {
-              "organism": "listaTarefas",
+              "organism": "tarefasLista",
               "via": {
                 "kind": "query",
                 "ref": "qryTarefa"
@@ -1465,19 +2135,14 @@
           ],
           "updates": [
             {
-              "endpoint": "qryMinhasTarefas",
+              "endpoint": "qryTarefasDoGrupo",
               "state": "qryMinhasTarefas.tarefas",
               "mode": "replace"
             },
             {
-              "endpoint": "qryTarefa",
-              "state": "qryTarefa.tarefa",
-              "mode": "replace"
-            },
-            {
-              "endpoint": "qryBuscarMembros",
-              "state": "qryBuscarMembros.membros",
-              "mode": "replace"
+              "endpoint": "qryTarefasDoGrupo",
+              "state": "qryMinhasTarefas.tarefas",
+              "mode": "append"
             },
             {
               "endpoint": "cmdCriarTarefa",
@@ -1485,13 +2150,38 @@
               "mode": "replace"
             },
             {
-              "endpoint": "cmdSalvarEdicao",
+              "endpoint": "cmdCriarTarefa",
+              "state": "qryTarefa.historico",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdAdicionarItensChecklist",
               "state": "qryTarefa.tarefa",
               "mode": "replace"
             },
             {
-              "endpoint": "cmdSalvarChecklist",
+              "endpoint": "cmdAdicionarItensChecklist",
+              "state": "qryTarefa.historico",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdSalvarAlteracoes",
               "state": "qryTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdSalvarAlteracoes",
+              "state": "qryTarefa.historico",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdAjustarChecklist",
+              "state": "qryTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdAjustarChecklist",
+              "state": "qryTarefa.historico",
               "mode": "replace"
             },
             {
@@ -1500,8 +2190,18 @@
               "mode": "replace"
             },
             {
-              "endpoint": "cmdEnviarRevisao",
+              "endpoint": "cmdIniciar",
+              "state": "qryTarefa.historico",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdEnviarParaRevisao",
               "state": "qryTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdEnviarParaRevisao",
+              "state": "qryTarefa.historico",
               "mode": "replace"
             },
             {
@@ -1510,90 +2210,117 @@
               "mode": "replace"
             },
             {
+              "endpoint": "cmdAceitar",
+              "state": "qryTarefa.historico",
+              "mode": "replace"
+            },
+            {
               "endpoint": "cmdDevolver",
               "state": "qryTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdDevolver",
+              "state": "qryTarefa.historico",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdRetomar",
+              "state": "qryTarefa.tarefa",
+              "mode": "replace"
+            },
+            {
+              "endpoint": "cmdRetomar",
+              "state": "qryTarefa.historico",
               "mode": "replace"
             },
             {
               "endpoint": "cmdCancelar",
               "state": "qryTarefa.tarefa",
               "mode": "replace"
+            },
+            {
+              "endpoint": "cmdCancelar",
+              "state": "qryTarefa.historico",
+              "mode": "replace"
             }
           ],
           "journeys": [
             {
-              "step": "cancelarTarefaCriador/localizarCriada",
+              "step": "minhasTarefas/listarMinhas",
               "organisms": [
-                "listaTarefas",
-                "detalheTarefa"
+                "tarefasLista"
               ],
               "endpoints": [
                 "qryMinhasTarefas",
+                "qryTarefasDoGrupo"
+              ]
+            },
+            {
+              "step": "minhasTarefas/verDetalhe",
+              "organisms": [
+                "tarefaDetalhe",
+                "tarefaHistorico"
+              ],
+              "endpoints": [
                 "qryTarefa"
-              ]
-            },
-            {
-              "step": "cancelarTarefaCriador/cancelarCriada",
-              "organisms": [
-                "acoesTarefa"
-              ],
-              "endpoints": [
-                "cmdCancelar"
-              ]
-            },
-            {
-              "step": "criarTarefa/localizarLista",
-              "organisms": [
-                "formTarefa"
-              ],
-              "endpoints": [
-                "qryListasAtivas"
               ]
             },
             {
               "step": "criarTarefa/preencherTarefa",
               "organisms": [
-                "formTarefa"
+                "tarefaForm"
               ],
               "endpoints": [
-                "qryBuscarMembros",
+                "qryResponsaveis",
+                "qryListas",
                 "cmdCriarTarefa"
               ]
             },
             {
-              "step": "editarTarefa/localizarTarefa",
+              "step": "criarTarefa/adicionarChecklist",
               "organisms": [
-                "listaTarefas",
-                "detalheTarefa"
+                "tarefaForm"
+              ],
+              "endpoints": [
+                "cmdAdicionarItensChecklist"
+              ]
+            },
+            {
+              "step": "editarTarefa/localizarTarefaEdicao",
+              "organisms": [
+                "tarefasLista"
               ],
               "endpoints": [
                 "qryMinhasTarefas",
+                "qryTarefasDoGrupo",
                 "qryTarefa"
               ]
             },
             {
               "step": "editarTarefa/alterarCampos",
               "organisms": [
-                "formTarefa"
+                "tarefaForm"
               ],
               "endpoints": [
-                "cmdSalvarEdicao"
+                "qryListas",
+                "cmdSalvarAlteracoes"
               ]
             },
             {
               "step": "editarTarefa/ajustarChecklist",
               "organisms": [
-                "formTarefa"
+                "tarefaForm"
               ],
               "endpoints": [
-                "cmdSalvarChecklist"
+                "cmdAjustarChecklist",
+                "cmdAdicionarItensChecklist"
               ]
             },
             {
-              "step": "executarTarefa/abrirMinhaTarefa",
+              "step": "executarTarefa/abrirTarefa",
               "organisms": [
-                "listaTarefas",
-                "detalheTarefa"
+                "tarefasLista"
               ],
               "endpoints": [
                 "qryMinhasTarefas",
@@ -1603,8 +2330,7 @@
             {
               "step": "executarTarefa/verTarefa",
               "organisms": [
-                "detalheTarefa",
-                "historicoTarefa"
+                "tarefaDetalhe"
               ],
               "endpoints": [
                 "qryTarefa"
@@ -1613,35 +2339,61 @@
             {
               "step": "executarTarefa/iniciarTarefa",
               "organisms": [
-                "acoesTarefa"
+                "tarefaAcoes"
               ],
               "endpoints": [
                 "cmdIniciar"
               ]
             },
             {
-              "step": "executarTarefa/marcarChecklist",
+              "step": "executarTarefa/marcarItem",
               "organisms": [
-                "formTarefa"
+                "tarefaForm"
               ],
               "endpoints": [
-                "cmdSalvarChecklist"
+                "cmdAjustarChecklist"
               ]
             },
             {
               "step": "executarTarefa/enviarRevisao",
               "organisms": [
-                "acoesTarefa"
+                "tarefaAcoes"
               ],
               "endpoints": [
-                "cmdEnviarRevisao"
+                "cmdEnviarParaRevisao"
               ]
             },
             {
-              "step": "reatribuirTarefaCriador/localizarParaReatribuir",
+              "step": "retomarTarefa/lerMotivo",
               "organisms": [
-                "listaTarefas",
-                "detalheTarefa"
+                "tarefaDetalhe"
+              ],
+              "endpoints": [
+                "qryTarefa"
+              ]
+            },
+            {
+              "step": "retomarTarefa/retomar",
+              "organisms": [
+                "tarefaAcoes"
+              ],
+              "endpoints": [
+                "cmdRetomar"
+              ]
+            },
+            {
+              "step": "retomarTarefa/reenviarRevisao",
+              "organisms": [
+                "tarefaAcoes"
+              ],
+              "endpoints": [
+                "cmdEnviarParaRevisao"
+              ]
+            },
+            {
+              "step": "revisarTarefa/abrirRevisao",
+              "organisms": [
+                "tarefasLista"
               ],
               "endpoints": [
                 "qryMinhasTarefas",
@@ -1649,79 +2401,10 @@
               ]
             },
             {
-              "step": "reatribuirTarefaCriador/escolherNovoResponsavel",
+              "step": "revisarTarefa/conferirTarefa",
               "organisms": [
-                "formTarefa"
-              ],
-              "endpoints": [
-                "qryBuscarMembros"
-              ]
-            },
-            {
-              "step": "reatribuirTarefaCriador/trocarResponsavel",
-              "organisms": [
-                "formTarefa"
-              ],
-              "endpoints": [
-                "cmdSalvarEdicao"
-              ]
-            },
-            {
-              "step": "retomarTarefaDevolvida/abrirDevolvida",
-              "organisms": [
-                "listaTarefas",
-                "detalheTarefa"
-              ],
-              "endpoints": [
-                "qryMinhasTarefas",
-                "qryTarefa"
-              ]
-            },
-            {
-              "step": "retomarTarefaDevolvida/lerMotivo",
-              "organisms": [
-                "detalheTarefa",
-                "historicoTarefa"
-              ],
-              "endpoints": [
-                "qryTarefa"
-              ]
-            },
-            {
-              "step": "retomarTarefaDevolvida/ajustarCampos",
-              "organisms": [
-                "formTarefa"
-              ],
-              "endpoints": [
-                "cmdSalvarEdicao",
-                "cmdSalvarChecklist"
-              ]
-            },
-            {
-              "step": "retomarTarefaDevolvida/reenviarRevisao",
-              "organisms": [
-                "acoesTarefa"
-              ],
-              "endpoints": [
-                "cmdEnviarRevisao"
-              ]
-            },
-            {
-              "step": "revisarTarefa/abrirTarefaRevisao",
-              "organisms": [
-                "listaTarefas",
-                "detalheTarefa"
-              ],
-              "endpoints": [
-                "qryMinhasTarefas",
-                "qryTarefa"
-              ]
-            },
-            {
-              "step": "revisarTarefa/conferirEntrega",
-              "organisms": [
-                "detalheTarefa",
-                "historicoTarefa"
+                "tarefaDetalhe",
+                "tarefaHistorico"
               ],
               "endpoints": [
                 "qryTarefa"
@@ -1730,7 +2413,7 @@
             {
               "step": "revisarTarefa/aceitarTarefa",
               "organisms": [
-                "acoesTarefa"
+                "tarefaAcoes"
               ],
               "endpoints": [
                 "cmdAceitar"
@@ -1739,10 +2422,76 @@
             {
               "step": "revisarTarefa/devolverTarefa",
               "organisms": [
-                "acoesTarefa"
+                "tarefaAcoes"
               ],
               "endpoints": [
                 "cmdDevolver"
+              ]
+            },
+            {
+              "step": "cancelarTarefaCriada/localizarCriadaCancelar",
+              "organisms": [
+                "tarefasLista"
+              ],
+              "endpoints": [
+                "qryTarefasDoGrupo",
+                "qryTarefa"
+              ]
+            },
+            {
+              "step": "cancelarTarefaCriada/cancelarCriada",
+              "organisms": [
+                "tarefaAcoes"
+              ],
+              "endpoints": [
+                "cmdCancelar"
+              ]
+            },
+            {
+              "step": "reatribuirTarefaCriada/localizarCriada",
+              "organisms": [
+                "tarefasLista"
+              ],
+              "endpoints": [
+                "qryTarefasDoGrupo",
+                "qryTarefa"
+              ]
+            },
+            {
+              "step": "reatribuirTarefaCriada/verResponsavelCriada",
+              "organisms": [
+                "tarefaDetalhe"
+              ],
+              "endpoints": [
+                "qryTarefa"
+              ]
+            },
+            {
+              "step": "reatribuirTarefaCriada/trocarResponsavelCriada",
+              "organisms": [
+                "tarefaForm"
+              ],
+              "endpoints": [
+                "qryResponsaveis",
+                "cmdSalvarAlteracoes"
+              ]
+            },
+            {
+              "step": "resumoDiario/lerResumo",
+              "organisms": [
+                "tarefasLista"
+              ],
+              "endpoints": [
+                "qryMinhasTarefas"
+              ]
+            },
+            {
+              "step": "resumoDiario/verVencendo",
+              "organisms": [
+                "tarefaDetalhe"
+              ],
+              "endpoints": [
+                "qryTarefa"
               ]
             }
           ]
@@ -1750,7 +2499,7 @@
       }
     },
     "status": "completed",
-    "stepId": 14,
+    "stepId": 17,
     "interaction": null,
     "nextSteps": null
   },

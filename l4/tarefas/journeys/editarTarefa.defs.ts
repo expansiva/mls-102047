@@ -7,45 +7,45 @@ export const editarTarefaJourney = {
   "journeyId": "editarTarefa",
   "business": {
     "actorRef": "membroEquipe",
-    "title": "Editar tarefa",
-    "goal": "Atualizar os campos e a checklist de uma tarefa visível sem mudar sua situação.",
+    "title": "Editar campos da tarefa",
+    "goal": "Ajustar campos de uma tarefa que vê sem mudar sua situação.",
     "entry": {
       "mode": "contextOrLookup"
     },
     "steps": [
       {
-        "stepId": "localizarTarefa",
+        "stepId": "localizarTarefaEdicao",
         "kind": "locate",
         "entity": "Tarefa",
-        "title": "Localizar a tarefa",
-        "description": "Encontra a tarefa entre as que pode ver."
+        "title": "Localizar tarefa",
+        "description": "O membro localiza a tarefa entre as que é responsável ou criou."
       },
       {
         "stepId": "alterarCampos",
         "kind": "act",
         "entity": "Tarefa",
         "effect": "update",
-        "title": "Editar os campos",
-        "description": "Altera título, descrição, prioridade, prazo, etiquetas ou anexos; a situação não muda."
+        "title": "Editar tarefa",
+        "description": "O membro altera título, descrição, prioridade, prazo, lista ou etiquetas sem mudar a situação."
       },
       {
         "stepId": "ajustarChecklist",
         "kind": "act",
         "entity": "ItemChecklist",
         "effect": "update",
-        "title": "Ajustar a checklist",
-        "description": "Altera ou marca itens da checklist da tarefa sem mudar a situação."
+        "title": "Ajustar checklist",
+        "description": "O membro edita ou marca itens da checklist."
       }
     ],
     "outcome": {
-      "statement": "Os campos da tarefa foram atualizados e a situação permaneceu a mesma.",
+      "statement": "A tarefa tem os campos atualizados e mantém a mesma situação.",
       "evidence": [
-        "Novos valores visíveis na tarefa",
-        "Situação inalterada"
+        "Os novos valores aparecem no detalhe da tarefa",
+        "A situação não mudou"
       ]
     }
   },
-  "businessHash": "sha256:268e7bc4350a4c241efcf00d3ec4ad17bc447d538d98c57e0326122f7cdcd84b"
+  "businessHash": "sha256:9448dda56a93a900b0dce6e4777a18d95cfecdfd0f6201db1b1611ffeffe52a1"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type EditarTarefaJourneyType = typeof editarTarefaJourney;

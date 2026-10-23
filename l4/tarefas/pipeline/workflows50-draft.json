@@ -3,9 +3,9 @@
   "moduleName": "tarefas",
   "processes": [
     {
-      "processId": "cicloTarefa",
-      "title": "Ciclo da tarefa",
-      "description": "Cada tarefa é uma ocorrência que passa do criador ao responsável para execução, volta ao criador para revisão e, se devolvida, retorna ao responsável até ser concluída ou cancelada.",
+      "processId": "processoTarefa",
+      "title": "Processo da tarefa",
+      "description": "Cada tarefa é uma ocorrência: quem criou registra, o responsável executa e envia para revisão, quem criou aceita ou devolve com motivo e o responsável retoma; a cada mudança quem age agora é avisado.",
       "trigger": {
         "kind": "manual",
         "actorRef": "membroEquipe"
@@ -17,21 +17,9 @@
           "actorRef": "membroEquipe",
           "journeyRef": "criarTarefa",
           "next": [
-            "aguardarInicio"
+            "executar"
           ],
-          "description": "O criador registra a tarefa e o responsável passa a ser quem age agora e é avisado."
-        },
-        {
-          "taskId": "aguardarInicio",
-          "kind": "wait",
-          "next": [
-            "executar",
-            "reatribuirCriador",
-            "reatribuirGestor",
-            "cancelarCriador",
-            "cancelarGestor"
-          ],
-          "description": "Aguarda o responsável iniciar a tarefa, ou uma reatribuição ou cancelamento."
+          "description": "Quem pode criar tarefas registra a tarefa e escolhe o responsável pelo nome, que é avisado e passa a agir."
         },
         {
           "taskId": "executar",
@@ -39,9 +27,20 @@
           "actorRef": "membroEquipe",
           "journeyRef": "executarTarefa",
           "next": [
+            "aguardarRevisao"
+          ],
+          "description": "O responsável inicia a tarefa, marca a checklist e envia para revisão de quem criou."
+        },
+        {
+          "taskId": "aguardarRevisao",
+          "kind": "wait",
+          "next": [
             "revisar"
           ],
-          "description": "O responsável inicia a tarefa e a envia para revisão, passando a vez ao criador."
+          "description": "A tarefa fica em revisão aguardando a decisão de quem criou.",
+          "wake": {
+            "mode": "none"
+          }
         },
         {
           "taskId": "revisar",
@@ -49,184 +48,140 @@
           "actorRef": "membroEquipe",
           "journeyRef": "revisarTarefa",
           "next": [
-            "aguardarAjuste"
+            "retomar"
           ],
-          "description": "O criador aceita a entrega, encerrando a tarefa como concluída, ou a devolve com o motivo ao responsável."
-        },
-        {
-          "taskId": "aguardarAjuste",
-          "kind": "wait",
-          "next": [
-            "retomar",
-            "reatribuirCriador",
-            "reatribuirGestor",
-            "cancelarCriador",
-            "cancelarGestor"
-          ],
-          "description": "Com a tarefa devolvida, aguarda o responsável retomar o ajuste, ou uma reatribuição ou cancelamento."
+          "description": "Quem criou aceita a entrega, encerrando a ocorrência como concluída, ou devolve com o motivo ao responsável, que é avisado."
         },
         {
           "taskId": "retomar",
           "kind": "human",
           "actorRef": "membroEquipe",
-          "journeyRef": "retomarTarefaDevolvida",
+          "journeyRef": "retomarTarefa",
           "next": [
-            "revisar"
+            "aguardarRevisao"
           ],
-          "description": "O responsável ajusta a tarefa devolvida e a reenvia para revisão do criador."
-        },
-        {
-          "taskId": "reatribuirCriador",
-          "kind": "human",
-          "actorRef": "membroEquipe",
-          "journeyRef": "reatribuirTarefaCriador",
-          "next": [
-            "aguardarInicio"
-          ],
-          "description": "O criador troca o responsável, que passa a ser quem age agora e é avisado."
-        },
-        {
-          "taskId": "reatribuirGestor",
-          "kind": "human",
-          "actorRef": "gestor",
-          "journeyRef": "reatribuirTarefaGestor",
-          "next": [
-            "aguardarInicio"
-          ],
-          "description": "O gestor troca o responsável, que passa a ser quem age agora e é avisado."
-        },
-        {
-          "taskId": "cancelarCriador",
-          "kind": "human",
-          "actorRef": "membroEquipe",
-          "journeyRef": "cancelarTarefaCriador",
-          "next": [],
-          "description": "O criador cancela a tarefa e a ocorrência é encerrada."
-        },
-        {
-          "taskId": "cancelarGestor",
-          "kind": "human",
-          "actorRef": "gestor",
-          "journeyRef": "cancelarTarefaGestor",
-          "next": [],
-          "description": "O gestor cancela a tarefa e a ocorrência é encerrada."
+          "description": "O responsável lê o motivo, retoma, corrige e reenvia a tarefa para revisão de quem criou."
         }
       ],
+      "room": "exclusive",
       "functions": [
         {
           "functionId": "abrirOcorrenciaTarefa",
-          "description": "Chamada pela tela de criação com uma chave de idempotência; valida lista, responsável e campos obrigatórios, grava a tarefa em a fazer, cria a mensagem de origem na thread do módulo e a Task com etapa, quem age agora (o responsável) e histórico, abre o task-room e avisa o responsável; devolve a tarefa e a Task; repetida com a mesma chave devolve a mesma tarefa sem criar outra."
+          "description": "Chamada pela tela ao criar a tarefa: valida que quem cria pode criar tarefas e que o responsável aceita tarefas, pede ao cm a mensagem de origem e a Task que referencia a tarefa, define o responsável como quem age agora e pede ao cm que o avise; devolve o id da ocorrência e, se repetida para a mesma tarefa, devolve a ocorrência já aberta sem novo aviso."
         },
         {
           "functionId": "avancarEtapaTarefa",
-          "description": "Chamada pelas telas de execução, revisão, retomada e cancelamento; valida que quem chama pode aplicar a transição (iniciar, enviarParaRevisao, aceitar, devolver com motivo, cancelar) na situação atual, aplica a transição, registra a etapa no histórico da Task, posta a mensagem da mudança no task-room, define e avisa quem age agora; devolve a Task atualizada; repetida sobre a mesma situação já aplicada não faz nada e devolve o estado atual."
+          "description": "Chamada pela tela, pelo cm em nome de quem respondeu num canal ou ao ser acordado: valida que a pessoa é quem age agora e que a transição (iniciar, enviarParaRevisao, aceitar, devolver com motivo, retomar) é permitida na situação atual, aplica a transição, registra o progresso, passa a vez ao responsável ou a quem criou e pede ao cm que avise; devolve a nova situação e, se repetida com a tarefa já na situação de destino, não reaplica nem reavisa."
         },
         {
-          "functionId": "reatribuirQuemAge",
-          "description": "Chamada pelas telas de reatribuição do criador ou do gestor; valida que quem chama é o criador ou o gestor e que o novo responsável é da equipe, grava o responsável, troca quem age agora na Task quando a vez é do responsável, registra no histórico, posta no task-room e avisa o novo responsável; devolve a Task; repetida com o mesmo responsável não gera novo aviso."
+          "functionId": "definirQuemAgeAgora",
+          "description": "Chamada pelas demais funções para decidir a pessoa da etapa: em a fazer, em andamento e devolvida é o responsável; em revisão é quem criou; concluída ou cancelada não tem ninguém; devolve o usuário sem efeito colateral."
         },
         {
-          "functionId": "resolverQuemAgeAgora",
-          "description": "Chamada por avancarEtapaTarefa e reatribuirQuemAge; decide a pessoa da etapa: o responsável para iniciar, executar e retomar, o criador para revisar; devolve o identificador da pessoa sem gravar nada."
+          "functionId": "trocarResponsavelOcorrencia",
+          "description": "Chamada pela tela quando quem criou ou o gestor reatribui: valida o papel de quem chama e que o novo responsável aceita tarefas, grava o novo responsável, recalcula quem age agora, atualiza a Task no cm e pede que o novo responsável seja avisado; repetida com o mesmo responsável não gera novo aviso."
+        },
+        {
+          "functionId": "cancelarOcorrenciaTarefa",
+          "description": "Chamada pela tela quando quem criou ou o gestor cancela: valida o papel e que a tarefa não está concluída ou cancelada, aplica a transição cancelar, encerra a Task no cm e pede que quem estava agindo seja avisado; repetida em tarefa já cancelada devolve o estado atual sem novo aviso."
         }
       ]
     },
     {
-      "processId": "avisoDiario",
-      "title": "Aviso diário de vencimentos",
-      "description": "Todo dia às 8h cada responsável recebe suas tarefas abertas que vencem hoje ou estão atrasadas, sem iniciar um novo aviso enquanto o do dia anterior não terminou.",
+      "processId": "resumoDiarioTarefas",
+      "title": "Resumo diário das 8h",
+      "description": "Todo dia às 8h cada responsável recebe as suas tarefas abertas que vencem hoje ou estão atrasadas, uma ocorrência por pessoa.",
       "trigger": {
         "kind": "scheduled",
         "schedule": "Todo dia às 8h"
       },
       "tasks": [
         {
-          "taskId": "gerarAvisos",
-          "kind": "mechanical",
-          "entityRef": "AvisoVencimento",
-          "effect": "create",
-          "next": [
-            "avisarResponsavel"
-          ],
-          "description": "Gera para cada responsável o aviso com suas tarefas abertas que vencem hoje ou estão atrasadas."
-        },
-        {
-          "taskId": "avisarResponsavel",
+          "taskId": "avisarVencendo",
           "kind": "alert",
           "actorRef": "membroEquipe",
           "next": [],
-          "description": "Cada responsável recebe o aviso diário e consulta suas tarefas que vencem hoje ou estão atrasadas pela jornada avisoDiarioVencimentos."
+          "description": "Ler as suas tarefas abertas que vencem hoje ou estão atrasadas e abri-las pela jornada resumoDiario."
         }
       ],
+      "room": "person",
       "functions": [
         {
-          "functionId": "gerarAvisosDiarios",
-          "description": "Chamada pelo agendamento das 8h; verifica se a execução do dia anterior terminou e, se não, não começa uma nova; seleciona as tarefas abertas com prazo hoje ou vencido, agrupa por responsável, grava um aviso por responsável e dia e notifica cada um; devolve a quantidade de avisos; repetida no mesmo dia não duplica avisos."
+          "functionId": "listarResponsaveisResumo",
+          "description": "Chamada pelo agendamento às 8h: encontra os responsáveis com tarefas abertas que vencem hoje ou estão atrasadas e devolve a lista de pessoas, sem escrever nada."
         },
         {
-          "functionId": "resolverResponsaveisComVencimento",
-          "description": "Chamada por gerarAvisosDiarios; devolve os responsáveis que têm tarefas abertas vencendo hoje ou atrasadas, com a lista de tarefas de cada um, sem gravar nada."
+          "functionId": "abrirResumoDiario",
+          "description": "Chamada pelo agendamento para cada responsável: se já existe um resumo não terminado para essa pessoa não abre outro e segue para as demais, senão pede ao cm a mensagem de origem e a Task com a lista das tarefas daquela pessoa e a avisa; uma falha numa pessoa nunca bloqueia as demais; repetida no mesmo dia devolve a ocorrência existente."
+        },
+        {
+          "functionId": "concluirResumoDiario",
+          "description": "Chamada pela tela ou pelo cm quando a pessoa leu o resumo: valida que a ocorrência é dela, marca o resumo como terminado e libera o próximo; repetida em resumo já terminado não faz nada."
         }
       ]
     }
   ],
   "journeyDecisions": [
     {
-      "journeyId": "criarTarefa",
-      "inProcess": true,
-      "processId": "cicloTarefa"
-    },
-    {
-      "journeyId": "executarTarefa",
-      "inProcess": true,
-      "processId": "cicloTarefa"
-    },
-    {
-      "journeyId": "revisarTarefa",
-      "inProcess": true,
-      "processId": "cicloTarefa"
-    },
-    {
-      "journeyId": "retomarTarefaDevolvida",
-      "inProcess": true,
-      "processId": "cicloTarefa"
-    },
-    {
-      "journeyId": "editarTarefa",
+      "journeyId": "configurarParticipantes",
       "inProcess": false
-    },
-    {
-      "journeyId": "cancelarTarefaCriador",
-      "inProcess": true,
-      "processId": "cicloTarefa"
-    },
-    {
-      "journeyId": "reatribuirTarefaCriador",
-      "inProcess": true,
-      "processId": "cicloTarefa"
-    },
-    {
-      "journeyId": "avisoDiarioVencimentos",
-      "inProcess": true,
-      "processId": "avisoDiario"
     },
     {
       "journeyId": "manterListas",
       "inProcess": false
     },
     {
-      "journeyId": "acompanharTarefasEquipe",
+      "journeyId": "criarTarefa",
+      "inProcess": true,
+      "processId": "processoTarefa"
+    },
+    {
+      "journeyId": "executarTarefa",
+      "inProcess": true,
+      "processId": "processoTarefa"
+    },
+    {
+      "journeyId": "revisarTarefa",
+      "inProcess": true,
+      "processId": "processoTarefa"
+    },
+    {
+      "journeyId": "retomarTarefa",
+      "inProcess": true,
+      "processId": "processoTarefa"
+    },
+    {
+      "journeyId": "editarTarefa",
       "inProcess": false
     },
     {
-      "journeyId": "reatribuirTarefaGestor",
-      "inProcess": true,
-      "processId": "cicloTarefa"
+      "journeyId": "reatribuirTarefa",
+      "inProcess": false
     },
     {
-      "journeyId": "cancelarTarefaGestor",
+      "journeyId": "reatribuirTarefaCriada",
+      "inProcess": false
+    },
+    {
+      "journeyId": "cancelarTarefa",
+      "inProcess": false
+    },
+    {
+      "journeyId": "cancelarTarefaCriada",
+      "inProcess": false
+    },
+    {
+      "journeyId": "minhasTarefas",
+      "inProcess": false
+    },
+    {
+      "journeyId": "resumoDiario",
       "inProcess": true,
-      "processId": "cicloTarefa"
+      "processId": "resumoDiarioTarefas"
+    },
+    {
+      "journeyId": "acompanharTarefas",
+      "inProcess": false
     }
   ]
 }

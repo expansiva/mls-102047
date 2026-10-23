@@ -1,31 +1,27 @@
 /// <mls fileReference="_102047_/l1/tarefas/layer_1_external/auth/authorityMap.ts" enhancement="_blank"/>
 export const entries = [
   {
-    "grantId": "gestorAvisosProprios",
-    "actorRef": "gestor"
-  },
-  {
     "grantId": "gestorListas",
     "actorRef": "gestor"
   },
   {
-    "grantId": "gestorMembros",
+    "grantId": "gestorParticipantes",
     "actorRef": "gestor"
   },
   {
-    "grantId": "gestorTarefasEquipe",
+    "grantId": "gestorTodasTarefas",
     "actorRef": "gestor"
   },
   {
-    "grantId": "membroAvisosProprios",
+    "grantId": "membroChecklistPropria",
     "actorRef": "membroEquipe"
   },
   {
-    "grantId": "membroConsultaListas",
+    "grantId": "membroConsultarListas",
     "actorRef": "membroEquipe"
   },
   {
-    "grantId": "membroEscolheResponsavel",
+    "grantId": "membroEscolherResponsavel",
     "actorRef": "membroEquipe"
   },
   {

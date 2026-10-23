@@ -13,9 +13,10 @@ export const tarefasIntegration = {
       "to": "any",
       "event": "tarefaConcluida",
       "on": "Tarefa.aceitar",
-      "description": "Publicado quando quem criou aceita a entrega e a tarefa passa para concluída; o registro da Tarefa nessa transição fica disponível para outros módulos que acompanhem entregas da equipe.",
+      "description": "Publicado quando quem criou aceita a revisão e a tarefa fica concluída. Outros módulos podem usar o registro da tarefa (lista, responsável, prazo) para indicadores ou acompanhamento.",
       "entityRefs": [
-        "Tarefa"
+        "Tarefa",
+        "ListaTarefas"
       ]
     },
     {
@@ -24,9 +25,10 @@ export const tarefasIntegration = {
       "to": "any",
       "event": "tarefaCancelada",
       "on": "Tarefa.cancelar",
-      "description": "Publicado quando quem criou ou o gestor cancela a tarefa; o registro da Tarefa nessa transição permite que outros módulos deixem de considerar a tarefa.",
+      "description": "Publicado quando quem criou ou o gestor cancela a tarefa. Outros módulos podem usar o registro da tarefa para encerrar o que dependia dela.",
       "entityRefs": [
-        "Tarefa"
+        "Tarefa",
+        "ListaTarefas"
       ]
     }
   ],

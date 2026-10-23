@@ -7,32 +7,32 @@ export const revisarTarefaJourney = {
   "journeyId": "revisarTarefa",
   "business": {
     "actorRef": "membroEquipe",
-    "title": "Revisar tarefa criada",
-    "goal": "Aceitar a entrega ou devolvê-la para ajuste com o motivo.",
+    "title": "Revisar tarefa",
+    "goal": "Aceitar ou devolver com motivo uma tarefa que criou e que está em revisão.",
     "entry": {
       "mode": "fromNotification"
     },
     "steps": [
       {
-        "stepId": "abrirTarefaRevisao",
+        "stepId": "abrirRevisao",
         "kind": "locate",
         "entity": "Tarefa",
         "title": "Abrir tarefa em revisão",
-        "description": "O criador abre a tarefa pelo aviso ou entre as que criou em revisão."
+        "description": "Quem criou abre a tarefa a partir do aviso ou do que depende dele agora."
       },
       {
-        "stepId": "conferirEntrega",
+        "stepId": "conferirTarefa",
         "kind": "inspect",
         "entity": "Tarefa",
-        "title": "Conferir a entrega",
-        "description": "Confere checklist, anexos e a discussão da tarefa."
+        "title": "Conferir entrega",
+        "description": "Quem criou confere checklist, campos e a conversa da tarefa."
       },
       {
         "stepId": "decidirRevisao",
         "kind": "decide",
         "entity": "Tarefa",
         "title": "Aceitar ou devolver",
-        "description": "Decide se aceita a entrega ou devolve para ajuste."
+        "description": "Quem criou decide se aceita a entrega ou devolve ao responsável."
       },
       {
         "stepId": "aceitarTarefa",
@@ -40,8 +40,8 @@ export const revisarTarefaJourney = {
         "entity": "Tarefa",
         "effect": "transition",
         "transitionRef": "aceitar",
-        "title": "Aceitar a tarefa",
-        "description": "Ao aceitar, a tarefa passa para concluída e a sala recebe a mensagem."
+        "title": "Aceitar tarefa",
+        "description": "Quem criou aceita e a tarefa fica concluída."
       },
       {
         "stepId": "devolverTarefa",
@@ -50,27 +50,18 @@ export const revisarTarefaJourney = {
         "effect": "transition",
         "transitionRef": "devolver",
         "title": "Devolver com motivo",
-        "description": "Ao devolver, informa o motivo e a tarefa volta para em andamento, com o responsável como quem age agora."
-      },
-      {
-        "stepId": "avisarResponsavelAjuste",
-        "kind": "handoff",
-        "entity": "Tarefa",
-        "title": "Avisar o responsável",
-        "description": "Quando devolvida, o responsável é avisado de novo para retomar o trabalho.",
-        "handoffTo": "membroEquipe"
+        "description": "Quem criou informa o motivo e a tarefa volta a em andamento; o responsável é avisado."
       }
     ],
     "outcome": {
-      "statement": "A tarefa foi concluída ou voltou para em andamento com o motivo registrado.",
+      "statement": "A tarefa foi concluída ou voltou ao responsável com o motivo.",
       "evidence": [
-        "Situação concluída ou em andamento",
-        "Motivo da devolução visível na tarefa",
-        "Mensagem da mudança na sala de discussão"
+        "A situação mostra concluída, ou em andamento com o motivo da devolução visível",
+        "O responsável é avisado quando a tarefa é devolvida"
       ]
     }
   },
-  "businessHash": "sha256:2e96c401845f09927042d2b3678925a824521511ac719c962d817965ca49dfe0"
+  "businessHash": "sha256:525054bd6bb269f66350e139f533fc0c9e0c146cbec9c4d3e679ac13b9254afe"
 } as const satisfies Ns5Readonly<Ns5JourneyArtifact>;
 
 export type RevisarTarefaJourneyType = typeof revisarTarefaJourney;

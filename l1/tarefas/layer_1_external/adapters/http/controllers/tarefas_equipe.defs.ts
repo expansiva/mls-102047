@@ -15,24 +15,33 @@ export const definition = {
     "pageId": "tarefas_equipe",
     "handlers": [
       {
-        "route": "tarefas.tarefas_equipe.cancelarTarefa",
-        "kind": "command",
+        "route": "tarefas.tarefas_equipe.buscarResponsaveisDisponiveis",
+        "kind": "query",
         "grantIds": [
-          "gestorTarefasEquipe",
-          "gestorMembros"
+          "gestorParticipantes"
         ],
-        "serviceFunction": "tarefas.tarefas_equipe.cancelarTarefa",
+        "serviceFunction": "tarefas.tarefas_equipe.buscarResponsaveisDisponiveis",
         "contractPath": "l2/tarefas/web/contracts/tarefas_equipe.defs.ts",
         "contractInterface": "Tarefas_equipeContracts"
       },
       {
-        "route": "tarefas.tarefas_equipe.carregarOpcoesEquipe",
+        "route": "tarefas.tarefas_equipe.cancelarTarefaEquipe",
+        "kind": "command",
+        "grantIds": [
+          "gestorTodasTarefas"
+        ],
+        "serviceFunction": "tarefas.tarefas_equipe.cancelarTarefaEquipe",
+        "contractPath": "l2/tarefas/web/contracts/tarefas_equipe.defs.ts",
+        "contractInterface": "Tarefas_equipeContracts"
+      },
+      {
+        "route": "tarefas.tarefas_equipe.carregarFiltrosEquipe",
         "kind": "query",
         "grantIds": [
           "gestorListas",
-          "gestorMembros"
+          "gestorParticipantes"
         ],
-        "serviceFunction": "tarefas.tarefas_equipe.carregarOpcoesEquipe",
+        "serviceFunction": "tarefas.tarefas_equipe.carregarFiltrosEquipe",
         "contractPath": "l2/tarefas/web/contracts/tarefas_equipe.defs.ts",
         "contractInterface": "Tarefas_equipeContracts"
       },
@@ -40,33 +49,29 @@ export const definition = {
         "route": "tarefas.tarefas_equipe.listarTarefasEquipe",
         "kind": "query",
         "grantIds": [
-          "gestorTarefasEquipe",
-          "gestorListas",
-          "gestorMembros"
+          "gestorTodasTarefas"
         ],
         "serviceFunction": "tarefas.tarefas_equipe.listarTarefasEquipe",
         "contractPath": "l2/tarefas/web/contracts/tarefas_equipe.defs.ts",
         "contractInterface": "Tarefas_equipeContracts"
       },
       {
-        "route": "tarefas.tarefas_equipe.obterTarefa",
+        "route": "tarefas.tarefas_equipe.obterTarefaEquipe",
         "kind": "query",
         "grantIds": [
-          "gestorTarefasEquipe",
-          "gestorMembros"
+          "gestorTodasTarefas"
         ],
-        "serviceFunction": "tarefas.tarefas_equipe.obterTarefa",
+        "serviceFunction": "tarefas.tarefas_equipe.obterTarefaEquipe",
         "contractPath": "l2/tarefas/web/contracts/tarefas_equipe.defs.ts",
         "contractInterface": "Tarefas_equipeContracts"
       },
       {
-        "route": "tarefas.tarefas_equipe.reatribuirTarefa",
+        "route": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
         "kind": "command",
         "grantIds": [
-          "gestorTarefasEquipe",
-          "gestorMembros"
+          "gestorTodasTarefas"
         ],
-        "serviceFunction": "tarefas.tarefas_equipe.reatribuirTarefa",
+        "serviceFunction": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
         "contractPath": "l2/tarefas/web/contracts/tarefas_equipe.defs.ts",
         "contractInterface": "Tarefas_equipeContracts"
       }

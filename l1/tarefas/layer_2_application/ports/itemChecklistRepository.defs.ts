@@ -14,6 +14,13 @@ export const definition = {
     "interfaceName": "ItemChecklistRepository",
     "methods": [
       {
+        "name": "create",
+        "params": [
+          "ItemChecklist"
+        ],
+        "returns": "ItemChecklist"
+      },
+      {
         "name": "list",
         "params": [
           "ItemChecklistFilter"

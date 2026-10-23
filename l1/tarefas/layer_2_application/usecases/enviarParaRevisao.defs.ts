@@ -17,7 +17,8 @@ export const definition = {
     "entityId": "Tarefa",
     "operation": "transition",
     "rulesApplied": [
-      "somenteResponsavelExecuta"
+      "apenasResponsavelExecuta",
+      "avisarQuemAgeAgora"
     ],
     "effects": [],
     "transitionRef": "enviarParaRevisao"

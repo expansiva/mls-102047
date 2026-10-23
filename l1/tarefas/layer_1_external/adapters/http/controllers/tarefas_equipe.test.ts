@@ -8,11 +8,12 @@ export const pageTests = {
   "actor": "gestor",
   "cases": [
     {
-      "id": "carregarOpcoesEquipe.ok",
-      "routine": "tarefas.tarefas_equipe.carregarOpcoesEquipe",
+      "id": "carregarFiltrosEquipe.ok",
+      "routine": "tarefas.tarefas_equipe.carregarFiltrosEquipe",
       "params": {},
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": false
     },
@@ -20,27 +21,27 @@ export const pageTests = {
       "id": "listarTarefasEquipe.ok",
       "routine": "tarefas.tarefas_equipe.listarTarefasEquipe",
       "params": {
-        "details": {},
         "page": 1,
         "pageSize": 10
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": false
     },
     {
-      "id": "listarTarefasEquipe.filtroPrioridadeStatus",
+      "id": "listarTarefasEquipe.filtroStatus",
       "routine": "tarefas.tarefas_equipe.listarTarefasEquipe",
       "params": {
-        "prioridade": "high",
         "status": "aFazer",
-        "details": {},
+        "prioridade": "media",
         "page": 1,
         "pageSize": 10
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": false
     },
@@ -49,54 +50,23 @@ export const pageTests = {
       "routine": "tarefas.tarefas_equipe.listarTarefasEquipe",
       "params": {
         "listaId": "<seedRef>",
-        "details": {},
-        "page": 1,
-        "pageSize": 10
-      },
-      "paramFieldRefs": {
-        "listaId": "Lista.id"
-      },
-      "expect": {
-        "ok": true
-      },
-      "mutating": false
-    },
-    {
-      "id": "listarTarefasEquipe.filtroResponsavel",
-      "routine": "tarefas.tarefas_equipe.listarTarefasEquipe",
-      "params": {
         "responsavelId": "<seedRef>",
-        "details": {},
         "page": 1,
         "pageSize": 10
       },
       "paramFieldRefs": {
-        "responsavelId": "MembroEquipe.id"
+        "listaId": "ListaTarefas.id",
+        "responsavelId": "Participante.id"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": false
     },
     {
-      "id": "listarTarefasEquipe.filtroVencimento",
-      "routine": "tarefas.tarefas_equipe.listarTarefasEquipe",
-      "params": {
-        "details": {
-          "venceHoje": true,
-          "atrasada": true
-        },
-        "page": 1,
-        "pageSize": 10
-      },
-      "expect": {
-        "ok": true
-      },
-      "mutating": false
-    },
-    {
-      "id": "obterTarefa.ok",
-      "routine": "tarefas.tarefas_equipe.obterTarefa",
+      "id": "obterTarefaEquipe.ok",
+      "routine": "tarefas.tarefas_equipe.obterTarefaEquipe",
       "params": {
         "tarefaId": "<seedRef>"
       },
@@ -104,7 +74,48 @@ export const pageTests = {
         "tarefaId": "Tarefa.id"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
+      },
+      "mutating": false
+    },
+    {
+      "id": "buscarResponsaveisDisponiveis.ok",
+      "routine": "tarefas.tarefas_equipe.buscarResponsaveisDisponiveis",
+      "params": {},
+      "expect": {
+        "ok": true,
+        "shape": "object"
+      },
+      "mutating": false
+    },
+    {
+      "id": "buscarResponsaveisDisponiveis.porNome",
+      "routine": "tarefas.tarefas_equipe.buscarResponsaveisDisponiveis",
+      "params": {
+        "nome": "<seedValue>"
+      },
+      "paramFieldRefs": {
+        "nome": "Participante.details.identification.name"
+      },
+      "expect": {
+        "ok": true,
+        "shape": "object"
+      },
+      "mutating": false
+    },
+    {
+      "id": "obterTarefaEquipe.aposCancelar",
+      "routine": "tarefas.tarefas_equipe.obterTarefaEquipe",
+      "params": {
+        "tarefaId": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "tarefaId": "Tarefa.id"
+      },
+      "expect": {
+        "ok": true,
+        "shape": "object"
       },
       "mutating": false
     },
@@ -112,7 +123,6 @@ export const pageTests = {
       "id": "listarTarefasEquipe.page.required",
       "routine": "tarefas.tarefas_equipe.listarTarefasEquipe",
       "params": {
-        "details": {},
         "pageSize": 10
       },
       "expect": {
@@ -125,7 +135,6 @@ export const pageTests = {
       "id": "listarTarefasEquipe.pageSize.required",
       "routine": "tarefas.tarefas_equipe.listarTarefasEquipe",
       "params": {
-        "details": {},
         "page": 1
       },
       "expect": {
@@ -135,8 +144,8 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "obterTarefa.tarefaId.required",
-      "routine": "tarefas.tarefas_equipe.obterTarefa",
+      "id": "obterTarefaEquipe.tarefaId.required",
+      "routine": "tarefas.tarefas_equipe.obterTarefaEquipe",
       "params": {},
       "expect": {
         "ok": false,
@@ -145,32 +154,34 @@ export const pageTests = {
       "mutating": false
     },
     {
-      "id": "reatribuirTarefa.ok",
-      "routine": "tarefas.tarefas_equipe.reatribuirTarefa",
+      "id": "trocarResponsavelTarefa.ok",
+      "routine": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
       "params": {
         "id": "<seedRef>",
-        "version": "<seedValue>",
+        "version": "<seedRef>",
         "responsavelId": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
         "version": "Tarefa.version",
-        "responsavelId": "MembroEquipe.id"
+        "responsavelId": "Participante.id"
       },
       "expect": {
-        "ok": true
+        "ok": true,
+        "shape": "object"
       },
       "mutating": true
     },
     {
-      "id": "reatribuirTarefa.id.required",
-      "routine": "tarefas.tarefas_equipe.reatribuirTarefa",
+      "id": "trocarResponsavelTarefa.id.required",
+      "routine": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
       "params": {
-        "version": 1,
+        "version": "<seedRef>",
         "responsavelId": "<seedRef>"
       },
       "paramFieldRefs": {
-        "responsavelId": "MembroEquipe.id"
+        "version": "Tarefa.version",
+        "responsavelId": "Participante.id"
       },
       "expect": {
         "ok": false,
@@ -179,15 +190,15 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "reatribuirTarefa.version.required",
-      "routine": "tarefas.tarefas_equipe.reatribuirTarefa",
+      "id": "trocarResponsavelTarefa.version.required",
+      "routine": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
       "params": {
         "id": "<seedRef>",
         "responsavelId": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
-        "responsavelId": "MembroEquipe.id"
+        "responsavelId": "Participante.id"
       },
       "expect": {
         "ok": false,
@@ -196,11 +207,11 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "reatribuirTarefa.responsavelId.required",
-      "routine": "tarefas.tarefas_equipe.reatribuirTarefa",
+      "id": "trocarResponsavelTarefa.responsavelId.required",
+      "routine": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
       "params": {
         "id": "<seedRef>",
-        "version": "<seedValue>"
+        "version": "<seedRef>"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
@@ -213,44 +224,65 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "reatribuirTarefa.versaoDivergente",
-      "routine": "tarefas.tarefas_equipe.reatribuirTarefa",
+      "id": "trocarResponsavelTarefa.responsavelInvalido",
+      "routine": "tarefas.tarefas_equipe.trocarResponsavelTarefa",
       "params": {
         "id": "<seedRef>",
-        "version": 9999,
-        "responsavelId": "<seedRef>"
-      },
-      "paramFieldRefs": {
-        "id": "Tarefa.id",
-        "responsavelId": "MembroEquipe.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "CONFLICT"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cancelarTarefa.ok",
-      "routine": "tarefas.tarefas_equipe.cancelarTarefa",
-      "params": {
-        "id": "<seedSpare>",
-        "version": "<seedValue>"
+        "version": "<seedRef>",
+        "responsavelId": "participante-inexistente"
       },
       "paramFieldRefs": {
         "id": "Tarefa.id",
         "version": "Tarefa.version"
       },
       "expect": {
-        "ok": true
+        "ok": false,
+        "errorCode": "RESPONSAVEL_INVALIDO"
       },
       "mutating": true
     },
     {
-      "id": "cancelarTarefa.id.required",
-      "routine": "tarefas.tarefas_equipe.cancelarTarefa",
+      "id": "cancelarTarefaEquipe.ok",
+      "routine": "tarefas.tarefas_equipe.cancelarTarefaEquipe",
       "params": {
-        "version": 1
+        "id": "<seedRef>",
+        "version": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "id": "Tarefa.id",
+        "version": "Tarefa.version"
+      },
+      "expect": {
+        "ok": true,
+        "shape": "object"
+      },
+      "mutating": true
+    },
+    {
+      "id": "cancelarTarefaEquipe.naoCancelavel",
+      "routine": "tarefas.tarefas_equipe.cancelarTarefaEquipe",
+      "params": {
+        "id": "<seedRef>",
+        "version": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "id": "Tarefa.id",
+        "version": "Tarefa.version"
+      },
+      "expect": {
+        "ok": false,
+        "errorCode": "TAREFA_NAO_CANCELAVEL"
+      },
+      "mutating": true
+    },
+    {
+      "id": "cancelarTarefaEquipe.id.required",
+      "routine": "tarefas.tarefas_equipe.cancelarTarefaEquipe",
+      "params": {
+        "version": "<seedRef>"
+      },
+      "paramFieldRefs": {
+        "version": "Tarefa.version"
       },
       "expect": {
         "ok": false,
@@ -259,8 +291,8 @@ export const pageTests = {
       "mutating": true
     },
     {
-      "id": "cancelarTarefa.version.required",
-      "routine": "tarefas.tarefas_equipe.cancelarTarefa",
+      "id": "cancelarTarefaEquipe.version.required",
+      "routine": "tarefas.tarefas_equipe.cancelarTarefaEquipe",
       "params": {
         "id": "<seedRef>"
       },
@@ -270,22 +302,6 @@ export const pageTests = {
       "expect": {
         "ok": false,
         "errorCode": "VALIDATION_ERROR"
-      },
-      "mutating": true
-    },
-    {
-      "id": "cancelarTarefa.versaoDivergente",
-      "routine": "tarefas.tarefas_equipe.cancelarTarefa",
-      "params": {
-        "id": "<seedRef>",
-        "version": 9999
-      },
-      "paramFieldRefs": {
-        "id": "Tarefa.id"
-      },
-      "expect": {
-        "ok": false,
-        "errorCode": "CONFLICT"
       },
       "mutating": true
     }

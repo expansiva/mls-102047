@@ -6,8 +6,8 @@ import type { TarefaRepository, TarefaFilter } from '/_102047_/l1/tarefas/layer_
 
 const REPOSITORY = "tarefa";
 const PRIMARY_KEY = ["id"] as const;
-const UNIQUE_KEYS: readonly (readonly string[])[] = [["chaveCriacao"]];
-const BINDINGS = [{"field":"id","column":"id","placement":"column"},{"field":"version","column":"json:version","placement":"json"},{"field":"titulo","column":"titulo","placement":"column"},{"field":"status","column":"status","placement":"column"},{"field":"prioridade","column":"prioridade","placement":"column"},{"field":"prazo","column":"prazo","placement":"column"},{"field":"listaId","column":"listaId","placement":"column"},{"field":"responsavelId","column":"responsavelId","placement":"column"},{"field":"criadorId","column":"criadorId","placement":"column"},{"field":"tarefaPaiId","column":"tarefaPaiId","placement":"column"},{"field":"chaveCriacao","column":"chaveCriacao","placement":"column"},{"field":"criadaEm","column":"criadaEm","placement":"column"},{"field":"details.descricao","column":"json:details.descricao","placement":"json"},{"field":"details.motivoDevolucao","column":"json:details.motivoDevolucao","placement":"json"},{"field":"details.devolvidaEm","column":"json:details.devolvidaEm","placement":"json"},{"field":"details.concluidaEm","column":"json:details.concluidaEm","placement":"json"},{"field":"details.canceladaEm","column":"json:details.canceladaEm","placement":"json"},{"field":"details.aberta","column":"json:details.aberta","placement":"json"},{"field":"details.venceHoje","column":"json:details.venceHoje","placement":"json"},{"field":"details.atrasada","column":"json:details.atrasada","placement":"json"},{"field":"details.quantidadeSubtarefas","column":"json:details.quantidadeSubtarefas","placement":"json"},{"field":"details.progressoChecklist","column":"json:details.progressoChecklist","placement":"json"}] as const;
+const UNIQUE_KEYS: readonly (readonly string[])[] = [];
+const BINDINGS = [{"field":"id","column":"id","placement":"column"},{"field":"version","column":"json:version","placement":"json"},{"field":"titulo","column":"titulo","placement":"column"},{"field":"status","column":"status","placement":"column"},{"field":"prioridade","column":"prioridade","placement":"column"},{"field":"prazo","column":"prazo","placement":"column"},{"field":"listaId","column":"listaId","placement":"column"},{"field":"responsavelId","column":"responsavelId","placement":"column"},{"field":"criadorId","column":"criadorId","placement":"column"},{"field":"tarefaPaiId","column":"tarefaPaiId","placement":"column"},{"field":"criadaEm","column":"criadaEm","placement":"column"},{"field":"details.descricao","column":"json:details.descricao","placement":"json"},{"field":"details.etiquetas","column":"json:details.etiquetas","placement":"json"},{"field":"details.motivoDevolucao","column":"json:details.motivoDevolucao","placement":"json"},{"field":"details.devolvidaEm","column":"json:details.devolvidaEm","placement":"json"},{"field":"details.retomadaEm","column":"json:details.retomadaEm","placement":"json"},{"field":"details.concluidaEm","column":"json:details.concluidaEm","placement":"json"},{"field":"details.canceladaEm","column":"json:details.canceladaEm","placement":"json"},{"field":"details.quemAgeAgora","column":"json:details.quemAgeAgora","placement":"json"},{"field":"details.aberta","column":"json:details.aberta","placement":"json"},{"field":"details.venceHoje","column":"json:details.venceHoje","placement":"json"},{"field":"details.atrasada","column":"json:details.atrasada","placement":"json"},{"field":"details.devolvidaPendente","column":"json:details.devolvidaPendente","placement":"json"},{"field":"details.quantidadeSubtarefas","column":"json:details.quantidadeSubtarefas","placement":"json"},{"field":"details.progressoChecklist","column":"json:details.progressoChecklist","placement":"json"}] as const;
 const JSON_COLUMN = "details";
 const VERSION_FIELD = "version";
 
@@ -132,13 +132,6 @@ export function bind(runtime: IModuleDataRuntime): TarefaRepository {
       const table = await runtime.getTable<Row>(REPOSITORY);
       const rows = await table.findMany({ where });
       return rows.map(row => fromRow(row) as unknown as Tarefa);
-    },
-    async get(id: string): Promise<Tarefa> {
-      const table = await runtime.getTable<Row>(REPOSITORY);
-      const column = columnOf(PRIMARY_KEY[0]);
-      const stored = await table.findOne({ where: { [column]: id } });
-      if (!stored) throw new AppError('NOT_FOUND', 'Record not found.', 404);
-      return fromRow(stored) as unknown as Tarefa;
     },
     async update(record: Tarefa): Promise<Tarefa> {
       

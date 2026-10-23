@@ -3,14 +3,22 @@
 export const definition = {
   "entry": {
     "params": {
-      "listaId": {
+      "tarefaId": {
         "type": "string",
         "sources": [
-          "url",
-          "localStorage"
+          "url"
         ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
+        "effect": "select:tarefaDetalhe",
+        "persist": false,
+        "required": false
+      },
+      "listaTarefasId": {
+        "type": "string",
+        "sources": [
+          "url"
+        ],
+        "effect": "select:tarefasEquipe",
+        "persist": false,
         "required": false
       },
       "responsavelId": {
@@ -19,113 +27,52 @@ export const definition = {
           "url",
           "localStorage"
         ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
-        "required": false
-      },
-      "prioridade": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
-        "required": false
-      },
-      "status": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
-        "required": false
-      },
-      "prazoDe": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
-        "required": false
-      },
-      "prazoAte": {
-        "type": "string",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
-        "required": false
-      },
-      "venceHoje": {
-        "type": "boolean",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
-        "required": false
-      },
-      "atrasada": {
-        "type": "boolean",
-        "sources": [
-          "url",
-          "localStorage"
-        ],
-        "effect": "filter:tarefasEquipe",
-        "persist": true,
-        "required": false
-      },
-      "tarefaId": {
-        "type": "string",
-        "sources": [
-          "url"
-        ],
-        "effect": "select:detalheTarefa",
+        "effect": "prefill:tarefaAcoes",
         "persist": false,
         "required": false
       }
     }
   },
   "requests": {
-    "carregarOpcoesEquipe": {
+    "carregarFiltrosEquipe": {
       "kind": "qry",
       "trigger": "onLoad",
       "returns": [
         "listas",
-        "membros"
+        "participantes"
       ]
     },
     "listarTarefasEquipe": {
       "kind": "qry",
-      "trigger": "onLoad",
+      "trigger": "listarTarefasEquipe",
       "returns": [
-        "tarefas"
+        "tarefas",
+        "contagemPorSituacao"
       ]
     },
-    "obterTarefa": {
+    "obterTarefaEquipe": {
       "kind": "qry",
-      "trigger": "obterTarefa",
+      "trigger": "obterTarefaEquipe",
       "returns": [
         "tarefa"
       ]
     },
-    "reatribuirTarefa": {
+    "buscarResponsaveisDisponiveis": {
+      "kind": "qry",
+      "trigger": "buscarResponsaveisDisponiveis",
+      "returns": [
+        "participantes"
+      ]
+    },
+    "trocarResponsavelTarefa": {
       "kind": "cmd",
-      "trigger": "reatribuirTarefa",
+      "trigger": "trocarResponsavel",
       "returns": [
         "tarefa"
       ],
       "writes": "Tarefa.update"
     },
-    "cancelarTarefa": {
+    "cancelarTarefaEquipe": {
       "kind": "cmd",
       "trigger": "cancelarTarefa",
       "returns": [
@@ -137,113 +84,130 @@ export const definition = {
   "states": {
     "tarefas": {
       "source": "listarTarefasEquipe.tarefas",
-      "description": "the list of Tarefa da equipe resumida com lista, responsável, prazo, situação e indicadores.",
+      "description": "the list of Tarefa da organização em forma resumida, com a lista, o responsável, quem age agora e as marcas de vencimento já calculadas.",
+      "organisms": [
+        "tarefasEquipe"
+      ]
+    },
+    "contagemPorSituacao": {
+      "source": "listarTarefasEquipe.contagemPorSituacao",
+      "description": "the list of Quantidade de tarefas em uma situação, dentro dos filtros aplicados.",
       "organisms": [
         "tarefasEquipe"
       ]
     },
     "listas": {
-      "source": "carregarOpcoesEquipe.listas",
-      "description": "the list of Lista (projeto ou área) identificada pelo nome.",
+      "source": "carregarFiltrosEquipe.listas",
+      "description": "the list of Lista de tarefas identificada pelo nome.",
       "organisms": [
         "tarefasEquipe"
       ]
     },
-    "membros": {
-      "source": "carregarOpcoesEquipe.membros",
-      "description": "the list of Membro da equipe com nome e situação no cadastro.",
+    "carregarFiltrosEquipeParticipantes": {
+      "source": "carregarFiltrosEquipe.participantes",
+      "description": "the list of Participante do módulo identificado pelo nome, com a situação na plataforma e se aceita tarefas.",
       "organisms": [
-        "acoesGestor",
         "tarefasEquipe"
       ]
     },
     "tarefa": {
-      "source": "obterTarefa.tarefa",
-      "description": "Tarefa completa com criador, responsável, marcos do histórico e itens da checklist.",
+      "source": "obterTarefaEquipe.tarefa",
+      "description": "Tarefa completa com lista, responsável, quem criou, quem age agora, subtarefas, checklist em ordem e o histórico de eventos.",
       "organisms": [
-        "acoesGestor",
-        "detalheTarefa",
-        "historicoTarefa"
+        "tarefaAcoes",
+        "tarefaDetalhe",
+        "tarefaHistorico"
+      ]
+    },
+    "buscarResponsaveisDisponiveisParticipantes": {
+      "source": "buscarResponsaveisDisponiveis.participantes",
+      "description": "the list of Participante do módulo identificado pelo nome, com a situação na plataforma e se aceita tarefas.",
+      "organisms": [
+        "tarefaAcoes"
       ]
     },
     "selectedTarefa": {
       "source": "entry.params.tarefaId",
       "description": "the id of the Tarefa selected in tarefasEquipe",
       "organisms": [
-        "detalheTarefa",
+        "tarefaDetalhe",
         "tarefasEquipe"
       ]
     }
   },
   "journeys": [
     {
-      "step": "acompanharTarefasEquipe/filtrarTarefas",
+      "step": "acompanharTarefas/filtrarTarefas",
       "organisms": [
         "tarefasEquipe"
       ]
     },
     {
-      "step": "acompanharTarefasEquipe/verQuadro",
+      "step": "acompanharTarefas/verQuadro",
       "organisms": [
         "tarefasEquipe"
       ]
     },
     {
-      "step": "acompanharTarefasEquipe/verDetalhe",
+      "step": "acompanharTarefas/abrirTarefaGestor",
       "organisms": [
-        "detalheTarefa",
-        "historicoTarefa"
+        "tarefaDetalhe",
+        "tarefaHistorico"
       ]
     },
     {
-      "step": "cancelarTarefaGestor/localizarParaCancelar",
+      "step": "cancelarTarefa/localizarTarefaCancelar",
       "organisms": [
-        "tarefasEquipe",
-        "detalheTarefa"
+        "tarefasEquipe"
       ]
     },
     {
-      "step": "cancelarTarefaGestor/cancelarPeloGestor",
+      "step": "cancelarTarefa/cancelar",
       "organisms": [
-        "acoesGestor"
+        "tarefaAcoes"
       ]
     },
     {
-      "step": "reatribuirTarefaGestor/localizarTarefaEquipe",
+      "step": "reatribuirTarefa/localizarTarefaReatribuir",
       "organisms": [
-        "tarefasEquipe",
-        "detalheTarefa"
+        "tarefasEquipe"
       ]
     },
     {
-      "step": "reatribuirTarefaGestor/escolherResponsavelEquipe",
+      "step": "reatribuirTarefa/verResponsavelAtual",
       "organisms": [
-        "acoesGestor"
+        "tarefaDetalhe"
       ]
     },
     {
-      "step": "reatribuirTarefaGestor/reatribuir",
+      "step": "reatribuirTarefa/trocarResponsavel",
       "organisms": [
-        "acoesGestor"
+        "tarefaAcoes"
       ]
     }
   ],
   "rules": [
-    "cancelamentoPorCriadorOuGestor",
+    "avisarQuemAgeAgora",
+    "cancelarApenasCriadorOuGestor",
     "edicaoNaoMudaSituacao",
-    "editarSomenteTarefaVisivel",
-    "reatribuicaoPorCriadorOuGestor",
-    "responsavelDeveSerMembroAtivo",
-    "tarefaEncerradaNaoTransiciona"
+    "escolhaResponsavelPeloNome",
+    "gestorPorAcessoPlataforma",
+    "membroVeResponsavelOuCriador",
+    "moduloNaoGuardaComentarios",
+    "participanteNaoConfiguradoAceitaECria",
+    "quemAgeAgoraPorSituacao",
+    "reatribuirApenasCriadorOuGestor",
+    "responsavelAceitaTarefas",
+    "tarefaAbertaVencimento"
   ],
   "access": {
     "actors": [
       "gestor"
     ],
     "grants": [
-      "gestorTarefasEquipe",
+      "gestorParticipantes",
       "gestorListas",
-      "gestorMembros"
+      "gestorTodasTarefas"
     ]
   }
 } as const;

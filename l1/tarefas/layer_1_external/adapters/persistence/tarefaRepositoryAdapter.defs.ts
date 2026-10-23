@@ -56,16 +56,16 @@ export const definition = {
         "column": "tarefaPaiId"
       },
       {
-        "field": "chaveCriacao",
-        "column": "chaveCriacao"
-      },
-      {
         "field": "criadaEm",
         "column": "criadaEm"
       },
       {
         "field": "details.descricao",
         "column": "json:details.descricao"
+      },
+      {
+        "field": "details.etiquetas",
+        "column": "json:details.etiquetas"
       },
       {
         "field": "details.motivoDevolucao",
@@ -76,12 +76,20 @@ export const definition = {
         "column": "json:details.devolvidaEm"
       },
       {
+        "field": "details.retomadaEm",
+        "column": "json:details.retomadaEm"
+      },
+      {
         "field": "details.concluidaEm",
         "column": "json:details.concluidaEm"
       },
       {
         "field": "details.canceladaEm",
         "column": "json:details.canceladaEm"
+      },
+      {
+        "field": "details.quemAgeAgora",
+        "column": "json:details.quemAgeAgora"
       },
       {
         "field": "details.aberta",
@@ -94,6 +102,10 @@ export const definition = {
       {
         "field": "details.atrasada",
         "column": "json:details.atrasada"
+      },
+      {
+        "field": "details.devolvidaPendente",
+        "column": "json:details.devolvidaPendente"
       },
       {
         "field": "details.quantidadeSubtarefas",
