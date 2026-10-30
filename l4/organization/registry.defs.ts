@@ -840,31 +840,6 @@ export const solutionRegistry = {
         }
       ],
       "updatedAt": "2026-10-23T01:12:36.704Z"
-    },
-    {
-      "moduleName": "notasTeste41",
-      "actors": [
-        {
-          "actorId": "operador",
-          "kind": "internal"
-        }
-      ],
-      "roles": [],
-      "generalFields": [],
-      "entities": [
-        {
-          "entityId": "Nota",
-          "kind": "entity",
-          "class": "core"
-        }
-      ],
-      "events": [
-        {
-          "eventId": "notaCriada",
-          "on": "Nota.create"
-        }
-      ],
-      "updatedAt": "2026-10-29T23:59:08.019Z"
     }
   ]
 } as const satisfies Ns4SolutionRegistryArtifact;
