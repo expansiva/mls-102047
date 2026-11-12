@@ -166,7 +166,7 @@ type="button"
 </header>
 <div class="mx-auto grid max-w-[1440px] grid-cols-[minmax(0,1fr)_380px] gap-6">
 <section data-organism-id="listasCadastradas" class="min-w-0 rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-6 shadow-sm">
-<div class="mb-5 max-w-md">
+<div class="mb-5 w-full">
 <groupsearchcontent--ml-search-bar
 .value=${this.texto}
 name="texto"
@@ -195,9 +195,9 @@ data-class="w-full"
 <TableCaption>${this.msg.tableTitle}</TableCaption>
 <TableHeader>
 <TableRow>
-<TableHead key="nome" sortable>${this.msg.name}</TableHead>
-<TableHead key="descricao">${this.msg.description}</TableHead>
-<TableHead key="tarefasAbertas" sortable>${this.msg.openTasks}</TableHead>
+<TableHead data-class="text-left!" key="nome" sortable>${this.msg.name}</TableHead>
+<TableHead data-class="text-left!" key="descricao">${this.msg.description}</TableHead>
+<TableHead data-class="text-left!" key="tarefasAbertas" sortable>${this.msg.openTasks}</TableHead>
 </TableRow>
 </TableHeader>
 <TableBody>

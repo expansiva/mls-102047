@@ -4,6 +4,7 @@ import { customElement } from 'lit/decorators.js';
 import { TarefasPainel_tarefasShared } from '/_102047_/l2/tarefas/web/shared/painel_tarefas.js';
 import '/_102040_/l2/molecules/groupviewmetric/ml-metric-big-number.js';
 
+
 /// **collab_i18n_start**
 const pageMessage_pt_br = {
   pageTitle: 'Painel de tarefas',
@@ -52,7 +53,7 @@ export class TarefasDesktopPage11Painel_tarefasPage extends TarefasPainel_tarefa
     return html`
       <section data-organism-id="indicadoresTarefas" aria-labelledby="panorama-heading" class="border-t border-[var(--border-subtle,currentColor)] pt-7">
         <h2 id="panorama-heading" class="mb-4 text-sm font-semibold text-[var(--text-strong,currentColor)]">${this.msg.healthTitle}</h2>
-        <div class="grid grid-cols-4 divide-x divide-[var(--border-subtle,currentColor)]">
+        <div class="grid grid-cols-4 divide-x divide-[var(--border-subtle,currentColor)] gap-4">
           <groupviewmetric--ml-metric-big-number .loading=${loading} data-class="px-5 first:pl-0 last:pr-0">
             <Label>${this.msg.openTasksLabel}</Label>
             <Value>${indicadores ? formatNumber(indicadores.tarefasAbertas) : ''}</Value>

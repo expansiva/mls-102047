@@ -85,13 +85,13 @@ export class TarefasDesktopPage11Minhas_tarefasPage extends TarefasMinhas_tarefa
             </grouptriggeraction--ml-button-standard>` : html`<span class="text-sm text-[var(--text-muted,currentColor)]">${this.msg.creatingDisabled}</span>`}
         </header>
         <div class="grid min-h-[620px] grid-cols-[minmax(0,1fr)_minmax(380px,42%)] gap-6">
-          <section data-organism-id="tarefasLista" class="overflow-hidden rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
-            <groupnavigatesection--ml-navigate-pills .value=${this.grupoTarefas} ?loading=${this.qryTarefasDoGrupoStatus === 'loading'} @change=${(e: CustomEvent<{value: string}>) => this.qryTarefasDoGrupo(e.detail.value as GrupoTarefas)}>
+          <section data-organism-id="tarefasLista" class="overflow-hidden rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-2">
+            <groupnavigatesection--ml-navigate-pills data-class="p-2!" .value=${this.grupoTarefas} ?loading=${this.qryTarefasDoGrupoStatus === 'loading'} @change=${(e: CustomEvent<{value: string}>) => this.qryTarefasDoGrupo(e.detail.value as GrupoTarefas)}>
               <Tab value="dependeDeMim" title=${this.msg.dependsOnMe}></Tab>
               <Tab value="responsavel" title=${this.msg.responsible}></Tab>
               <Tab value="criadas" title=${this.msg.created}></Tab>
             </groupnavigatesection--ml-navigate-pills>
-            <groupviewtable--ml-grouping-table
+            <groupviewtable--ml-grouping-table data-class="p-2!"
               .value=${list ? String(list.items.findIndex((row) => row.id === this.selectedTarefa)) : ''}
               .page=${list?.page ?? 1} .pageSize=${list?.pageSize ?? 0} .totalItems=${0}
               ?loading=${this.pageStatus === 'loading' || this.qryTarefasDoGrupoStatus === 'loading'}
@@ -113,7 +113,7 @@ export class TarefasDesktopPage11Minhas_tarefasPage extends TarefasMinhas_tarefa
             </groupviewtable--ml-grouping-table>
             ${list?.hasMore ? html`<div class="border-t border-[var(--border-subtle,currentColor)] p-3 text-right"><grouptriggeraction--ml-button-standard data-variant="secondary" size="sm" @action=${() => this.qryTarefasDoGrupo(this.grupoTarefas, list.page + 1, true)}><Label>${this.msg.loadMore}</Label></grouptriggeraction--ml-button-standard></div>` : ''}
           </section>
-          <aside class="overflow-hidden rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)]">
+          <aside class="overflow-hidden rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-2">
             <molecules--ml-scenary-102020 mode="scenary" backLabel=${this.msg.back} .value=${this.scenary || (this.selectedTarefa !== null ? 'detalhe' : 'vazio')} @change=${(e: CustomEvent<{value: string}>) => { if (e.target === e.currentTarget) { this.setScenario(e.detail.value); if (e.detail.value === 'vazio' || e.detail.value === 'nova') this.qryTarefa(null); } }}>
               <Scene value="vazio" title=${this.msg.pageTitle}> <div class="p-10 text-center text-[var(--text-muted,currentColor)]">${this.msg.selectTask}</div> </Scene>
               <Scene value="detalhe" title=${this.msg.taskDetails} nav="back" backTo="vazio">${this.renderDetail()}</Scene>

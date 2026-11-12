@@ -124,11 +124,11 @@ export class TarefasDesktopPage11ParticipantesPage extends TarefasParticipantesS
             <TableCaption>${this.msg.directoryTitle}</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead key="name" sortable>${this.msg.name}</TableHead>
-                <TableHead key="status">${this.msg.status}</TableHead>
-                <TableHead key="accepts">${this.msg.acceptsTasksEffective}</TableHead>
-                <TableHead key="creates">${this.msg.canCreateTasksEffective}</TableHead>
-                <TableHead key="roles">${this.msg.roles}</TableHead>
+                <TableHead data-class="text-left!" key="name" sortable>${this.msg.name}</TableHead>
+                <TableHead data-class="text-left!" key="status">${this.msg.status}</TableHead>
+                <TableHead data-class="text-left!" key="accepts">${this.msg.acceptsTasksEffective}</TableHead>
+                <TableHead data-class="text-left!" key="creates">${this.msg.canCreateTasksEffective}</TableHead>
+                <TableHead data-class="text-left!" key="roles">${this.msg.roles}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

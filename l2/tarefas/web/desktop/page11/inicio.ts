@@ -7,6 +7,7 @@ import '/_102040_/l2/molecules/groupnotifyuser/ml-notify-banner.js';
 import '/_102040_/l2/molecules/grouptriggeraction/ml-button-group.js';
 import '/_102040_/l2/molecules/groupviewdata/ml-vertical-record-list.js';
 import '/_102040_/l2/molecules/groupviewmetric/ml-metric-card.js';
+import '/_102040_/l2/molecules/grouptriggeraction/ml-button-standard.js';
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(document.documentElement.lang || undefined, {
@@ -210,61 +211,61 @@ export class TarefasDesktopPage11InicioPage extends TarefasInicioShared {
   }
 
   render() {
-    this.msg = pageMessages[this.getMessageKey(pageMessages)];
-    const loading = this.carregarInicioStatus === 'loading';
-    const errorMessage = this.carregarInicioError?.code === 'client.preconditionMissing'
-      ? this.msg.missingContext
-      : (this.carregarInicioError?.message || this.msg.loadError);
-    return html`
-      <main class="min-h-full bg-[var(--page-bg,transparent)] px-8 py-7 text-[var(--text-default,currentColor)]">
-        <header class="mx-auto mb-6 flex max-w-7xl items-center justify-between">
-          <h1 class="text-2xl font-semibold tracking-tight text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
-          <button type="button" class="min-h-10 rounded-md border border-[var(--button-secondary-border,currentColor)] bg-[var(--button-secondary-bg,transparent)] px-4 text-sm font-medium text-[var(--button-secondary-text,currentColor)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.carregarInicio()} ?disabled=${loading} aria-busy=${loading}>${this.msg.reload}</button>
-        </header>
-        <div class="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_280px] gap-6">
-          <div class="flex min-w-0 flex-col gap-5">
-            ${this.carregarInicioError ? html`
-              <groupnotifyuser--ml-notify-banner type="error" .visible=${true} .dismissible=${false}>
-                <Title>${this.msg.loadError}</Title>
-                <Message>${errorMessage}</Message>
-                <Action><button type="button" @click=${() => this.verMinhasTarefas()}>${this.msg.backToTasks}</button></Action>
-              </groupnotifyuser--ml-notify-banner>
-            ` : ''}
-            <section data-organism-id="alertasPrazo" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5">
-              <groupnotifyuser--ml-notify-banner type="warning" .visible=${this.alertas.length > 0} .dismissible=${false}>
-                <Title>${this.msg.dailySummary}</Title>
-                <Message>${this.msg.dailySummaryMessage}</Message>
-              </groupnotifyuser--ml-notify-banner>
-              <div class="mt-4">
-                <groupviewdata--ml-vertical-record-list .loading=${loading} .hoverable=${true} @row-click=${(e: CustomEvent<{ index: number }>) => { const alert = this.alertas[e.detail.index]; this.abrirTarefaVencendo(alert ? alert.id : null); }}>
-                  <Columns><Column field="task" header=${this.msg.task}></Column><Column field="due" header=${this.msg.dueDate}></Column><Column field="status" header=${this.msg.situation}></Column></Columns>
-                  <Rows>${this.alertas.map((alert) => html`<Row><Cell><span class="font-medium text-[var(--text-strong,currentColor)]">${alert.titulo}</span></Cell><Cell>${formatDate(alert.prazo)}</Cell><Cell>${this.msg[STATUS_KEY[alert.status]]}</Cell></Row>`)}</Rows>
-                  <Loading><p class="py-8 text-center text-[var(--text-muted,currentColor)]">${this.msg.loading}</p></Loading>
-                  <Empty><p class="py-8 text-center text-[var(--text-muted,currentColor)]">${this.msg.noDueTasks}</p></Empty>
-                </groupviewdata--ml-vertical-record-list>
-              </div>
-            </section>
-            ${this.pageStatus === 'empty' ? html`<p class="rounded-xl border border-[var(--border-subtle,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-6 text-center text-[var(--text-muted,currentColor)]">${this.msg.pageEmpty}</p>` : ''}
-            ${this.renderPendingTasks()}
-          </div>
-          <aside class="flex flex-col gap-5">
-            <section data-organism-id="indicadoresTarefas" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
-              <h2 class="mb-3 text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.taskOverview}</h2>
-              <div class="grid grid-cols-2 gap-3">
-                <groupviewmetric--ml-metric-card .loading=${loading}><Label>${this.msg.openTasks}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.abertas) : '—'}</Value></groupviewmetric--ml-metric-card>
-                <groupviewmetric--ml-metric-card .loading=${loading}><Label>${this.msg.dueToday}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.vencemHoje) : '—'}</Value></groupviewmetric--ml-metric-card>
-                <groupviewmetric--ml-metric-card .loading=${loading}><Label>${this.msg.lateTasks}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.atrasadas) : '—'}</Value></groupviewmetric--ml-metric-card>
-                <groupviewmetric--ml-metric-card .loading=${loading}><Label>${this.msg.returnedTasks}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.devolvidasPendentes) : '—'}</Value></groupviewmetric--ml-metric-card>
-              </div>
-              <button type="button" class="mt-4 min-h-10 w-full rounded-md border border-[var(--button-secondary-border,currentColor)] bg-[var(--button-secondary-bg,transparent)] px-3 text-sm font-medium text-[var(--button-secondary-text,currentColor)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.verMinhasTarefas()}>${this.msg.viewMyTasks}</button>
-            </section>
-            <section data-organism-id="minhasPermissoes" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-4">
-              <h2 class="mb-3 text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.yourPermissions}</h2>
-              <dl class="space-y-3 text-sm"><div><dt class="text-[var(--text-muted,currentColor)]">${this.msg.participant}</dt><dd class="font-medium text-[var(--text-strong,currentColor)]">${this.permissoes?.details.identification.name ?? this.msg.unavailable}</dd></div><div><dt class="text-[var(--text-muted,currentColor)]">${this.msg.acceptsTasks}</dt><dd class="font-medium text-[var(--text-strong,currentColor)]">${this.permissoes ? (this.permissoes.details.tarefas.aceitaTarefasEfetivo ? this.msg.yes : this.msg.no) : this.msg.unavailable}</dd></div><div><dt class="text-[var(--text-muted,currentColor)]">${this.msg.canCreateTasks}</dt><dd class="font-medium text-[var(--text-strong,currentColor)]">${this.permissoes ? (this.permissoes.details.tarefas.podeCriarTarefasEfetivo ? this.msg.yes : this.msg.no) : this.msg.unavailable}</dd></div></dl>
-            </section>
-          </aside>
-        </div>
-      </main>
-    `;
-  }
+ this.msg = pageMessages[this.getMessageKey(pageMessages)];
+ const loading = this.carregarInicioStatus === 'loading';
+ const errorMessage = this.carregarInicioError?.code === 'client.preconditionMissing'
+ ? this.msg.missingContext
+ : (this.carregarInicioError?.message || this.msg.loadError);
+ return html`
+ <main class="min-h-full bg-[var(--page-bg,transparent)] px-8 py-7 text-[var(--text-default,currentColor)]">
+ <header class="mx-auto mb-6 flex max-w-7xl items-center justify-between">
+ <h1 class="text-2xl font-semibold tracking-tight text-[var(--text-strong,currentColor)]">${this.msg.pageTitle}</h1>
+ <grouptriggeraction--ml-button-standard data-variant="secondary" data-class="min-h-10" @action=${() => this.carregarInicio()} ?disabled=${loading} aria-busy=${loading}><Label>${this.msg.reload}</Label></grouptriggeraction--ml-button-standard>
+ </header>
+ <div class="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_280px] gap-6">
+ <div class="flex min-w-0 flex-col gap-5">
+ ${this.carregarInicioError ? html`
+ <groupnotifyuser--ml-notify-banner type="error" .visible=${true} .dismissible=${false}>
+ <Title>${this.msg.loadError}</Title>
+ <Message>${errorMessage}</Message>
+ <Action><button type="button" @click=${() => this.verMinhasTarefas()}>${this.msg.backToTasks}</button></Action>
+ </groupnotifyuser--ml-notify-banner>
+ ` : ''}
+ <section data-organism-id="alertasPrazo" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-5">
+ <groupnotifyuser--ml-notify-banner type="warning" .visible=${this.alertas.length > 0} .dismissible=${false}>
+ <Title>${this.msg.dailySummary}</Title>
+ <Message>${this.msg.dailySummaryMessage}</Message>
+ </groupnotifyuser--ml-notify-banner>
+ <div class="mt-4">
+ <groupviewdata--ml-vertical-record-list .loading=${loading} .hoverable=${true} @row-click=${(e: CustomEvent<{ index: number }>) => { const alert = this.alertas[e.detail.index]; this.abrirTarefaVencendo(alert ? alert.id : null); }}>
+ <Columns><Column field="task" header=${this.msg.task}></Column><Column field="due" header=${this.msg.dueDate}></Column><Column field="status" header=${this.msg.situation}></Column></Columns>
+ <Rows>${this.alertas.map((alert) => html`<Row><Cell><span class="font-medium text-[var(--text-strong,currentColor)]">${alert.titulo}</span></Cell><Cell>${formatDate(alert.prazo)}</Cell><Cell>${this.msg[STATUS_KEY[alert.status]]}</Cell></Row>`)}</Rows>
+ <Loading><p class="py-8 text-center text-[var(--text-muted,currentColor)]">${this.msg.loading}</p></Loading>
+ <Empty><p class="py-8 text-center text-[var(--text-muted,currentColor)]">${this.msg.noDueTasks}</p></Empty>
+ </groupviewdata--ml-vertical-record-list>
+ </div>
+ </section>
+ ${this.pageStatus === 'empty' ? html`<p class="rounded-xl border border-[var(--border-subtle,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-6 text-center text-[var(--text-muted,currentColor)]">${this.msg.pageEmpty}</p>` : ''}
+ ${this.renderPendingTasks()}
+ </div>
+ <aside class="flex flex-col gap-5">
+ <section data-organism-id="indicadoresTarefas" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-bg,transparent)] p-4">
+ <h2 class="mb-3 text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.taskOverview}</h2>
+ <div class="grid grid-cols-2 auto-rows-fr items-stretch gap-3">
+ <groupviewmetric--ml-metric-card class="block h-full" data-class="h-full flex flex-col justify-between" .loading=${loading}><Label>${this.msg.openTasks}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.abertas) : '—'}</Value></groupviewmetric--ml-metric-card>
+ <groupviewmetric--ml-metric-card class="block h-full" data-class="h-full flex flex-col justify-between" .loading=${loading}><Label>${this.msg.dueToday}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.vencemHoje) : '—'}</Value></groupviewmetric--ml-metric-card>
+ <groupviewmetric--ml-metric-card class="block h-full" data-class="h-full flex flex-col justify-between" .loading=${loading}><Label>${this.msg.lateTasks}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.atrasadas) : '—'}</Value></groupviewmetric--ml-metric-card>
+ <groupviewmetric--ml-metric-card class="block h-full" data-class="h-full flex flex-col justify-between" .loading=${loading}><Label>${this.msg.returnedTasks}</Label><Value>${this.indicadores ? formatNumber(this.indicadores.devolvidasPendentes) : '—'}</Value></groupviewmetric--ml-metric-card>
+ </div>
+ <button type="button" class="mt-4 min-h-10 w-full rounded-md border border-[var(--button-secondary-border,currentColor)] bg-[var(--button-secondary-bg,transparent)] px-3 text-sm font-medium text-[var(--button-secondary-text,currentColor)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus-ring,currentColor)]" @click=${() => this.verMinhasTarefas()}>${this.msg.viewMyTasks}</button>
+ </section>
+ <section data-organism-id="minhasPermissoes" class="rounded-xl border border-[var(--border-default,currentColor)] bg-[var(--surface-alt-bg,transparent)] p-4">
+ <h2 class="mb-3 text-base font-semibold text-[var(--text-strong,currentColor)]">${this.msg.yourPermissions}</h2>
+ <dl class="space-y-3 text-sm"><div><dt class="text-[var(--text-muted,currentColor)]">${this.msg.participant}</dt><dd class="font-medium text-[var(--text-strong,currentColor)]">${this.permissoes?.details.identification.name ?? this.msg.unavailable}</dd></div><div><dt class="text-[var(--text-muted,currentColor)]">${this.msg.acceptsTasks}</dt><dd class="font-medium text-[var(--text-strong,currentColor)]">${this.permissoes ? (this.permissoes.details.tarefas.aceitaTarefasEfetivo ? this.msg.yes : this.msg.no) : this.msg.unavailable}</dd></div><div><dt class="text-[var(--text-muted,currentColor)]">${this.msg.canCreateTasks}</dt><dd class="font-medium text-[var(--text-strong,currentColor)]">${this.permissoes ? (this.permissoes.details.tarefas.podeCriarTarefasEfetivo ? this.msg.yes : this.msg.no) : this.msg.unavailable}</dd></div></dl>
+ </section>
+ </aside>
+ </div>
+ </main>
+ `;
+ }
 }
